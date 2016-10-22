@@ -2,12 +2,12 @@ PROJECT(network)
 
 #引用头文件目录
 INCLUDE_DIRECTORIES(
-	${GSF_SOURCE_DIR}/depend/libevent-2.0.22-stable/include
+	${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
 )
 
 #引用库目录
 LINK_DIRECTORIES(
-	${GSF_SOURCE_DIR}/depend/lib
+	${GSF_SOURCE_DIR}/3rd/lib
 )
 
 FILE(GLOB_RECURSE SRC "*.cpp" ".h")
