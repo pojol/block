@@ -1,17 +1,8 @@
-PROJECT(network_test)
+PROJECT(pipe_client_test)
 
-#引用头文件目录
-INCLUDE_DIRECTORIES(
-	${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
-)
-
-#引用库目录
-LINK_DIRECTORIES(
-	${GSF_SOURCE_DIR}/3rd/lib
-)
 
 FILE(GLOB_RECURSE SRC "*.cpp" "*.h")
-ADD_EXECUTABLE(network_test ${SRC})
+ADD_EXECUTABLE(pipe_client_test ${SRC})
 
 if(MSVC)     
     # Use the static C library for all build types
@@ -25,8 +16,6 @@ if(MSVC)
         string(REGEX REPLACE "/MD" "/MT" ${var} "${${var}}")
       endif()
     endforeach()    
-
-	TARGET_LINK_LIBRARIES(network_test ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib)
 	
 endif(MSVC)
 
