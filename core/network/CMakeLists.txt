@@ -10,7 +10,7 @@ LINK_DIRECTORIES(
 	${GSF_SOURCE_DIR}/3rd/lib
 )
 
-FILE(GLOB_RECURSE SRC "*.cpp" ".h")
+FILE(GLOB_RECURSE SRC "*.cpp" "*.h")
 ADD_LIBRARY(network STATIC ${SRC})
 
 if(MSVC)     
