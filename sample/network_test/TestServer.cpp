@@ -92,7 +92,6 @@ void TestServer::setup_thread(LibeventThread *thread)
 
 	int fds[2];	//read,write pipe
 
-
 	event_set(&thread->notify_event, thread->notify_receive_fd, EV_READ | EV_PERSIST, thread_process, thread);
 	event_base_set(thread->base, &thread->notify_event);
 
