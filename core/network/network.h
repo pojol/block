@@ -11,8 +11,6 @@ namespace gsf
 {
 	class NetworkThread;
 
-	typedef std::shared_ptr<NetworkThread> NetworkThreadPtr;
-
 	//! 网络模块核心类
 	class Network
 	{
@@ -26,16 +24,16 @@ namespace gsf
 		int run();
 
 	private:
-		//! 设置工作线程
-		int32_t setup_thread(NetworkThreadPtr threadPtr);
+		//! 初始化工作线程
+		int32_t init_work_thread();
 
 		static void worker_thread_process(int32_t fd, int16_t which, void *arg);
 
 	private:
 
-		NetworkThreadPtr main_thread_ptr_;
+		NetworkThread *main_thread_ptr_;
 	
-		std::vector<NetworkThreadPtr> worker_thread_vec_;
+		std::vector<NetworkThread*> worker_thread_vec_;
 
 		const NetworkConfig config_;
 	};

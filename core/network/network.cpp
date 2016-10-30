@@ -3,32 +3,34 @@
 #include "network_thread.h"
 #include "network_config.h"
 
+
 gsf::Network::Network(const NetworkConfig &config)
 	: config_(config)
 {
-	main_thread_ptr_ = std::make_shared<NetworkThread>();
+	main_thread_ptr_ = new NetworkThread();
 
 	main_thread_ptr_->event_base_ptr_ = event_base_new();
 
-	for (int i = 0; i < config.m_workThreadCount; ++i)
-	{
-		auto threadPtr = std::make_shared<NetworkThread>();
-
-		worker_thread_vec_.push_back(threadPtr);
-
-		setup_thread(threadPtr);
-	}
+	init_work_thread();
 }
 
-int32_t gsf::Network::setup_thread(NetworkThreadPtr threadPtr)
+gsf::Network::~Network()
 {
-	threadPtr->event_base_ptr_ = event_base_new();
 
-	int fds[2];
+}
 
-	struct event *ev_receice = event_new(threadPtr->event_base_ptr_, threadPtr->notify_receive_fd_
-		, EV_READ | EV_PERSIST, worker_thread_process, nullptr);
-	event_add(ev_receice, nullptr);
+int32_t gsf::Network::init_work_thread()
+{
+	for (int i = 0; i < config_.m_workThreadCount; ++i)
+	{
+		auto threadPtr = new NetworkThread();
+
+		threadPtr->event_base_ptr_ = event_base_new();
+
+
+
+		worker_thread_vec_.push_back(threadPtr);
+	}
 
 	return 0;
 }
