@@ -21,16 +21,18 @@
 
 void singal_cb(evutil_socket_t fd, short event, void * arg)
 {
-
 	char buf[1];
 	int n = recv(fd, (char*)buf, sizeof(buf), 0);
 	if (n == -1){
 		int err = GetLastError();
 	}
-	else if (n == 0){
-	}
 
-	printf("hello\n");
+        switch(buf[0])
+        {
+             case 'c':
+                  printf("new connect!");
+             break;
+        }
 }
 
 int main()
@@ -50,6 +52,7 @@ int main()
 
 	base = event_base_new();
 
+        //! pipe[0] read pipe, pipe[1] write pipe.
 	evutil_socket_t pipe[2];
 	if (evutil_socketpair(AF_INET, SOCK_STREAM, 0, pipe) < 0){
 		
@@ -59,16 +62,15 @@ int main()
 
 
 	struct event *signal;
-	signal = event_new(base, pipe[0], EV_WRITE | EV_PERSIST, singal_cb, NULL);
+	signal = event_new(base, pipe[0], EV_READ | EV_PERSIST, singal_cb, NULL);
 	event_add(signal, NULL);
 	
 
 	char buf[1];
 	buf[0] = 'c';
-	send(pipe[0], buf, 1, 0);
+	send(pipe[1], buf, 1, 0);
 
 	
-
 	event_base_dispatch(base);
 	event_base_free(base);
 
