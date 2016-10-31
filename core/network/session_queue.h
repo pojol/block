@@ -6,7 +6,7 @@
 namespace gsf
 {
 	class Session;
-	class NetworkThread;
+	struct NetworkThread;
 
 	class SessionQueue
 	{

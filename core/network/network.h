@@ -5,11 +5,13 @@
 #include <vector>
 #include <memory>
 
+#include <event2/util.h>
+
 #include "network_config.h"
 
 namespace gsf
 {
-	class NetworkThread;
+	struct NetworkThread;
 
 	//! 网络模块核心类
 	class Network
@@ -21,13 +23,14 @@ namespace gsf
 
 		int start();
 
-		int run();
-
+		void dispatch_conn_new(evutil_socket_t fd);
 	private:
 		//! 初始化工作线程
 		int32_t init_work_thread();
 
-		static void worker_thread_process(int32_t fd, int16_t which, void *arg);
+		static void worker_thread_process(evutil_socket_t fd, short event, void * arg);
+
+		static void worker_thread_run(NetworkThread *thread);
 
 	private:
 

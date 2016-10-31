@@ -15,13 +15,8 @@ namespace gsf
 
 		struct event *notify_event_;
 
-#ifdef WIN32
-		PHANDLE notify_receive_fd_;
-		PHANDLE notify_send_fd_;
-#else
-		int32_t notify_receive_fd_;
-		int32_t notify_send_fd_;
-#endif // WIN32
+		evutil_socket_t notify_receive_fd_;
+		evutil_socket_t notify_send_fd_;
 
 		SessionQueue session_queue_;
 
