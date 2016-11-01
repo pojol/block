@@ -1,12 +1,16 @@
 #include <stdio.h>
 
-#include <windows.h>
+#ifdef WIN32
+	#include <windows.h>
+#endif
+
 #include <iostream>
 #include <string>
 
 
 int main(void)
 {
+#ifdef WIN32
 	HANDLE hPipe;
 	char buffer[1024];
 	DWORD dwRead;
@@ -36,6 +40,7 @@ int main(void)
 
 		DisconnectNamedPipe(hPipe);
 	}
+#endif
 
 	return 0;
 }

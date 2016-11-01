@@ -4,9 +4,12 @@
 #include "network_config.h"
 
 #ifdef WIN32
-#include <winsock2.h>
-#include <windows.h>
+    #include <winsock2.h>
+    #include <windows.h>
+#else
+    #include <netinet/in.h>
 #endif // WIN32
+
 
 #include <thread>
 
@@ -42,8 +45,7 @@ int gsf::Network::start()
 	}
 #endif // WIN32
 
-
-	sockaddr_in sin;
+    struct sockaddr_in sin;
 	memset(&sin, 0, sizeof(sin));
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(config_.port_);
@@ -114,7 +116,7 @@ void gsf::Network::dispatch_conn_new(evutil_socket_t fd)
 
 	//int tid = (last_thread + 1) % config_.worker_thread_count_;
 
-	// ³õÊ¼»¯session
+	// ï¿½ï¿½Ê¼ï¿½ï¿½session
 
 	char buf[1];
 	buf[0] = 'c';

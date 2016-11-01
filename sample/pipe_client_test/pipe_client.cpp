@@ -1,12 +1,15 @@
 #include <stdio.h>
 
-#include <windows.h>
+#ifdef WIN32
+	#include <windows.h>
+#endif
 
 #include <string>
 #include <iostream>
 
 int main(void)
 {
+#ifdef WIN32
 	HANDLE hPipe;
 	DWORD dwWritten;
 
@@ -28,6 +31,6 @@ int main(void)
 
 		CloseHandle(hPipe);
 	}
-
+#endif
 	return (0);
 }

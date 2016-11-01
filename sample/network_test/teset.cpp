@@ -7,6 +7,7 @@
 #include <stdint.h>
 
 #include <sys/types.h>
+#include <sys/socket.h>
 
 #include <event2/event-config.h>
 #include <event2/event.h>
@@ -16,7 +17,7 @@
 #include <windows.h>
 #endif // WIN32
 
-#include <io.h>
+//#include <io.h>
 
 
 void singal_cb(evutil_socket_t fd, short event, void * arg)
@@ -24,7 +25,7 @@ void singal_cb(evutil_socket_t fd, short event, void * arg)
 	char buf[1];
 	int n = recv(fd, (char*)buf, sizeof(buf), 0);
 	if (n == -1){
-		int err = GetLastError();
+		int err = evutil_socket_geterror(fd);
 	}
 
         switch(buf[0])

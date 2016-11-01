@@ -3,7 +3,7 @@
 
 namespace gsf
 {
-	//! 接收到一个新连接的事件
+	//! 锟斤拷锟秸碉拷一锟斤拷锟斤拷锟斤拷锟接碉拷锟铰硷拷
 	class AcceptNewConnectEvent
 	{
 		
