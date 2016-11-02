@@ -14,6 +14,7 @@
 #include <thread>
 
 #include <event2/listener.h>
+#include <event2/bufferevent.h>
 
 static void listener_event_cb(struct evconnlistener *listener, evutil_socket_t fd, struct sockaddr *sa, int socklen, void *arg);
 
@@ -112,7 +113,9 @@ int32_t gsf::Network::init_work_thread()
 
 void gsf::Network::dispatch_conn_new(evutil_socket_t fd)
 {
-
+	//new session 
+	//init session	session->s_fd = fd;
+	//session queue push (session)
 
 	//int tid = (last_thread + 1) % config_.worker_thread_count_;
 
@@ -136,6 +139,22 @@ void gsf::Network::worker_thread_process(evutil_socket_t fd, short event, void *
 	switch (buf[0])
 	{
 	case 'c':
+		//struct bufferevent *bev;
+
+		// get session by session queue
+
+		/*
+		bev = bufferevent_socket_new(threadPtr->event_base_ptr_, session->s_id, BEV_OPT_CLOSE_ON_FREE);
+		if (!bev){
+
+		}
+
+		bufferevent_setcb(bev, read_cb, write_cb, close_cb, session);
+		bufferevent_enable(bev, EV_WRITE);
+		bufferevent_enable(bev, EV_READ);
+		*/
+		//send connection evnet
+
 		break;
 	}
 }
