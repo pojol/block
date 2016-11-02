@@ -7,7 +7,6 @@
 #include <stdint.h>
 
 #include <sys/types.h>
-#include <sys/socket.h>
 
 #include <event2/event-config.h>
 #include <event2/event.h>
