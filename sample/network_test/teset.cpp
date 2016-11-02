@@ -17,29 +17,35 @@
 #include <windows.h>
 #endif // WIN32
 
-//#include <io.h>
 
-
-void singal_cb(evutil_socket_t fd, short event, void * arg)
+//! user interface test
+/*
+class LoginServerHandler : public AcceptHandler
 {
-	char buf[1];
-	int n = recv(fd, (char*)buf, sizeof(buf), 0);
-	if (n == -1){
-		int err = evutil_socket_geterror(fd);
-	}
+public:
+    virtual ~LoginServerHandler(){}
 
-        switch(buf[0])
-        {
-             case 'c':
-                  printf("new connect!");
-             break;
-        }
-}
+    //! new connection bind session to message dispatch
+    virtual void handler_new_connection(int acceptor_id, int session_id)
+    {
+        open_session(session_id, &network::MessageHandler<>());
+    }
+};
+
+class Login2GateServerHandler : public ConnectHandler
+{
+public:
+    virtual ~Login2GateServerHandler(){}
+
+    virtual void handler_new_connection(int connector_id, int session_id){}
+
+    virtual void handler_connect_failed(){}
+};
+*/
+
 
 int main()
 {
-	struct event_base *base;
-
 #ifdef WIN32
 	WORD wVersionRequested;
 	WSADATA wsaData;
@@ -51,29 +57,14 @@ int main()
 	}
 #endif // WIN32
 
-	base = event_base_new();
+    /*
+    AcceptorConfig _acceptConfig;
+    Acceptor _acceptor(_acceptConfig, new LoginServerHandler());
+    _acceptor.open();
 
-        //! pipe[0] read pipe, pipe[1] write pipe.
-	evutil_socket_t pipe[2];
-	if (evutil_socketpair(AF_INET, SOCK_STREAM, 0, pipe) < 0){
-		
-	}
-	evutil_make_socket_nonblocking(pipe[0]);
-	evutil_make_socket_nonblocking(pipe[1]);
-
-
-	struct event *signal;
-	signal = event_new(base, pipe[0], EV_READ | EV_PERSIST, singal_cb, NULL);
-	event_add(signal, NULL);
-	
-
-	char buf[1];
-	buf[0] = 'c';
-	send(pipe[1], buf, 1, 0);
-
-	
-	event_base_dispatch(base);
-	event_base_free(base);
-
+    ConnectorConfig _connectConfig;
+    Connector _connector(_connectConfig, new Login2GateServerHandler());
+    _connector.open();
+    */
 	return 0;
 }
