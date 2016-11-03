@@ -13,7 +13,7 @@ namespace gsf
 {
 	struct NetworkThread;
 
-	//! ÍøÂçÄ£¿éºËÐÄÀà
+	//! ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	class Network
 	{
 	public:
@@ -25,7 +25,7 @@ namespace gsf
 
 		void dispatch_conn_new(evutil_socket_t fd);
 	private:
-		//! ³õÊ¼»¯¹¤×÷Ïß³Ì
+		//! ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß³ï¿½
 		int32_t init_work_thread();
 
 		static void worker_thread_process(evutil_socket_t fd, short event, void * arg);

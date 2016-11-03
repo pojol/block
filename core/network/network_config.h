@@ -5,10 +5,10 @@
 
 namespace gsf
 {
-	//! ┤ж└э═°┬ч▓у┼ф╓├╧р╣╪└р
+	//! я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜
 	struct NetworkConfig
 	{
-		int32_t worker_thread_count_;		//═°┬ч╣д╫ў╧▀│╠╩¤┴┐
+		int32_t worker_thread_count_;		//я┐╜я┐╜я┐╜ч╣дя┐╜я┐╜я┐╜▀│я┐╜я┐╜я┐╜я┐╜я┐╜
 
 		int32_t port_;
 
