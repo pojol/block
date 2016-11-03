@@ -8,6 +8,9 @@
     #include <windows.h>
 #else
     #include <netinet/in.h>
+	#include <sys/types.h>
+	#include <sys/socket.h>
+	#include <errno.h>
 #endif // WIN32
 
 
@@ -132,7 +135,7 @@ void gsf::Network::dispatch_conn_new(evutil_socket_t fd)
 
 	char buf[1];
 	buf[0] = 'c';
-	if (SOCKET_ERROR != send(worker_thread_vec_[0]->notify_send_fd_, buf, 1, 0)){
+	if (send(worker_thread_vec_[0]->notify_send_fd_, buf, 1, 0) != 0){
 		//err dispose
 	}
 }

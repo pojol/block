@@ -3,6 +3,7 @@
 
 #include <thread>
 #include <mutex>
+#include <stdlib.h>
 
 namespace gsf
 {
@@ -17,7 +18,6 @@ namespace gsf
   typedef struct conn_queue_item CQ_ITEM;
   struct conn_queue_item {
       int               sfd;
-      enum conn_states  init_state;
       int               event_flags;
       Session *s;
       CQ_ITEM          *next;
@@ -98,7 +98,7 @@ namespace gsf
           int i;
 
           /* Allocate a bunch of items at once to reduce fragmentation */
-          item = malloc(sizeof(CQ_ITEM) * ITEMS_PER_ALLOC);
+          item = (CQ_ITEM*)malloc(sizeof(CQ_ITEM) * ITEMS_PER_ALLOC);
           if (NULL == item) {
               //err dispose
               return NULL;

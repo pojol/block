@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <memory>
 
-#include "session_queue.h"
+#include "network_connect.h"
 
 namespace gsf
 {
@@ -18,7 +18,7 @@ namespace gsf
 		evutil_socket_t notify_receive_fd_;
 		evutil_socket_t notify_send_fd_;
 
-		SessionQueue session_queue_;
+		CQ *connect_queue_;
 
 		int32_t index_;
 	};
