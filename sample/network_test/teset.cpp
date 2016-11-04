@@ -57,13 +57,18 @@ int main()
 #endif // WIN32
 
     /*
+    NetWrok::instance().init();
+
     AcceptorConfig _acceptConfig;
     Acceptor _acceptor(_acceptConfig, new LoginServerHandler());
-    _acceptor.open();
 
     ConnectorConfig _connectConfig;
     Connector _connector(_connectConfig, new Login2GateServerHandler());
-    _connector.open();
+
+    NetWrok::instance().open_acceptor(_acceptor);
+    NetWork::instance().open_connector(_connector);
+
+    NetWork::instance().run();
     */
 	return 0;
 }

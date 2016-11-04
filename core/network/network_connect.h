@@ -5,6 +5,8 @@
 #include <mutex>
 #include <stdlib.h>
 
+// memcache thread.c
+
 namespace gsf
 {
   class Session;

@@ -7,6 +7,7 @@
 namespace gsf
 {
 	class AcceptHandler;
+    class Session;
 
 	struct AcceptorConfig
 	{
@@ -19,7 +20,15 @@ namespace gsf
 	public:
 		Acceptor(AcceptorConfig &config, AcceptHandler *handler);
 
-		int32_t open();
+        Session * get_session();
+
+        void hander_new_connect();
+
+	private:
+		AcceptorConfig config_;
+		AcceptHandler *handler_;
+
+        Session *session_;
 	};
 }
 

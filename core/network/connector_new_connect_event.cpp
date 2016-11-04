@@ -1,1 +1,0 @@
-#include "connector_new_connect_event.h"

@@ -3,7 +3,7 @@
 
 namespace gsf
 {
-	//! 连接产生错误事件
+	//! 锟斤拷锟接诧拷锟斤拷锟斤拷锟斤拷锟铰硷拷
 	class ConnectFailedEvent
 	{
 

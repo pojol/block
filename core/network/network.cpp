@@ -3,6 +3,9 @@
 #include "network_thread.h"
 #include "network_config.h"
 
+#include "acceptor.h"
+#include "session.h"
+
 #ifdef WIN32
     #include <winsock2.h>
     #include <windows.h>
@@ -13,13 +16,17 @@
 	#include <errno.h>
 #endif // WIN32
 
-
-#include <thread>
-
 #include <event2/listener.h>
 #include <event2/bufferevent.h>
 
-static void listener_event_cb(struct evconnlistener *listener, evutil_socket_t fd, struct sockaddr *sa, int socklen, void *arg);
+#include <thread>
+
+
+static void accept_event_cb(struct evconnlistener *listener, evutil_socket_t fd, struct sodkaddr *sa, int socklen, void *arg)
+{
+    gsf::Network *network = (gsf::Network*)(arg);
+    network->dispatch_conn_new(fd);
+}
 
 gsf::Network::Network(const NetworkConfig &config)
 	: config_(config)
@@ -36,6 +43,7 @@ gsf::Network::~Network()
 
 }
 
+
 int gsf::Network::start()
 {
 #ifdef WIN32
@@ -48,24 +56,6 @@ int gsf::Network::start()
 		exit(1);
 	}
 #endif // WIN32
-
-    struct sockaddr_in sin;
-	memset(&sin, 0, sizeof(sin));
-	sin.sin_family = AF_INET;
-	sin.sin_port = htons(config_.port_);
-
-
-	struct evconnlistener *listener;
-	listener = evconnlistener_new_bind(main_thread_ptr_->event_base_ptr_
-		, listener_event_cb
-		, (void*)this
-		, LEV_OPT_REUSEABLE | LEV_OPT_CLOSE_ON_FREE
-		, -1
-		, (sockaddr*)&sin
-		, sizeof(sockaddr_in));
-	if (NULL == listener){
-
-	}
 
 	for (auto &worker : worker_thread_vec_)
 	{
@@ -113,6 +103,30 @@ int32_t gsf::Network::init_work_thread()
 	return 0;
 }
 
+void gsf::Network::open_acceptor(AcceptorConfig &config, Acceptor *acceptor)
+{
+    struct sockaddr_in sin;
+    memset(&sin, 0, sizeof(sin));
+    sin.sin_family = AF_INET;
+    sin.sin_port = htons(config.port);
+
+    struct evconnlistener *listener;
+
+    listener = evconnlistener_new_bind(main_thread_ptr_->event_base_ptr_
+            ,accept_event_cb
+            ,(void*)this
+            ,LEV_OPT_REUSEABLE | LEV_OPT_CLOSE_ON_FREE
+            ,-1
+            ,(sockaddr*)&sin
+            ,sizeof(sockaddr_in));
+    if (NULL == listener){
+
+    }
+
+    acceptor_ = acceptor;
+}
+
+
 static int last_thread = -1;
 
 void gsf::Network::dispatch_conn_new(evutil_socket_t fd)
@@ -135,7 +149,7 @@ void gsf::Network::dispatch_conn_new(evutil_socket_t fd)
 
 	char buf[1];
 	buf[0] = 'c';
-	if (send(worker_thread_vec_[0]->notify_send_fd_, buf, 1, 0) != 0){
+	if (send(thread->notify_send_fd_, buf, 1, 0) != 0){
 		//err dispose
 	}
 }
@@ -160,12 +174,14 @@ void gsf::Network::worker_thread_process(evutil_socket_t fd, short event, void *
 			if (!bev){
 				
 			}
+
+            //acceptor_ = acceptor_mgr::instance().get_acceptor(acceptor_id);
+            //bufferevent_setcb(bev, Session::read_cb, Session::write_cb, acceptor_->make_session());
+            //bufferevent_enable(bev, EV_WRITE);
+            //bufferevent_enable(bev, EV_READ);
 			
-			//bufferevent_setcb(bev, read_cb, write_cb, close_cb, session);
-			//bufferevent_enable(bev, EV_WRITE);
-			//bufferevent_enable(bev, EV_READ);
-			
-			//send connection evnet
+			//send connection event
+            //acceptor_->hander_new_connect();
 		}
 		break;
 	}
@@ -173,13 +189,6 @@ void gsf::Network::worker_thread_process(evutil_socket_t fd, short event, void *
 
 void gsf::Network::worker_thread_run(NetworkThread *thread)
 {
+    //! 进入到工作线程循环，这里要考虑到超时处理。
 	event_base_dispatch(thread->event_base_ptr_);
-}
-
-void listener_event_cb(struct evconnlistener *listener, evutil_socket_t fd, struct sockaddr *sa, int socklen, void *arg)
-{
-	gsf::Network *network = static_cast<gsf::Network*>(arg);
-
-	//test
-	network->dispatch_conn_new(fd);
 }

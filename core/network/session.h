@@ -4,10 +4,14 @@
 
 namespace gsf
 {
-	//! Á¬½Ó¶ÔÏóÀà
+	//! ç®¡ç†bufferè°ƒæ•´æ°´ä½ï¼Œ å¤„ç†è¯»å†™äº‹ä»¶
 	class Session
 	{
+    public:
+        static void read_cb(struct bufferevent *bev, void *ctx);
+        static void write_cb(struct bufferevent *bev, void *ctx);
 
+    private:
 	};
 }
 
