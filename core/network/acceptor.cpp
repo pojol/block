@@ -25,9 +25,10 @@ gsf::Acceptor::Acceptor(AcceptorConfig &config, AcceptHandler *handler)
 
 }
 
-gsf::Session * gsf::Acceptor::get_session()
+
+gsf::Session * gsf::Acceptor::make_session()
 {
-    return session_;
+	return nullptr;
 }
 
 void gsf::Acceptor::hander_new_connect()

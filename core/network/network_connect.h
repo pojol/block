@@ -9,21 +9,24 @@
 
 namespace gsf
 {
-  class Session;
+	class Acceptor;
+	class Connector;
   
-  static std::mutex cqi_freelist_lock;
-  static std::mutex stack_lock;
+	static std::mutex cqi_freelist_lock;
+	static std::mutex stack_lock;
 
 #define ITEMS_PER_ALLOC 64
 
-  /* An item in the connection queue. */
-  typedef struct conn_queue_item CQ_ITEM;
-  struct conn_queue_item {
-      int               sfd;
-      int               event_flags;
-      Session *s;
-      CQ_ITEM          *next;
-  };
+	/* An item in the connection queue. */
+	typedef struct conn_queue_item CQ_ITEM;
+	struct conn_queue_item {
+		int             sfd;
+		int             event_flags;
+      
+		void			*ListenPtr;
+
+		CQ_ITEM          *next;
+	};
 
   /* Free list of CQ_ITEM structs */
   static CQ_ITEM *cqi_freelist;

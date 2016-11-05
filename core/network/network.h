@@ -33,7 +33,7 @@ namespace gsf
 
         void open_connector(ConnectorConfig &config, Connector *connector);
 
-		void dispatch_conn_new(evutil_socket_t fd);
+		void accept_conn_new(evutil_socket_t fd);
 
 	private:
 		//! ��ʼ�������߳�
@@ -43,7 +43,6 @@ namespace gsf
 		static void worker_thread_process(evutil_socket_t fd, short event, void * arg);
 
 		static void worker_thread_run(NetworkThread *thread);
-
 	private:
 
 		NetworkThread *main_thread_ptr_;

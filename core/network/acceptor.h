@@ -20,7 +20,7 @@ namespace gsf
 	public:
 		Acceptor(AcceptorConfig &config, AcceptHandler *handler);
 
-        Session * get_session();
+		Session * make_session();
 
         void hander_new_connect();
 

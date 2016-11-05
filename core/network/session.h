@@ -1,6 +1,7 @@
 #ifndef _GSF_SESSION_HEADER_
 #define _GSF_SESSION_HEADER_
 
+#include <event2/bufferevent.h>
 
 namespace gsf
 {
@@ -8,8 +9,8 @@ namespace gsf
 	class Session
 	{
     public:
-        static void read_cb(struct bufferevent *bev, void *ctx);
-        static void write_cb(struct bufferevent *bev, void *ctx);
+        static void read_cb(::bufferevent *bev, void *ctx);
+        static void write_cb(::bufferevent *bev, void *ctx);
 
     private:
 	};

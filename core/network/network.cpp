@@ -21,12 +21,13 @@
 
 #include <thread>
 
+//! 有新的客户端连接进来
+void accept_listen_cb(::evconnlistener *listener
+	, evutil_socket_t fd
+	, sockaddr *sa
+	, int socklen
+	, void *arg);
 
-static void accept_event_cb(struct evconnlistener *listener, evutil_socket_t fd, struct sodkaddr *sa, int socklen, void *arg)
-{
-    gsf::Network *network = (gsf::Network*)(arg);
-    network->dispatch_conn_new(fd);
-}
 
 gsf::Network::Network(const NetworkConfig &config)
 	: config_(config)
@@ -110,10 +111,12 @@ void gsf::Network::open_acceptor(AcceptorConfig &config, Acceptor *acceptor)
     sin.sin_family = AF_INET;
     sin.sin_port = htons(config.port);
 
-    struct evconnlistener *listener;
+	acceptor_ = acceptor;
+
+    ::evconnlistener *listener;
 
     listener = evconnlistener_new_bind(main_thread_ptr_->event_base_ptr_
-            ,accept_event_cb
+			,accept_listen_cb
             ,(void*)this
             ,LEV_OPT_REUSEABLE | LEV_OPT_CLOSE_ON_FREE
             ,-1
@@ -122,14 +125,12 @@ void gsf::Network::open_acceptor(AcceptorConfig &config, Acceptor *acceptor)
     if (NULL == listener){
 
     }
-
-    acceptor_ = acceptor;
 }
 
 
 static int last_thread = -1;
 
-void gsf::Network::dispatch_conn_new(evutil_socket_t fd)
+void gsf::Network::accept_conn_new(evutil_socket_t fd)
 {
 	CQ_ITEM *item = cqi_new();
 	if (!item){
@@ -144,6 +145,7 @@ void gsf::Network::dispatch_conn_new(evutil_socket_t fd)
 	last_thread = tid;
 	
 	item->sfd = fd;
+	item->ListenPtr = acceptor_;
 	
 	cq_push(thread->connect_queue_, item);
 
@@ -169,19 +171,19 @@ void gsf::Network::worker_thread_process(evutil_socket_t fd, short event, void *
 	case 'c':
 		CQ_ITEM *item = cq_pop(threadPtr->connect_queue_);
 		if (item){
-			struct bufferevent *bev;
+			::bufferevent *bev;
 			bev = bufferevent_socket_new(threadPtr->event_base_ptr_, item->sfd, BEV_OPT_CLOSE_ON_FREE);
 			if (!bev){
 				
 			}
 
-            //acceptor_ = acceptor_mgr::instance().get_acceptor(acceptor_id);
-            //bufferevent_setcb(bev, Session::read_cb, Session::write_cb, acceptor_->make_session());
-            //bufferevent_enable(bev, EV_WRITE);
-            //bufferevent_enable(bev, EV_READ);
+			Acceptor *acceptor_ = static_cast<Acceptor*>(item->ListenPtr);
+			bufferevent_setcb(bev, Session::read_cb, Session::write_cb, NULL, acceptor_->make_session());
+            bufferevent_enable(bev, EV_WRITE);
+            bufferevent_enable(bev, EV_READ);
 			
 			//send connection event
-            //acceptor_->hander_new_connect();
+			acceptor_->hander_new_connect();
 		}
 		break;
 	}
@@ -191,4 +193,11 @@ void gsf::Network::worker_thread_run(NetworkThread *thread)
 {
     //! 进入到工作线程循环，这里要考虑到超时处理。
 	event_base_dispatch(thread->event_base_ptr_);
+}
+
+
+void accept_listen_cb(evconnlistener *listener, evutil_socket_t fd, struct sodkaddr *sa, int socklen, void *arg)
+{
+	gsf::Network *network = (gsf::Network*)(arg);
+	network->accept_conn_new(fd);
 }
