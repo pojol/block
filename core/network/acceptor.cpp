@@ -1,10 +1,14 @@
 #include "acceptor.h"
 
+#include "session.h"
+
 #include "accept_handler.h"
 #include "network.h"
 
 #include <event2/listener.h>
 #include <event2/bufferevent.h>
+
+#include <stdint.h>
 
 #ifdef WIN32
     #include <winsock2.h>
@@ -25,13 +29,25 @@ gsf::Acceptor::Acceptor(AcceptorConfig &config, AcceptHandler *handler)
 
 }
 
+static int32_t session_index = 0;
 
+//! 这边的设计先临时写写，测试好功能后在做优化
 gsf::Session * gsf::Acceptor::make_session()
 {
-	return nullptr;
+    Session *session = new Session(session_index++);
+
+    auto itr = session_queue_.find(session->getid());
+    if (itr == session_queue_.end()){
+        session_queue_.insert(std::make_pair(session->getid(), session));
+    }
+    else {
+        return nullptr;
+    }
+
+	return session;
 }
 
-void gsf::Acceptor::hander_new_connect()
+void gsf::Acceptor::handler_new_connect(int32_t session_id)
 {
-    handler_->handler_new_connection(1, 1);
+    handler_->handler_new_connection(id_, session_id);
 }

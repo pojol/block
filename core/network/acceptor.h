@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <string>
 
+#include <unordered_map>
+
 namespace gsf
 {
 	class AcceptHandler;
@@ -22,13 +24,16 @@ namespace gsf
 
 		Session * make_session();
 
-        void hander_new_connect();
+        void handler_new_connect(int32_t session_id);
 
 	private:
 		AcceptorConfig config_;
 		AcceptHandler *handler_;
 
-        Session *session_;
+		typedef std::unordered_map<int32_t, Session*> SessionQueue;
+		SessionQueue session_queue_;
+
+		int32_t id_;
 	};
 }
 

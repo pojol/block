@@ -178,12 +178,13 @@ void gsf::Network::worker_thread_process(evutil_socket_t fd, short event, void *
 			}
 
 			Acceptor *acceptor_ = static_cast<Acceptor*>(item->ListenPtr);
-			bufferevent_setcb(bev, Session::read_cb, Session::write_cb, NULL, acceptor_->make_session());
+            Session *session = acceptor_->make_session();
+			bufferevent_setcb(bev, Session::read_cb, Session::write_cb, NULL, session);
             bufferevent_enable(bev, EV_WRITE);
             bufferevent_enable(bev, EV_READ);
 			
 			//send connection event
-			acceptor_->hander_new_connect();
+			acceptor_->handler_new_connect(session->getid());
 		}
 		break;
 	}
