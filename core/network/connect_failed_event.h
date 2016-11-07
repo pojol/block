@@ -3,10 +3,12 @@
 
 namespace gsf
 {
-	//! ���Ӳ��������¼�
 	class ConnectFailedEvent
 	{
+	public:
+		virtual ~ConnectFailedEvent(){}
 
+		virtual void handler_connect_failed() = 0;
 	};
 }
 

@@ -21,6 +21,7 @@ namespace gsf
 	{
 	public:
 		Acceptor(AcceptorConfig &config, AcceptHandler *handler);
+		~Acceptor();
 
 		Session * make_session();
 

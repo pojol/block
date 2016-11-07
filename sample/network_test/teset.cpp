@@ -77,5 +77,7 @@ int main()
 
 	gsf::Network::instance().start();
 
+	//! 这里还有个重要的地方就是需要拿到网络层的超时事件，方便做其他处理。
+
 	return 0;
 }

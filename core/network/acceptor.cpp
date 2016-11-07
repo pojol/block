@@ -29,6 +29,11 @@ gsf::Acceptor::Acceptor(AcceptorConfig &config, AcceptHandler *handler)
 
 }
 
+gsf::Acceptor::~Acceptor()
+{
+
+}
+
 static int32_t session_index = 0;
 
 gsf::Session * gsf::Acceptor::make_session()
