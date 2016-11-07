@@ -31,7 +31,6 @@ gsf::Acceptor::Acceptor(AcceptorConfig &config, AcceptHandler *handler)
 
 static int32_t session_index = 0;
 
-//! 这边的设计先临时写写，测试好功能后在做优化
 gsf::Session * gsf::Acceptor::make_session()
 {
     Session *session = new Session(session_index++);
@@ -50,4 +49,9 @@ gsf::Session * gsf::Acceptor::make_session()
 void gsf::Acceptor::handler_new_connect(int32_t session_id)
 {
     handler_->handler_new_connection(id_, session_id);
+}
+
+gsf::AcceptorConfig & gsf::Acceptor::get_config()
+{
+	return config_;
 }

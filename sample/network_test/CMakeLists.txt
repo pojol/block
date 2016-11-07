@@ -3,6 +3,7 @@ PROJECT(network_test)
 #引用头文件目录
 INCLUDE_DIRECTORIES(
 	${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
+	${GSF_SOURCE_DIR}/core/network
 )
 
 #引用库目录
@@ -26,7 +27,7 @@ if(MSVC)
       endif()
     endforeach()    
 
-	TARGET_LINK_LIBRARIES(network_test ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib)
+	TARGET_LINK_LIBRARIES(network_test ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib network.lib)
 	
 endif(MSVC)
 

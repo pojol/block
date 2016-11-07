@@ -26,6 +26,8 @@ namespace gsf
 
         void handler_new_connect(int32_t session_id);
 
+		AcceptorConfig &get_config();
+
 	private:
 		AcceptorConfig config_;
 		AcceptHandler *handler_;

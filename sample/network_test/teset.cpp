@@ -16,10 +16,13 @@
 #include <windows.h>
 #endif // WIN32
 
+#include <network.h>
+#include <acceptor.h>
+#include <accept_handler.h>
 
 //! user interface test
-/*
-class LoginServerHandler : public AcceptHandler
+
+class LoginServerHandler : public gsf::AcceptHandler
 {
 public:
     virtual ~LoginServerHandler(){}
@@ -27,10 +30,11 @@ public:
     //! new connection bind session to message dispatch
     virtual void handler_new_connection(int acceptor_id, int session_id)
     {
-        open_session(session_id, &network::MessageHandler<>());
+        //open_session(session_id, &network::MessageHandler<>());
     }
 };
 
+/*
 class Login2GateServerHandler : public ConnectHandler
 {
 public:
@@ -56,19 +60,22 @@ int main()
 	}
 #endif // WIN32
 
-    /*
-    NetWrok::instance().init();
+	gsf::NetworkConfig _config;
+	_config.worker_thread_count_ = 4;
+	gsf::Network::instance().init(_config);
+    
 
-    AcceptorConfig _acceptConfig;
-    Acceptor _acceptor(_acceptConfig, new LoginServerHandler());
+    gsf::AcceptorConfig _acceptConfig;
+	_acceptConfig.port = 8888;
+    gsf::Acceptor _acceptor(_acceptConfig, new LoginServerHandler());
 
-    ConnectorConfig _connectConfig;
-    Connector _connector(_connectConfig, new Login2GateServerHandler());
+    //ConnectorConfig _connectConfig;
+    //Connector _connector(_connectConfig, new Login2GateServerHandler());
 
-    NetWrok::instance().open_acceptor(_acceptor);
-    NetWork::instance().open_connector(_connector);
+    gsf::Network::instance().open_acceptor(&_acceptor);
+    //NetWork::instance().open_connector(_connector);
 
-    NetWork::instance().run();
-    */
+	gsf::Network::instance().start();
+
 	return 0;
 }
