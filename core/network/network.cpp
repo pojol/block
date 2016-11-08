@@ -62,7 +62,7 @@ int gsf::Network::start()
 	for (auto &worker : worker_thread_vec_)
 	{
 		std::thread wt(worker_thread_run, worker);
-		wt.join();
+		wt.join(); //这里由于内部调用了event_base_dispatch会阻塞在这里（考虑是否用detach将线程防止在后台。
 	}
 
 	event_base_dispatch(main_thread_ptr_->event_base_ptr_);
@@ -80,7 +80,7 @@ int32_t gsf::Network::init_work_thread()
 
 		evutil_socket_t pipe[2];
 		if (evutil_socketpair(AF_INET, SOCK_STREAM, 0, pipe) < 0){
-
+                     printf("evutil_socketpair err!\n");
 		}
 		threadPtr->notify_send_fd_ = pipe[1];
 		threadPtr->notify_receive_fd_ = pipe[0];
@@ -124,7 +124,7 @@ void gsf::Network::open_acceptor(Acceptor *acceptor)
             ,(sockaddr*)&sin
             ,sizeof(sockaddr_in));
     if (NULL == listener){
-
+        printf("evconnlistener new bind err!/n");
     }
 }
 
@@ -135,7 +135,7 @@ void gsf::Network::accept_conn_new(evutil_socket_t fd)
 {
 	CQ_ITEM *item = NetworkConnect::instance().cqi_new();
 	if (!item){
-		//err dispose
+		printf("cqi_new err!\n");
 		return;
 	}
 	
@@ -153,7 +153,7 @@ void gsf::Network::accept_conn_new(evutil_socket_t fd)
 	char buf[1];
 	buf[0] = 'c';
 	if (send(thread->notify_send_fd_, buf, 1, 0) != 0){
-		//err dispose
+		printf("pipe send err!\n"); //evutil_socket_geterror
 	}
 }
 
@@ -165,6 +165,7 @@ void gsf::Network::worker_thread_process(evutil_socket_t fd, short event, void *
 	int n = recv(fd, buf, 1, 0);
 	if (n == -1){
 		int err = evutil_socket_geterror(fd);
+                printf("pipe recv err!\n");
 	}
 
 	switch (buf[0])
@@ -175,7 +176,7 @@ void gsf::Network::worker_thread_process(evutil_socket_t fd, short event, void *
 			::bufferevent *bev;
 			bev = bufferevent_socket_new(threadPtr->event_base_ptr_, item->sfd, BEV_OPT_CLOSE_ON_FREE);
 			if (!bev){
-				
+				printf("bufferevent_socket_new err!\n");
 			}
 
 			Acceptor *acceptor_ = static_cast<Acceptor*>(item->ListenPtr);
