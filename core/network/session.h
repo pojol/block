@@ -15,6 +15,8 @@ namespace gsf
 
 	static void err_cb(::bufferevent *bev, short what, void *ctx);
 
+	int send(const char *data, int len);
+		
         int32_t getid() const { return id_; }
     private:
         uint32_t id_;
