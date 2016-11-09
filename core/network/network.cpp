@@ -61,8 +61,7 @@ int gsf::Network::start()
 {
 	for (auto &worker : worker_thread_vec_)
 	{
-		std::thread wt(worker_thread_run, worker);
-		wt.join(); //这里由于内部调用了event_base_dispatch会阻塞在这里（考虑是否用detach将线程防止在后台。
+		worker->th = new std::thread(worker_thread_run, worker); //非空构造会直接启动线程
 	}
 
 	event_base_dispatch(main_thread_ptr_->event_base_ptr_);
@@ -77,6 +76,9 @@ int32_t gsf::Network::init_work_thread()
 		auto threadPtr = new NetworkThread();
 
 		threadPtr->event_base_ptr_ = event_base_new();
+		
+		threadPtr->connect_queue_ = new CQ();
+		NetworkConnect::instance().cq_init(threadPtr->connect_queue_);
 
 		evutil_socket_t pipe[2];
 		if (evutil_socketpair(AF_INET, SOCK_STREAM, 0, pipe) < 0){
@@ -152,7 +154,7 @@ void gsf::Network::accept_conn_new(evutil_socket_t fd)
 
 	char buf[1];
 	buf[0] = 'c';
-	if (send(thread->notify_send_fd_, buf, 1, 0) != 0){
+	if (send(thread->notify_send_fd_, buf, 1, 0) < 0){
 		printf("pipe send err!\n"); //evutil_socket_geterror
 	}
 }
