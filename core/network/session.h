@@ -9,15 +9,19 @@ namespace gsf
 	class Session
 	{
     public:
-        Session(int32_t id);
+        Session(int32_t id, ::bufferevent *bev, int fd);
 
         static void read_cb(::bufferevent *bev, void *ctx);
-        static void write_cb(::bufferevent *bev, void *ctx);
-		static void err_cb(::bufferevent *bev, short what, void *ctx);
+
+	static void err_cb(::bufferevent *bev, short what, void *ctx);
 
         int32_t getid() const { return id_; }
     private:
         uint32_t id_;
+		
+	int fd_;
+		
+	::bufferevent *bev_;
 	};
 }
 
