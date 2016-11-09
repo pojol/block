@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 #include <memory>
+#include <thread>
 
 #include "network_connect.h"
 
@@ -15,6 +16,8 @@ namespace gsf
 {
 	struct NetworkThread
 	{
+		std::thread *th;
+		
 		event_base *event_base_ptr_;
 
 		event *notify_event_;
