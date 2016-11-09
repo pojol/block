@@ -1,2 +1,3 @@
 
-ADD_SUBDIRECTORY(network_test)
+ADD_SUBDIRECTORY(test_network)
+ADD_SUBDIRECTORY(test_echoclient)
