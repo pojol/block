@@ -29,6 +29,7 @@ gsf::Acceptor::Acceptor(AcceptorConfig &config, AcceptHandler *handler)
 
 }
 
+
 gsf::Acceptor::~Acceptor()
 {
 
@@ -36,9 +37,9 @@ gsf::Acceptor::~Acceptor()
 
 static int32_t session_index = 0;
 
-gsf::Session * gsf::Acceptor::make_session()
+gsf::Session * gsf::Acceptor::make_session(::bufferevent *bev, int fd)
 {
-    Session *session = new Session(session_index++);
+    Session *session = new Session(session_index++, bev, fd);
 
     auto itr = session_queue_.find(session->getid());
     if (itr == session_queue_.end()){

@@ -1,5 +1,9 @@
 #include "session.h"
 
+#include <event2/buffer.h>
+
+
+#include <iostream>
 
 gsf::Session::Session(int32_t id, ::bufferevent *bev, int fd)
     : id_(id)
@@ -15,6 +19,7 @@ void gsf::Session::read_cb(::bufferevent *bev, void *ctx)
 	struct evbuffer *input = bufferevent_get_input(bev);
 	while ((len = evbuffer_remove(input, buf, sizeof(buf))) > 0)
 	{
+		//test 
 		char *read = new char[len];
 		memcpy(read, buf, len);
 		std::cout << read << std::endl;
@@ -22,7 +27,7 @@ void gsf::Session::read_cb(::bufferevent *bev, void *ctx)
 	}
 
 	Session *session = static_cast<Session*>(ctx);
-	session->send();
+	session->send(nullptr, 0);	//test
 }
 
 void gsf::Session::err_cb(::bufferevent *bev, short what, void *ctx)
@@ -45,13 +50,14 @@ void gsf::Session::err_cb(::bufferevent *bev, short what, void *ctx)
 	bufferevent_free(bev);
 }
 
-void gsf::Session::send(const char *data, int len)
+int gsf::Session::send(const char *data, int len)
 {
+	//test
 	struct evbuffer *output = evbuffer_new();
 
 	evbuffer_add(output, "hello", 5);
 
 	evbuffer_write(output, fd_);
 
-	delete output;
+	return 0;
 }

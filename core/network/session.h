@@ -13,11 +13,12 @@ namespace gsf
 
         static void read_cb(::bufferevent *bev, void *ctx);
 
-	static void err_cb(::bufferevent *bev, short what, void *ctx);
+		static void err_cb(::bufferevent *bev, short what, void *ctx);
 
-	int send(const char *data, int len);
+		int send(const char *data, int len);
 		
         int32_t getid() const { return id_; }
+
     private:
         uint32_t id_;
 		

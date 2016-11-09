@@ -5,6 +5,7 @@
 #include <mutex>
 #include <stdlib.h>
 
+#include <memory>
 // memcache thread.c
 
 namespace gsf
@@ -20,7 +21,7 @@ namespace gsf
 		int             sfd;
 		int             event_flags;
 
-		void			*ListenPtr;
+		void			*ptr;
 
 		CQ_ITEM          *next;
 	};

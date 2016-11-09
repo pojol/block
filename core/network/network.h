@@ -20,6 +20,9 @@ namespace gsf
     struct ConnectorConfig;
     class Connector;
 
+	typedef std::shared_ptr<Acceptor> AcceptorPtr;
+	typedef std::shared_ptr<NetworkThread> NetworkThreadPtr;
+
 	class Network
 	{
 	public:
@@ -31,10 +34,11 @@ namespace gsf
 
 		int start();
 
-        void open_acceptor(Acceptor *acceptor);
+		void open_acceptor(AcceptorPtr acceptor_ptr);
 
         void open_connector(ConnectorConfig &config, Connector *connector);
 
+	protected:
 		void accept_conn_new(evutil_socket_t fd);
 
 	private:
@@ -45,7 +49,7 @@ namespace gsf
 
 		static void worker_thread_process(evutil_socket_t fd, short event, void * arg);
 
-		static void worker_thread_run(NetworkThread *thread);
+		static void worker_thread_run(NetworkThreadPtr thread_ptr);
 
 		static void accept_listen_cb(::evconnlistener *listener
 			, evutil_socket_t fd
@@ -54,11 +58,11 @@ namespace gsf
 			, void *arg);
 	private:
 
-		NetworkThread *main_thread_ptr_;
+		NetworkThreadPtr main_thread_ptr_;
 	
-		std::vector<NetworkThread*> worker_thread_vec_;
+		std::vector<NetworkThreadPtr> worker_thread_vec_;
 
-        Acceptor *acceptor_;
+		AcceptorPtr acceptor_ptr_;
 
 		NetworkConfig config_;
 	};

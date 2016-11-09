@@ -48,7 +48,7 @@ int gsf::Network::init(const NetworkConfig &config)
 {
 	config_ = config;
 
-	main_thread_ptr_ = new NetworkThread();
+	main_thread_ptr_ = std::make_shared<NetworkThread>();
 
 	main_thread_ptr_->event_base_ptr_ = event_base_new();
 
@@ -73,48 +73,48 @@ int32_t gsf::Network::init_work_thread()
 {
 	for (int i = 0; i < config_.worker_thread_count_; ++i)
 	{
-		auto threadPtr = new NetworkThread();
+		auto thread_ptr = std::make_shared<NetworkThread>();
 
-		threadPtr->event_base_ptr_ = event_base_new();
+		thread_ptr->event_base_ptr_ = event_base_new();
 		
-		threadPtr->connect_queue_ = new CQ();
-		NetworkConnect::instance().cq_init(threadPtr->connect_queue_);
+		thread_ptr->connect_queue_ = new CQ();
+		NetworkConnect::instance().cq_init(thread_ptr->connect_queue_);
 
 		evutil_socket_t pipe[2];
 		if (evutil_socketpair(AF_INET, SOCK_STREAM, 0, pipe) < 0){
                      printf("evutil_socketpair err!\n");
 		}
-		threadPtr->notify_send_fd_ = pipe[1];
-		threadPtr->notify_receive_fd_ = pipe[0];
-		evutil_make_socket_nonblocking(threadPtr->notify_send_fd_);
-		evutil_make_socket_nonblocking(threadPtr->notify_receive_fd_);
+		thread_ptr->notify_send_fd_ = pipe[1];
+		thread_ptr->notify_receive_fd_ = pipe[0];
+		evutil_make_socket_nonblocking(thread_ptr->notify_send_fd_);
+		evutil_make_socket_nonblocking(thread_ptr->notify_receive_fd_);
 
 
 		struct event *signal;
-		signal = event_new(threadPtr->event_base_ptr_
-			, threadPtr->notify_receive_fd_
+		signal = event_new(thread_ptr->event_base_ptr_
+			, thread_ptr->notify_receive_fd_
 			, EV_READ | EV_PERSIST
 			, worker_thread_process
-			, threadPtr);
+			, thread_ptr.get());
 		if (signal){
-			threadPtr->notify_event_ = signal;
+			thread_ptr->notify_event_ = signal;
 			event_add(signal, NULL);
 		}
 
-		worker_thread_vec_.push_back(threadPtr);
+		worker_thread_vec_.push_back(thread_ptr);
 	}
 
 	return 0;
 }
 
-void gsf::Network::open_acceptor(Acceptor *acceptor)
+void gsf::Network::open_acceptor(AcceptorPtr acceptor_ptr)
 {
     struct sockaddr_in sin;
     memset(&sin, 0, sizeof(sin));
     sin.sin_family = AF_INET;
-	sin.sin_port = htons(acceptor->get_config().port);
+	sin.sin_port = htons(acceptor_ptr->get_config().port);
 
-	acceptor_ = acceptor;
+	acceptor_ptr_ = acceptor_ptr;
 
     ::evconnlistener *listener;
 
@@ -143,24 +143,26 @@ void gsf::Network::accept_conn_new(evutil_socket_t fd)
 	
 	int tid = (last_thread + 1) % config_.worker_thread_count_;
 	
-	NetworkThread *thread = worker_thread_vec_[tid];
+	auto thread_ptr = worker_thread_vec_[tid];
 	
 	last_thread = tid;
 	
 	item->sfd = fd;
-	item->ListenPtr = acceptor_;
+	//temp
+	item->ptr = acceptor_ptr_.get();
 	
-	NetworkConnect::instance().cq_push(thread->connect_queue_, item);
+	NetworkConnect::instance().cq_push(thread_ptr->connect_queue_, item);
 
 	char buf[1];
 	buf[0] = 'c';
-	if (send(thread->notify_send_fd_, buf, 1, 0) < 0){
+	if (send(thread_ptr->notify_send_fd_, buf, 1, 0) < 0){
 		printf("pipe send err!\n"); //evutil_socket_geterror
 	}
 }
 
 void gsf::Network::worker_thread_process(evutil_socket_t fd, short event, void * arg)
 {
+	//! just use point not copy
 	NetworkThread *threadPtr = static_cast<NetworkThread*>(arg);
 
 	char buf[1];
@@ -181,22 +183,22 @@ void gsf::Network::worker_thread_process(evutil_socket_t fd, short event, void *
 				printf("bufferevent_socket_new err!\n");
 			}
 
-			Acceptor *acceptor_ = static_cast<Acceptor*>(item->ListenPtr);
-            Session *session = acceptor_->make_session();
-			bufferevent_setcb(bev, Session::read_cb, Session::write_cb, Session::err_cb, session);
+			Acceptor *acceptor_ptr = static_cast<Acceptor*>(item->ptr);
+			Session *session = acceptor_ptr->make_session(bev, item->sfd);
+			bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, session);
             bufferevent_enable(bev, EV_WRITE);
             bufferevent_enable(bev, EV_READ);
 			
 			//send connection event
-			acceptor_->handler_new_connect(session->getid());
+			acceptor_ptr->handler_new_connect(session->getid());
 		}
 		break;
 	}
 }
 
-void gsf::Network::worker_thread_run(NetworkThread *thread)
+void gsf::Network::worker_thread_run(NetworkThreadPtr thread_ptr)
 {
-	event_base_dispatch(thread->event_base_ptr_);
+	event_base_dispatch(thread_ptr->event_base_ptr_);
 }
 
 

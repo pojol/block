@@ -6,6 +6,8 @@
 
 #include <unordered_map>
 
+#include <event2/bufferevent.h>
+
 namespace gsf
 {
 	class AcceptHandler;
@@ -23,7 +25,7 @@ namespace gsf
 		Acceptor(AcceptorConfig &config, AcceptHandler *handler);
 		~Acceptor();
 
-		Session * make_session();
+		Session * make_session(::bufferevent *bev, int fd);
 
         void handler_new_connect(int32_t session_id);
 

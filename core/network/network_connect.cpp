@@ -1,13 +1,12 @@
 #include "network_connect.h"
 
-
-gsf::NetworkConnect::~NetworkConnect()
-	:cqi_freelist(nullptr)
+gsf::NetworkConnect::NetworkConnect()
+:cqi_freelist(nullptr)
 {
 
 }
 
-gsf::NetworkConnect::NetworkConnect()
+gsf::NetworkConnect::~NetworkConnect()
 {
 
 }
