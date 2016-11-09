@@ -2,6 +2,7 @@
 
 
 gsf::NetworkConnect::~NetworkConnect()
+	:cqi_freelist(nullptr)
 {
 
 }
