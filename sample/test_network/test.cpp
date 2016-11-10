@@ -23,6 +23,23 @@
 #include <iostream>
 //! user interface test
 
+/*
+class PlayerSession : public SessionHandler
+{
+public:
+virtual void connect();
+virtual void disconnect();
+
+virtual void recv();
+virtual void write();
+};
+
+class Player
+{
+
+}
+*/
+
 class LoginServerHandler : public gsf::AcceptHandler
 {
 public:
@@ -32,7 +49,10 @@ public:
     virtual void handler_new_connection(int acceptor_id, int session_id)
     {
 		std::cout << "new connection " << acceptor_id << " " << session_id << std::endl;
-        //gsf::SessionMgr::instance().open_session(session_id, this, &gsf::MessageSessionBinder<T>::instance());
+        //gsf::SessionMgr::instance().open_session(session_id, this, &gsf::MessageBinder<T>::instance());
+		//or
+		//gsf::SessionMgr::instance().open_session(session_id, make PlayerSession, &gsf::MessageBinder<T>::instance());
+		//
     }
 };
 
@@ -40,13 +60,15 @@ public:
 class Login2GateServerHandler : public ConnectHandler
 {
 public:
-    virtual ~Login2GateServerHandler(){}
+virtual ~Login2GateServerHandler(){}
 
-    virtual void handler_new_connection(int connector_id, int session_id){}
+virtual void handler_new_connection(int connector_id, int session_id){}
 
-    virtual void handler_connect_failed(){}
+virtual void handler_connect_failed(){}
 };
 */
+
+
 
 
 int main()
