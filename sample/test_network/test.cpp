@@ -32,7 +32,7 @@ public:
     virtual void handler_new_connection(int acceptor_id, int session_id)
     {
 		std::cout << "new connection " << acceptor_id << " " << session_id << std::endl;
-        //open_session(session_id, &network::MessageHandler<>());
+        //gsf::SessionMgr::instance().open_session(session_id, this, &gsf::MessageSessionBinder<T>::instance());
     }
 };
 
