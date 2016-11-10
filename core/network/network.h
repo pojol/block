@@ -8,8 +8,6 @@
 #include <event2/util.h>
 #include <event2/listener.h>
 
-#include "network_config.h"
-
 namespace gsf
 {
 	struct NetworkThread;
@@ -23,6 +21,16 @@ namespace gsf
 	typedef std::shared_ptr<Acceptor> AcceptorPtr;
 	typedef std::shared_ptr<NetworkThread> NetworkThreadPtr;
 
+	struct NetworkConfig
+	{
+		int32_t worker_thread_count_;
+		int32_t port_;
+	};
+
+
+	// event bind
+	// network init uninit
+	// loop
 	class Network
 	{
 	public:

@@ -1,7 +1,6 @@
 #include "network.h"
 
 #include "network_thread.h"
-#include "network_config.h"
 
 #include "acceptor.h"
 #include "session.h"
