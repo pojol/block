@@ -19,6 +19,7 @@
 #include <network.h>
 #include <acceptor.h>
 #include <accept_handler.h>
+#include <acceptor_mgr.h>
 
 #include <iostream>
 
@@ -161,20 +162,18 @@ int main()
 	_config.worker_thread_count_ = 4;
 	gsf::Network::instance().init(_config);
     
-
     gsf::AcceptorConfig _acceptConfig;
 	_acceptConfig.port = 8888;
-	gsf::AcceptorPtr acceptor_ptr = std::make_shared<gsf::Acceptor>(_acceptConfig, new LoginServerHandler());
 
-    //ConnectorConfig _connectConfig;
-    //Connector _connector(_connectConfig, new Login2GateServerHandler());
-
-	gsf::Network::instance().open_acceptor(acceptor_ptr);
-    //NetWork::instance().open_connector(_connector);
+	int _acceptor_id = gsf::AcceptorMgr::instance().make_acceptor(_acceptConfig);
+	if (_acceptor_id < 0){
+		//err
+	}
+	if (gsf::AcceptorMgr::instance().open(_acceptor_id, new LoginServerHandler()) < 0){
+		//err
+	}
 
 	gsf::Network::instance().start();
-
-	//! 这里还有个重要的地方就是需要拿到网络层的超时事件，方便做其他处理。
 
 	return 0;
 }

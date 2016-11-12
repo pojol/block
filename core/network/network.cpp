@@ -4,6 +4,7 @@
 
 #include "acceptor.h"
 #include "session.h"
+#include "err.h"
 
 #ifdef WIN32
     #include <winsock2.h>
@@ -106,30 +107,6 @@ int32_t gsf::Network::init_work_thread()
 	return 0;
 }
 
-void gsf::Network::open_acceptor(AcceptorPtr acceptor_ptr)
-{
-    struct sockaddr_in sin;
-    memset(&sin, 0, sizeof(sin));
-    sin.sin_family = AF_INET;
-	sin.sin_port = htons(acceptor_ptr->get_config().port);
-
-	acceptor_ptr_ = acceptor_ptr;
-
-    ::evconnlistener *listener;
-
-    listener = evconnlistener_new_bind(main_thread_ptr_->event_base_ptr_
-			,accept_listen_cb
-            ,(void*)this
-            ,LEV_OPT_REUSEABLE | LEV_OPT_CLOSE_ON_FREE
-            ,-1
-            ,(sockaddr*)&sin
-            ,sizeof(sockaddr_in));
-    if (NULL == listener){
-        printf("evconnlistener new bind err!/n");
-    }
-}
-
-
 static int last_thread = -1;
 
 void gsf::Network::accept_conn_new(evutil_socket_t fd)
@@ -157,6 +134,26 @@ void gsf::Network::accept_conn_new(evutil_socket_t fd)
 	if (send(thread_ptr->notify_send_fd_, buf, 1, 0) < 0){
 		printf("pipe send err!\n"); //evutil_socket_geterror
 	}
+}
+
+evconnlistener * gsf::Network::accept_bind(const std::string &ip, int port)
+{
+	struct sockaddr_in sin;
+	memset(&sin, 0, sizeof(sin));
+	sin.sin_family = AF_INET;
+	sin.sin_port = htons(port);
+
+	::evconnlistener *listener;
+
+	listener = evconnlistener_new_bind(Network::instance().main_thread_ptr_->event_base_ptr_
+		, accept_listen_cb
+		, (void*)this
+		, LEV_OPT_REUSEABLE | LEV_OPT_CLOSE_ON_FREE
+		, -1
+		, (sockaddr*)&sin
+		, sizeof(sockaddr_in));
+
+	return listener;
 }
 
 void gsf::Network::worker_thread_process(evutil_socket_t fd, short event, void * arg)

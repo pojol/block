@@ -3,10 +3,12 @@
 
 #include <stdint.h>
 #include <string>
+#include <memory>
 
 #include <unordered_map>
 
 #include <event2/bufferevent.h>
+#include <event2/listener.h>
 
 namespace gsf
 {
@@ -22,8 +24,12 @@ namespace gsf
 	class Acceptor
 	{
 	public:
-		Acceptor(AcceptorConfig &config, AcceptHandler *handler);
+		Acceptor(uint32_t id, const AcceptorConfig &config);
 		~Acceptor();
+
+		int open(AcceptHandler *accept_handler);
+
+		int close();
 
 		Session * make_session(::bufferevent *bev, int fd);
 
@@ -31,14 +37,18 @@ namespace gsf
 
 		AcceptorConfig &get_config();
 
+		uint32_t getid() const;
+
 	private:
 		AcceptorConfig config_;
 		AcceptHandler *handler_;
 
+		::evconnlistener *listener_ptr_;
+
 		typedef std::unordered_map<int32_t, Session*> SessionQueue;
 		SessionQueue session_queue_;
 
-		int32_t id_;
+		uint32_t id_;
 	};
 }
 

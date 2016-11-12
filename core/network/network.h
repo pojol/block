@@ -33,6 +33,7 @@ namespace gsf
 	// loop
 	class Network
 	{
+		friend class Acceptor;
 	public:
 		~Network();
 
@@ -42,12 +43,12 @@ namespace gsf
 
 		int start();
 
-		void open_acceptor(AcceptorPtr acceptor_ptr);
-
         void open_connector(ConnectorConfig &config, Connector *connector);
 
 	protected:
 		void accept_conn_new(evutil_socket_t fd);
+
+		::evconnlistener * accept_bind(const std::string &ip, int port);
 
 	private:
 		Network();
