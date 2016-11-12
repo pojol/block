@@ -21,7 +21,7 @@
 #include <accept_handler.h>
 
 #include <iostream>
-//! user interface test
+
 
 /*
 class PlayerSession : public SessionHandler
@@ -56,19 +56,92 @@ public:
     }
 };
 
+
+//! user interface test
 /*
-class Login2GateServerHandler : public ConnectHandler
-{
-public:
-virtual ~Login2GateServerHandler(){}
+	class LoginHandler : 
+		public AcceptHandler,
+		public SessionCloseHandler
+	{
+		public:
+			virtual void handle_new_connection(int acceptor_id, int session_id)
+			{
+				gsf::SessionMgr::instance().open(session_id, this);
+			}
+			
+			vittual void handle_close(int session_id
+				, int err_code
+				, int acceptor_id
+				, int connector_id
+				, const std::string &ip
+				, const int port);
+	}
 
-virtual void handler_new_connection(int connector_id, int session_id){}
+	class Login2GameHandler :
+		public ConnectHandler,
+		public SessionCloseHandler
+	{
+		public:
+			virtual void handle_new_connection(int connector_id, int session_id)
+			{
+				gsf::SessionMgr::instance().open(session_id, this);
+			}
 
-virtual void handler_connect_failed(){}
-};
+			virtual void handle_connect_failed(int connector_id, int err_code, const std::string &ip, const int port);
+
+			vittual void handle_close(int session_id
+			, int err_code
+			, int acceptor_id
+			, int connector_id
+			, const std::string &ip
+			, const int port);
+	}
+
+	class LoginTimeoutHandler : public TimeOutHandler
+	{
+		public:
+			virtual void time_out(int thread_id, int overtime_time);
+	}
+
+	------init------
+	gsf::NetworkConfig _config(...);
+	gsf::Network::instance().init(_config);
+
+	gsf::MessageSessionBinder<T>::instance();
+
+	//accept
+	gsf::AcceptorConfig _acceptor_config(...);
+	int _acceptor_id = gsf::AcceptorMgr::instance().make_acceptor(&_acceptor_config);
+	if (acceptor_id < 0){
+		//err
+	}
+
+	if (gsf::AcceptorMgr::instance().open(_acceptor_id, new LoginHandler()) < 0){
+		//err
+	}
+
+	//connect
+	gsf::ConnectorConfig _gameserver_connector_config(...);
+	int _connector_id = gsf::ConnectorMgr::instance().make_connector(&_gameserver_connector_config);
+	if (_connector_id < 0){
+		//err
+	}
+
+	if (gsf::ConnectorMgr::instance().open(_connector_id, new Login2GameHandler() < 0){
+		//err
+	}
+
+	gsf::Network::instance().start(new LoginTimeoutHandler());
+	-----decode-----
+
+	class ModuleDecode
+	{
+		void regist()
+		{
+			gsf::MessageSessionBinder<T>::instance().bind(message_id, &class::func);
+		}
+	}
 */
-
-
 
 
 int main()
