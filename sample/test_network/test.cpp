@@ -20,6 +20,9 @@
 #include <acceptor.h>
 #include <acceptor_mgr.h>
 
+#include <session.h>
+#include <session_mgr.h>
+
 #include <iostream>
 
 
@@ -40,7 +43,9 @@ class Player
 }
 */
 
-class LoginServerHandler : public gsf::AcceptHandler
+class LoginServerHandler : 
+	public gsf::AcceptHandler,
+	public gsf::SessionCloseHandler
 {
 public:
     virtual ~LoginServerHandler(){}
@@ -49,11 +54,23 @@ public:
     virtual void handler_new_connection(int acceptor_id, int session_id)
     {
 		std::cout << "new connection " << acceptor_id << " " << session_id << std::endl;
+
+		gsf::SessionMgr::instance().open(session_id, nullptr, this);
         //gsf::SessionMgr::instance().open_session(session_id, this, &gsf::MessageBinder<T>::instance());
 		//or
 		//gsf::SessionMgr::instance().open_session(session_id, make PlayerSession, &gsf::MessageBinder<T>::instance());
 		//
     }
+
+	virtual void handle_close(uint32_t session_id
+		, int err_code
+		, int accepor_id
+		, int connector_id
+		, const std::string &ip
+		, const int port)
+	{
+
+	}
 };
 
 

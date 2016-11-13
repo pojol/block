@@ -138,7 +138,7 @@ void gsf::Network::accept_conn_new(int acceptor_id, evutil_socket_t fd)
 	}
 }
 
-evconnlistener * gsf::Network::accept_bind(int acceptor_id, const std::string &ip, int port)
+evconnlistener * gsf::Network::accept_bind(Acceptor *acceptor_ptr, const std::string &ip, int port)
 {
 	struct sockaddr_in sin;
 	memset(&sin, 0, sizeof(sin));
@@ -149,7 +149,7 @@ evconnlistener * gsf::Network::accept_bind(int acceptor_id, const std::string &i
 
 	listener = evconnlistener_new_bind(Network::instance().main_thread_ptr_->event_base_ptr_
 		, accept_listen_cb
-		, &acceptor_id
+		, acceptor_ptr
 		, LEV_OPT_REUSEABLE | LEV_OPT_CLOSE_ON_FREE
 		, -1
 		, (sockaddr*)&sin
@@ -208,7 +208,7 @@ void gsf::Network::worker_thread_run(NetworkThreadPtr thread_ptr)
 
 void gsf::Network::accept_listen_cb(::evconnlistener *listener, evutil_socket_t fd, sockaddr *sa, int socklen, void *arg)
 {
-	int *_acceptor_id = static_cast<int*>(arg);
+	Acceptor *_acceptor_ptr = static_cast<Acceptor*>(arg);
 
-	Network::instance().accept_conn_new(*_acceptor_id, fd);
+	Network::instance().accept_conn_new(_acceptor_ptr->get_id(), fd);
 }

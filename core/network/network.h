@@ -46,9 +46,9 @@ namespace gsf
 	protected:
 		void accept_conn_new(int acceptor_id, evutil_socket_t fd);
 
-		::evconnlistener * accept_bind(int acceptor_id, const std::string &ip, int port);
+		::evconnlistener * accept_bind(Acceptor *acceptor_ptr, const std::string &ip, int port);
 
-		::evconnlistener * connect_bind(int connector_id, const std::string &ip ,int port);
+		::evconnlistener * connect_bind(Connector *connector_ptr, const std::string &ip, int port);
 
 	private:
 		Network();

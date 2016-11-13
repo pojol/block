@@ -24,7 +24,7 @@ namespace gsf
 
 		static SessionMgr & instance();
 
-		int open(int session_id, std::shared_ptr<SessionHandler> session_handler, std::shared_ptr<SessionCloseHandler> close_handler);
+		int open(int session_id, SessionHandler *session_handler, SessionCloseHandler *close_handler);
 
 		int close(int session_id);
 

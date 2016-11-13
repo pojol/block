@@ -27,8 +27,7 @@ gsf::SessionPtr gsf::SessionMgr::make_session(::bufferevent *bev, int fd)
 }
 
 
-int gsf::SessionMgr::open(int session_id, std::shared_ptr<SessionHandler> session_handler,
-						  std::shared_ptr<SessionCloseHandler> close_handler)
+int gsf::SessionMgr::open(int session_id, SessionHandler *session_handler, SessionCloseHandler *close_handler)
 {
 	auto _session_itr = session_queue_.find(session_id);
 	if (_session_itr != session_queue_.end()){

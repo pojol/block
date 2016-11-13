@@ -9,9 +9,13 @@ gsf::Session::Session(int32_t id, ::bufferevent *bev, int fd)
     : id_(id)
     , bev_(bev)
     , fd_(fd)
+	, out_buf_(nullptr)
+	, in_buf_(nullptr)
+	, session_handler_(nullptr)
+	, close_handler_(nullptr)
 {}
 
-int gsf::Session::open(SessionHandlerPtr session_handler, SessionCloseHandlerPtr close_handler)
+int gsf::Session::open(SessionHandler *session_handler, SessionCloseHandler *close_handler)
 {
 	session_handler = session_handler;
 	close_handler_ = close_handler;
@@ -29,18 +33,27 @@ void gsf::Session::read_cb(::bufferevent *bev, void *ctx)
 
 	Session *_session_ptr = static_cast<Session*>(ctx);
 	evbuffer *_in = _session_ptr->get_inbuf();
+	if (_in){
+		bufferevent_read_buffer(bev, _in);
 
-	bufferevent_read_buffer(bev, _in);
+		while ((len = evbuffer_remove(_in, buf, sizeof(buf))) > 0)
+		{
+			//test 
+			uint8_t *read = new uint8_t[len];
+			memcpy(read, buf, len);
 
-	while ((len = evbuffer_remove(_in, buf, sizeof(buf))) > 0)
-	{
-		//test 
-		uint8_t *read = new uint8_t[len];
-		memcpy(read, buf, len);
+			if (_session_ptr->get_session_handler()){
+				_session_ptr->get_session_handler()->handle_data(read);
+			}
+			else {
+				printf("not bind session_handler!\n");
+			}
 
-		_session_ptr->get_session_handler()->handle_data(read);
-
-		delete []read;
+			delete[]read;
+		}
+	}
+	else {
+		printf("read err, not open session!\n");
 	}
 }
 

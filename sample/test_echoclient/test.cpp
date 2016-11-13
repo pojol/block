@@ -41,6 +41,9 @@ int main()
 	sockaddr_in addr;
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(8888);
+#ifdef WIN32
+	addr.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");
+#endif // WIN32
 
 	int ret;
 	ret = connect(socket_fd, (sockaddr*)&addr, sizeof(sockaddr));

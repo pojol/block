@@ -41,7 +41,7 @@ int gsf::Acceptor::open(AcceptHandler *accept_handler)
 {
 	handler_ = accept_handler;
 
-	listener_ptr_ = Network::instance().accept_bind(id_, "", config_.port);
+	listener_ptr_ = Network::instance().accept_bind(this, "", config_.port);
 	if (listener_ptr_){
 		return 0;
 	}

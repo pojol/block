@@ -3,7 +3,7 @@
 
 #include <event2/bufferevent.h>
 #include <stdint.h>
-
+#include <memory>
 #include <string>
 
 namespace gsf
@@ -32,13 +32,10 @@ namespace gsf
 
 	class Session
 	{
-		typedef std::shared_ptr<SessionHandler> SessionHandlerPtr;
-		typedef std::shared_ptr<SessionCloseHandler> SessionCloseHandlerPtr;
-
     public:
         Session(int32_t id, ::bufferevent *bev, int fd);
 
-		int open(SessionHandlerPtr session_handler, SessionCloseHandlerPtr close_handler);
+		int open(SessionHandler *session_handler, SessionCloseHandler *close_handler);
 
         static void read_cb(::bufferevent *bev, void *ctx);
 
@@ -51,7 +48,7 @@ namespace gsf
 		::evbuffer * get_outbuf() { return out_buf_; }
 		::evbuffer * get_inbuf() { return in_buf_; }
 
-		SessionHandlerPtr get_session_handler() { return session_handler_; }
+		SessionHandler * get_session_handler() { return session_handler_; }
 
     private:
         uint32_t id_;
@@ -62,8 +59,8 @@ namespace gsf
 		::evbuffer *out_buf_;
 		::evbuffer *in_buf_;
 
-		SessionHandlerPtr session_handler_;
-		SessionCloseHandlerPtr close_handler_;
+		SessionHandler *session_handler_;
+		SessionCloseHandler *close_handler_;
 	};
 }
 
