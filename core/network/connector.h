@@ -7,12 +7,19 @@
 namespace gsf
 {
 	class Session;
-	class ConnectHandler;
 
 	struct ConnectorConfig
 	{
 		int32_t port;
 		std::string address;
+	};
+
+	class ConnectHandler
+	{
+	public:
+		virtual ~ConnectHandler(){}
+
+		virtual void handler_new_connection(int connector_id, int session_id) = 0;
 	};
 
 	class Connector

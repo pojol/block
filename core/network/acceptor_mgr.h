@@ -10,6 +10,8 @@ namespace gsf
 	class AcceptHandler;
 	class Acceptor;
 
+	typedef std::shared_ptr<Acceptor> AcceptorPtr;
+
 	class AcceptorMgr
 	{
 	public:
@@ -23,6 +25,8 @@ namespace gsf
 		int open(int acceptor_id, AcceptHandler *accept_handler);
 
 		int close(int acceptor_id);
+
+		AcceptorPtr find_acceptor(int accepor_id);
 
 	protected:
 		AcceptorMgr();

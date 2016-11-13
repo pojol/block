@@ -2,6 +2,7 @@
 
 #include "network_thread.h"
 
+#include "acceptor_mgr.h"
 #include "acceptor.h"
 #include "session.h"
 #include "err.h"
@@ -82,7 +83,7 @@ int32_t gsf::Network::init_work_thread()
 
 		evutil_socket_t pipe[2];
 		if (evutil_socketpair(AF_INET, SOCK_STREAM, 0, pipe) < 0){
-                     printf("evutil_socketpair err!\n");
+			printf("evutil_socketpair err!\n");
 		}
 		thread_ptr->notify_send_fd_ = pipe[1];
 		thread_ptr->notify_receive_fd_ = pipe[0];
@@ -109,7 +110,7 @@ int32_t gsf::Network::init_work_thread()
 
 static int last_thread = -1;
 
-void gsf::Network::accept_conn_new(evutil_socket_t fd)
+void gsf::Network::accept_conn_new(int acceptor_id, evutil_socket_t fd)
 {
 	CQ_ITEM *item = NetworkConnect::instance().cqi_new();
 	if (!item){
@@ -125,8 +126,8 @@ void gsf::Network::accept_conn_new(evutil_socket_t fd)
 	
 	item->sfd = fd;
 	//temp
-	item->ptr = acceptor_ptr_.get();
-	
+	item->acceptor_id = acceptor_id;
+
 	NetworkConnect::instance().cq_push(thread_ptr->connect_queue_, item);
 
 	char buf[1];
@@ -136,7 +137,7 @@ void gsf::Network::accept_conn_new(evutil_socket_t fd)
 	}
 }
 
-evconnlistener * gsf::Network::accept_bind(const std::string &ip, int port)
+evconnlistener * gsf::Network::accept_bind(int acceptor_id, const std::string &ip, int port)
 {
 	struct sockaddr_in sin;
 	memset(&sin, 0, sizeof(sin));
@@ -147,7 +148,7 @@ evconnlistener * gsf::Network::accept_bind(const std::string &ip, int port)
 
 	listener = evconnlistener_new_bind(Network::instance().main_thread_ptr_->event_base_ptr_
 		, accept_listen_cb
-		, (void*)this
+		, &acceptor_id
 		, LEV_OPT_REUSEABLE | LEV_OPT_CLOSE_ON_FREE
 		, -1
 		, (sockaddr*)&sin
@@ -165,7 +166,7 @@ void gsf::Network::worker_thread_process(evutil_socket_t fd, short event, void *
 	int n = recv(fd, buf, 1, 0);
 	if (n == -1){
 		int err = evutil_socket_geterror(fd);
-                printf("pipe recv err!\n");
+		printf("pipe recv err!\n");
 	}
 
 	switch (buf[0])
@@ -179,14 +180,19 @@ void gsf::Network::worker_thread_process(evutil_socket_t fd, short event, void *
 				printf("bufferevent_socket_new err!\n");
 			}
 
-			Acceptor *acceptor_ptr = static_cast<Acceptor*>(item->ptr);
-			Session *session = acceptor_ptr->make_session(bev, item->sfd);
-			bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, session);
-            bufferevent_enable(bev, EV_WRITE);
-            bufferevent_enable(bev, EV_READ);
-			
-			//send connection event
-			acceptor_ptr->handler_new_connect(session->getid());
+			auto _acceptor_ptr = AcceptorMgr::instance().find_acceptor(item->acceptor_id);
+			if (_acceptor_ptr){
+				Session *session = _acceptor_ptr->make_session(bev, item->sfd);
+				bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, session);
+				bufferevent_enable(bev, EV_WRITE);
+				bufferevent_enable(bev, EV_READ);
+
+				//send connection event
+				_acceptor_ptr->handler_new_connect(session->getid());
+			}
+			else {
+				printf("worker_thread_process not find acceptor!\n");
+			}
 		}
 		break;
 	}
@@ -200,6 +206,7 @@ void gsf::Network::worker_thread_run(NetworkThreadPtr thread_ptr)
 
 void gsf::Network::accept_listen_cb(::evconnlistener *listener, evutil_socket_t fd, sockaddr *sa, int socklen, void *arg)
 {
-	gsf::Network *network = (gsf::Network*)(arg);
-	network->accept_conn_new(fd);
+	int *_acceptor_id = static_cast<int*>(arg);
+
+	Network::instance().accept_conn_new(*_acceptor_id, fd);
 }

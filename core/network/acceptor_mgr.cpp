@@ -1,6 +1,5 @@
 #include "acceptor_mgr.h"
 
-#include "accept_handler.h"
 #include "acceptor.h"
 
 #include "err.h"
@@ -45,25 +44,36 @@ int gsf::AcceptorMgr::make_acceptor(const AcceptorConfig &config)
 
 int gsf::AcceptorMgr::open(int acceptor_id, AcceptHandler *accept_handler)
 {
-	auto itr = std::find_if(acceptor_vec_.begin(), acceptor_vec_.end(), [&](AcceptorVec::value_type it){
-		return (it->getid() == acceptor_id);
-	});
-	if (itr != acceptor_vec_.end()){
-		return (*itr)->open(accept_handler);
+	auto acceptor_ptr = find_acceptor(acceptor_id);
+	if (acceptor_ptr){
+		return acceptor_ptr->open(accept_handler);
 	}
-
-	return ACCEPTOR_NOT_FIND;
+	else {
+		return ACCEPTOR_NOT_FIND;
+	}
 }
 
 int gsf::AcceptorMgr::close(int acceptor_id)
 {
+	auto acceptor_ptr = find_acceptor(acceptor_id);
+	if (acceptor_ptr){
+		return acceptor_ptr->close();
+	}
+	else {
+		return ACCEPTOR_NOT_FIND;
+	}
+}
+
+gsf::AcceptorPtr gsf::AcceptorMgr::find_acceptor(int accepor_id)
+{
 	auto itr = std::find_if(acceptor_vec_.begin(), acceptor_vec_.end(), [&](AcceptorVec::value_type it){
-		return (it->getid() == acceptor_id);
+		return (it->getid() == accepor_id);
 	});
 	if (itr != acceptor_vec_.end()){
-		return (*itr)->close();
+		return (*itr);
 	}
-
-	return ACCEPTOR_NOT_FIND;
+	else {
+		return nullptr;
+	}
 }
 

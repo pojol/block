@@ -21,7 +21,8 @@ namespace gsf
 		int             sfd;
 		int             event_flags;
 
-		void			*ptr;
+		uint32_t		acceptor_id;
+		uint32_t		connector_id;
 
 		CQ_ITEM          *next;
 	};
