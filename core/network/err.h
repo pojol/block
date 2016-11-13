@@ -6,6 +6,7 @@ enum Err
 	ACCEPTOR_CONSTRUCT_ERR	= -1,
 	ACCEPTOR_NOT_FIND		= -2,
 	LIBEVENT_NEW_BIND_ERR	= -3,
+	SESSION_NOT_FIND		= -4,
 };
 
 #endif

@@ -5,8 +5,6 @@
 #include <string>
 #include <memory>
 
-#include <unordered_map>
-
 #include <event2/bufferevent.h>
 #include <event2/listener.h>
 
@@ -26,9 +24,7 @@ namespace gsf
 	public:
 		virtual ~AcceptHandler(){}
 
-		/**!
-		* ½¨Á¢Á¬½Ó³É¹¦£¡Õâ¸öº¯Êı¿ªÊ¼¿ÉÒÔ¿ªÆôsessionµÄÕìÌı£¬°ó¶¨message<T>
-		* */
+        //! æœ‰æ–°çš„è¿æ¥è¿›æ¥
 		virtual void handler_new_connection(int acceptor_id, int session_id) = 0;
 	};
 
@@ -42,22 +38,17 @@ namespace gsf
 
 		int close();
 
-		Session * make_session(::bufferevent *bev, int fd);
-
         void handler_new_connect(int32_t session_id);
 
 		AcceptorConfig &get_config();
 
-		uint32_t getid() const;
+		uint32_t get_id() const;
 
 	private:
 		AcceptorConfig config_;
 		AcceptHandler *handler_;
 
 		::evconnlistener *listener_ptr_;
-
-		typedef std::unordered_map<int32_t, Session*> SessionQueue;
-		SessionQueue session_queue_;
 
 		uint32_t id_;
 	};

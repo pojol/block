@@ -3,6 +3,7 @@
 #include "network_thread.h"
 
 #include "acceptor_mgr.h"
+#include "session_mgr.h"
 #include "acceptor.h"
 #include "session.h"
 #include "err.h"
@@ -182,13 +183,14 @@ void gsf::Network::worker_thread_process(evutil_socket_t fd, short event, void *
 
 			auto _acceptor_ptr = AcceptorMgr::instance().find_acceptor(item->acceptor_id);
 			if (_acceptor_ptr){
-				Session *session = _acceptor_ptr->make_session(bev, item->sfd);
-				bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, session);
-				bufferevent_enable(bev, EV_WRITE);
-				bufferevent_enable(bev, EV_READ);
+                auto _session_ptr = SessionMgr::instance().make_session(bev, item->sfd);
 
 				//send connection event
-				_acceptor_ptr->handler_new_connect(session->getid());
+				_acceptor_ptr->handler_new_connect(_session_ptr->get_id());
+
+				bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, _session_ptr.get());
+				bufferevent_enable(bev, EV_WRITE);
+				bufferevent_enable(bev, EV_READ);
 			}
 			else {
 				printf("worker_thread_process not find acceptor!\n");

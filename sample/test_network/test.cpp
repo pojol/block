@@ -18,7 +18,6 @@
 
 #include <network.h>
 #include <acceptor.h>
-#include <accept_handler.h>
 #include <acceptor_mgr.h>
 
 #include <iostream>

@@ -26,8 +26,6 @@ namespace gsf
 		evutil_socket_t notify_send_fd_;
 
 		CQ *connect_queue_;
-
-		int32_t index_;
 	};
 }
 

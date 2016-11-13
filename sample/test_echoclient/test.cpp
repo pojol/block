@@ -18,7 +18,6 @@
 
 #include <network.h>
 #include <acceptor.h>
-#include <accept_handler.h>
 
 #include <iostream>
 
@@ -42,7 +41,6 @@ int main()
 	sockaddr_in addr;
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(8888);
-	addr.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");
 
 	int ret;
 	ret = connect(socket_fd, (sockaddr*)&addr, sizeof(sockaddr));

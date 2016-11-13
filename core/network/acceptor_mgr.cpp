@@ -67,7 +67,7 @@ int gsf::AcceptorMgr::close(int acceptor_id)
 gsf::AcceptorPtr gsf::AcceptorMgr::find_acceptor(int accepor_id)
 {
 	auto itr = std::find_if(acceptor_vec_.begin(), acceptor_vec_.end(), [&](AcceptorVec::value_type it){
-		return (it->getid() == accepor_id);
+		return (it->get_id() == accepor_id);
 	});
 	if (itr != acceptor_vec_.end()){
 		return (*itr);

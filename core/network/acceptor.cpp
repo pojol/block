@@ -57,23 +57,6 @@ int gsf::Acceptor::close()
 	return 0;
 }
 
-static int32_t session_index = 0;
-
-gsf::Session * gsf::Acceptor::make_session(::bufferevent *bev, int fd)
-{
-    Session *session = new Session(session_index++, bev, fd);
-
-    auto itr = session_queue_.find(session->getid());
-    if (itr == session_queue_.end()){
-        session_queue_.insert(std::make_pair(session->getid(), session));
-    }
-    else {
-        return nullptr;
-    }
-
-	return session;
-}
-
 void gsf::Acceptor::handler_new_connect(int32_t session_id)
 {
     handler_->handler_new_connection(id_, session_id);
@@ -84,7 +67,7 @@ gsf::AcceptorConfig & gsf::Acceptor::get_config()
 	return config_;
 }
 
-uint32_t gsf::Acceptor::getid() const
+uint32_t gsf::Acceptor::get_id() const
 {
 	return id_;
 }

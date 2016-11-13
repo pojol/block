@@ -11,23 +11,37 @@ gsf::Session::Session(int32_t id, ::bufferevent *bev, int fd)
     , fd_(fd)
 {}
 
+int gsf::Session::open(SessionHandlerPtr session_handler, SessionCloseHandlerPtr close_handler)
+{
+	session_handler = session_handler;
+	close_handler_ = close_handler;
+
+	in_buf_ = evbuffer_new();
+	out_buf_ = evbuffer_new();
+
+	return 0;
+}
+
 void gsf::Session::read_cb(::bufferevent *bev, void *ctx)
 {
 	char buf[1024];
 	int len;
 
-	struct evbuffer *input = bufferevent_get_input(bev);
-	while ((len = evbuffer_remove(input, buf, sizeof(buf))) > 0)
+	Session *_session_ptr = static_cast<Session*>(ctx);
+	evbuffer *_in = _session_ptr->get_inbuf();
+
+	bufferevent_read_buffer(bev, _in);
+
+	while ((len = evbuffer_remove(_in, buf, sizeof(buf))) > 0)
 	{
 		//test 
-		char *read = new char[len];
+		uint8_t *read = new uint8_t[len];
 		memcpy(read, buf, len);
-		std::cout << read << std::endl;
+
+		_session_ptr->get_session_handler()->handle_data(read);
+
 		delete []read;
 	}
-
-	Session *session = static_cast<Session*>(ctx);
-	session->send(nullptr, 0);	//test
 }
 
 void gsf::Session::err_cb(::bufferevent *bev, short what, void *ctx)
@@ -50,14 +64,12 @@ void gsf::Session::err_cb(::bufferevent *bev, short what, void *ctx)
 	bufferevent_free(bev);
 }
 
-int gsf::Session::send(const char *data, int len)
+int gsf::Session::send(const uint8_t *data, int len)
 {
 	//test
-	struct evbuffer *output = evbuffer_new();
 
-	evbuffer_add(output, "hello", 5);
-
-	evbuffer_write(output, fd_);
+	evbuffer_add(out_buf_, data, len);
+	evbuffer_write(out_buf_, fd_);
 
 	return 0;
 }
