@@ -2,6 +2,8 @@
 #include "connector.h"
 #include "err.h"
 
+#include <algorithm>
+
 gsf::ConnectorMgr* gsf::ConnectorMgr::instance_ = nullptr;
 
 gsf::ConnectorMgr::ConnectorMgr()
