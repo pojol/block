@@ -5,6 +5,7 @@
 #include "acceptor_mgr.h"
 #include "session_mgr.h"
 #include "acceptor.h"
+#include "connector.h"
 #include "session.h"
 #include "err.h"
 
@@ -13,6 +14,7 @@
     #include <windows.h>
 #else
     #include <netinet/in.h>
+	#include <arpa/inet.h>
 	#include <sys/types.h>
 	#include <sys/socket.h>
 	#include <errno.h>
@@ -158,6 +160,32 @@ evconnlistener * gsf::Network::accept_bind(Acceptor *acceptor_ptr, const std::st
 	return listener;
 }
 
+int gsf::Network::connect_bind(Connector *connector_ptr, const std::string &ip, int port)
+{
+	::bufferevent *bev = bufferevent_socket_new(main_thread_ptr_->event_base_ptr_, -1, BEV_OPT_CLOSE_ON_FREE);
+	if (!bev){
+		return LIBEVENT_BUFFER_EVENT_CONSTRUCT_ERR;
+	}
+
+	struct sockaddr_in sin;
+	memset(&sin, 0, sizeof(sin));
+	sin.sin_family = AF_INET;
+	sin.sin_port = htons(port);
+	sin.sin_addr.s_addr = inet_addr(ip.c_str());
+
+	int fd = bufferevent_socket_connect(bev, (sockaddr*)&sin, sizeof(sockaddr_in));
+	if (fd < 0){
+		connector_ptr->handle_connect_failed(fd, ip, port);
+		bufferevent_free(bev);
+	}
+
+	auto _session_ptr = SessionMgr::instance().make_session(bev, fd);
+	bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, _session_ptr.get());
+	bufferevent_enable(bev, EV_READ);
+
+	return 0;
+}
+
 void gsf::Network::worker_thread_process(evutil_socket_t fd, short event, void * arg)
 {
 	//! just use point not copy
@@ -189,7 +217,6 @@ void gsf::Network::worker_thread_process(evutil_socket_t fd, short event, void *
 				_acceptor_ptr->handler_new_connect(_session_ptr->get_id());
 
 				bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, _session_ptr.get());
-				bufferevent_enable(bev, EV_WRITE);
 				bufferevent_enable(bev, EV_READ);
 			}
 			else {

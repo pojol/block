@@ -34,6 +34,7 @@ namespace gsf
 	class Network
 	{
 		friend class Acceptor;
+		friend class Connector;
 	public:
 		~Network();
 
@@ -48,7 +49,7 @@ namespace gsf
 
 		::evconnlistener * accept_bind(Acceptor *acceptor_ptr, const std::string &ip, int port);
 
-		::evconnlistener * connect_bind(Connector *connector_ptr, const std::string &ip, int port);
+		int connect_bind(Connector *connector_ptr, const std::string &ip, int port);
 
 	private:
 		Network();

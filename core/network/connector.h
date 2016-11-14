@@ -20,13 +20,19 @@ namespace gsf
 		virtual ~ConnectHandler(){}
 
 		virtual void handler_new_connection(int connector_id, int session_id) = 0;
+
+		virtual void handle_connect_failed(int connector_id, int err_code, const std::string &ip, const int port) = 0;
 	};
 
 	class Connector
 	{
 	public:
-		Connector(ConnectorConfig &config, ConnectHandler *handler);
+		Connector(uint32_t id, const ConnectorConfig &config);
 		~Connector();
+
+		uint32_t get_id() const { return id_; }
+
+		void handle_connect_failed(int err_code, const std::string &ip, const int port);
 
 	private:
 		ConnectorConfig config_;
@@ -34,7 +40,7 @@ namespace gsf
 
 		Session *session_;
 
-		int32_t id_;
+		uint32_t id_;
 	};
 }
 
