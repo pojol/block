@@ -24,13 +24,9 @@ namespace gsf
 	struct NetworkConfig
 	{
 		int32_t worker_thread_count_;
-		int32_t port_;
 	};
 
 
-	// event bind
-	// network init uninit
-	// loop
 	class Network
 	{
 		friend class Acceptor;
@@ -57,7 +53,7 @@ namespace gsf
 
 		int32_t init_work_thread();
 
-		static void worker_thread_process(evutil_socket_t fd, short event, void * arg);
+		static void worker_thread_process(evutil_socket_t fd, short event, void *arg);
 
 		static void worker_thread_run(NetworkThreadPtr thread_ptr);
 
@@ -66,13 +62,13 @@ namespace gsf
 			, sockaddr *sa
 			, int socklen
 			, void *arg);
+
+		static void send_wait_time_cb(evutil_socket_t fd, short event, void *arg);
 	private:
 
 		NetworkThreadPtr main_thread_ptr_;
 	
 		std::vector<NetworkThreadPtr> worker_thread_vec_;
-
-		AcceptorPtr acceptor_ptr_;
 
 		NetworkConfig config_;
 	};

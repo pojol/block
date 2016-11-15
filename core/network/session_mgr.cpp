@@ -43,12 +43,20 @@ int gsf::SessionMgr::close(int session_id)
 	return 0;
 }
 
-int gsf::SessionMgr::send(int session_id, const uint8_t *data, uint32_t len)
+int gsf::SessionMgr::write(int session_id, const uint8_t *data, uint32_t len)
 {
 	auto _session_itr = session_queue_.find(session_id);
 	if (_session_itr != session_queue_.end()){
-		return _session_itr->second->send(data, len);
+		_session_itr->second->write(data, len);
 	}
 
 	return 0;
+}
+
+void gsf::SessionMgr::send_buf(int session_id)
+{
+	auto _session_itr = session_queue_.find(session_id);
+	if (_session_itr != session_queue_.end()){
+		_session_itr->second->send();
+	}
 }

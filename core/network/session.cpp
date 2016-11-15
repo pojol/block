@@ -46,7 +46,7 @@ void gsf::Session::read_cb(::bufferevent *bev, void *ctx)
 				_session_ptr->get_session_handler()->handle_data(read);
 			}
 			else {
-				printf("not bind session_handler!\n");
+				printf("not bind session_handler! %d\n", _session_ptr->get_id());
 			}
 
 			delete[]read;
@@ -77,12 +77,12 @@ void gsf::Session::err_cb(::bufferevent *bev, short what, void *ctx)
 	bufferevent_free(bev);
 }
 
-int gsf::Session::send(const uint8_t *data, int len)
+void gsf::Session::write(const uint8_t *data, int len)
 {
-	//test
-
 	evbuffer_add(out_buf_, data, len);
-	evbuffer_write(out_buf_, fd_);
+}
 
-	return 0;
+void gsf::Session::send()
+{
+	evbuffer_write(out_buf_, fd_);
 }

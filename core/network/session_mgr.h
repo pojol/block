@@ -28,10 +28,12 @@ namespace gsf
 
 		int close(int session_id);
 
-		int send(int session_id, const uint8_t *data, uint32_t len);
+		int write(int session_id, const uint8_t *data, uint32_t len);
 
 	protected:
 		SessionPtr make_session(::bufferevent *bev, int fd);
+
+		void send_buf(int session_id);
 
 	private:
 		static SessionMgr *instance_;

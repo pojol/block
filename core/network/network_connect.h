@@ -23,6 +23,7 @@ namespace gsf
 
 		uint32_t		acceptor_id;
 		uint32_t		connector_id;
+		uint32_t 		session_id;
 
 		CQ_ITEM          *next;
 	};

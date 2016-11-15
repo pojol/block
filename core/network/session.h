@@ -32,6 +32,7 @@ namespace gsf
 
 	class Session
 	{
+		friend class SessionMgr;
     public:
         Session(int32_t id, ::bufferevent *bev, int fd);
 
@@ -42,15 +43,17 @@ namespace gsf
 
 		static void err_cb(::bufferevent *bev, short what, void *ctx);
 
-		//! 这个地方不能即时发送，延时发送可以减少发送次数。
-		int send(const uint8_t *data, int len);
-		
+		void write(const uint8_t *data, int len);
+
         int32_t get_id() const { return id_; }
 
 		::evbuffer * get_outbuf() { return out_buf_; }
 		::evbuffer * get_inbuf() { return in_buf_; }
 
 		SessionHandler * get_session_handler() { return session_handler_; }
+
+	protected:
+		void send();
 
     private:
         uint32_t id_;

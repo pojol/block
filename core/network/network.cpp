@@ -105,6 +105,13 @@ int32_t gsf::Network::init_work_thread()
 			event_add(signal, NULL);
 		}
 
+		struct ::event * time_event = nullptr;
+		time_event = event_new(thread_ptr->event_base_ptr_, -1, EV_PERSIST, send_wait_time_cb, thread_ptr.get());
+
+		struct timeval tv{0,20*1000};
+		evtimer_add(time_event, &tv);
+		//evtimer_del(time_event);
+
 		worker_thread_vec_.push_back(thread_ptr);
 	}
 
@@ -136,7 +143,7 @@ void gsf::Network::accept_conn_new(int acceptor_id, evutil_socket_t fd)
 	char buf[1];
 	buf[0] = 'c';
 	if (send(thread_ptr->notify_send_fd_, buf, 1, 0) < 0){
-		printf("pipe send err!\n"); //evutil_socket_geterror
+		printf("pipe send err! %s\n", evutil_socket_geterror()); //
 	}
 }
 
@@ -159,6 +166,7 @@ evconnlistener * gsf::Network::accept_bind(Acceptor *acceptor_ptr, const std::st
 
 	return listener;
 }
+
 
 int gsf::Network::connect_bind(Connector *connector_ptr, const std::string &ip, int port)
 {
@@ -183,8 +191,12 @@ int gsf::Network::connect_bind(Connector *connector_ptr, const std::string &ip, 
 	bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, _session_ptr.get());
 	bufferevent_enable(bev, EV_READ);
 
+	//! connector 的消息发送绑定在主循环上，和acceptor分开处理。
+	// todo
+
 	return 0;
 }
+
 
 void gsf::Network::worker_thread_process(evutil_socket_t fd, short event, void * arg)
 {
@@ -213,6 +225,7 @@ void gsf::Network::worker_thread_process(evutil_socket_t fd, short event, void *
 			auto _acceptor_ptr = AcceptorMgr::instance().find_acceptor(item->acceptor_id);
 			if (_acceptor_ptr){
                 auto _session_ptr = SessionMgr::instance().make_session(bev, item->sfd);
+				item->session_id = _session_ptr->get_id();
 
 				//send connection event
 				_acceptor_ptr->handler_new_connect(_session_ptr->get_id());
@@ -229,6 +242,7 @@ void gsf::Network::worker_thread_process(evutil_socket_t fd, short event, void *
 	}
 }
 
+
 void gsf::Network::worker_thread_run(NetworkThreadPtr thread_ptr)
 {
 	event_base_dispatch(thread_ptr->event_base_ptr_);
@@ -240,4 +254,15 @@ void gsf::Network::accept_listen_cb(::evconnlistener *listener, evutil_socket_t 
 	Acceptor *_acceptor_ptr = static_cast<Acceptor*>(arg);
 
 	Network::instance().accept_conn_new(_acceptor_ptr->get_id(), fd);
+}
+
+
+void gsf::Network::send_wait_time_cb(evutil_socket_t fd, short event, void *arg)
+{
+	auto _thread_ptr = static_cast<NetworkThread*>(arg);
+	CQ_ITEM *item = _thread_ptr->connect_queue_->head;
+	while (item->next != _thread_ptr->connect_queue_->tail)
+	{
+		SessionMgr::instance().send_buf(item->session_id);
+	}
 }
