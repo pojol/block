@@ -24,7 +24,6 @@ namespace gsf
 	public:
 		virtual ~AcceptHandler(){}
 
-        //! 有新的连接进来
 		virtual void handler_new_connection(int acceptor_id, int session_id) = 0;
 	};
 
