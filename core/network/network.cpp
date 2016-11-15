@@ -24,9 +24,9 @@
 #include <event2/bufferevent.h>
 
 #include <thread>
+#include <mutex>
 
-
-
+static std::mutex pipe_lock;
 gsf::Network* gsf::Network::instance_ = NULL;
 
 gsf::Network::Network()
@@ -203,6 +203,7 @@ void gsf::Network::worker_thread_process(evutil_socket_t fd, short event, void *
 	case 'c':
 		CQ_ITEM *item = NetworkConnect::instance().cq_pop(threadPtr->connect_queue_);
 		if (item){
+			pipe_lock.lock();
 			::bufferevent *bev;
 			bev = bufferevent_socket_new(threadPtr->event_base_ptr_, item->sfd, BEV_OPT_CLOSE_ON_FREE);
 			if (!bev){
@@ -222,6 +223,7 @@ void gsf::Network::worker_thread_process(evutil_socket_t fd, short event, void *
 			else {
 				printf("worker_thread_process not find acceptor!\n");
 			}
+			pipe_lock.unlock();
 		}
 		break;
 	}
