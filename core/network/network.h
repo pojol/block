@@ -23,7 +23,15 @@ namespace gsf
 
 	struct NetworkConfig
 	{
+		NetworkConfig()
+			: worker_thread_count_(1)
+			, send_wait_time_(20)
+			, read_wait_time_(20)
+		{}
+
 		int32_t worker_thread_count_;
+		int32_t send_wait_time_;
+		int32_t read_wait_time_;
 	};
 
 

@@ -110,7 +110,7 @@ int32_t gsf::Network::init_work_thread()
 		struct ::event * time_event = nullptr;
 		time_event = event_new(thread_ptr->event_base_ptr_, -1, EV_PERSIST, send_wait_time_cb, thread_ptr.get());
 
-		struct timeval tv = {0 , 40*1000};
+		struct timeval tv = {0 , config_.send_wait_time_*1000};
 		evtimer_add(time_event, &tv);
 		//evtimer_del(time_event);
 

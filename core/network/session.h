@@ -40,7 +40,6 @@ namespace gsf
 
 		int open(SessionHandler *session_handler, SessionCloseHandler *close_handler);
 
-		//! 这个地方需要把消息写入到同一个线程的FIFO队列里面，由逻辑循环读取
         static void read_cb(::bufferevent *bev, void *ctx);
 
 		static void err_cb(::bufferevent *bev, short what, void *ctx);
