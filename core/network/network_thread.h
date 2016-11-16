@@ -4,6 +4,8 @@
 
 #include <event2/event.h>
 
+#include <vector>
+#include <unordered_map>
 
 #include <stdint.h>
 #include <memory>
@@ -14,6 +16,22 @@
 
 namespace gsf
 {
+	class ThreadMessageBuffer
+	{
+		typedef std::unordered_map<int, ::evbuffer*> MessageBufferMap;
+		typedef std::vector<std::pair<::evbuffer*, int>> ActiveBufferVec;
+	public:
+		int add_evbuffer(int session_id);
+		int rmv_evbuffer(int session_id);
+		
+		void write_evbuffer(int session_id, const uint8_t *data, int len);
+		void send_evbuffer();
+		
+	private:
+		MessageBufferMap message_buffer_map_;
+		ActiveBufferVec active_buffer_vec_;
+	}
+	
 	struct NetworkThread
 	{
 		std::thread *th;
@@ -26,6 +44,8 @@ namespace gsf
 		evutil_socket_t notify_send_fd_;
 
 		CQ *connect_queue_;
+		
+		ThreadMessageBuffer *buffer_;
 	};
 }
 
