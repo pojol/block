@@ -1,19 +1,27 @@
 #include "session.h"
+#include "network_thread.h"
 
 #include <event2/buffer.h>
 
 
 #include <iostream>
 
-gsf::Session::Session(int32_t id, ::bufferevent *bev, int fd)
+gsf::Session::Session(int32_t id, ::bufferevent *bev, int fd, OBuffer *out_buffer)
     : id_(id)
     , bev_(bev)
     , fd_(fd)
-	, out_buf_(nullptr)
 	, in_buf_(nullptr)
 	, session_handler_(nullptr)
 	, close_handler_(nullptr)
-{}
+{
+	out_buffer_ = out_buffer;
+	out_buffer->add_evbuffer(fd);
+}
+
+gsf::Session::~Session()
+{
+	evbuffer_free(in_buf_);
+}
 
 int gsf::Session::open(SessionHandler *session_handler, SessionCloseHandler *close_handler)
 {
@@ -21,7 +29,6 @@ int gsf::Session::open(SessionHandler *session_handler, SessionCloseHandler *clo
 	close_handler_ = close_handler;
 
 	in_buf_ = evbuffer_new();
-	out_buf_ = evbuffer_new();
 
 	return 0;
 }
@@ -77,12 +84,7 @@ void gsf::Session::err_cb(::bufferevent *bev, short what, void *ctx)
 	bufferevent_free(bev);
 }
 
-void gsf::Session::write(const uint8_t *data, int len)
+void gsf::Session::write(const char *data, int len)
 {
-	evbuffer_add(out_buf_, data, len);
-}
-
-void gsf::Session::send()
-{
-	evbuffer_write(out_buf_, fd_);
+	out_buffer_->write_evbuffer(fd_, data, len);
 }

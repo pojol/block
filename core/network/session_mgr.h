@@ -14,6 +14,8 @@ namespace gsf
 	class SessionHandler;
 	class Session;
 
+	class OBuffer;
+
 	typedef std::shared_ptr<Session> SessionPtr;
 
 	class SessionMgr
@@ -28,12 +30,10 @@ namespace gsf
 
 		int close(int session_id);
 
-		int write(int session_id, const uint8_t *data, uint32_t len);
+		int write(int session_id, const char *data, uint32_t len);
 
 	protected:
-		SessionPtr make_session(::bufferevent *bev, int fd);
-
-		void send_buf(int session_id);
+		SessionPtr make_session(::bufferevent *bev, int fd, OBuffer *out_buffer);
 
 	private:
 		static SessionMgr *instance_;

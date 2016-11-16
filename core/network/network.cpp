@@ -84,6 +84,8 @@ int32_t gsf::Network::init_work_thread()
 		thread_ptr->connect_queue_ = new CQ();
 		NetworkConnect::instance().cq_init(thread_ptr->connect_queue_);
 
+		thread_ptr->out_buffer_ = new OBuffer();
+
 		evutil_socket_t pipe[2];
 		if (evutil_socketpair(AF_INET, SOCK_STREAM, 0, pipe) < 0){
 			printf("evutil_socketpair err!\n");
@@ -108,7 +110,7 @@ int32_t gsf::Network::init_work_thread()
 		struct ::event * time_event = nullptr;
 		time_event = event_new(thread_ptr->event_base_ptr_, -1, EV_PERSIST, send_wait_time_cb, thread_ptr.get());
 
-		struct timeval tv{0,20*1000};
+		struct timeval tv = {0 , 40*1000};
 		evtimer_add(time_event, &tv);
 		//evtimer_del(time_event);
 
@@ -143,7 +145,7 @@ void gsf::Network::accept_conn_new(int acceptor_id, evutil_socket_t fd)
 	char buf[1];
 	buf[0] = 'c';
 	if (send(thread_ptr->notify_send_fd_, buf, 1, 0) < 0){
-		printf("pipe send err! %s\n", evutil_socket_geterror()); //
+		printf("pipe send err! %s\n", evutil_socket_geterror(thread_ptr->notify_send_fd_)); //
 	}
 }
 
@@ -187,7 +189,7 @@ int gsf::Network::connect_bind(Connector *connector_ptr, const std::string &ip, 
 		bufferevent_free(bev);
 	}
 
-	auto _session_ptr = SessionMgr::instance().make_session(bev, fd);
+	auto _session_ptr = SessionMgr::instance().make_session(bev, fd, nullptr);
 	bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, _session_ptr.get());
 	bufferevent_enable(bev, EV_READ);
 
@@ -224,7 +226,7 @@ void gsf::Network::worker_thread_process(evutil_socket_t fd, short event, void *
 
 			auto _acceptor_ptr = AcceptorMgr::instance().find_acceptor(item->acceptor_id);
 			if (_acceptor_ptr){
-                auto _session_ptr = SessionMgr::instance().make_session(bev, item->sfd);
+				auto _session_ptr = SessionMgr::instance().make_session(bev, item->sfd, threadPtr->out_buffer_);
 				item->session_id = _session_ptr->get_id();
 
 				//send connection event
@@ -260,9 +262,5 @@ void gsf::Network::accept_listen_cb(::evconnlistener *listener, evutil_socket_t 
 void gsf::Network::send_wait_time_cb(evutil_socket_t fd, short event, void *arg)
 {
 	auto _thread_ptr = static_cast<NetworkThread*>(arg);
-	CQ_ITEM *item = _thread_ptr->connect_queue_->head;
-	while (item->next != _thread_ptr->connect_queue_->tail)
-	{
-		SessionMgr::instance().send_buf(item->session_id);
-	}
+	_thread_ptr->out_buffer_->send_evbuffer();
 }

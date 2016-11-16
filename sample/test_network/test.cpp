@@ -56,6 +56,8 @@ public:
 		std::cout << "new connection " << acceptor_id << " " << session_id << std::endl;
 
 		gsf::SessionMgr::instance().open(session_id, nullptr, this);
+
+		//gsf::SessionMgr::instance().write(session_id, "c", 1);
         //gsf::SessionMgr::instance().open_session(session_id, this, &gsf::MessageBinder<T>::instance());
 		//or
 		//gsf::SessionMgr::instance().open_session(session_id, make PlayerSession, &gsf::MessageBinder<T>::instance());

@@ -16,24 +16,27 @@
 
 namespace gsf
 {
-	class ThreadMessageBuffer
+	class OBuffer
 	{
-		typedef std::unordered_map<int, ::evbuffer*> MessageBufferMap;
+		typedef std::unordered_map<int, ::evbuffer*> OBufferMap;
 		typedef std::vector<std::pair<::evbuffer*, int>> ActiveBufferVec;
 	public:
 		int add_evbuffer(int fd);
 		int rmv_evbuffer(int fd);
 		
-		void write_evbuffer(int fd, const uint8_t *data, int len);
+		void write_evbuffer(int fd, const char *data, int len);
 		void send_evbuffer();
 		
 	private:
-		MessageBufferMap message_buffer_map_;
+		OBufferMap buffer_map_;
 		ActiveBufferVec active_buffer_vec_;
-	}
+	};
 	
 	struct NetworkThread
 	{
+		NetworkThread();
+		~NetworkThread();
+
 		std::thread *th;
 		
 		event_base *event_base_ptr_;
@@ -45,7 +48,7 @@ namespace gsf
 
 		CQ *connect_queue_;
 		
-		ThreadMessageBuffer *buffer_;
+		OBuffer *out_buffer_;
 	};
 }
 
