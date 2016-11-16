@@ -21,10 +21,10 @@ namespace gsf
 		typedef std::unordered_map<int, ::evbuffer*> MessageBufferMap;
 		typedef std::vector<std::pair<::evbuffer*, int>> ActiveBufferVec;
 	public:
-		int add_evbuffer(int session_id);
-		int rmv_evbuffer(int session_id);
+		int add_evbuffer(int fd);
+		int rmv_evbuffer(int fd);
 		
-		void write_evbuffer(int session_id, const uint8_t *data, int len);
+		void write_evbuffer(int fd, const uint8_t *data, int len);
 		void send_evbuffer();
 		
 	private:
