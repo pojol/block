@@ -72,5 +72,6 @@ void gsf::OBuffer::send_evbuffer()
 		{
 			evbuffer_write(buf.first, buf.second);
 		}
+		active_buffer_vec_.clear();
 	}
 }
