@@ -15,6 +15,7 @@ namespace gsf
 	class Session;
 
 	class OBuffer;
+	class IBuffer;
 
 	typedef std::shared_ptr<Session> SessionPtr;
 
@@ -32,8 +33,10 @@ namespace gsf
 
 		int write(int session_id, const char *data, uint32_t len);
 
+		SessionPtr find(int session_id);
+
 	protected:
-		SessionPtr make_session(::bufferevent *bev, int fd, OBuffer *out_buffer);
+		SessionPtr make_session(::bufferevent *bev, int fd, OBuffer *out_buffer, IBuffer *in_buffer);
 
 	private:
 		static SessionMgr *instance_;

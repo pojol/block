@@ -16,11 +16,11 @@ gsf::SessionMgr& gsf::SessionMgr::instance()
 
 static uint32_t session_index = 0;
 
-gsf::SessionPtr gsf::SessionMgr::make_session(::bufferevent *bev, int fd, OBuffer *out_buffer)
+gsf::SessionPtr gsf::SessionMgr::make_session(::bufferevent *bev, int fd, OBuffer *out_buffer, IBuffer *in_buffer)
 {
 	session_index++;
 
-	auto _session_ptr = std::make_shared<Session>(session_index, bev, fd, out_buffer);
+	auto _session_ptr = std::make_shared<Session>(session_index, bev, fd, out_buffer, in_buffer);
 	session_queue_.insert(std::make_pair(_session_ptr->get_id(), _session_ptr));
 
 	return _session_ptr;
@@ -51,4 +51,14 @@ int gsf::SessionMgr::write(int session_id, const char *data, uint32_t len)
 	}
 
 	return 0;
+}
+
+gsf::SessionPtr gsf::SessionMgr::find(int session_id)
+{
+	auto _session_itr = session_queue_.find(session_id);
+	if (_session_itr != session_queue_.end()){
+		return _session_itr->second;
+	}
+
+	return nullptr;
 }

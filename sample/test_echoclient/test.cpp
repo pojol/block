@@ -29,7 +29,7 @@ int main()
 	WORD wVersionRequested;
 	WSADATA wsaData;
 
-	for (int i = 0; i < 1; ++i)
+	for (int i = 0; i < 50000; ++i)
 	{
 		wVersionRequested = MAKEWORD(1, 1);
 		int result = WSAStartup(wVersionRequested, &wsaData);
@@ -52,9 +52,9 @@ int main()
 
 		ret = send(socket_fd, "1", 1, 0);
 
-		char buf[1024];
-		recv(socket_fd, buf, 1024, 0);
-		std::cout << buf << std::endl;
+		//char buf[1024];
+		//recv(socket_fd, buf, 1024, 0);
+		//std::cout << buf << std::endl;
 	}
 
 

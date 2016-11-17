@@ -9,6 +9,7 @@
 namespace gsf
 {
 	class OBuffer;
+	class IBuffer;
 
 	class SessionCloseHandler
 	{
@@ -28,14 +29,14 @@ namespace gsf
 	public:
 		virtual ~SessionHandler();
 
-		virtual void handle_data(const uint8_t *data) = 0;
+		virtual void handle_data(const char *data) = 0;
 		
 	};
 
 	class Session
 	{
     public:
-        Session(int32_t id, ::bufferevent *bev, int fd, OBuffer *out_buffer);
+        Session(int32_t id, ::bufferevent *bev, int fd, OBuffer *out_buffer, IBuffer *in_buffer);
 		~Session();
 
 		int open(SessionHandler *session_handler, SessionCloseHandler *close_handler);
@@ -47,8 +48,9 @@ namespace gsf
 		void write(const char *data, int len);
 
         int32_t get_id() const { return id_; }
+		int get_fd() const { return fd_; }
 
-		::evbuffer * get_inbuf() { return in_buf_; }
+		IBuffer * get_inbuf() { return in_buffer_; }
 
 		SessionHandler * get_session_handler() { return session_handler_; }
 
@@ -61,7 +63,7 @@ namespace gsf
 		::bufferevent *bev_;
 
 		OBuffer *out_buffer_;
-		::evbuffer *in_buf_;
+		IBuffer *in_buffer_;
 
 		SessionHandler *session_handler_;
 		SessionCloseHandler *close_handler_;

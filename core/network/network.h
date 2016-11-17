@@ -48,6 +48,9 @@ namespace gsf
 
 		int start();
 
+		//temp
+		std::vector<NetworkThreadPtr> & get_worker_thread() { return worker_thread_vec_; }
+
 	protected:
 		void accept_conn_new(int acceptor_id, evutil_socket_t fd);
 
@@ -72,6 +75,7 @@ namespace gsf
 			, void *arg);
 
 		static void send_wait_time_cb(evutil_socket_t fd, short event, void *arg);
+		static void read_wait_time_cb(evutil_socket_t fd, short event, void *arg);
 	private:
 
 		NetworkThreadPtr main_thread_ptr_;
