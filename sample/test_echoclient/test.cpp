@@ -28,15 +28,15 @@ int main()
 #ifdef WIN32
 	WORD wVersionRequested;
 	WSADATA wsaData;
+	wVersionRequested = MAKEWORD(1, 1);
+	int result = WSAStartup(wVersionRequested, &wsaData);
+	if (result != 0){
+		exit(1);
+	}
+#endif // WIN32
 
 	for (int i = 0; i < 50000; ++i)
 	{
-		wVersionRequested = MAKEWORD(1, 1);
-		int result = WSAStartup(wVersionRequested, &wsaData);
-		if (result != 0){
-			exit(1);
-		}
-#endif // WIN32
 
 		int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
 

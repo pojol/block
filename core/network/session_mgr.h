@@ -36,7 +36,9 @@ namespace gsf
 		SessionPtr find(int session_id);
 
 	protected:
-		SessionPtr make_session(::bufferevent *bev, int fd, OBuffer *out_buffer, IBuffer *in_buffer);
+		SessionPtr make_session(::bufferevent *bev, int fd);
+
+        void write_impl();
 
 	private:
 		static SessionMgr *instance_;

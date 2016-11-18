@@ -56,8 +56,6 @@ int gsf::Network::init(const NetworkConfig &config)
 
 	main_thread_ptr_->event_base_ptr_ = event_base_new();
 
-	main_thread_ptr_->in_buffer_ = new IBuffer();
-
 	struct ::event * time_event = nullptr;
 	time_event = event_new(main_thread_ptr_->event_base_ptr_, -1, EV_PERSIST, read_wait_time_cb, main_thread_ptr_.get());
 
@@ -92,9 +90,6 @@ int32_t gsf::Network::init_work_thread()
 		
 		thread_ptr->connect_queue_ = new CQ();
 		NetworkConnect::instance().cq_init(thread_ptr->connect_queue_);
-
-		thread_ptr->out_buffer_ = new OBuffer();
-		thread_ptr->in_buffer_ = new IBuffer();
 
 		evutil_socket_t pipe[2];
 		if (evutil_socketpair(AF_INET, SOCK_STREAM, 0, pipe) < 0){
@@ -155,7 +150,7 @@ void gsf::Network::accept_conn_new(int acceptor_id, evutil_socket_t fd)
 	char buf[1];
 	buf[0] = 'c';
 	if (send(thread_ptr->notify_send_fd_, buf, 1, 0) < 0){
-		printf("pipe send err! %s\n", evutil_socket_geterror(thread_ptr->notify_send_fd_)); //
+		printf("pipe send err! %d\n", evutil_socket_geterror(thread_ptr->notify_send_fd_)); //
 	}
 }
 
@@ -199,7 +194,7 @@ int gsf::Network::connect_bind(Connector *connector_ptr, const std::string &ip, 
 		bufferevent_free(bev);
 	}
 
-	auto _session_ptr = SessionMgr::instance().make_session(bev, fd, nullptr, nullptr);
+	auto _session_ptr = SessionMgr::instance().make_session(bev, fd);
 	bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, _session_ptr.get());
 	bufferevent_enable(bev, EV_READ);
 
@@ -236,7 +231,7 @@ void gsf::Network::worker_thread_process(evutil_socket_t fd, short event, void *
 
 			auto _acceptor_ptr = AcceptorMgr::instance().find_acceptor(item->acceptor_id);
 			if (_acceptor_ptr){
-				auto _session_ptr = SessionMgr::instance().make_session(bev, item->sfd, threadPtr->out_buffer_, threadPtr->in_buffer_);
+				auto _session_ptr = SessionMgr::instance().make_session(bev, item->sfd);
 				item->session_id = _session_ptr->get_id();
 
 				//send connection event
@@ -271,23 +266,10 @@ void gsf::Network::accept_listen_cb(::evconnlistener *listener, evutil_socket_t 
 
 void gsf::Network::send_wait_time_cb(evutil_socket_t fd, short event, void *arg)
 {
-	auto _thread_ptr = static_cast<NetworkThread*>(arg);
-	_thread_ptr->out_buffer_->send_evbuffer();
+    SessionMgr::instance().write_impl();
 }
 
 void gsf::Network::read_wait_time_cb(evutil_socket_t fd, short event, void *arg)
 {
-	auto _thread_ptr = static_cast<NetworkThread*>(arg);
 
-	//swap to main_thread
-	auto _threads = Network::instance().get_worker_thread();
-	for (auto &th : _threads)
-	{
-		th->in_buffer_->lock.lock();
-		_thread_ptr->in_buffer_->push_evbuffer(th->in_buffer_->active_buffer_vec_);
-		th->in_buffer_->lock.unlock();
-	}
-
-	//dispatch
-	_thread_ptr->in_buffer_->pop_evbuffer();
 }

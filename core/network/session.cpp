@@ -6,18 +6,13 @@
 
 #include <iostream>
 
-gsf::Session::Session(int32_t id, ::bufferevent *bev, int fd, OBuffer *out_buffer, IBuffer *in_buffer)
+gsf::Session::Session(int32_t id, ::bufferevent *bev, int fd)
     : id_(id)
     , bev_(bev)
     , fd_(fd)
 	, session_handler_(nullptr)
 	, close_handler_(nullptr)
 {
-	out_buffer_ = out_buffer;
-	out_buffer->add_evbuffer(fd);
-
-	in_buffer_ = in_buffer;
-	in_buffer_->add_evbuffer(id);
 }
 
 gsf::Session::~Session()
@@ -27,8 +22,11 @@ gsf::Session::~Session()
 
 int gsf::Session::open(SessionHandler *session_handler, SessionCloseHandler *close_handler)
 {
-	session_handler = session_handler;
+	session_handler_ = session_handler;
 	close_handler_ = close_handler;
+
+    in_buf_ = evbuffer_new();
+    out_buf_ = evbuffer_new();
 
 	return 0;
 }
@@ -36,9 +34,10 @@ int gsf::Session::open(SessionHandler *session_handler, SessionCloseHandler *clo
 void gsf::Session::read_cb(::bufferevent *bev, void *ctx)
 {
 	Session *_session_ptr = static_cast<Session*>(ctx);
-	IBuffer *_in = _session_ptr->get_inbuf();
 
-	bufferevent_read_buffer(bev, _in->find_evbuffer(_session_ptr->get_id()));
+	bufferevent_read_buffer(bev, _session_ptr->get_inbuf());
+
+
 }
 
 void gsf::Session::err_cb(::bufferevent *bev, short what, void *ctx)
@@ -63,5 +62,10 @@ void gsf::Session::err_cb(::bufferevent *bev, short what, void *ctx)
 
 void gsf::Session::write(const char *data, int len)
 {
-	out_buffer_->write_evbuffer(fd_, data, len);
+	evbuffer_add(out_buf_, data, len);
+}
+
+void gsf::Session::write_impl()
+{
+    evbuffer_write(out_buf_, fd_);
 }

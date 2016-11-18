@@ -16,11 +16,11 @@ gsf::SessionMgr& gsf::SessionMgr::instance()
 
 static uint32_t session_index = 0;
 
-gsf::SessionPtr gsf::SessionMgr::make_session(::bufferevent *bev, int fd, OBuffer *out_buffer, IBuffer *in_buffer)
+gsf::SessionPtr gsf::SessionMgr::make_session(::bufferevent *bev, int fd)
 {
 	session_index++;
 
-	auto _session_ptr = std::make_shared<Session>(session_index, bev, fd, out_buffer, in_buffer);
+	auto _session_ptr = std::make_shared<Session>(session_index, bev, fd);
 	session_queue_.insert(std::make_pair(_session_ptr->get_id(), _session_ptr));
 
 	return _session_ptr;
@@ -51,6 +51,15 @@ int gsf::SessionMgr::write(int session_id, const char *data, uint32_t len)
 	}
 
 	return 0;
+}
+
+void gsf::SessionMgr::write_impl()
+{
+	//! 这个地方待优化 active_list 只有会话层需要发送数据的时候才被调用，不是遍历hash_map去调用。
+	for (auto itr : session_queue_)
+	{
+		itr.second->write_impl();
+	}
 }
 
 gsf::SessionPtr gsf::SessionMgr::find(int session_id)

@@ -36,7 +36,7 @@ namespace gsf
 	class Session
 	{
     public:
-        Session(int32_t id, ::bufferevent *bev, int fd, OBuffer *out_buffer, IBuffer *in_buffer);
+        Session(int32_t id, ::bufferevent *bev, int fd);
 		~Session();
 
 		int open(SessionHandler *session_handler, SessionCloseHandler *close_handler);
@@ -48,11 +48,12 @@ namespace gsf
 		void write(const char *data, int len);
 
         int32_t get_id() const { return id_; }
-		int get_fd() const { return fd_; }
 
-		IBuffer * get_inbuf() { return in_buffer_; }
+		::evbuffer * get_inbuf() { return in_buf_; }
 
 		SessionHandler * get_session_handler() { return session_handler_; }
+
+        void write_impl();
 
 	protected:
 
@@ -62,8 +63,8 @@ namespace gsf
 		int fd_;
 		::bufferevent *bev_;
 
-		OBuffer *out_buffer_;
-		IBuffer *in_buffer_;
+        ::evbuffer *in_buf_;
+        ::evbuffer *out_buf_;
 
 		SessionHandler *session_handler_;
 		SessionCloseHandler *close_handler_;
