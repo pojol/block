@@ -65,6 +65,7 @@ namespace gsf
 
         ::evbuffer *in_buf_;
         ::evbuffer *out_buf_;
+		bool need_write_;
 
 		SessionHandler *session_handler_;
 		SessionCloseHandler *close_handler_;
