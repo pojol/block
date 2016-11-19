@@ -41,6 +41,8 @@ namespace gsf
         void write_impl();
 
 	private:
+		std::vector<int> out_active_vec_;
+
 		static SessionMgr *instance_;
 
 		typedef std::unordered_map<int32_t, SessionPtr> SessionQueue;

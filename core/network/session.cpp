@@ -13,6 +13,7 @@ gsf::Session::Session(int32_t id, ::bufferevent *bev, int fd)
 	, session_handler_(nullptr)
 	, close_handler_(nullptr)
 	, need_write_(false)
+	, need_read_(false)
 {
 }
 
@@ -61,10 +62,14 @@ void gsf::Session::err_cb(::bufferevent *bev, short what, void *ctx)
 	bufferevent_free(bev);
 }
 
-void gsf::Session::write(const char *data, int len)
+int gsf::Session::write(const char *data, int len)
 {
+	int _ret = need_write_ ? 1 : 0;
+
 	evbuffer_add(out_buf_, data, len);
 	need_write_ = true;
+
+	return _ret;
 }
 
 void gsf::Session::write_impl()

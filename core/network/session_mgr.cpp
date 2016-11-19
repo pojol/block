@@ -47,7 +47,9 @@ int gsf::SessionMgr::write(int session_id, const char *data, uint32_t len)
 {
 	auto _session_itr = session_queue_.find(session_id);
 	if (_session_itr != session_queue_.end()){
-		_session_itr->second->write(data, len);
+		if (_session_itr->second->write(data, len) == 0){
+			out_active_vec_.push_back(session_id);
+		}
 	}
 
 	return 0;
@@ -55,11 +57,15 @@ int gsf::SessionMgr::write(int session_id, const char *data, uint32_t len)
 
 void gsf::SessionMgr::write_impl()
 {
-	//! 这个地方待优化 active_list 只有会话层需要发送数据的时候才被调用，不是遍历hash_map去调用。
-	for (auto itr : session_queue_)
+	for (int session_id : out_active_vec_)
 	{
-		itr.second->write_impl();
+		auto _session_itr = session_queue_.find(session_id);
+		if (_session_itr != session_queue_.end()){
+			_session_itr->second->write_impl();
+		}
 	}
+
+	out_active_vec_.clear();
 }
 
 gsf::SessionPtr gsf::SessionMgr::find(int session_id)
