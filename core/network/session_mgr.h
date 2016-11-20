@@ -22,6 +22,7 @@ namespace gsf
 	class SessionMgr
 	{
 		friend class Network;
+
 	public:
 		~SessionMgr();
 
@@ -42,6 +43,7 @@ namespace gsf
 
 	private:
 		std::vector<int> out_active_vec_;
+		std::vector<int> in_active_vec_;
 
 		static SessionMgr *instance_;
 

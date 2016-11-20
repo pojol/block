@@ -5,6 +5,8 @@
 #include <vector>
 #include <memory>
 
+#include <future>
+
 #include <event2/util.h>
 #include <event2/listener.h>
 

@@ -49,6 +49,7 @@ int main()
 
 		int ret;
 		ret = connect(socket_fd, (sockaddr*)&addr, sizeof(sockaddr));
+		printf("connect %d\n", socket_fd);
 
 		ret = send(socket_fd, "1", 1, 0);
 

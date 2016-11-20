@@ -26,6 +26,7 @@
 #include <thread>
 #include <mutex>
 
+
 static std::mutex pipe_lock;
 gsf::Network* gsf::Network::instance_ = NULL;
 
@@ -198,9 +199,6 @@ int gsf::Network::connect_bind(Connector *connector_ptr, const std::string &ip, 
 	bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, _session_ptr.get());
 	bufferevent_enable(bev, EV_READ);
 
-	//! connector 的消息发送绑定在主循环上，和acceptor分开处理。
-	// todo
-
 	return 0;
 }
 
@@ -266,10 +264,13 @@ void gsf::Network::accept_listen_cb(::evconnlistener *listener, evutil_socket_t 
 
 void gsf::Network::send_wait_time_cb(evutil_socket_t fd, short event, void *arg)
 {
+
     SessionMgr::instance().write_impl();
 }
 
 void gsf::Network::read_wait_time_cb(evutil_socket_t fd, short event, void *arg)
 {
+	auto *_thread_ptr = static_cast<NetworkThread*>(arg);
 
+	//...
 }

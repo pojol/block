@@ -1,8 +1,8 @@
 #include "session.h"
 #include "network_thread.h"
+#include "session_mgr.h"
 
 #include <event2/buffer.h>
-
 
 #include <iostream>
 
@@ -37,9 +37,9 @@ void gsf::Session::read_cb(::bufferevent *bev, void *ctx)
 {
 	Session *_session_ptr = static_cast<Session*>(ctx);
 
-	bufferevent_read_buffer(bev, _session_ptr->get_inbuf());
+	_session_ptr->read(bev);
 
-
+	//evbuffer_add_buffer()
 }
 
 void gsf::Session::err_cb(::bufferevent *bev, short what, void *ctx)
@@ -79,4 +79,14 @@ void gsf::Session::write_impl()
 		need_write_ = false;
 	}
 
+}
+
+void gsf::Session::read(::bufferevent *bev)
+{
+	if (!need_read_){
+	}
+
+	bufferevent_read_buffer(bev, in_buf_);
+
+	need_read_ = true;
 }

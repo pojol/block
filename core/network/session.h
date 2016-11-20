@@ -55,6 +55,8 @@ namespace gsf
 
         void write_impl();
 
+		void read(::bufferevent *bev);
+
 	protected:
 
     private:
