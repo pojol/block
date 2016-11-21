@@ -39,3 +39,17 @@ if platform.system() == "Windows":
 
     os.system(os.getcwd() + '\\' + '3rd' + '\\' + 'libevent-2.0.22-stable' + '\\' + 'win_build.bat')
 
+    libdpath = os.getcwd() + '\\' + 'LIB_D'
+    if os.path.exists(libdpath) != True:
+        os.mkdir(libdpath)
+
+    shutil.copyfile(os.getcwd() + '\\' + '3rd' + '\\' + 'libevent-2.0.22-stable' + '\\' + 'libevent.lib', libdpath + '\\' + 'libevent.lib')
+    shutil.copyfile(os.getcwd() + '\\' + '3rd' + '\\' + 'libevent-2.0.22-stable' + '\\' + 'libevent_core.lib', libdpath + '\\' + 'libevent_core.lib')
+    shutil.copyfile(os.getcwd() + '\\' + '3rd' + '\\' + 'libevent-2.0.22-stable' + '\\' + 'libevent_extras.lib', libdpath + '\\' + 'libevent_extras.lib')
+
+    buildpath = os.getcwd() + '\\' + 'build'
+    if os.path.exists(buildpath) != True:
+        os.mkdir(buildpath)
+
+    os.system(os.getcwd() + '\\' + 'build.bat')
+
