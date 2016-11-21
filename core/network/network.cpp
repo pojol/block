@@ -83,7 +83,8 @@ int gsf::Network::start()
 
 int32_t gsf::Network::init_work_thread()
 {
-	for (int i = 0; i < config_.worker_thread_count_; ++i)
+	int _work_thread_count = std::thread::hardware_concurrency() - 1;
+	for (int i = 0; i < _work_thread_count; ++i)
 	{
 		auto thread_ptr = std::make_shared<NetworkThread>();
 
