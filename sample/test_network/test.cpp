@@ -44,8 +44,8 @@ class Player
 */
 
 class LoginServerHandler : 
-	public gsf::AcceptHandler,
-	public gsf::SessionCloseHandler
+	public gsf::network::AcceptHandler,
+	public gsf::network::SessionCloseHandler
 {
 public:
     virtual ~LoginServerHandler(){}
@@ -55,7 +55,7 @@ public:
     {
 		std::cout << "new connection " << acceptor_id << " " << session_id << std::endl;
 
-		gsf::SessionMgr::instance().open(session_id, nullptr, this);
+		gsf::network::SessionMgr::instance().open(session_id, nullptr, this);
 
 		//gsf::SessionMgr::instance().write(session_id, "c", 1);
         //gsf::SessionMgr::instance().open_session(session_id, this, &gsf::MessageBinder<T>::instance());
@@ -176,22 +176,22 @@ int main()
 	}
 #endif // WIN32
 
-	gsf::NetworkConfig _config;
+	gsf::network::NetworkConfig _config;
 	_config.worker_thread_count_ = 4;
-	gsf::Network::instance().init(_config);
+	gsf::network::Network::instance().init(_config);
     
-    gsf::AcceptorConfig _acceptConfig;
+	gsf::network::AcceptorConfig _acceptConfig;
 	_acceptConfig.port = 8888;
 
-	int _acceptor_id = gsf::AcceptorMgr::instance().make_acceptor(_acceptConfig);
+	int _acceptor_id = gsf::network::AcceptorMgr::instance().make_acceptor(_acceptConfig);
 	if (_acceptor_id < 0){
 		//err
 	}
-	if (gsf::AcceptorMgr::instance().open(_acceptor_id, new LoginServerHandler()) < 0){
+	if (gsf::network::AcceptorMgr::instance().open(_acceptor_id, new LoginServerHandler()) < 0){
 		//err
 	}
 
-	gsf::Network::instance().start();
+	gsf::network::Network::instance().start();
 
 	return 0;
 }

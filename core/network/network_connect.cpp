@@ -1,35 +1,35 @@
 #include "network_connect.h"
 
-gsf::NetworkConnect::NetworkConnect()
+gsf::network::NetworkConnect::NetworkConnect()
 :cqi_freelist(nullptr)
 {
 
 }
 
-gsf::NetworkConnect::~NetworkConnect()
+gsf::network::NetworkConnect::~NetworkConnect()
 {
 
 }
 
-gsf::NetworkConnect* gsf::NetworkConnect::instance_ = NULL;
+gsf::network::NetworkConnect* gsf::network::NetworkConnect::instance_ = NULL;
 
-gsf::NetworkConnect& gsf::NetworkConnect::instance()
+gsf::network::NetworkConnect& gsf::network::NetworkConnect::instance()
 {
 	if (instance_ == NULL)
 	{
-		instance_ = new gsf::NetworkConnect();
+		instance_ = new gsf::network::NetworkConnect();
 	}
 	return *instance_;
 }
 
-void gsf::NetworkConnect::cq_init(CQ *cq)
+void gsf::network::NetworkConnect::cq_init(CQ *cq)
 {
 	cq->head = NULL;
 	cq->tail = NULL;
 }
 
 
-gsf::CQ_ITEM * gsf::NetworkConnect::cq_pop(CQ *cq)
+gsf::network::CQ_ITEM * gsf::network::NetworkConnect::cq_pop(CQ *cq)
 {
 	CQ_ITEM *item;
 
@@ -46,7 +46,7 @@ gsf::CQ_ITEM * gsf::NetworkConnect::cq_pop(CQ *cq)
 }
 
 
-void gsf::NetworkConnect::cq_push(CQ *cq, CQ_ITEM *item)
+void gsf::network::NetworkConnect::cq_push(CQ *cq, CQ_ITEM *item)
 {
 	item->next = NULL;
 
@@ -60,7 +60,7 @@ void gsf::NetworkConnect::cq_push(CQ *cq, CQ_ITEM *item)
 }
 
 
-gsf::CQ_ITEM * gsf::NetworkConnect::cqi_new(void)
+gsf::network::CQ_ITEM * gsf::network::NetworkConnect::cqi_new(void)
 {
 	CQ_ITEM *item = NULL;
 	cqi_freelist_lock.lock();
@@ -97,7 +97,7 @@ gsf::CQ_ITEM * gsf::NetworkConnect::cqi_new(void)
 	return item;
 }
 
-void gsf::NetworkConnect::cqi_free(CQ_ITEM *item)
+void gsf::network::NetworkConnect::cqi_free(CQ_ITEM *item)
 {
 	cqi_freelist_lock.lock();
 	item->next = cqi_freelist;

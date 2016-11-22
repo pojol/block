@@ -16,23 +16,26 @@
 
 namespace gsf
 {
-
-	struct NetworkThread
+	namespace network
 	{
-		NetworkThread();
-		~NetworkThread();
+		struct NetworkThread
+		{
+			NetworkThread();
+			~NetworkThread();
 
-		std::thread *th;
-		
-		event_base *event_base_ptr_;
+			std::thread *th;
 
-		event *notify_event_;
+			event_base *event_base_ptr_;
 
-		evutil_socket_t notify_receive_fd_;
-		evutil_socket_t notify_send_fd_;
+			event *notify_event_;
 
-		CQ *connect_queue_;
-	};
+			evutil_socket_t notify_receive_fd_;
+			evutil_socket_t notify_send_fd_;
+
+			CQ *connect_queue_;
+		};
+	}
+	
 }
 
 #endif

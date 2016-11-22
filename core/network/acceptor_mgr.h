@@ -6,38 +6,41 @@
 
 namespace gsf
 {
-	struct AcceptorConfig;
-	class AcceptHandler;
-	class Acceptor;
-
-	typedef std::shared_ptr<Acceptor> AcceptorPtr;
-
-	class AcceptorMgr
+	namespace network
 	{
-	public:
+		struct AcceptorConfig;
+		class AcceptHandler;
+		class Acceptor;
 
-		~AcceptorMgr();
+		typedef std::shared_ptr<Acceptor> AcceptorPtr;
 
-		static AcceptorMgr & instance();
+		class AcceptorMgr
+		{
+		public:
 
-		int make_acceptor(const AcceptorConfig &config);
+			~AcceptorMgr();
 
-		int open(int acceptor_id, AcceptHandler *accept_handler);
+			static AcceptorMgr & instance();
 
-		int close(int acceptor_id);
+			int make_acceptor(const AcceptorConfig &config);
 
-		AcceptorPtr find_acceptor(int accepor_id);
+			int open(int acceptor_id, AcceptHandler *accept_handler);
 
-	protected:
-		AcceptorMgr();
-		static AcceptorMgr *instance_;
+			int close(int acceptor_id);
 
-	private:
-		typedef std::vector<std::shared_ptr<Acceptor>> AcceptorVec;
-		AcceptorVec acceptor_vec_;
+			AcceptorPtr find_acceptor(int accepor_id);
 
-		uint32_t acceptor_index_;
-	};
+		protected:
+			AcceptorMgr();
+			static AcceptorMgr *instance_;
+
+		private:
+			typedef std::vector<std::shared_ptr<Acceptor>> AcceptorVec;
+			AcceptorVec acceptor_vec_;
+
+			uint32_t acceptor_index_;
+		};
+	}
 }
 
 #endif

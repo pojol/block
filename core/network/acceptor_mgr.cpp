@@ -6,29 +6,29 @@
 
 #include <algorithm>
 
-gsf::AcceptorMgr* gsf::AcceptorMgr::instance_ = NULL;
+gsf::network::AcceptorMgr* gsf::network::AcceptorMgr::instance_ = NULL;
 
-gsf::AcceptorMgr::AcceptorMgr()
+gsf::network::AcceptorMgr::AcceptorMgr()
 	:acceptor_index_(0)
 {
 
 }
 
-gsf::AcceptorMgr::~AcceptorMgr()
+gsf::network::AcceptorMgr::~AcceptorMgr()
 {
 
 }
 
-gsf::AcceptorMgr& gsf::AcceptorMgr::instance()
+gsf::network::AcceptorMgr& gsf::network::AcceptorMgr::instance()
 {
 	if (instance_ == NULL)
 	{
-		instance_ = new gsf::AcceptorMgr();
+		instance_ = new gsf::network::AcceptorMgr();
 	}
 	return *instance_;
 }
 
-int gsf::AcceptorMgr::make_acceptor(const AcceptorConfig &config)
+int gsf::network::AcceptorMgr::make_acceptor(const AcceptorConfig &config)
 {
 	acceptor_index_++;
 
@@ -42,7 +42,7 @@ int gsf::AcceptorMgr::make_acceptor(const AcceptorConfig &config)
 	return acceptor_index_;
 }
 
-int gsf::AcceptorMgr::open(int acceptor_id, AcceptHandler *accept_handler)
+int gsf::network::AcceptorMgr::open(int acceptor_id, AcceptHandler *accept_handler)
 {
 	auto acceptor_ptr = find_acceptor(acceptor_id);
 	if (acceptor_ptr){
@@ -53,7 +53,7 @@ int gsf::AcceptorMgr::open(int acceptor_id, AcceptHandler *accept_handler)
 	}
 }
 
-int gsf::AcceptorMgr::close(int acceptor_id)
+int gsf::network::AcceptorMgr::close(int acceptor_id)
 {
 	auto acceptor_ptr = find_acceptor(acceptor_id);
 	if (acceptor_ptr){
@@ -64,7 +64,7 @@ int gsf::AcceptorMgr::close(int acceptor_id)
 	}
 }
 
-gsf::AcceptorPtr gsf::AcceptorMgr::find_acceptor(int accepor_id)
+gsf::network::AcceptorPtr gsf::network::AcceptorMgr::find_acceptor(int accepor_id)
 {
 	auto itr = std::find_if(acceptor_vec_.begin(), acceptor_vec_.end(), [&](AcceptorVec::value_type it){
 		return (it->get_id() == accepor_id);

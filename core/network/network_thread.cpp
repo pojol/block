@@ -7,7 +7,7 @@
 
 #include <algorithm>
 
-gsf::NetworkThread::NetworkThread()
+gsf::network::NetworkThread::NetworkThread()
 	: th(nullptr)
 	, event_base_ptr_(nullptr)
 	, notify_event_(nullptr)
@@ -16,7 +16,7 @@ gsf::NetworkThread::NetworkThread()
 
 }
 
-gsf::NetworkThread::~NetworkThread()
+gsf::network::NetworkThread::~NetworkThread()
 {
 
 }

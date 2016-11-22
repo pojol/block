@@ -28,28 +28,28 @@
 
 
 static std::mutex pipe_lock;
-gsf::Network* gsf::Network::instance_ = NULL;
+gsf::network::Network* gsf::network::Network::instance_ = NULL;
 
-gsf::Network::Network()
+gsf::network::Network::Network()
 {
 
 }
 
-gsf::Network::~Network()
+gsf::network::Network::~Network()
 {
 
 }
 
-gsf::Network& gsf::Network::instance()
+gsf::network::Network& gsf::network::Network::instance()
 {
 	if (instance_ == NULL)
 	{
-		instance_ = new gsf::Network();
+		instance_ = new gsf::network::Network();
 	}
 	return *instance_;
 }
 
-int gsf::Network::init(const NetworkConfig &config)
+int gsf::network::Network::init(const NetworkConfig &config)
 {
 	config_ = config;
 
@@ -69,7 +69,7 @@ int gsf::Network::init(const NetworkConfig &config)
 	return 0;
 }
 
-int gsf::Network::start()
+int gsf::network::Network::start()
 {
 	for (auto &worker : worker_thread_vec_)
 	{
@@ -81,7 +81,7 @@ int gsf::Network::start()
 	return 0;
 }
 
-int32_t gsf::Network::init_work_thread()
+int32_t gsf::network::Network::init_work_thread()
 {
 	int _work_thread_count = std::thread::hardware_concurrency() - 1;
 	for (int i = 0; i < _work_thread_count; ++i)
@@ -129,7 +129,7 @@ int32_t gsf::Network::init_work_thread()
 
 static int last_thread = -1;
 
-void gsf::Network::accept_conn_new(int acceptor_id, evutil_socket_t fd)
+void gsf::network::Network::accept_conn_new(int acceptor_id, evutil_socket_t fd)
 {
 	CQ_ITEM *item = NetworkConnect::instance().cqi_new();
 	if (!item){
@@ -156,7 +156,7 @@ void gsf::Network::accept_conn_new(int acceptor_id, evutil_socket_t fd)
 	}
 }
 
-evconnlistener * gsf::Network::accept_bind(Acceptor *acceptor_ptr, const std::string &ip, int port)
+evconnlistener * gsf::network::Network::accept_bind(Acceptor *acceptor_ptr, const std::string &ip, int port)
 {
 	struct sockaddr_in sin;
 	memset(&sin, 0, sizeof(sin));
@@ -177,7 +177,7 @@ evconnlistener * gsf::Network::accept_bind(Acceptor *acceptor_ptr, const std::st
 }
 
 
-int gsf::Network::connect_bind(Connector *connector_ptr, const std::string &ip, int port)
+int gsf::network::Network::connect_bind(Connector *connector_ptr, const std::string &ip, int port)
 {
 	::bufferevent *bev = bufferevent_socket_new(main_thread_ptr_->event_base_ptr_, -1, BEV_OPT_CLOSE_ON_FREE);
 	if (!bev){
@@ -204,7 +204,7 @@ int gsf::Network::connect_bind(Connector *connector_ptr, const std::string &ip, 
 }
 
 
-void gsf::Network::worker_thread_process(evutil_socket_t fd, short event, void * arg)
+void gsf::network::Network::worker_thread_process(evutil_socket_t fd, short event, void * arg)
 {
 	//! just use point not copy
 	NetworkThread *threadPtr = static_cast<NetworkThread*>(arg);
@@ -249,13 +249,13 @@ void gsf::Network::worker_thread_process(evutil_socket_t fd, short event, void *
 }
 
 
-void gsf::Network::worker_thread_run(NetworkThreadPtr thread_ptr)
+void gsf::network::Network::worker_thread_run(NetworkThreadPtr thread_ptr)
 {
 	event_base_dispatch(thread_ptr->event_base_ptr_);
 }
 
 
-void gsf::Network::accept_listen_cb(::evconnlistener *listener, evutil_socket_t fd, sockaddr *sa, int socklen, void *arg)
+void gsf::network::Network::accept_listen_cb(::evconnlistener *listener, evutil_socket_t fd, sockaddr *sa, int socklen, void *arg)
 {
 	Acceptor *_acceptor_ptr = static_cast<Acceptor*>(arg);
 
@@ -263,13 +263,13 @@ void gsf::Network::accept_listen_cb(::evconnlistener *listener, evutil_socket_t 
 }
 
 
-void gsf::Network::send_wait_time_cb(evutil_socket_t fd, short event, void *arg)
+void gsf::network::Network::send_wait_time_cb(evutil_socket_t fd, short event, void *arg)
 {
 
     SessionMgr::instance().write_impl();
 }
 
-void gsf::Network::read_wait_time_cb(evutil_socket_t fd, short event, void *arg)
+void gsf::network::Network::read_wait_time_cb(evutil_socket_t fd, short event, void *arg)
 {
 	auto *_thread_ptr = static_cast<NetworkThread*>(arg);
 

@@ -6,7 +6,7 @@
 
 #include <iostream>
 
-gsf::Session::Session(int32_t id, ::bufferevent *bev, int fd)
+gsf::network::Session::Session(int32_t id, ::bufferevent *bev, int fd)
     : id_(id)
     , bev_(bev)
     , fd_(fd)
@@ -17,12 +17,12 @@ gsf::Session::Session(int32_t id, ::bufferevent *bev, int fd)
 {
 }
 
-gsf::Session::~Session()
+gsf::network::Session::~Session()
 {
 	
 }
 
-int gsf::Session::open(SessionHandler *session_handler, SessionCloseHandler *close_handler)
+int gsf::network::Session::open(SessionHandler *session_handler, SessionCloseHandler *close_handler)
 {
 	session_handler_ = session_handler;
 	close_handler_ = close_handler;
@@ -33,7 +33,7 @@ int gsf::Session::open(SessionHandler *session_handler, SessionCloseHandler *clo
 	return 0;
 }
 
-void gsf::Session::read_cb(::bufferevent *bev, void *ctx)
+void gsf::network::Session::read_cb(::bufferevent *bev, void *ctx)
 {
 	Session *_session_ptr = static_cast<Session*>(ctx);
 
@@ -42,7 +42,7 @@ void gsf::Session::read_cb(::bufferevent *bev, void *ctx)
 	//evbuffer_add_buffer()
 }
 
-void gsf::Session::err_cb(::bufferevent *bev, short what, void *ctx)
+void gsf::network::Session::err_cb(::bufferevent *bev, short what, void *ctx)
 {
 	if (what & BEV_EVENT_EOF)  
 	{  
@@ -62,7 +62,7 @@ void gsf::Session::err_cb(::bufferevent *bev, short what, void *ctx)
 	bufferevent_free(bev);
 }
 
-int gsf::Session::write(const char *data, int len)
+int gsf::network::Session::write(const char *data, int len)
 {
 	int _ret = need_write_ ? 1 : 0;
 
@@ -72,7 +72,7 @@ int gsf::Session::write(const char *data, int len)
 	return _ret;
 }
 
-void gsf::Session::write_impl()
+void gsf::network::Session::write_impl()
 {
 	if (need_write_){
 		evbuffer_write(out_buf_, fd_);
@@ -81,7 +81,7 @@ void gsf::Session::write_impl()
 
 }
 
-void gsf::Session::read(::bufferevent *bev)
+void gsf::network::Session::read(::bufferevent *bev)
 {
 	if (!need_read_){
 	}

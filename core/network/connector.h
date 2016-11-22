@@ -6,42 +6,45 @@
 
 namespace gsf
 {
-	class Session;
-
-	struct ConnectorConfig
+	namespace network
 	{
-		int32_t port;
-		std::string address;
-	};
+		class Session;
 
-	class ConnectHandler
-	{
-	public:
-		virtual ~ConnectHandler(){}
+		struct ConnectorConfig
+		{
+			int32_t port;
+			std::string address;
+		};
 
-		virtual void handler_new_connection(int connector_id, int session_id) = 0;
+		class ConnectHandler
+		{
+		public:
+			virtual ~ConnectHandler(){}
 
-		virtual void handle_connect_failed(int connector_id, int err_code, const std::string &ip, const int port) = 0;
-	};
+			virtual void handler_new_connection(int connector_id, int session_id) = 0;
 
-	class Connector
-	{
-	public:
-		Connector(uint32_t id, const ConnectorConfig &config);
-		~Connector();
+			virtual void handle_connect_failed(int connector_id, int err_code, const std::string &ip, const int port) = 0;
+		};
 
-		uint32_t get_id() const { return id_; }
+		class Connector
+		{
+		public:
+			Connector(uint32_t id, const ConnectorConfig &config);
+			~Connector();
 
-		void handle_connect_failed(int err_code, const std::string &ip, const int port);
+			uint32_t get_id() const { return id_; }
 
-	private:
-		ConnectorConfig config_;
-		ConnectHandler *handler_;
+			void handle_connect_failed(int err_code, const std::string &ip, const int port);
 
-		Session *session_;
+		private:
+			ConnectorConfig config_;
+			ConnectHandler *handler_;
 
-		uint32_t id_;
-	};
+			Session *session_;
+
+			uint32_t id_;
+		};
+	}
 }
 
 

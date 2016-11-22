@@ -7,37 +7,41 @@
 
 namespace gsf
 {
-    struct ConnectorConfig;
-    class Connector;
-    class ConnectorHandler;
+	namespace network
+	{
+		struct ConnectorConfig;
+		class Connector;
+		class ConnectorHandler;
 
-    typedef std::shared_ptr<Connector> ConnectorPtr;
+		typedef std::shared_ptr<Connector> ConnectorPtr;
 
-    class ConnectorMgr
-    {
-    public:
-        ~ConnectorMgr();
+		class ConnectorMgr
+		{
+		public:
+			~ConnectorMgr();
 
-        static ConnectorMgr & instance();
+			static ConnectorMgr & instance();
 
-        int make_connector(const ConnectorConfig &config);
+			int make_connector(const ConnectorConfig &config);
 
-        int open(int connector_id, ConnectorHandler *connector_handler);
+			int open(int connector_id, ConnectorHandler *connector_handler);
 
-        int close(int connector_id);
+			int close(int connector_id);
 
-        ConnectorPtr find_connector(int connector_id);
+			ConnectorPtr find_connector(int connector_id);
 
-    protected:
-        ConnectorMgr();
-        static ConnectorMgr *instance_;
+		protected:
+			ConnectorMgr();
+			static ConnectorMgr *instance_;
 
-    private:
-        typedef std::vector<ConnectorPtr> ConnectorVec;
-        ConnectorVec connector_vec_;
+		private:
+			typedef std::vector<ConnectorPtr> ConnectorVec;
+			ConnectorVec connector_vec_;
 
-        uint32_t connector_index_;
-    };
+			uint32_t connector_index_;
+		};
+	}
+    
 }
 
 #endif

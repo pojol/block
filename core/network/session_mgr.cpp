@@ -3,20 +3,20 @@
 
 #include "err.h"
 
-gsf::SessionMgr* gsf::SessionMgr::instance_ = nullptr;
+gsf::network::SessionMgr* gsf::network::SessionMgr::instance_ = nullptr;
 
-gsf::SessionMgr& gsf::SessionMgr::instance()
+gsf::network::SessionMgr& gsf::network::SessionMgr::instance()
 {
 	if (instance_ == nullptr)
 	{
-		instance_ = new gsf::SessionMgr();
+		instance_ = new gsf::network::SessionMgr();
 	}
 	return *instance_;
 }
 
 static uint32_t session_index = 0;
 
-gsf::SessionPtr gsf::SessionMgr::make_session(::bufferevent *bev, int fd)
+gsf::network::SessionPtr gsf::network::SessionMgr::make_session(::bufferevent *bev, int fd)
 {
 	session_index++;
 
@@ -27,7 +27,7 @@ gsf::SessionPtr gsf::SessionMgr::make_session(::bufferevent *bev, int fd)
 }
 
 
-int gsf::SessionMgr::open(int session_id, SessionHandler *session_handler, SessionCloseHandler *close_handler)
+int gsf::network::SessionMgr::open(int session_id, SessionHandler *session_handler, SessionCloseHandler *close_handler)
 {
 	auto _session_itr = session_queue_.find(session_id);
 	if (_session_itr != session_queue_.end()){
@@ -38,12 +38,12 @@ int gsf::SessionMgr::open(int session_id, SessionHandler *session_handler, Sessi
 	}
 }
 
-int gsf::SessionMgr::close(int session_id)
+int gsf::network::SessionMgr::close(int session_id)
 {
 	return 0;
 }
 
-int gsf::SessionMgr::write(int session_id, const char *data, uint32_t len)
+int gsf::network::SessionMgr::write(int session_id, const char *data, uint32_t len)
 {
 	auto _session_itr = session_queue_.find(session_id);
 	if (_session_itr != session_queue_.end()){
@@ -55,7 +55,7 @@ int gsf::SessionMgr::write(int session_id, const char *data, uint32_t len)
 	return 0;
 }
 
-void gsf::SessionMgr::write_impl()
+void gsf::network::SessionMgr::write_impl()
 {
 	for (int session_id : out_active_vec_)
 	{
@@ -68,7 +68,7 @@ void gsf::SessionMgr::write_impl()
 	out_active_vec_.clear();
 }
 
-gsf::SessionPtr gsf::SessionMgr::find(int session_id)
+gsf::network::SessionPtr gsf::network::SessionMgr::find(int session_id)
 {
 	auto _session_itr = session_queue_.find(session_id);
 	if (_session_itr != session_queue_.end()){

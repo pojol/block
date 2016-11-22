@@ -23,21 +23,21 @@
 
 
 
-gsf::Acceptor::Acceptor(uint32_t id, const AcceptorConfig &config)
+gsf::network::Acceptor(uint32_t id, const AcceptorConfig &config)
     :config_(config)
 	,id_(id)
 {
 
 }
 
-gsf::Acceptor::~Acceptor()
+gsf::network::Acceptor::~Acceptor()
 {
 	// ...
 
 	close();
 }
 
-int gsf::Acceptor::open(AcceptHandler *accept_handler)
+int gsf::network::Acceptor::open(AcceptHandler *accept_handler)
 {
 	handler_ = accept_handler;
 
@@ -50,24 +50,24 @@ int gsf::Acceptor::open(AcceptHandler *accept_handler)
 	}
 }
 
-int gsf::Acceptor::close()
+int gsf::network::Acceptor::close()
 {
 	evconnlistener_free(listener_ptr_);
 
 	return 0;
 }
 
-void gsf::Acceptor::handler_new_connect(int32_t session_id)
+void gsf::network::Acceptor::handler_new_connect(int32_t session_id)
 {
     handler_->handler_new_connection(id_, session_id);
 }
 
-gsf::AcceptorConfig & gsf::Acceptor::get_config()
+gsf::network::AcceptorConfig & gsf::Acceptor::get_config()
 {
 	return config_;
 }
 
-uint32_t gsf::Acceptor::get_id() const
+uint32_t gsf::network::Acceptor::get_id() const
 {
 	return id_;
 }

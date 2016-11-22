@@ -10,46 +10,49 @@
 
 namespace gsf
 {
-	class SessionCloseHandler;
-	class SessionHandler;
-	class Session;
-
-	class OBuffer;
-	class IBuffer;
-
-	typedef std::shared_ptr<Session> SessionPtr;
-
-	class SessionMgr
+	namespace network
 	{
-		friend class Network;
+		class SessionCloseHandler;
+		class SessionHandler;
+		class Session;
 
-	public:
-		~SessionMgr();
+		class OBuffer;
+		class IBuffer;
 
-		static SessionMgr & instance();
+		typedef std::shared_ptr<Session> SessionPtr;
 
-		int open(int session_id, SessionHandler *session_handler, SessionCloseHandler *close_handler);
+		class SessionMgr
+		{
+			friend class Network;
 
-		int close(int session_id);
+		public:
+			~SessionMgr();
 
-		int write(int session_id, const char *data, uint32_t len);
+			static SessionMgr & instance();
 
-		SessionPtr find(int session_id);
+			int open(int session_id, SessionHandler *session_handler, SessionCloseHandler *close_handler);
 
-	protected:
-		SessionPtr make_session(::bufferevent *bev, int fd);
+			int close(int session_id);
 
-        void write_impl();
+			int write(int session_id, const char *data, uint32_t len);
 
-	private:
-		std::vector<int> out_active_vec_;
-		std::vector<int> in_active_vec_;
+			SessionPtr find(int session_id);
 
-		static SessionMgr *instance_;
+		protected:
+			SessionPtr make_session(::bufferevent *bev, int fd);
 
-		typedef std::unordered_map<int32_t, SessionPtr> SessionQueue;
-		SessionQueue session_queue_;
-	};
+			void write_impl();
+
+		private:
+			std::vector<int> out_active_vec_;
+			std::vector<int> in_active_vec_;
+
+			static SessionMgr *instance_;
+
+			typedef std::unordered_map<int32_t, SessionPtr> SessionQueue;
+			SessionQueue session_queue_;
+		};
+	}
 }
 
 #endif

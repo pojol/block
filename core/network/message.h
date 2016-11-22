@@ -3,7 +3,9 @@
 
 namespace gsf
 {
-
+	namespace network
+	{
+	}
 }
 
 #endif

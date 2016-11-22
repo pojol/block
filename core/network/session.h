@@ -8,71 +8,75 @@
 
 namespace gsf
 {
-	class OBuffer;
-	class IBuffer;
-
-	class SessionCloseHandler
+	namespace network
 	{
-	public:
-		virtual ~SessionCloseHandler(){};
+		class OBuffer;
+		class IBuffer;
 
-		virtual void handle_close(uint32_t session_id
-			, int err_code
-			, int accepor_id
-			, int connector_id
-			, const std::string &ip
-			, const int port) = 0;
-	};
+		class SessionCloseHandler
+		{
+		public:
+			virtual ~SessionCloseHandler(){};
 
-	class SessionHandler
-	{
-	public:
-		virtual ~SessionHandler();
+			virtual void handle_close(uint32_t session_id
+				, int err_code
+				, int accepor_id
+				, int connector_id
+				, const std::string &ip
+				, const int port) = 0;
+		};
 
-		virtual void handle_data(const char *data) = 0;
-		
-	};
+		class SessionHandler
+		{
+		public:
+			virtual ~SessionHandler();
 
-	class Session
-	{
-    public:
-        Session(int32_t id, ::bufferevent *bev, int fd);
-		~Session();
+			virtual void handle_data(const char *data) = 0;
 
-		int open(SessionHandler *session_handler, SessionCloseHandler *close_handler);
+		};
 
-        static void read_cb(::bufferevent *bev, void *ctx);
+		class Session
+		{
+		public:
+			Session(int32_t id, ::bufferevent *bev, int fd);
+			~Session();
 
-		static void err_cb(::bufferevent *bev, short what, void *ctx);
+			int open(SessionHandler *session_handler, SessionCloseHandler *close_handler);
 
-		int write(const char *data, int len);
+			static void read_cb(::bufferevent *bev, void *ctx);
 
-        int32_t get_id() const { return id_; }
+			static void err_cb(::bufferevent *bev, short what, void *ctx);
 
-		::evbuffer * get_inbuf() { return in_buf_; }
+			int write(const char *data, int len);
 
-		SessionHandler * get_session_handler() { return session_handler_; }
+			int32_t get_id() const { return id_; }
 
-        void write_impl();
+			::evbuffer * get_inbuf() { return in_buf_; }
 
-		void read(::bufferevent *bev);
+			SessionHandler * get_session_handler() { return session_handler_; }
 
-	protected:
+			void write_impl();
 
-    private:
-        uint32_t id_;
-		
-		int fd_;
-		::bufferevent *bev_;
+			void read(::bufferevent *bev);
 
-        ::evbuffer *in_buf_;
-        ::evbuffer *out_buf_;
-		bool need_write_;
-		bool need_read_;
+		protected:
 
-		SessionHandler *session_handler_;
-		SessionCloseHandler *close_handler_;
-	};
+		private:
+			uint32_t id_;
+
+			int fd_;
+			::bufferevent *bev_;
+
+			::evbuffer *in_buf_;
+			::evbuffer *out_buf_;
+			bool need_write_;
+			bool need_read_;
+
+			SessionHandler *session_handler_;
+			SessionCloseHandler *close_handler_;
+		};
+	}
+	
 }
 
 

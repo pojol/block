@@ -10,47 +10,50 @@
 
 namespace gsf
 {
-	class AcceptHandler;
-    class Session;
-
-	struct AcceptorConfig
+	namespace network
 	{
-		int32_t port;
-		std::string address;
-	};
+		class AcceptHandler;
+		class Session;
 
-	class AcceptHandler
-	{
-	public:
-		virtual ~AcceptHandler(){}
+		struct AcceptorConfig
+		{
+			int32_t port;
+			std::string address;
+		};
 
-		virtual void handler_new_connection(int acceptor_id, int session_id) = 0;
-	};
+		class AcceptHandler
+		{
+		public:
+			virtual ~AcceptHandler(){}
 
-	class Acceptor
-	{
-	public:
-		Acceptor(uint32_t id, const AcceptorConfig &config);
-		~Acceptor();
+			virtual void handler_new_connection(int acceptor_id, int session_id) = 0;
+		};
 
-		int open(AcceptHandler *accept_handler);
+		class Acceptor
+		{
+		public:
+			Acceptor(uint32_t id, const AcceptorConfig &config);
+			~Acceptor();
 
-		int close();
+			int open(AcceptHandler *accept_handler);
 
-        void handler_new_connect(int32_t session_id);
+			int close();
 
-		AcceptorConfig &get_config();
+			void handler_new_connect(int32_t session_id);
 
-		uint32_t get_id() const;
+			AcceptorConfig &get_config();
 
-	private:
-		AcceptorConfig config_;
-		AcceptHandler *handler_;
+			uint32_t get_id() const;
 
-		::evconnlistener *listener_ptr_;
+		private:
+			AcceptorConfig config_;
+			AcceptHandler *handler_;
 
-		uint32_t id_;
-	};
+			::evconnlistener *listener_ptr_;
+
+			uint32_t id_;
+		};
+	}
 }
 
 
