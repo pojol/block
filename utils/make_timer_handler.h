@@ -1,4 +1,6 @@
 
+#include <memory>
+
 		template <typename T>
 		class TTimerHandler;
 
@@ -48,7 +50,7 @@
 		template <typename R,typename P1>
 		inline TimerHandler * makeTimerHandler(R (*func)(P1),P1 p1)
 		{
-			return new TTimerHandler<R (P1)>(func,p1);
+			return std::make_shared<TTimerHandler<R(P1)>>(func, p1);
 		}
 
 		template <typename R,typename P1>

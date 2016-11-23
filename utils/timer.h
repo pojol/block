@@ -2,16 +2,23 @@
 #define _TIMER_HEADER_
 
 #include <stdint.h>
+#include <memory>
+#include <map>
+
+#include "min_heap.h"
+
 
 namespace gsf
 {
 	namespace utils
 	{
+		class TimerHandler;
+
 		template <typename T>
 		struct timer_traits
 		{
 			typedef typename T::type type;
-		}
+		};
 
 		struct delay_second_tag {};
 		struct delay_second
@@ -83,13 +90,16 @@ namespace gsf
 
 		class Timer
 		{
+			typedef std::shared_ptr<TimerHandler> TimerHandlerPtr;
 		public:
 			
 			template <typename T>
-			uint32_t add_timer(T delay, std::shared_ptr<TimerHandler> timer_handler_ptr);
+			uint32_t add_timer(T delay, TimerHandlerPtr timer_handler_ptr);
 			
 			void rmv_timer(uint32_t timer_id);
 			
+			void update();
+
 		private:
 			struct TimerItem
 			{
@@ -106,8 +116,26 @@ namespace gsf
 				{
 					return time_ < item.time_;
 				}
+			};
+
+			uint32_t update_delay(delay_second delay, TimerHandlerPtr handler, delay_second_tag);
+			uint32_t update_delay(delay_day delay, TimerHandlerPtr handler, delay_day_tag);
+			uint32_t update_delay(delay_week delay, TimerHandlerPtr handler, delay_week_tag);
+			uint32_t update_delay(delay_month delay, TimerHandlerPtr handler, delay_month_tag);
+
+			template <typename T>
+			uint32_t Timer::add_timer(T delay, TimerHandlerPtr timer_handler_ptr)
+			{
+				update_delay(delay, timer_handler_ptr, typename timer_traits<T>::type());
 			}
+
+		private:
+
+			MinHeap<TimerItem> minheap_;
+
+			std::map<uint32_t, bool> mark_map_;
 		};
+
 	}
 }
 
