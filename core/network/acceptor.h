@@ -1,12 +1,12 @@
 #ifndef _GSF_ACCEPTOR_HEADER_
 #define _GSF_ACCEPTOR_HEADER_
 
-#include <stdint.h>
 #include <string>
 #include <memory>
 
 #include <event2/bufferevent.h>
 #include <event2/listener.h>
+
 
 namespace gsf
 {
@@ -32,7 +32,7 @@ namespace gsf
 		class Acceptor
 		{
 		public:
-			Acceptor(uint32_t id, const AcceptorConfig &config);
+			Acceptor(int id, const AcceptorConfig &config);
 			~Acceptor();
 
 			int open(AcceptHandler *accept_handler);
@@ -43,7 +43,7 @@ namespace gsf
 
 			AcceptorConfig &get_config();
 
-			uint32_t get_id() const;
+			int get_id() const;
 
 		private:
 			AcceptorConfig config_;
@@ -51,7 +51,7 @@ namespace gsf
 
 			::evconnlistener *listener_ptr_;
 
-			uint32_t id_;
+			int id_;
 		};
 	}
 }

@@ -22,13 +22,13 @@
 #endif // WIN32
 
 
-
-gsf::network::Acceptor(uint32_t id, const AcceptorConfig &config)
-    :config_(config)
-	,id_(id)
+gsf::network::Acceptor::Acceptor(int id, const AcceptorConfig &config)
+	: id_(id)
+	, config_(config)
 {
 
 }
+
 
 gsf::network::Acceptor::~Acceptor()
 {
@@ -62,12 +62,12 @@ void gsf::network::Acceptor::handler_new_connect(int32_t session_id)
     handler_->handler_new_connection(id_, session_id);
 }
 
-gsf::network::AcceptorConfig & gsf::Acceptor::get_config()
+gsf::network::AcceptorConfig & gsf::network::Acceptor::get_config()
 {
 	return config_;
 }
 
-uint32_t gsf::network::Acceptor::get_id() const
+int gsf::network::Acceptor::get_id() const
 {
 	return id_;
 }

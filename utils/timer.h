@@ -5,6 +5,9 @@
 #include <memory>
 #include <map>
 
+#include <chrono>
+#include <ctime>
+
 #include "min_heap.h"
 
 
@@ -20,6 +23,10 @@ namespace gsf
 			typedef typename T::type type;
 		};
 
+
+		/**!
+			距离当前时间的固定时间区间更新，比如还有几秒，几分钟，几天
+		*/
 		struct delay_second_tag {};
 		struct delay_second
 		{
@@ -34,6 +41,9 @@ namespace gsf
 			uint32_t second_;
 		};
 
+		/**!
+			每天固定时间更新,比如每天的4点15分更新
+		*/
 		struct delay_day_tag {};
 		struct delay_day
 		{
@@ -52,6 +62,9 @@ namespace gsf
 			uint32_t minute_;
 		};
 
+		/**!
+			每周固定时间更新,比如每周的星期一6点更新
+		*/
 		struct delay_week_tag {};
 		struct delay_week
 		{
@@ -70,6 +83,9 @@ namespace gsf
 			uint32_t hour_;
 		};
 
+		/**!
+			每月固定时间更新
+		*/
 		struct delay_month_tag {};
 		struct delay_month
 		{
@@ -93,43 +109,52 @@ namespace gsf
 			typedef std::shared_ptr<TimerHandler> TimerHandlerPtr;
 		public:
 			
+			~Timer();
+			static Timer& instance();
+
 			template <typename T>
-			uint32_t add_timer(T delay, TimerHandlerPtr timer_handler_ptr);
+			uint32_t add_timer(T delay, TimerHandler *timer_handler_ptr);
 			
-			void rmv_timer(uint32_t timer_id);
+			int rmv_timer(uint32_t timer_id);
 			
 			void update();
 
 		private:
+			Timer();
+			static Timer* instance_;
+
 			struct TimerItem
 			{
-				std::shared_ptr<TimerHandler> timer_handler_ptr_;
-				int64_t time_;
+				TimerHandler *timer_handler_ptr_;
+				std::chrono::system_clock::time_point tp_;
 				int32_t timer_id_;
-				
-				bool operator > (const TimerItem &item)
-				{
-					return time_ > item.time_;
-				}
-				
+
 				bool operator < (const TimerItem &item)
 				{
-					return time_ < item.time_;
+					return (tp_ < item.tp_);
+				}
+
+				bool operator > (const TimerItem &item)
+				{
+					return (tp_ > item.tp_);
 				}
 			};
 
-			uint32_t update_delay(delay_second delay, TimerHandlerPtr handler, delay_second_tag);
-			uint32_t update_delay(delay_day delay, TimerHandlerPtr handler, delay_day_tag);
-			uint32_t update_delay(delay_week delay, TimerHandlerPtr handler, delay_week_tag);
-			uint32_t update_delay(delay_month delay, TimerHandlerPtr handler, delay_month_tag);
+			uint32_t update_delay(delay_second delay, TimerHandler * handler, delay_second_tag);
+			uint32_t update_delay(delay_day delay, TimerHandler * handler, delay_day_tag);
+			uint32_t update_delay(delay_week delay, TimerHandler * handler, delay_week_tag);
+			uint32_t update_delay(delay_month delay, TimerHandler * handler, delay_month_tag);
+
+			uint32_t make_timeid();
 
 			template <typename T>
-			uint32_t Timer::add_timer(T delay, TimerHandlerPtr timer_handler_ptr)
+			uint32_t Timer::add_timer(T delay, TimerHandler * timer_handler_ptr, bool repeat = false)
 			{
 				update_delay(delay, timer_handler_ptr, typename timer_traits<T>::type());
 			}
 
 		private:
+			static uint32_t time_index_;
 
 			MinHeap<TimerItem> minheap_;
 

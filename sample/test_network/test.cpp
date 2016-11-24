@@ -25,6 +25,8 @@
 
 #include <iostream>
 
+#include <timer.h>
+#include <make_timer_handler.h>
 
 /*
 class PlayerSession : public SessionHandler
@@ -162,6 +164,11 @@ public:
 	}
 */
 
+class TimerTest
+{
+public:
+	void pt() { std::cout << "timer test" << std::endl; }
+};
 
 int main()
 {
@@ -191,7 +198,17 @@ int main()
 		//err
 	}
 
-	gsf::network::Network::instance().start();
+	//gsf::network::Network::instance().start();
+
+	using namespace gsf::utils;
+	TimerTest *tt = new TimerTest();
+	
+	Timer::instance().add_timer(delay_second(1), makeTimerHandler(&TimerTest::pt, tt));
+	
+	while (1)
+	{
+		Timer::instance().update();
+	}
 
 	return 0;
 }

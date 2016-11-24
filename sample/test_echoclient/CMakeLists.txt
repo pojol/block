@@ -4,6 +4,7 @@ PROJECT(test_echoclient)
 INCLUDE_DIRECTORIES(
 	${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
 	${GSF_SOURCE_DIR}/core/network
+	${GSF_SOURCE_DIR}/utils
 )
 
 #引用库目录
@@ -27,7 +28,7 @@ if(MSVC)
       endif()
     endforeach()    
 
-	TARGET_LINK_LIBRARIES(test_echoclient ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib network.lib)
+	TARGET_LINK_LIBRARIES(test_echoclient ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib network.lib utils.lib)
 	
 endif(MSVC)
 
