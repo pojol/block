@@ -23,6 +23,8 @@ if(MSVC)
         string(REGEX REPLACE "/MD" "/MT" ${var} "${${var}}")
       endif()
     endforeach()    
+    
+    SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/LIB_D)
 
 	
 endif(MSVC)
