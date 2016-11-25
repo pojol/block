@@ -265,13 +265,18 @@ void gsf::network::Network::accept_listen_cb(::evconnlistener *listener, evutil_
 
 void gsf::network::Network::send_wait_time_cb(evutil_socket_t fd, short event, void *arg)
 {
-
-    SessionMgr::instance().write_impl();
+	// production readbuf
+	
+	// send write buf
+	// 不能使用sessionmgr 因为无法区分其中的session是隶属于那个线程。 本线程的session应该由自己调度。
+    //SessionMgr::instance().write_impl();
 }
 
 void gsf::network::Network::read_wait_time_cb(evutil_socket_t fd, short event, void *arg)
 {
 	auto *_thread_ptr = static_cast<NetworkThread*>(arg);
-
+		
+	// 自己线程生产readbuf 主线程消费
+	// sconsume readbuf
 	//...
 }
