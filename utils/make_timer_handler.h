@@ -1,105 +1,98 @@
 
-#include <memory>
-#include "timer_handler.h"
+	template <typename T>
+	class TTimerHandler;
 
-namespace gsf
-{
-	namespace utils
+	//R ()
+	template <typename R>
+	class TTimerHandler<R()>:public TimerHandler
 	{
-		template <typename T>
-		class TTimerHandler;
+	public:
+		typedef R(*FUNC_TYPE)();
+		TTimerHandler(FUNC_TYPE func);
+		void handleTimeout();
+	private:
+		FUNC_TYPE	m_func;
+	};
 
-		//R ()
-		template <typename R>
-		class TTimerHandler<R()>:public TimerHandler
-		{
-		public:
-			typedef R(*FUNC_TYPE)();
-			TTimerHandler(FUNC_TYPE func);
-			void handleTimeout();
-		private:
-			FUNC_TYPE	m_func;
-		};
+	template <typename R>
+	inline TimerHandler * makeTimerHandler(R(*func)())
+	{
+		return new TTimerHandler<R()>(func);
+	}
 
-		template <typename R>
-		inline TimerHandler * makeTimerHandler(R(*func)())
-		{
-			return new TTimerHandler<R()>(func);
-		}
+	template <typename R>
+	inline TTimerHandler<R()>::TTimerHandler(typename TTimerHandler<R()>::FUNC_TYPE func) :
+		m_func(func)
+	{
+	}
 
-		template <typename R>
-		inline TTimerHandler<R()>::TTimerHandler(typename TTimerHandler<R()>::FUNC_TYPE func) :
-			m_func(func)
-		{
-		}
+	template <typename R>
+	inline void TTimerHandler<R()>::handleTimeout()
+	{
+		(*m_func)();
+	}
 
-		template <typename R>
-		inline void TTimerHandler<R()>::handleTimeout()
-		{
-			(*m_func)();
-		}
+	//R (P1)
+	template <typename R, typename P1>
+	class TTimerHandler<R(P1)>:public TimerHandler
+	{
+	public:
+		typedef R(*FUNC_TYPE)(P1);
+		TTimerHandler(FUNC_TYPE func, P1 p1);
+		void handleTimeout();
+	private:
+		FUNC_TYPE	m_func;
+		P1			m_p1;
+	};
 
-		//R (P1)
-		template <typename R, typename P1>
-		class TTimerHandler<R(P1)>:public TimerHandler
-		{
-		public:
-			typedef R(*FUNC_TYPE)(P1);
-			TTimerHandler(FUNC_TYPE func, P1 p1);
-			void handleTimeout();
-		private:
-			FUNC_TYPE	m_func;
-			P1			m_p1;
-		};
+	template <typename R, typename P1>
+	inline TimerHandler * makeTimerHandler(R(*func)(P1), P1 p1)
+	{
+		return std::make_shared<TTimerHandler<R(P1)>>(func, p1);
+	}
 
-		template <typename R, typename P1>
-		inline TimerHandler * makeTimerHandler(R(*func)(P1), P1 p1)
-		{
-			return std::make_shared<TTimerHandler<R(P1)>>(func, p1);
-		}
+	template <typename R, typename P1>
+	inline TTimerHandler<R(P1)>::TTimerHandler(typename TTimerHandler<R(P1)>::FUNC_TYPE func, P1 p1) :
+		m_func(func),
+		m_p1(p1)
+	{
+	}
 
-		template <typename R, typename P1>
-		inline TTimerHandler<R(P1)>::TTimerHandler(typename TTimerHandler<R(P1)>::FUNC_TYPE func, P1 p1) :
-			m_func(func),
-			m_p1(p1)
-		{
-		}
+	template <typename R, typename P1>
+	inline void TTimerHandler<R(P1)>::handleTimeout()
+	{
+		(*m_func)(m_p1);
+	}
 
-		template <typename R, typename P1>
-		inline void TTimerHandler<R(P1)>::handleTimeout()
-		{
-			(*m_func)(m_p1);
-		}
+	//R (P1,P2)
+	template <typename R, typename P1, typename P2>
+	class TTimerHandler<R(P1, P2)>:public TimerHandler
+	{
+	public:
+		typedef R(*FUNC_TYPE)(P1, P2);
+		TTimerHandler(FUNC_TYPE func, P1 p1, P2 p2);
+		void handleTimeout();
+	private:
+		FUNC_TYPE	m_func;
+		P1			m_p1;
+		P2			m_p2;
+	};
 
-		//R (P1,P2)
-		template <typename R, typename P1, typename P2>
-		class TTimerHandler<R(P1, P2)>:public TimerHandler
-		{
-		public:
-			typedef R(*FUNC_TYPE)(P1, P2);
-			TTimerHandler(FUNC_TYPE func, P1 p1, P2 p2);
-			void handleTimeout();
-		private:
-			FUNC_TYPE	m_func;
-			P1			m_p1;
-			P2			m_p2;
-		};
+	template <typename R, typename P1, typename P2>
+	inline TimerHandler * makeTimerHandler(R(*func)(P1, P2), P1 p1, P2 p2)
+	{
+		return std::make_shared(TTimerHandler<R(P1, P2)>)(func, p1, p2);
+	}
 
-		template <typename R, typename P1, typename P2>
-		inline TimerHandler * makeTimerHandler(R(*func)(P1, P2), P1 p1, P2 p2)
-		{
-			return std::make_shared(TTimerHandler<R(P1, P2)>)(func, p1, p2);
-		}
+	template <typename R, typename P1, typename P2>
+	inline TTimerHandler<R(P1, P2)>::TTimerHandler(typename TTimerHandler<R(P1, P2)>::FUNC_TYPE func, P1 p1, P2 p2) :
+		m_func(func),
+		m_p1(p1),
+		m_p2(p2)
+	{
+	}
 
-		template <typename R, typename P1, typename P2>
-		inline TTimerHandler<R(P1, P2)>::TTimerHandler(typename TTimerHandler<R(P1, P2)>::FUNC_TYPE func, P1 p1, P2 p2) :
-			m_func(func),
-			m_p1(p1),
-			m_p2(p2)
-		{
-		}
-
-		template <typename R, typename P1, typename P2>
+	template <typename R, typename P1, typename P2>
 		inline void TTimerHandler<R(P1, P2)>::handleTimeout()
 		{
 			(*m_func)(m_p1, m_p2);
@@ -809,7 +802,4 @@ namespace gsf
 			(m_obj->*m_func)(m_p1, m_p2, m_p3, m_p4, m_p5, m_p6, m_p7, m_p8, m_p9);
 		}
 
-
-	}
-}
 
