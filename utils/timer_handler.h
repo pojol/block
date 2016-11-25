@@ -1,22 +1,23 @@
 #ifndef _TIMER_HANDLER_HEADER_
 #define _TIMER_HANDLER_HEADER_
 
+#include <memory>
 
 namespace gsf
 {
 	namespace utils
 	{
-		//!¶¨Ê±Æ÷´¦ÀíÆ÷½Ó¿Ú¶¨Òå
+		//!å®šæ—¶å™¨å¤„ç†å™¨æ¥å£å®šä¹‰
 		class TimerHandler
 		{
 		public:
-			//!¹¹Ôìº¯Êı
+			//!æ„é€ å‡½æ•°
 			TimerHandler();
 
-			//!Îö¹¹º¯Êı
+			//!ææ„å‡½æ•°
 			virtual ~TimerHandler();
 
-			//!¶¨Ê±Æ÷´¦Àíº¯Êı
+			//!å®šæ—¶å™¨å¤„ç†å‡½æ•°
 			virtual void handleTimeout() = 0;
 		};
 
@@ -29,7 +30,7 @@ namespace gsf
 
 		}
 
-#include "make_timer_handler.h"
+		#include "make_timer_handler.h"
 	}
 }
 
