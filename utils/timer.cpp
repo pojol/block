@@ -49,7 +49,7 @@ uint32_t gsf::utils::Timer::update_delay(delay_day delay, TimerHandler *handler,
 	auto _timeid = make_timeid();
 
 	using namespace std::chrono;
-	//! ÕâÀï²»ĞèÒªÓÃµ½¾ßÌåµÄÈÕÆÚ£¬ËùÒÔ²»×ª»»µ½±±¾©Ê±¼äÈ¥´¦Àí¡£
+	//! è¿™é‡Œä¸éœ€è¦ç”¨åˆ°å…·ä½“çš„æ—¥æœŸï¼Œæ‰€ä»¥ä¸è½¬æ¢åˆ°åŒ—äº¬æ—¶é—´å»å¤„ç†ã€‚
 
 	typedef duration<int, std::ratio<60 * 60 * 24>> dur_day;
 	time_point<system_clock, dur_day> _today = time_point_cast<dur_day>(system_clock::now());
@@ -64,7 +64,7 @@ uint32_t gsf::utils::Timer::update_delay(delay_day delay, TimerHandler *handler,
 		_item.tp_ = _second + seconds(_space_second - _passed_second);
 	}
 	else {
-		_item.tp_ = _second + seconds(_passed_second - _space_second + 24 * 60 * 60);
+		_item.tp_ = _second + seconds((24 * 60 * 60) - _passed_second - _space_second);
 	}
 
 	_item.timer_handler_ptr_ = handler;
