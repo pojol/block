@@ -25,7 +25,7 @@ namespace gsf
 
 
 		/**!
-			¾àÀëµ±Ç°Ê±¼äµÄ¹Ì¶¨Ê±¼äÇø¼ä¸üĞÂ£¬±ÈÈç»¹ÓĞ¼¸Ãë£¬¼¸·ÖÖÓ£¬¼¸Ìì
+			è·ç¦»å½“å‰æ—¶é—´çš„å›ºå®šæ—¶é—´åŒºé—´æ›´æ–°ï¼Œæ¯”å¦‚è¿˜æœ‰å‡ ç§’ï¼Œå‡ åˆ†é’Ÿï¼Œå‡ å¤©
 		*/
 		struct delay_second_tag {};
 		struct delay_second
@@ -42,7 +42,7 @@ namespace gsf
 		};
 
 		/**!
-			Ã¿Ìì¹Ì¶¨Ê±¼ä¸üĞÂ,±ÈÈçÃ¿ÌìµÄ4µã15·Ö¸üĞÂ
+			æ¯å¤©å›ºå®šæ—¶é—´æ›´æ–°,æ¯”å¦‚æ¯å¤©çš„4ç‚¹15åˆ†æ›´æ–°
 		*/
 		struct delay_day_tag {};
 		struct delay_day
@@ -63,7 +63,7 @@ namespace gsf
 		};
 
 		/**!
-			Ã¿ÖÜ¹Ì¶¨Ê±¼ä¸üĞÂ,±ÈÈçÃ¿ÖÜµÄĞÇÆÚÒ»6µã¸üĞÂ
+			æ¯å‘¨å›ºå®šæ—¶é—´æ›´æ–°,æ¯”å¦‚æ¯å‘¨çš„æ˜ŸæœŸä¸€6ç‚¹æ›´æ–°
 		*/
 		struct delay_week_tag {};
 		struct delay_week
@@ -84,7 +84,7 @@ namespace gsf
 		};
 
 		/**!
-			Ã¿ÔÂ¹Ì¶¨Ê±¼ä¸üĞÂ
+			æ¯æœˆå›ºå®šæ—¶é—´æ›´æ–°
 		*/
 		struct delay_month_tag {};
 		struct delay_month
@@ -147,12 +147,6 @@ namespace gsf
 
 			uint32_t make_timeid();
 
-			template <typename T>
-			uint32_t Timer::add_timer(T delay, TimerHandler * timer_handler_ptr, bool repeat = false)
-			{
-				update_delay(delay, timer_handler_ptr, typename timer_traits<T>::type());
-			}
-
 		private:
 			static uint32_t time_index_;
 
@@ -160,6 +154,12 @@ namespace gsf
 
 			std::map<uint32_t, bool> mark_map_;
 		};
+		
+		template <typename T>
+		uint32_t gsf::utils::Timer::add_timer(T delay, TimerHandler * timer_handler_ptr)
+		{
+			return update_delay(delay, timer_handler_ptr, typename timer_traits<T>::type());
+		}
 
 	}
 }
