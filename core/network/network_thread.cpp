@@ -40,7 +40,10 @@ void gsf::network::IBuffer::ready_consume()
 	for (auto &it : ibuffer_vec_)
 	{
 		evbuffer *buff = evbuffer_new();
-		evbuffer_add_buffer(it.second, buff);
+		evbuffer_add_buffer(buff, it.second);
+
+		int len = evbuffer_get_length(buff);
+		int len1 = evbuffer_get_length(it.second);
 
 		consume_vec_.push_back(std::make_pair(it.first, buff));
 	}
@@ -56,10 +59,11 @@ void gsf::network::IBuffer::consume()
 
 	for (auto &it : consume_vec_)
 	{
-		char buf[1];
-		evbuffer_remove(it.second, buf, 1);
+		int len = evbuffer_get_length(it.second);
+		char *buff = (char*)malloc(len);
+		evbuffer_remove(it.second, buff, len);
 
-		printf("session : %d recv : %s \n", it.first, buf);
+		printf("session : %d len : %d recv : %s \n", it.first, len, buff);
 	}
 
 	consume_vec_.clear();

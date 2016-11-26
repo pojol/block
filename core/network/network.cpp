@@ -278,7 +278,6 @@ void gsf::network::Network::send_wait_time_cb(evutil_socket_t fd, short event, v
 		th->in_buffer_->ready_consume();
 	}
 
-
 	// consume writebuf
 
 	// send write buf
