@@ -35,8 +35,6 @@ void gsf::network::IBuffer::mark_produce(uint32_t session_id, evbuffer *buff)
 
 void gsf::network::IBuffer::ready_consume()
 {
-	mtx.lock();
-
 	for (auto &it : ibuffer_vec_)
 	{
 		evbuffer *buff = evbuffer_new();
@@ -49,24 +47,28 @@ void gsf::network::IBuffer::ready_consume()
 	}
 
 	ibuffer_vec_.clear();
-
-	mtx.unlock();
 }
 
 void gsf::network::IBuffer::consume()
 {
-	mtx.lock();
 
-	for (auto &it : consume_vec_)
+	for (auto itr = consume_vec_.begin(); itr != consume_vec_.end();)
 	{
-		int len = evbuffer_get_length(it.second);
+		int len = evbuffer_get_length(itr->second);
 		char *buff = (char*)malloc(len);
-		evbuffer_remove(it.second, buff, len);
+		evbuffer_remove(itr->second, buff, len);
 
-		printf("session : %d len : %d recv : %s \n", it.first, len, buff);
+		//printf("session : %d len : %d recv : %s \n", itr->first, len, buff);
+
+		//! 如果buff被拿完则从vec中删除
+		if (len == 1){
+			itr = consume_vec_.erase(itr);
+		}
+		else {
+			++itr;
+		}
 	}
 
-	consume_vec_.clear();
-
-	mtx.unlock();
+	//debug
+	printf("thread id : %d \n", std::this_thread::get_id());
 }

@@ -273,10 +273,7 @@ void gsf::network::Network::send_wait_time_cb(evutil_socket_t fd, short event, v
 	// produce readbuf
 	auto *_thread_ptr = static_cast<NetworkThread*>(arg);
 
-	for (auto &th : Network::instance().get_worker_thread())
-	{
-		th->in_buffer_->ready_consume();
-	}
+
 
 	// consume writebuf
 
@@ -284,18 +281,23 @@ void gsf::network::Network::send_wait_time_cb(evutil_socket_t fd, short event, v
 
 }
 
+//! 不再作为主线程的事件，工作线程同样要有各自的事件，用于从等待队列中取出数据填充到ringbuff
 void gsf::network::Network::read_wait_time_cb(evutil_socket_t fd, short event, void *arg)
 {
 	auto *_thread_ptr = static_cast<NetworkThread*>(arg);
-		
+	
+	//! 先填充
 	for (auto &th : Network::instance().get_worker_thread())
 	{
-		// consume readbuf
-		th->in_buffer_->consume();
+		th->in_buffer_->ready_consume();
 	}
 
-	// produce writebuf
-	
-	// dispatch readbuf
+	for (auto &th : Network::instance().get_worker_thread())
+	{
+		// 从ringbuff拿出数据
+		//th->in_buffer_->consume();
+	}
+
+	// 通过主线程派发
 }
 

@@ -24,8 +24,10 @@ namespace gsf
 		public:
 			void mark_produce(uint32_t session_id, evbuffer *buff);
 
+			//! 生产，把消息填充到ringbuff
 			void ready_consume();
 
+			//! 由主线程取出ringbuff
 			void consume();
 
 		private:
