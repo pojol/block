@@ -113,7 +113,7 @@ namespace gsf
 			static Timer& instance();
 
 			template <typename T>
-			uint32_t add_timer(T delay, TimerHandler *timer_handler_ptr);
+			uint32_t add_timer(T delay, TimerHandlerPtr timer_handler_ptr);
 			
 			int rmv_timer(uint32_t timer_id);
 			
@@ -125,7 +125,7 @@ namespace gsf
 
 			struct TimerItem
 			{
-				TimerHandler *timer_handler_ptr_;
+				TimerHandlerPtr timer_handler_ptr_;
 				std::chrono::system_clock::time_point tp_;
 				int32_t timer_id_;
 
@@ -140,10 +140,10 @@ namespace gsf
 				}
 			};
 
-			uint32_t update_delay(delay_second delay, TimerHandler * handler, delay_second_tag);
-			uint32_t update_delay(delay_day delay, TimerHandler * handler, delay_day_tag);
-			uint32_t update_delay(delay_week delay, TimerHandler * handler, delay_week_tag);
-			uint32_t update_delay(delay_month delay, TimerHandler * handler, delay_month_tag);
+			uint32_t update_delay(delay_second delay, TimerHandlerPtr handler, delay_second_tag);
+			uint32_t update_delay(delay_day delay, TimerHandlerPtr handler, delay_day_tag);
+			uint32_t update_delay(delay_week delay, TimerHandlerPtr handler, delay_week_tag);
+			uint32_t update_delay(delay_month delay, TimerHandlerPtr handler, delay_month_tag);
 
 			uint32_t make_timeid();
 
@@ -156,7 +156,7 @@ namespace gsf
 		};
 		
 		template <typename T>
-		uint32_t gsf::utils::Timer::add_timer(T delay, TimerHandler * timer_handler_ptr)
+		uint32_t gsf::utils::Timer::add_timer(T delay, TimerHandlerPtr timer_handler_ptr)
 		{
 			return update_delay(delay, timer_handler_ptr, typename timer_traits<T>::type());
 		}

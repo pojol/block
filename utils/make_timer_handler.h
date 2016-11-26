@@ -2,6 +2,9 @@
 	template <typename T>
 	class TTimerHandler;
 
+	class TimerHandler;
+	typedef std::shared_ptr<TimerHandler> TimerHandlerPtr;
+
 	//R ()
 	template <typename R>
 	class TTimerHandler<R()>:public TimerHandler
@@ -15,9 +18,9 @@
 	};
 
 	template <typename R>
-	inline TimerHandler * makeTimerHandler(R(*func)())
+	inline TimerHandlerPtr makeTimerHandler(R(*func)())
 	{
-		return new TTimerHandler<R()>(func);
+		return std::make_shared<TTimerHandler<R()>>(func);
 	}
 
 	template <typename R>
@@ -46,7 +49,7 @@
 	};
 
 	template <typename R, typename P1>
-	inline TimerHandler * makeTimerHandler(R(*func)(P1), P1 p1)
+	inline TimerHandlerPtr makeTimerHandler(R(*func)(P1), P1 p1)
 	{
 		return std::make_shared<TTimerHandler<R(P1)>>(func, p1);
 	}
@@ -79,9 +82,9 @@
 	};
 
 	template <typename R, typename P1, typename P2>
-	inline TimerHandler * makeTimerHandler(R(*func)(P1, P2), P1 p1, P2 p2)
+	inline TimerHandlerPtr makeTimerHandler(R(*func)(P1, P2), P1 p1, P2 p2)
 	{
-		return std::make_shared(TTimerHandler<R(P1, P2)>)(func, p1, p2);
+		return std::make_shared<TTimerHandler<R(P1, P2)>>(func, p1, p2);
 	}
 
 	template <typename R, typename P1, typename P2>
@@ -114,9 +117,9 @@
 		};
 
 		template <typename R, typename P1, typename P2, typename P3>
-		inline TimerHandler * makeTimerHandler(R(*func)(P1, P2, P3), P1 p1, P2 p2, P3 p3)
+		inline TimerHandlerPtr makeTimerHandler(R(*func)(P1, P2, P3), P1 p1, P2 p2, P3 p3)
 		{
-			return std::make_shared(TTimerHandler<R(P1, P2, P3)>)(func, p1, p2, p3);
+			return std::make_shared<TTimerHandler<R(P1, P2, P3)>>(func, p1, p2, p3);
 		}
 
 		template <typename R, typename P1, typename P2, typename P3>
@@ -151,9 +154,9 @@
 		};
 
 		template <typename R, typename P1, typename P2, typename P3, typename P4>
-		inline TimerHandler * makeTimerHandler(R(*func)(P1, P2, P3, P4), P1 p1, P2 p2, P3 p3, P4 p4)
+		inline TimerHandlerPtr makeTimerHandler(R(*func)(P1, P2, P3, P4), P1 p1, P2 p2, P3 p3, P4 p4)
 		{
-			return std::make_shared(TTimerHandler<R(P1, P2, P3, P4)>)(func, p1, p2, p3, p4);
+			return std::make_shared<TTimerHandler<R(P1, P2, P3, P4)>>(func, p1, p2, p3, p4);
 		}
 
 		template <typename R, typename P1, typename P2, typename P3, typename P4>
@@ -190,9 +193,9 @@
 		};
 
 		template <typename R, typename P1, typename P2, typename P3, typename P4, typename P5>
-		inline TimerHandler * makeTimerHandler(R(*func)(P1, P2, P3, P4, P5), P1 p1, P2 p2, P3 p3, P4 p4, P5 p5)
+		inline TimerHandlerPtr makeTimerHandler(R(*func)(P1, P2, P3, P4, P5), P1 p1, P2 p2, P3 p3, P4 p4, P5 p5)
 		{
-			return std::make_shared(TTimerHandler<R(P1, P2, P3, P4, P5)>)(func, p1, p2, p3, p4, p5);
+			return std::make_shared<TTimerHandler<R(P1, P2, P3, P4, P5)>>(func, p1, p2, p3, p4, p5);
 		}
 
 		template <typename R, typename P1, typename P2, typename P3, typename P4, typename P5>
@@ -231,9 +234,9 @@
 		};
 
 		template <typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6>
-		inline TimerHandler * makeTimerHandler(R(*func)(P1, P2, P3, P4, P5, P6), P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6)
+		inline TimerHandlerPtr makeTimerHandler(R(*func)(P1, P2, P3, P4, P5, P6), P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6)
 		{
-			return std::make_shared(TTimerHandler<R(P1, P2, P3, P4, P5, P6)>)(func, p1, p2, p3, p4, p5, p6);
+			return std::make_shared<TTimerHandler<R(P1, P2, P3, P4, P5, P6)>>(func, p1, p2, p3, p4, p5, p6);
 		}
 
 		template <typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6>
@@ -274,9 +277,9 @@
 		};
 
 		template <typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7>
-		inline TimerHandler * makeTimerHandler(R(*func)(P1, P2, P3, P4, P5, P6, P7), P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7)
+		inline TimerHandlerPtr makeTimerHandler(R(*func)(P1, P2, P3, P4, P5, P6, P7), P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7)
 		{
-			return std::make_shared(TTimerHandler<R(P1, P2, P3, P4, P5, P6, P7)>)(func, p1, p2, p3, p4, p5, p6, p7);
+			return std::make_shared<TTimerHandler<R(P1, P2, P3, P4, P5, P6, P7)>>(func, p1, p2, p3, p4, p5, p6, p7);
 		}
 
 		template <typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7>
@@ -319,9 +322,9 @@
 		};
 
 		template <typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8>
-		inline TimerHandler * makeTimerHandler(R(*func)(P1, P2, P3, P4, P5, P6, P7, P8), P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8)
+		inline TimerHandlerPtr makeTimerHandler(R(*func)(P1, P2, P3, P4, P5, P6, P7, P8), P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8)
 		{
-			return std::make_shared(TTimerHandler<R(P1, P2, P3, P4, P5, P6, P7, P8)>)(func, p1, p2, p3, p4, p5, p6, p7, p8);
+			return std::make_shared<TTimerHandler<R(P1, P2, P3, P4, P5, P6, P7, P8)>>(func, p1, p2, p3, p4, p5, p6, p7, p8);
 		}
 
 		template <typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8>
@@ -366,9 +369,9 @@
 		};
 
 		template <typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9>
-		inline TimerHandler * makeTimerHandler(R(*func)(P1, P2, P3, P4, P5, P6, P7, P8, P9), P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9)
+		inline TimerHandlerPtr makeTimerHandler(R(*func)(P1, P2, P3, P4, P5, P6, P7, P8, P9), P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9)
 		{
-			return std::make_shared(TTimerHandler<R(P1, P2, P3, P4, P5, P6, P7, P8, P9)>)(func, p1, p2, p3, p4, p5, p6, p7, p8, p9);
+			return std::make_shared<TTimerHandler<R(P1, P2, P3, P4, P5, P6, P7, P8, P9)>>(func, p1, p2, p3, p4, p5, p6, p7, p8, p9);
 		}
 
 		template <typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9>
@@ -406,9 +409,9 @@
 		};
 
 		template <typename C, typename R>
-		inline TimerHandler * makeTimerHandler(R(C::*func)(), C * obj)
+		inline TimerHandlerPtr makeTimerHandler(R(C::*func)(), C * obj)
 		{
-			return new TTimerHandler<R(C::*)()>(func, obj);
+			return std::make_shared<TTimerHandler<R(C::*)()>>(func, obj);
 		}
 
 		template <typename C, typename R>
@@ -439,9 +442,9 @@
 		};
 
 		template <typename C, typename R, typename P1>
-		inline TimerHandler * makeTimerHandler(R(C::*func)(P1), C * obj, P1 p1)
+		inline TimerHandlerPtr makeTimerHandler(R(C::*func)(P1), C * obj, P1 p1)
 		{
-			return std::make_shared(TTimerHandler<R(C::*)(P1)>)(func, obj, p1);
+			return std::make_shared<TTimerHandler<R(C::*)(P1)>>(func, obj, p1);
 		}
 
 		template <typename C, typename R, typename P1>
@@ -474,9 +477,9 @@
 		};
 
 		template <typename C, typename R, typename P1, typename P2>
-		inline TimerHandler * makeTimerHandler(R(C::*func)(P1, P2), C * obj, P1 p1, P2 p2)
+		inline TimerHandlerPtr makeTimerHandler(R(C::*func)(P1, P2), C * obj, P1 p1, P2 p2)
 		{
-			return std::make_shared(TTimerHandler<R(C::*)(P1, P2)>)(func, obj, p1, p2);
+			return std::make_shared<TTimerHandler<R(C::*(P1, P2))>>(func, obj, p1, p2);
 		}
 
 		template <typename C, typename R, typename P1, typename P2>
@@ -511,9 +514,9 @@
 		};
 
 		template <typename C, typename R, typename P1, typename P2, typename P3>
-		inline TimerHandler * makeTimerHandler(R(C::*func)(P1, P2, P3), C * obj, P1 p1, P2 p2, P3 p3)
+		inline TimerHandlerPtr makeTimerHandler(R(C::*func)(P1, P2, P3), C * obj, P1 p1, P2 p2, P3 p3)
 		{
-			return std::make_shared(TTimerHandler<R(C::*)(P1, P2, P3)>)(func, obj, p1, p2, p3);
+			return std::make_shared<TTimerHandler<R(C::*)(P1, P2, P3)>>(func, obj, p1, p2, p3);
 		}
 
 		template <typename C, typename R, typename P1, typename P2, typename P3>
@@ -550,9 +553,9 @@
 		};
 
 		template <typename C, typename R, typename P1, typename P2, typename P3, typename P4>
-		inline TimerHandler * makeTimerHandler(R(C::*func)(P1, P2, P3, P4), C * obj, P1 p1, P2 p2, P3 p3, P4 p4)
+		inline TimerHandlerPtr makeTimerHandler(R(C::*func)(P1, P2, P3, P4), C * obj, P1 p1, P2 p2, P3 p3, P4 p4)
 		{
-			return std::make_shared(TTimerHandler<R(C::*)(P1, P2, P3, P4)>)(func, obj, p1, p2, p3, p4);
+			return std::make_shared<TTimerHandler<R(C::*)(P1, P2, P3, P4)>>(func, obj, p1, p2, p3, p4);
 		}
 
 		template <typename C, typename R, typename P1, typename P2, typename P3, typename P4>
@@ -591,9 +594,9 @@
 		};
 
 		template <typename C, typename R, typename P1, typename P2, typename P3, typename P4, typename P5>
-		inline TimerHandler * makeTimerHandler(R(C::*func)(P1, P2, P3, P4, P5), C * obj, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5)
+		inline TimerHandlerPtr makeTimerHandler(R(C::*func)(P1, P2, P3, P4, P5), C * obj, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5)
 		{
-			return std::make_shared(TTimerHandler<R(C::*)(P1, P2, P3, P4, P5)>)(func, obj, p1, p2, p3, p4, p5);
+			return std::make_shared<TTimerHandler<R(C::*)(P1, P2, P3, P4, P5)>>(func, obj, p1, p2, p3, p4, p5);
 		}
 
 		template <typename C, typename R, typename P1, typename P2, typename P3, typename P4, typename P5>
@@ -634,9 +637,9 @@
 		};
 
 		template <typename C, typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6>
-		inline TimerHandler * makeTimerHandler(R(C::*func)(P1, P2, P3, P4, P5, P6), C * obj, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6)
+		inline TimerHandlerPtr makeTimerHandler(R(C::*func)(P1, P2, P3, P4, P5, P6), C * obj, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6)
 		{
-			return std::make_shared(TTimerHandler<R(C::*)(P1, P2, P3, P4, P5, P6)>)(func, obj, p1, p2, p3, p4, p5, p6);
+			return std::make_shared<TTimerHandler<R(C::*)(P1, P2, P3, P4, P5, P6)>>(func, obj, p1, p2, p3, p4, p5, p6);
 		}
 
 		template <typename C, typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6>
@@ -679,9 +682,9 @@
 		};
 
 		template <typename C, typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7>
-		inline TimerHandler * makeTimerHandler(R(C::*func)(P1, P2, P3, P4, P5, P6, P7), C * obj, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7)
+		inline TimerHandlerPtr makeTimerHandler(R(C::*func)(P1, P2, P3, P4, P5, P6, P7), C * obj, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7)
 		{
-			return std::make_shared(TTimerHandler<R(C::*)(P1, P2, P3, P4, P5, P6, P7)>)(func, obj, p1, p2, p3, p4, p5, p6, p7);
+			return std::make_shared<TTimerHandler<R(C::*)(P1, P2, P3, P4, P5, P6, P7)>>(func, obj, p1, p2, p3, p4, p5, p6, p7);
 		}
 
 		template <typename C, typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7>
@@ -726,9 +729,9 @@
 		};
 
 		template <typename C, typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8>
-		inline TimerHandler * makeTimerHandler(R(C::*func)(P1, P2, P3, P4, P5, P6, P7, P8), C * obj, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8)
+		inline TimerHandlerPtr makeTimerHandler(R(C::*func)(P1, P2, P3, P4, P5, P6, P7, P8), C * obj, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8)
 		{
-			return std::make_shared(TTimerHandler<R(C::*)(P1, P2, P3, P4, P5, P6, P7, P8)>)(func, obj, p1, p2, p3, p4, p5, p6, p7, p8);
+			return std::make_shared<TTimerHandler<R(C::*)(P1, P2, P3, P4, P5, P6, P7, P8)>>(func, obj, p1, p2, p3, p4, p5, p6, p7, p8);
 		}
 
 		template <typename C, typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8>
@@ -775,9 +778,9 @@
 		};
 
 		template <typename C, typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9>
-		inline TimerHandler * makeTimerHandler(R(C::*func)(P1, P2, P3, P4, P5, P6, P7, P8, P9), C * obj, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9)
+		inline TimerHandlerPtr makeTimerHandler(R(C::*func)(P1, P2, P3, P4, P5, P6, P7, P8, P9), C * obj, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9)
 		{
-			return std::make_shared(TTimerHandler<R(C::*)(P1, P2, P3, P4, P5, P6, P7, P8, P9)>)(func, obj, p1, p2, p3, p4, p5, p6, p7, p8, p9);
+			return std::make_shared<TTimerHandler<R(C::*)(P1, P2, P3, P4, P5, P6, P7, P8, P9)>>(func, obj, p1, p2, p3, p4, p5, p6, p7, p8, p9);
 		}
 
 		template <typename C, typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9>

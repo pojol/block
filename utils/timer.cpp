@@ -28,7 +28,7 @@ gsf::utils::Timer& gsf::utils::Timer::instance()
 }
 
 
-uint32_t gsf::utils::Timer::update_delay(delay_second delay, TimerHandler *handler, delay_second_tag)
+uint32_t gsf::utils::Timer::update_delay(delay_second delay, TimerHandlerPtr handler, delay_second_tag)
 {
 	auto _timeid = make_timeid();
 
@@ -44,7 +44,7 @@ uint32_t gsf::utils::Timer::update_delay(delay_second delay, TimerHandler *handl
 	return _timeid;
 }
 
-uint32_t gsf::utils::Timer::update_delay(delay_day delay, TimerHandler *handler, delay_day_tag)
+uint32_t gsf::utils::Timer::update_delay(delay_day delay, TimerHandlerPtr handler, delay_day_tag)
 {
 	auto _timeid = make_timeid();
 
@@ -76,14 +76,14 @@ uint32_t gsf::utils::Timer::update_delay(delay_day delay, TimerHandler *handler,
 	return _timeid;
 }
 
-uint32_t gsf::utils::Timer::update_delay(delay_week delay, TimerHandler *handler, delay_week_tag)
+uint32_t gsf::utils::Timer::update_delay(delay_week delay, TimerHandlerPtr  handler, delay_week_tag)
 {
 	auto _timeid = make_timeid();
 
 	return _timeid;
 }
 
-uint32_t gsf::utils::Timer::update_delay(delay_month delay, TimerHandler *handler, delay_month_tag)
+uint32_t gsf::utils::Timer::update_delay(delay_month delay, TimerHandlerPtr handler, delay_month_tag)
 {
 	auto _timeid = make_timeid();
 
@@ -123,7 +123,12 @@ void gsf::utils::Timer::update()
 			}
 			mark_map_.erase(itr);
 
-			_item = minheap_.get_min();
+			if (!minheap_.empty()){
+				_item = minheap_.get_min();
+			}
+			else {
+				break;
+			}
 		}
 	}
 

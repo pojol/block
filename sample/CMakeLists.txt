@@ -1,3 +1,4 @@
 
 ADD_SUBDIRECTORY(test_network)
 ADD_SUBDIRECTORY(test_echoclient)
+ADD_SUBDIRECTORY(test_timer)

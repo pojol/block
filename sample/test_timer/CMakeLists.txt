@@ -1,17 +1,19 @@
-PROJECT(network)
+PROJECT(test_timer)
 
 #引用头文件目录
 INCLUDE_DIRECTORIES(
 	${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
+	${GSF_SOURCE_DIR}/core/network
+	${GSF_SOURCE_DIR}/utils
 )
 
 #引用库目录
 LINK_DIRECTORIES(
-	${GSF_SOURCE_DIR}/LIB_D
+	${GSF_SOURCE_DIR}/LIB_D/Debug
 )
 
 FILE(GLOB_RECURSE SRC "*.cpp" "*.h")
-ADD_LIBRARY(network STATIC ${SRC})
+ADD_EXECUTABLE(test_timer ${SRC})
 
 if(MSVC)     
     # Use the static C library for all build types
@@ -25,9 +27,8 @@ if(MSVC)
         string(REGEX REPLACE "/MD" "/MT" ${var} "${${var}}")
       endif()
     endforeach()    
-	
-	SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/LIB_D)
-	#TARGET_LINK_LIBRARIES(network ws2_32.lib)	项目本身是静态库不需要链接静态库
+
+	TARGET_LINK_LIBRARIES(test_timer ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib network.lib utils.lib)
 	
 endif(MSVC)
 
