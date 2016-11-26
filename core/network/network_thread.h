@@ -11,6 +11,7 @@
 #include <memory>
 #include <thread>
 
+#include "session_mgr.h"
 #include "network_connect.h"
 
 
@@ -18,9 +19,32 @@ namespace gsf
 {
 	namespace network
 	{
+		class IBuffer
+		{
+		public:
+			void mark_produce(uint32_t session_id, evbuffer *buff);
+
+			void ready_consume();
+
+			void consume();
+
+		private:
+			//! produce list
+			std::vector<std::pair<uint32_t, evbuffer*>> ibuffer_vec_;
+
+			std::vector<std::pair<uint32_t, evbuffer*>> consume_vec_;
+
+			std::mutex mtx;
+		};
+
+		class OBuffer
+		{
+
+		};
+
 		struct NetworkThread
 		{
-			NetworkThread();
+			NetworkThread(int index);
 			~NetworkThread();
 
 			std::thread *th;
@@ -33,6 +57,13 @@ namespace gsf
 			evutil_socket_t notify_send_fd_;
 
 			CQ *connect_queue_;
+
+			IBuffer *in_buffer_;
+			OBuffer *out_buffer_;
+
+			SessionMgr *session_mgr;
+
+			int index_;
 		};
 	}
 	

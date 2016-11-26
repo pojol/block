@@ -22,16 +22,18 @@ gsf::network::Session::~Session()
 	
 }
 
-int gsf::network::Session::open(SessionHandler *session_handler, SessionCloseHandler *close_handler)
-{
-	session_handler_ = session_handler;
-	close_handler_ = close_handler;
 
-    in_buf_ = evbuffer_new();
-    out_buf_ = evbuffer_new();
+int gsf::network::Session::init(IBuffer *ibuffer, OBuffer *obuffer)
+{
+	in_buf_ = evbuffer_new();
+	out_buf_ = evbuffer_new();
+
+	thread_in_buffer_ = ibuffer;
+	thread_out_buffer_ = obuffer;
 
 	return 0;
 }
+
 
 void gsf::network::Session::read_cb(::bufferevent *bev, void *ctx)
 {
@@ -84,6 +86,7 @@ void gsf::network::Session::write_impl()
 void gsf::network::Session::read(::bufferevent *bev)
 {
 	if (!need_read_){
+		thread_in_buffer_->mark_produce(id_, in_buf_);
 	}
 
 	bufferevent_read_buffer(bev, in_buf_);

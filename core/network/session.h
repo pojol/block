@@ -41,7 +41,7 @@ namespace gsf
 			Session(int32_t id, ::bufferevent *bev, int fd);
 			~Session();
 
-			int open(SessionHandler *session_handler, SessionCloseHandler *close_handler);
+			int init(IBuffer *ibuffer, OBuffer *obuffer);
 
 			static void read_cb(::bufferevent *bev, void *ctx);
 
@@ -50,8 +50,6 @@ namespace gsf
 			int write(const char *data, int len);
 
 			int32_t get_id() const { return id_; }
-
-			::evbuffer * get_inbuf() { return in_buf_; }
 
 			SessionHandler * get_session_handler() { return session_handler_; }
 
@@ -67,8 +65,12 @@ namespace gsf
 			int fd_;
 			::bufferevent *bev_;
 
+			IBuffer *thread_in_buffer_;
+			OBuffer *thread_out_buffer_;
+
 			::evbuffer *in_buf_;
 			::evbuffer *out_buf_;
+
 			bool need_write_;
 			bool need_read_;
 

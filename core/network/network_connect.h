@@ -23,7 +23,6 @@ namespace gsf
 			int             sfd;
 			int             event_flags;
 
-			uint32_t		acceptor_id;
 			uint32_t		connector_id;
 			uint32_t 		session_id;
 

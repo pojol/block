@@ -18,7 +18,6 @@
 
 #include <network.h>
 #include <acceptor.h>
-#include <acceptor_mgr.h>
 
 #include <session.h>
 #include <session_mgr.h>
@@ -47,35 +46,16 @@ class Player
 */
 
 class LoginServerHandler : 
-	public gsf::network::AcceptHandler,
-	public gsf::network::SessionCloseHandler
+	public gsf::network::AcceptHandler
 {
 public:
     virtual ~LoginServerHandler(){}
 
     //! new connection bind session to message dispatch
-    virtual void handler_new_connection(int acceptor_id, int session_id)
+    virtual void handler_new_connection(int session_id)
     {
-		std::cout << "new connection " << acceptor_id << " " << session_id << std::endl;
-
-		gsf::network::SessionMgr::instance().open(session_id, nullptr, this);
-
-		//gsf::SessionMgr::instance().write(session_id, "c", 1);
-        //gsf::SessionMgr::instance().open_session(session_id, this, &gsf::MessageBinder<T>::instance());
-		//or
-		//gsf::SessionMgr::instance().open_session(session_id, make PlayerSession, &gsf::MessageBinder<T>::instance());
-		//
+		printf("new connection session_id : %d\n", session_id);
     }
-
-	virtual void handle_close(uint32_t session_id
-		, int err_code
-		, int accepor_id
-		, int connector_id
-		, const std::string &ip
-		, const int port)
-	{
-
-	}
 };
 
 
@@ -165,12 +145,6 @@ public:
 	}
 */
 
-static int count_ = 0;
-class TimerTest
-{
-public:
-	void pt(int i) { printf("%d\n", i); ++count_; }
-};
 
 int main()
 {
@@ -185,18 +159,15 @@ int main()
 	}
 #endif // WIN32
 
-	gsf::network::NetworkConfig _config;
-	_config.worker_thread_count_ = 4;
-	gsf::network::Network::instance().init(_config);
+	using namespace gsf::network;
+
+	NetworkConfig _config;
+	Network::instance().init(_config);
     
-	gsf::network::AcceptorConfig _acceptConfig;
+	AcceptorConfig _acceptConfig;
 	_acceptConfig.port = 8888;
 
-	int _acceptor_id = gsf::network::AcceptorMgr::instance().make_acceptor(_acceptConfig);
-	if (_acceptor_id < 0){
-		//err
-	}
-	if (gsf::network::AcceptorMgr::instance().open(_acceptor_id, new LoginServerHandler()) < 0){
+	if (Network::instance().make_acceptor(_acceptConfig, new LoginServerHandler()) < 0){
 		//err
 	}
 

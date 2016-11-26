@@ -26,13 +26,13 @@ namespace gsf
 		public:
 			virtual ~AcceptHandler(){}
 
-			virtual void handler_new_connection(int acceptor_id, int session_id) = 0;
+			virtual void handler_new_connection(int session_id) = 0;
 		};
 
 		class Acceptor
 		{
 		public:
-			Acceptor(int id, const AcceptorConfig &config);
+			Acceptor(const AcceptorConfig &config);
 			~Acceptor();
 
 			int open(AcceptHandler *accept_handler);
@@ -50,8 +50,6 @@ namespace gsf
 			AcceptHandler *handler_;
 
 			::evconnlistener *listener_ptr_;
-
-			int id_;
 		};
 	}
 }

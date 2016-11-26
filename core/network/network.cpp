@@ -2,7 +2,6 @@
 
 #include "network_thread.h"
 
-#include "acceptor_mgr.h"
 #include "session_mgr.h"
 #include "acceptor.h"
 #include "connector.h"
@@ -53,7 +52,7 @@ int gsf::network::Network::init(const NetworkConfig &config)
 {
 	config_ = config;
 
-	main_thread_ptr_ = std::make_shared<NetworkThread>();
+	main_thread_ptr_ = std::make_shared<NetworkThread>(0);
 
 	main_thread_ptr_->event_base_ptr_ = event_base_new();
 
@@ -83,10 +82,12 @@ int gsf::network::Network::start()
 
 int32_t gsf::network::Network::init_work_thread()
 {
-	int _work_thread_count = std::thread::hardware_concurrency() - 1;
-	for (int i = 0; i < _work_thread_count; ++i)
+	if (config_.worker_thread_count_ == 1){
+		config_.worker_thread_count_ = std::thread::hardware_concurrency() - 1;
+	}
+	for (int i = 0; i < config_.worker_thread_count_; ++i)
 	{
-		auto thread_ptr = std::make_shared<NetworkThread>();
+		auto thread_ptr = std::make_shared<NetworkThread>(i + 1);
 
 		thread_ptr->event_base_ptr_ = event_base_new();
 		
@@ -129,7 +130,7 @@ int32_t gsf::network::Network::init_work_thread()
 
 static int last_thread = -1;
 
-void gsf::network::Network::accept_conn_new(int acceptor_id, evutil_socket_t fd)
+void gsf::network::Network::accept_conn_new(evutil_socket_t fd)
 {
 	CQ_ITEM *item = NetworkConnect::instance().cqi_new();
 	if (!item){
@@ -144,8 +145,6 @@ void gsf::network::Network::accept_conn_new(int acceptor_id, evutil_socket_t fd)
 	last_thread = tid;
 	
 	item->sfd = fd;
-	//temp
-	item->acceptor_id = acceptor_id;
 
 	NetworkConnect::instance().cq_push(thread_ptr->connect_queue_, item);
 
@@ -156,24 +155,24 @@ void gsf::network::Network::accept_conn_new(int acceptor_id, evutil_socket_t fd)
 	}
 }
 
-evconnlistener * gsf::network::Network::accept_bind(Acceptor *acceptor_ptr, const std::string &ip, int port)
+void gsf::network::Network::accept_bind(const std::string &ip, int port)
 {
 	struct sockaddr_in sin;
 	memset(&sin, 0, sizeof(sin));
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(port);
 
-	::evconnlistener *listener;
-
-	listener = evconnlistener_new_bind(Network::instance().main_thread_ptr_->event_base_ptr_
+	accept_listener_ = evconnlistener_new_bind(Network::instance().main_thread_ptr_->event_base_ptr_
 		, accept_listen_cb
-		, acceptor_ptr
+		, acceptor_ptr_.get()
 		, LEV_OPT_REUSEABLE | LEV_OPT_CLOSE_ON_FREE
 		, -1
 		, (sockaddr*)&sin
 		, sizeof(sockaddr_in));
 
-	return listener;
+	if (!accept_listener_){
+		printf("accept listen err!\n");
+	}
 }
 
 
@@ -196,7 +195,7 @@ int gsf::network::Network::connect_bind(Connector *connector_ptr, const std::str
 		bufferevent_free(bev);
 	}
 
-	auto _session_ptr = SessionMgr::instance().make_session(bev, fd);
+	auto _session_ptr = main_thread_ptr_->session_mgr->make_session(bev, fd);
 	bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, _session_ptr.get());
 	bufferevent_enable(bev, EV_READ);
 
@@ -221,33 +220,39 @@ void gsf::network::Network::worker_thread_process(evutil_socket_t fd, short even
 	case 'c':
 		CQ_ITEM *item = NetworkConnect::instance().cq_pop(threadPtr->connect_queue_);
 		if (item){
-			pipe_lock.lock();
+			
 			::bufferevent *bev;
 			bev = bufferevent_socket_new(threadPtr->event_base_ptr_, item->sfd, BEV_OPT_CLOSE_ON_FREE);
 			if (!bev){
 				printf("bufferevent_socket_new err!\n");
 			}
 
-			auto _acceptor_ptr = AcceptorMgr::instance().find_acceptor(item->acceptor_id);
-			if (_acceptor_ptr){
-				auto _session_ptr = SessionMgr::instance().make_session(bev, item->sfd);
-				item->session_id = _session_ptr->get_id();
+			auto _session_ptr = threadPtr->session_mgr->make_session(bev, item->sfd);
+			_session_ptr->init(threadPtr->in_buffer_, threadPtr->out_buffer_);
+			item->session_id = _session_ptr->get_id();
 
-				//send connection event
-				_acceptor_ptr->handler_new_connect(_session_ptr->get_id());
-
-				bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, _session_ptr.get());
-				bufferevent_enable(bev, EV_READ);
-			}
-			else {
-				printf("worker_thread_process not find acceptor!\n");
-			}
+			pipe_lock.lock();
+			//send connection event, need send to mainthread
+			Network::instance().get_acceptor()->handler_new_connect(_session_ptr->get_id());
 			pipe_lock.unlock();
+
+			bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, _session_ptr.get());
+			bufferevent_enable(bev, EV_READ);
 		}
 		break;
 	}
 }
 
+int gsf::network::Network::make_acceptor(const AcceptorConfig &config, AcceptHandler *accept_handler)
+{
+	acceptor_ptr_ = std::make_shared<Acceptor>(config);
+
+	acceptor_ptr_->open(accept_handler);
+
+	accept_bind(config.address, config.port);
+
+	return 0;
+}
 
 void gsf::network::Network::worker_thread_run(NetworkThreadPtr thread_ptr)
 {
@@ -259,24 +264,39 @@ void gsf::network::Network::accept_listen_cb(::evconnlistener *listener, evutil_
 {
 	Acceptor *_acceptor_ptr = static_cast<Acceptor*>(arg);
 
-	Network::instance().accept_conn_new(_acceptor_ptr->get_id(), fd);
+	Network::instance().accept_conn_new(fd);
 }
 
 
 void gsf::network::Network::send_wait_time_cb(evutil_socket_t fd, short event, void *arg)
 {
-	// production readbuf
-	
+	// produce readbuf
+	auto *_thread_ptr = static_cast<NetworkThread*>(arg);
+
+	for (auto &th : Network::instance().get_worker_thread())
+	{
+		th->in_buffer_->ready_consume();
+	}
+
+
+	// consume writebuf
+
 	// send write buf
-	// 不能使用sessionmgr 因为无法区分其中的session是隶属于那个线程。 本线程的session应该由自己调度。
-    //SessionMgr::instance().write_impl();
+
 }
 
 void gsf::network::Network::read_wait_time_cb(evutil_socket_t fd, short event, void *arg)
 {
 	auto *_thread_ptr = static_cast<NetworkThread*>(arg);
 		
-	// 自己线程生产readbuf 主线程消费
-	// sconsume readbuf
-	//...
+	for (auto &th : Network::instance().get_worker_thread())
+	{
+		// consume readbuf
+		th->in_buffer_->consume();
+	}
+
+	// produce writebuf
+	
+	// dispatch readbuf
 }
+

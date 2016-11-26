@@ -35,7 +35,7 @@ int main()
 	}
 #endif // WIN32
 
-	for (int i = 0; i < 50000; ++i)
+	for (int i = 0; i < 100; ++i)
 	{
 
 		int socket_fd = socket(AF_INET, SOCK_STREAM, 0);

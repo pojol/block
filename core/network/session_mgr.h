@@ -27,10 +27,7 @@ namespace gsf
 
 		public:
 			~SessionMgr();
-
-			static SessionMgr & instance();
-
-			int open(int session_id, SessionHandler *session_handler, SessionCloseHandler *close_handler);
+			SessionMgr(uint32_t index);
 
 			int close(int session_id);
 
@@ -41,16 +38,14 @@ namespace gsf
 		protected:
 			SessionPtr make_session(::bufferevent *bev, int fd);
 
-			void write_impl();
-
 		private:
 			std::vector<int> out_active_vec_;
 			std::vector<int> in_active_vec_;
 
-			static SessionMgr *instance_;
-
 			typedef std::unordered_map<int32_t, SessionPtr> SessionQueue;
 			SessionQueue session_queue_;
+
+			uint32_t session_index_;
 		};
 	}
 }

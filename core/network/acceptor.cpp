@@ -22,9 +22,8 @@
 #endif // WIN32
 
 
-gsf::network::Acceptor::Acceptor(int id, const AcceptorConfig &config)
-	: id_(id)
-	, config_(config)
+gsf::network::Acceptor::Acceptor(const AcceptorConfig &config)
+	: config_(config)
 {
 
 }
@@ -41,13 +40,7 @@ int gsf::network::Acceptor::open(AcceptHandler *accept_handler)
 {
 	handler_ = accept_handler;
 
-	listener_ptr_ = Network::instance().accept_bind(this, "", config_.port);
-	if (listener_ptr_){
-		return 0;
-	}
-	else {
-		return LIBEVENT_NEW_BIND_ERR;
-	}
+	return 0;
 }
 
 int gsf::network::Acceptor::close()
@@ -59,16 +52,11 @@ int gsf::network::Acceptor::close()
 
 void gsf::network::Acceptor::handler_new_connect(int32_t session_id)
 {
-    handler_->handler_new_connection(id_, session_id);
+    handler_->handler_new_connection(session_id);
 }
 
 gsf::network::AcceptorConfig & gsf::network::Acceptor::get_config()
 {
 	return config_;
-}
-
-int gsf::network::Acceptor::get_id() const
-{
-	return id_;
 }
 

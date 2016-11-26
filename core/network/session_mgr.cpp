@@ -3,40 +3,27 @@
 
 #include "err.h"
 
-gsf::network::SessionMgr* gsf::network::SessionMgr::instance_ = nullptr;
 
-gsf::network::SessionMgr& gsf::network::SessionMgr::instance()
+gsf::network::SessionMgr::SessionMgr(uint32_t index)
 {
-	if (instance_ == nullptr)
-	{
-		instance_ = new gsf::network::SessionMgr();
-	}
-	return *instance_;
+	session_index_ = index;
 }
 
-static uint32_t session_index = 0;
+gsf::network::SessionMgr::~SessionMgr()
+{
+
+}
 
 gsf::network::SessionPtr gsf::network::SessionMgr::make_session(::bufferevent *bev, int fd)
 {
-	session_index++;
+	session_index_++;
 
-	auto _session_ptr = std::make_shared<Session>(session_index, bev, fd);
+	auto _session_ptr = std::make_shared<Session>(session_index_, bev, fd);
 	session_queue_.insert(std::make_pair(_session_ptr->get_id(), _session_ptr));
 
 	return _session_ptr;
 }
 
-
-int gsf::network::SessionMgr::open(int session_id, SessionHandler *session_handler, SessionCloseHandler *close_handler)
-{
-	auto _session_itr = session_queue_.find(session_id);
-	if (_session_itr != session_queue_.end()){
-		return _session_itr->second->open(session_handler, close_handler);
-	}
-	else {
-		return SESSION_NOT_FIND;
-	}
-}
 
 int gsf::network::SessionMgr::close(int session_id)
 {
@@ -53,19 +40,6 @@ int gsf::network::SessionMgr::write(int session_id, const char *data, uint32_t l
 	}
 
 	return 0;
-}
-
-void gsf::network::SessionMgr::write_impl()
-{
-	for (int session_id : out_active_vec_)
-	{
-		auto _session_itr = session_queue_.find(session_id);
-		if (_session_itr != session_queue_.end()){
-			_session_itr->second->write_impl();
-		}
-	}
-
-	out_active_vec_.clear();
 }
 
 gsf::network::SessionPtr gsf::network::SessionMgr::find(int session_id)

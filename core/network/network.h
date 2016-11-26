@@ -18,6 +18,7 @@ namespace gsf
 
 		struct AcceptorConfig;
 		class Acceptor;
+		class AcceptHandler;
 
 		struct ConnectorConfig;
 		class Connector;
@@ -50,15 +51,19 @@ namespace gsf
 
 			int init(const NetworkConfig &config);
 
+			int make_acceptor(const AcceptorConfig &config, AcceptHandler *accept_handler);
+
+			AcceptorPtr get_acceptor() { return acceptor_ptr_; }
+
 			int start();
 
 			//temp
 			std::vector<NetworkThreadPtr> & get_worker_thread() { return worker_thread_vec_; }
 
 		protected:
-			void accept_conn_new(int acceptor_id, evutil_socket_t fd);
+			void accept_conn_new(evutil_socket_t fd);
 
-			::evconnlistener * accept_bind(Acceptor *acceptor_ptr, const std::string &ip, int port);
+			void accept_bind(const std::string &ip, int port);
 
 			int connect_bind(Connector *connector_ptr, const std::string &ip, int port);
 
@@ -85,6 +90,9 @@ namespace gsf
 			NetworkThreadPtr main_thread_ptr_;
 
 			std::vector<NetworkThreadPtr> worker_thread_vec_;
+
+			AcceptorPtr acceptor_ptr_;
+			::evconnlistener *accept_listener_;
 
 			NetworkConfig config_;
 		};
