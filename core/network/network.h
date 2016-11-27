@@ -51,14 +51,14 @@ namespace gsf
 
 			int init(const NetworkConfig &config);
 
-			int make_acceptor(const AcceptorConfig &config, AcceptHandler *accept_handler);
-
-			AcceptorPtr get_acceptor() { return acceptor_ptr_; }
-
 			int start();
 
 			//temp
 			std::vector<NetworkThreadPtr> & get_worker_thread() { return worker_thread_vec_; }
+
+			int make_acceptor(const AcceptorConfig &config, AcceptHandler *accept_handler);
+
+			AcceptorPtr get_acceptor() { return acceptor_ptr_; }
 
 		protected:
 			void accept_conn_new(evutil_socket_t fd);
@@ -83,8 +83,12 @@ namespace gsf
 				, int socklen
 				, void *arg);
 
-			static void send_wait_time_cb(evutil_socket_t fd, short event, void *arg);
-			static void read_wait_time_cb(evutil_socket_t fd, short event, void *arg);
+			static void main_produce_event(evutil_socket_t fd, short event, void *arg);
+			static void main_consume_event(evutil_socket_t fd, short event, void *arg);
+
+			static void work_produce_event(evutil_socket_t fd, short event, void *arg);
+			static void work_consume_event(evutil_socket_t fd, short event, void *arg);
+
 		private:
 
 			NetworkThreadPtr main_thread_ptr_;
@@ -95,6 +99,12 @@ namespace gsf
 			::evconnlistener *accept_listener_;
 
 			NetworkConfig config_;
+
+			::event * produce_event_;
+			::event * consume_event_;
+
+			::event * work_produce_event_;
+			::event * work_consume_event_;
 		};
 	}
 }

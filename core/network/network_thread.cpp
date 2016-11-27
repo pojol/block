@@ -7,6 +7,10 @@
 
 #include <algorithm>
 
+//debug
+#include <iostream>
+#include <assert.h>
+
 gsf::network::NetworkThread::NetworkThread(int index)
 	: th(nullptr)
 	, event_base_ptr_(nullptr)
@@ -30,45 +34,37 @@ gsf::network::NetworkThread::~NetworkThread()
 
 void gsf::network::IBuffer::mark_produce(uint32_t session_id, evbuffer *buff)
 {
+	assert(session_id != 0);
 	ibuffer_vec_.push_back(std::make_pair(session_id, buff));
 }
 
-void gsf::network::IBuffer::ready_consume()
+void gsf::network::IBuffer::produce()
 {
-	for (auto &it : ibuffer_vec_)
+	for (auto itr = ibuffer_vec_.begin(); itr != ibuffer_vec_.end();)
 	{
+		//! 这个buffer可以不用new 后续优化
 		evbuffer *buff = evbuffer_new();
-		evbuffer_add_buffer(buff, it.second);
+		evbuffer_add_buffer(buff, itr->second);
 
-		int len = evbuffer_get_length(buff);
-		int len1 = evbuffer_get_length(it.second);
+		//! 这里需要验证下buffer 的完整性，如果不是一个整包则不压入消费队列。
 
-		consume_vec_.push_back(std::make_pair(it.first, buff));
+		mtx.lock();
+		consume_vec_.push_back(std::make_pair(itr->first, buff));
+		mtx.unlock();
+
+		itr = ibuffer_vec_.erase(itr);
+		//++itr;
 	}
-
-	ibuffer_vec_.clear();
 }
 
-void gsf::network::IBuffer::consume()
+void gsf::network::IBuffer::consume(std::vector<std::pair<uint32_t, evbuffer*>> &vec)
 {
+	mtx.lock();
+	if (!consume_vec_.empty()){
 
-	for (auto itr = consume_vec_.begin(); itr != consume_vec_.end();)
-	{
-		int len = evbuffer_get_length(itr->second);
-		char *buff = (char*)malloc(len);
-		evbuffer_remove(itr->second, buff, len);
+		consume_vec_.swap(vec);
 
-		//printf("session : %d len : %d recv : %s \n", itr->first, len, buff);
-
-		//! 如果buff被拿完则从vec中删除
-		if (len == 1){
-			itr = consume_vec_.erase(itr);
-		}
-		else {
-			++itr;
-		}
+		consume_vec_.clear();
 	}
-
-	//debug
-	printf("thread id : %d \n", std::this_thread::get_id());
+	mtx.unlock();
 }

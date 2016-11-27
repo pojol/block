@@ -18,6 +18,7 @@
 
 #include <network.h>
 #include <acceptor.h>
+#include <thread>
 
 #include <iostream>
 
@@ -35,7 +36,7 @@ int main()
 	}
 #endif // WIN32
 
-	for (int i = 0; i < 100; ++i)
+	for (int i = 0; i < 40000; ++i)
 	{
 
 		int socket_fd = socket(AF_INET, SOCK_STREAM, 0);

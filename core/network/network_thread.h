@@ -19,23 +19,24 @@ namespace gsf
 {
 	namespace network
 	{
+		//! 两个buffer先上锁验证逻辑，后续优化为无锁队列（lockfree | ringbuffer ...)
+
 		class IBuffer
 		{
 		public:
 			void mark_produce(uint32_t session_id, evbuffer *buff);
 
 			//! 生产，把消息填充到ringbuff
-			void ready_consume();
+			void produce();
 
 			//! 由主线程取出ringbuff
-			void consume();
+			void consume(std::vector<std::pair<uint32_t, evbuffer*>> &vec);
 
 		private:
 			//! produce list
 			std::vector<std::pair<uint32_t, evbuffer*>> ibuffer_vec_;
-
 			std::vector<std::pair<uint32_t, evbuffer*>> consume_vec_;
-
+			
 			std::mutex mtx;
 		};
 

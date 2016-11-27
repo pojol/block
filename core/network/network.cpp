@@ -19,24 +19,32 @@
 	#include <errno.h>
 #endif // WIN32
 
+#include <event2/buffer.h>
 #include <event2/listener.h>
 #include <event2/bufferevent.h>
 
 #include <thread>
 #include <mutex>
 
+//! debug
+#include <iostream>
 
 static std::mutex pipe_lock;
 gsf::network::Network* gsf::network::Network::instance_ = NULL;
 
 gsf::network::Network::Network()
+	: produce_event_(nullptr)
+	, consume_event_(nullptr)
+	, work_produce_event_(nullptr)
+	, work_consume_event_(nullptr)
 {
 
 }
 
 gsf::network::Network::~Network()
 {
-
+	evtimer_del(produce_event_);
+	evtimer_del(consume_event_);
 }
 
 gsf::network::Network& gsf::network::Network::instance()
@@ -56,12 +64,12 @@ int gsf::network::Network::init(const NetworkConfig &config)
 
 	main_thread_ptr_->event_base_ptr_ = event_base_new();
 
-	struct ::event * time_event = nullptr;
-	time_event = event_new(main_thread_ptr_->event_base_ptr_, -1, EV_PERSIST, read_wait_time_cb, main_thread_ptr_.get());
+	produce_event_ = event_new(main_thread_ptr_->event_base_ptr_, -1, EV_PERSIST, main_produce_event, main_thread_ptr_.get());
+	consume_event_ = event_new(main_thread_ptr_->event_base_ptr_, -1, EV_PERSIST, main_consume_event, main_thread_ptr_.get());
 
 	struct timeval tv = { 0, config_.read_wait_time_ * 1000 };
-	evtimer_add(time_event, &tv);
-	//evtimer_del(time_event);
+	evtimer_add(produce_event_, &tv);
+	evtimer_add(consume_event_, &tv);
 
 	init_work_thread();
 
@@ -115,12 +123,12 @@ int32_t gsf::network::Network::init_work_thread()
 			event_add(signal, NULL);
 		}
 
-		struct ::event * time_event = nullptr;
-		time_event = event_new(thread_ptr->event_base_ptr_, -1, EV_PERSIST, send_wait_time_cb, thread_ptr.get());
+		work_produce_event_ = event_new(thread_ptr->event_base_ptr_, -1, EV_PERSIST, work_produce_event, thread_ptr.get());
+		work_consume_event_ = event_new(thread_ptr->event_base_ptr_, -1, EV_PERSIST, work_consume_event, thread_ptr.get());
 
 		struct timeval tv = {0 , config_.send_wait_time_*1000};
-		evtimer_add(time_event, &tv);
-		//evtimer_del(time_event);
+		evtimer_add(work_produce_event_, &tv);
+		evtimer_add(work_consume_event_, &tv);
 
 		worker_thread_vec_.push_back(thread_ptr);
 	}
@@ -268,36 +276,47 @@ void gsf::network::Network::accept_listen_cb(::evconnlistener *listener, evutil_
 }
 
 
-void gsf::network::Network::send_wait_time_cb(evutil_socket_t fd, short event, void *arg)
+void gsf::network::Network::main_produce_event(evutil_socket_t fd, short event, void *arg)
 {
-	// produce readbuf
 	auto *_thread_ptr = static_cast<NetworkThread*>(arg);
-
-
-
-	// consume writebuf
-
-	// send write buf
 
 }
 
-//! 不再作为主线程的事件，工作线程同样要有各自的事件，用于从等待队列中取出数据填充到ringbuff
-void gsf::network::Network::read_wait_time_cb(evutil_socket_t fd, short event, void *arg)
+void gsf::network::Network::main_consume_event(evutil_socket_t fd, short event, void *arg)
 {
 	auto *_thread_ptr = static_cast<NetworkThread*>(arg);
-	
-	//! 先填充
-	for (auto &th : Network::instance().get_worker_thread())
-	{
-		th->in_buffer_->ready_consume();
-	}
 
 	for (auto &th : Network::instance().get_worker_thread())
 	{
-		// 从ringbuff拿出数据
-		//th->in_buffer_->consume();
-	}
+		std::vector<std::pair<uint32_t, evbuffer*>> vec;
+		th->in_buffer_->consume(vec);
 
-	// 通过主线程派发
+		// test dispatch
+		for (auto &it : vec)
+		{
+			int len = evbuffer_get_length(it.second);
+			char * buf = (char *)malloc(len);
+			evbuffer_remove(it.second, buf, len);
+
+			std::cout << "thread : " << std::this_thread::get_id() << " session : " << it.first << " recv : " << buf << std::endl;
+
+			evbuffer_free(it.second);
+		}
+
+		vec.clear();
+	}
+}
+
+void gsf::network::Network::work_produce_event(evutil_socket_t fd, short event, void *arg)
+{
+	auto *_thread_ptr = static_cast<NetworkThread*>(arg);
+
+	_thread_ptr->in_buffer_->produce();
+}
+
+void gsf::network::Network::work_consume_event(evutil_socket_t fd, short event, void *arg)
+{
+	auto *_thread_ptr = static_cast<NetworkThread*>(arg);
+
 }
 
