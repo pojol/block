@@ -22,8 +22,9 @@
 #endif // WIN32
 
 
-gsf::network::Acceptor::Acceptor(const AcceptorConfig &config)
+gsf::network::Acceptor::Acceptor(const AcceptorConfig &config, std::function<void(int)> func)
 	: config_(config)
+	, accept_handler_(func)
 {
 
 }
@@ -36,12 +37,6 @@ gsf::network::Acceptor::~Acceptor()
 	close();
 }
 
-int gsf::network::Acceptor::open(AcceptHandler *accept_handler)
-{
-	handler_ = accept_handler;
-
-	return 0;
-}
 
 int gsf::network::Acceptor::close()
 {
@@ -50,13 +45,14 @@ int gsf::network::Acceptor::close()
 	return 0;
 }
 
-void gsf::network::Acceptor::handler_new_connect(int32_t session_id)
-{
-    handler_->handler_new_connection(session_id);
-}
 
 gsf::network::AcceptorConfig & gsf::network::Acceptor::get_config()
 {
 	return config_;
+}
+
+void gsf::network::Acceptor::handler_new_connect(int32_t session_id)
+{
+	accept_handler_(session_id);
 }
 

@@ -31,8 +31,6 @@ namespace gsf
 
 			int close(int session_id);
 
-			int write(int session_id, const char *data, uint32_t len);
-
 			SessionPtr find(int session_id);
 
 		protected:

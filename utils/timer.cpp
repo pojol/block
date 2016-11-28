@@ -49,7 +49,7 @@ uint32_t gsf::utils::Timer::update_delay(delay_day delay, TimerHandlerPtr handle
 	auto _timeid = make_timeid();
 
 	using namespace std::chrono;
-	//! 这里不需要用到具体的日期，所以不转换到北京时间去处理。
+	//! 
 
 	typedef duration<int, std::ratio<60 * 60 * 24>> dur_day;
 	time_point<system_clock, dur_day> _today = time_point_cast<dur_day>(system_clock::now());

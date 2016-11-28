@@ -47,13 +47,11 @@ namespace gsf
 
 			static void err_cb(::bufferevent *bev, short what, void *ctx);
 
-			int write(const char *data, int len);
+			int write(::evbuffer *data);
 
 			int32_t get_id() const { return id_; }
 
 			SessionHandler * get_session_handler() { return session_handler_; }
-
-			void write_impl();
 
 			void read(::bufferevent *bev);
 

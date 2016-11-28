@@ -24,9 +24,6 @@ namespace gsf
 		};
 
 
-		/**!
-			距离当前时间的固定时间区间更新，比如还有几秒，几分钟，几天
-		*/
 		struct delay_second_tag {};
 		struct delay_second
 		{
@@ -42,7 +39,7 @@ namespace gsf
 		};
 
 		/**!
-			每天固定时间更新,比如每天的4点15分更新
+			fixed
 		*/
 		struct delay_day_tag {};
 		struct delay_day
@@ -62,9 +59,7 @@ namespace gsf
 			uint32_t minute_;
 		};
 
-		/**!
-			每周固定时间更新,比如每周的星期一6点更新
-		*/
+
 		struct delay_week_tag {};
 		struct delay_week
 		{
@@ -83,9 +78,7 @@ namespace gsf
 			uint32_t hour_;
 		};
 
-		/**!
-			每月固定时间更新
-		*/
+
 		struct delay_month_tag {};
 		struct delay_month
 		{
@@ -152,7 +145,7 @@ namespace gsf
 
 			MinHeap<TimerItem> minheap_;
 
-			std::map<uint32_t, bool> mark_map_;
+			std::map<uint32_t, bool> mark_map_;	//! 
 		};
 		
 		template <typename T>

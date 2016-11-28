@@ -26,23 +26,43 @@ namespace gsf
 		public:
 			void mark_produce(uint32_t session_id, evbuffer *buff);
 
+			void new_connect(uint32_t session_id);
+
 			//! 生产，把消息填充到ringbuff
 			void produce();
 
 			//! 由主线程取出ringbuff
-			void consume(std::vector<std::pair<uint32_t, evbuffer*>> &vec);
+			void consume(std::vector<std::pair<uint32_t, evbuffer*>> &vec, std::vector<uint32_t> &conn);
 
 		private:
 			//! produce list
 			std::vector<std::pair<uint32_t, evbuffer*>> ibuffer_vec_;
 			std::vector<std::pair<uint32_t, evbuffer*>> consume_vec_;
 			
+			//! temp
+			std::vector<uint32_t> connect_vec_;
+
 			std::mutex mtx;
 		};
 
 		class OBuffer
 		{
+			typedef std::vector<std::pair<uint32_t, evbuffer*>> ProduceVec;
+		public:
+			void mian_thread_init(int threads);
 
+			void write(uint32_t session_id, const char *data, int len);
+
+			void produce();
+
+			void consume(uint32_t thread_index, ProduceVec &vec);
+
+		private:
+
+			std::vector<ProduceVec> thread_write_vec_;
+			std::vector<ProduceVec> thread_produce_vec_;
+
+			std::mutex mtx;
 		};
 
 		struct NetworkThread

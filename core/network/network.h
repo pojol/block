@@ -55,8 +55,9 @@ namespace gsf
 
 			//temp
 			std::vector<NetworkThreadPtr> & get_worker_thread() { return worker_thread_vec_; }
+			NetworkThreadPtr get_main_thread() { return main_thread_ptr_; }
 
-			int make_acceptor(const AcceptorConfig &config, AcceptHandler *accept_handler);
+			int make_acceptor(const AcceptorConfig &config, std::function<void(int)> func);
 
 			AcceptorPtr get_acceptor() { return acceptor_ptr_; }
 

@@ -38,6 +38,15 @@ void gsf::network::IBuffer::mark_produce(uint32_t session_id, evbuffer *buff)
 	ibuffer_vec_.push_back(std::make_pair(session_id, buff));
 }
 
+
+void gsf::network::IBuffer::new_connect(uint32_t session_id)
+{
+	mtx.lock();
+	connect_vec_.push_back(session_id);
+	mtx.unlock();
+}
+
+
 void gsf::network::IBuffer::produce()
 {
 	for (auto itr = ibuffer_vec_.begin(); itr != ibuffer_vec_.end();)
@@ -57,7 +66,7 @@ void gsf::network::IBuffer::produce()
 	}
 }
 
-void gsf::network::IBuffer::consume(std::vector<std::pair<uint32_t, evbuffer*>> &vec)
+void gsf::network::IBuffer::consume(std::vector<std::pair<uint32_t, evbuffer*>> &vec, std::vector<uint32_t> &conn)
 {
 	mtx.lock();
 	if (!consume_vec_.empty()){
@@ -66,5 +75,61 @@ void gsf::network::IBuffer::consume(std::vector<std::pair<uint32_t, evbuffer*>> 
 
 		consume_vec_.clear();
 	}
+
+	if (!connect_vec_.empty()){
+	
+		connect_vec_.swap(conn);
+
+		connect_vec_.clear();
+	}
+
 	mtx.unlock();
 }
+
+void gsf::network::OBuffer::write(uint32_t session_id, const char *data, int len)
+{
+	//! temp
+	evbuffer *buff = evbuffer_new();
+	evbuffer_add(buff, data, len);
+
+	uint32_t _index = static_cast<uint32_t>(session_id / 10000);
+	thread_write_vec_[_index].push_back(std::make_pair(session_id, buff));
+}
+
+void gsf::network::OBuffer::mian_thread_init(int threads)
+{
+	for (int i = 0; i < threads; ++i)
+	{
+		ProduceVec vec;
+		thread_write_vec_.push_back(vec);
+	}
+}
+
+void gsf::network::OBuffer::produce()
+{
+	mtx.lock();
+
+	if (!thread_write_vec_.empty()){
+		thread_write_vec_.swap(thread_produce_vec_);
+		thread_write_vec_.clear();
+	}
+
+	mtx.unlock();
+}
+
+void gsf::network::OBuffer::consume(uint32_t thread_index, ProduceVec &vec)
+{
+	mtx.lock();
+
+	if (!thread_produce_vec_.empty()){
+		if (!thread_produce_vec_[thread_index].empty()){
+			thread_produce_vec_[thread_index].swap(vec);
+
+			thread_produce_vec_[thread_index].clear();
+		}
+	}
+
+	mtx.unlock();
+}
+
+

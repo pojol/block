@@ -64,23 +64,10 @@ void gsf::network::Session::err_cb(::bufferevent *bev, short what, void *ctx)
 	bufferevent_free(bev);
 }
 
-int gsf::network::Session::write(const char *data, int len)
+int gsf::network::Session::write(::evbuffer *data)
 {
-	int _ret = need_write_ ? 1 : 0;
-
-	evbuffer_add(out_buf_, data, len);
-	need_write_ = true;
-
-	return _ret;
-}
-
-void gsf::network::Session::write_impl()
-{
-	if (need_write_){
-		evbuffer_write(out_buf_, fd_);
-		need_write_ = false;
-	}
-
+	evbuffer_write(data, fd_);
+	return 0;
 }
 
 void gsf::network::Session::read(::bufferevent *bev)

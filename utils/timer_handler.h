@@ -7,17 +7,13 @@ namespace gsf
 {
 	namespace utils
 	{
-		//!定时器处理器接口定义
 		class TimerHandler
 		{
 		public:
-			//!构造函数
 			TimerHandler();
 
-			//!析构函数
 			virtual ~TimerHandler();
 
-			//!定时器处理函数
 			virtual void handleTimeout() = 0;
 		};
 

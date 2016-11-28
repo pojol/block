@@ -45,14 +45,13 @@ class Player
 }
 */
 
-class LoginServerHandler : 
-	public gsf::network::AcceptHandler
+class LoginServerHandler
 {
 public:
-    virtual ~LoginServerHandler(){}
+    ~LoginServerHandler(){}
 
     //! new connection bind session to message dispatch
-    virtual void handler_new_connection(int session_id)
+    void handler_new_connection(int session_id)
     {
 		printf("new connection session_id : %d\n", session_id);
     }
@@ -167,7 +166,10 @@ int main()
 	AcceptorConfig _acceptConfig;
 	_acceptConfig.port = 8888;
 
-	if (Network::instance().make_acceptor(_acceptConfig, new LoginServerHandler()) < 0){
+	LoginServerHandler *accept_handler = new LoginServerHandler();
+
+	if (Network::instance().make_acceptor(_acceptConfig
+		, std::bind(&LoginServerHandler::handler_new_connection, accept_handler, std::placeholders::_1)) < 0){
 		//err
 	}
 

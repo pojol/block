@@ -239,10 +239,7 @@ void gsf::network::Network::worker_thread_process(evutil_socket_t fd, short even
 			_session_ptr->init(threadPtr->in_buffer_, threadPtr->out_buffer_);
 			item->session_id = _session_ptr->get_id();
 
-			pipe_lock.lock();
-			//send connection event, need send to mainthread
-			Network::instance().get_acceptor()->handler_new_connect(_session_ptr->get_id());
-			pipe_lock.unlock();
+			threadPtr->in_buffer_->new_connect(_session_ptr->get_id());
 
 			bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, _session_ptr.get());
 			bufferevent_enable(bev, EV_READ);
@@ -251,11 +248,9 @@ void gsf::network::Network::worker_thread_process(evutil_socket_t fd, short even
 	}
 }
 
-int gsf::network::Network::make_acceptor(const AcceptorConfig &config, AcceptHandler *accept_handler)
+int gsf::network::Network::make_acceptor(const AcceptorConfig &config, std::function<void(int)> func)
 {
-	acceptor_ptr_ = std::make_shared<Acceptor>(config);
-
-	acceptor_ptr_->open(accept_handler);
+	acceptor_ptr_ = std::make_shared<Acceptor>(config, func);
 
 	accept_bind(config.address, config.port);
 
@@ -279,7 +274,8 @@ void gsf::network::Network::accept_listen_cb(::evconnlistener *listener, evutil_
 void gsf::network::Network::main_produce_event(evutil_socket_t fd, short event, void *arg)
 {
 	auto *_thread_ptr = static_cast<NetworkThread*>(arg);
-
+	
+	_thread_ptr->out_buffer_->produce();
 }
 
 void gsf::network::Network::main_consume_event(evutil_socket_t fd, short event, void *arg)
@@ -289,7 +285,8 @@ void gsf::network::Network::main_consume_event(evutil_socket_t fd, short event, 
 	for (auto &th : Network::instance().get_worker_thread())
 	{
 		std::vector<std::pair<uint32_t, evbuffer*>> vec;
-		th->in_buffer_->consume(vec);
+		std::vector<uint32_t> conn;
+		th->in_buffer_->consume(vec, conn);
 
 		// test dispatch
 		for (auto &it : vec)
@@ -304,6 +301,11 @@ void gsf::network::Network::main_consume_event(evutil_socket_t fd, short event, 
 		}
 
 		vec.clear();
+
+		for (int i : conn)
+		{
+			Network::instance().get_acceptor()->handler_new_connect(i);
+		}
 	}
 }
 
@@ -318,5 +320,17 @@ void gsf::network::Network::work_consume_event(evutil_socket_t fd, short event, 
 {
 	auto *_thread_ptr = static_cast<NetworkThread*>(arg);
 
+	auto _main_thread_ptr = Network::instance().get_main_thread();
+
+	std::vector<std::pair<uint32_t, evbuffer*>> vec;
+	_main_thread_ptr->out_buffer_->consume(_thread_ptr->index_, vec);
+
+	for (auto &it : vec)
+	{
+		SessionPtr _seesion = _thread_ptr->session_mgr->find(it.first);
+		_seesion->write(it.second);
+	}
+
+	vec.clear();
 }
 

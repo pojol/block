@@ -7,6 +7,7 @@
 #include <event2/bufferevent.h>
 #include <event2/listener.h>
 
+#include <functional>
 
 namespace gsf
 {
@@ -21,21 +22,11 @@ namespace gsf
 			std::string address;
 		};
 
-		class AcceptHandler
-		{
-		public:
-			virtual ~AcceptHandler(){}
-
-			virtual void handler_new_connection(int session_id) = 0;
-		};
-
 		class Acceptor
 		{
 		public:
-			Acceptor(const AcceptorConfig &config);
+			Acceptor(const AcceptorConfig &config, std::function<void(int)> func);
 			~Acceptor();
-
-			int open(AcceptHandler *accept_handler);
 
 			int close();
 
@@ -47,7 +38,8 @@ namespace gsf
 
 		private:
 			AcceptorConfig config_;
-			AcceptHandler *handler_;
+
+			std::function<void(int)> accept_handler_;
 
 			::evconnlistener *listener_ptr_;
 		};
