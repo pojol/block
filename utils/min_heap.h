@@ -1,128 +1,179 @@
 #ifndef _MIN_HEAP_HEAD_
 #define _MIN_HEAP_HEAD_
 
-#include <vector>
-#include <stdexcept>
-
-/**!
-	from https://github.com/AlirezaShahabi/CPP-MinHeap/blob/master/MinHeap.h
-*/
 
 namespace gsf
 {
 	namespace utils
 	{
-		template <typename T> class MinHeap 
+		template <typename T>
+		struct min_heap
 		{
-
-		private:
-			std::vector<T> data;
-			// private utility functions
-			void heapify();
-			void bubble_up(int);
-			void bubble_down(int);
-			void swap_val(int, int);
-
-		public:
-			// constructor
-			MinHeap();
-			MinHeap(const std::vector<T>&);
-			MinHeap(T*, int);
-			// public member functions
-			MinHeap& add(const T&);
-			MinHeap& rem_min();
-			T get_min() const;
-			inline int size() const { return data.size(); }
-			inline bool empty() const { return data.empty(); }
+			T** p;
+			unsigned n, a;
 		};
 
+		template <typename T>
+		static inline void	     min_heap_ctor(min_heap<T>* s);
 
-		// constructors
-		template <typename T> MinHeap<T>::MinHeap() :data() {}
+		template <typename T>
+		static inline void	     min_heap_dtor(min_heap<T>* s);
 
-		template <typename T> MinHeap<T>::MinHeap(const std::vector<T>& v) :
-			data(v) {
-			heapify();
+		template <typename T>
+		static inline void	     min_heap_elem_init(T* e);
+		
+		template <typename T>
+		static inline int	     min_heap_elt_is_top(const T *e);
+		
+		template <typename T>
+		static inline int	     min_heap_elem_greater(T *a, T *b);
+
+		template <typename T>
+		static inline int	     min_heap_empty(min_heap<T>* s);
+
+		template <typename T>
+		static inline unsigned	     min_heap_size(min_heap<T>* s);
+
+		template <typename T>
+		static inline T*  min_heap_top(min_heap<T>* s);
+
+		template <typename T>
+		static inline int	     min_heap_reserve(min_heap<T>* s, unsigned n);
+		
+		template <typename T>
+		static inline int	     min_heap_push(min_heap<T>* s, T* e);
+
+		template <typename T>
+		static inline T*  min_heap_pop(min_heap<T>* s);
+
+		template <typename T>
+		static inline int	     min_heap_erase(min_heap<T>* s, T* e);
+
+		template <typename T>
+		static inline void	     min_heap_shift_up_(min_heap<T>* s, unsigned hole_index, T* e);
+
+		template <typename T>
+		static inline void	     min_heap_shift_down_(min_heap<T>* s, unsigned hole_index, T* e);
+
+		template <typename T>
+		int min_heap_elem_greater(T *a, T *b)
+		{
+			return (a->tp_ > b->tp_);
 		}
 
-		template <typename T> MinHeap<T>::MinHeap(T* arr, int n) : data(n) {
-			std::copy(arr, arr + n, data.begin());
-			heapify();
+		template <typename T>
+		void min_heap_ctor(min_heap<T>* s) { s->p = 0; s->n = 0; s->a = 0; }
+
+		template <typename T>
+		void min_heap_dtor(min_heap<T>* s) { if (s->p) free(s->p); }
+
+		template <typename T>
+		void min_heap_elem_init(T* e) { e->min_heap_idx = -1; }
+
+		template <typename T>
+		int min_heap_empty(min_heap<T>* s) { return 0u == s->n; }
+
+		template <typename T>
+		unsigned min_heap_size(min_heap<T>* s) { return s->n; }
+
+		template <typename T>
+		T* min_heap_top(min_heap<T>* s) { return s->n ? *s->p : 0; }
+
+		template <typename T>
+		int min_heap_push(min_heap<T>* s, T* e)
+		{
+			if (min_heap_reserve(s, s->n + 1))
+				return -1;
+			min_heap_shift_up_(s, s->n++, e);
+			return 0;
 		}
 
-		// add a new element to MinHeap
-		template <typename T> MinHeap<T>& MinHeap<T>::add(const T& obj) {
-			data.push_back(obj);
-			int last_index = size() - 1;
-			bubble_up(last_index);
-			return *this;
-		}
-
-		// remove the minimum element from the MinHeap
-		template <typename T> MinHeap<T>& MinHeap<T>::rem_min() {
-			if (!empty()) {
-				int last_index = size() - 1;
-				swap_val(0, last_index);
-				data.pop_back();
-				bubble_down(0);
+		template <typename T>
+		T* min_heap_pop(min_heap<T>* s)
+		{
+			if (s->n)
+			{
+				T* e = *s->p;
+				min_heap_shift_down_(s, 0u, s->p[--s->n]);
+				e->min_heap_idx = -1;
+				return e;
 			}
-			return *this;
+			return 0;
 		}
 
-		// return the minimum value
-		template <typename T> T MinHeap<T>::get_min() const {
-			if (empty()) { throw std::out_of_range("empty heap!"); }
-			return data[0];
+		template <typename T>
+		int min_heap_elt_is_top(const T *e)
+		{
+			return e->min_heap_idx == 0;
 		}
 
-
-		// private utility functions
-
-
-		// heapify an ordinary array
-		template <typename T> void MinHeap<T>::heapify() {
-			if (empty()) { return; }
-			int last_index = size() - 1;
-			for (int i = last_index; i >= 0; --i) { bubble_down(i); }
-		}
-
-		// bubble_up operation
-		template <typename T> void MinHeap<T>::bubble_up(int index) {
-			if (index == 0) { return; }
-			int parent_index = static_cast<int>((index - 1) / 2);
-			if (data[parent_index] > data[index]) {
-				swap_val(index, parent_index);
-				bubble_up(parent_index);
+		template <typename T>
+		int min_heap_erase(min_heap<T>* s, T* e)
+		{
+			if (-1 != e->min_heap_idx)
+			{
+				T *last = s->p[--s->n];
+				unsigned parent = (e->min_heap_idx - 1) / 2;
+				/* we replace e with the last element in the heap.  We might need to
+				shift it upward if it is less than its parent, or downward if it is
+				greater than one or both its children. Since the children are known
+				to be less than the parent, it can't need to shift both up and
+				down. */
+				if (e->min_heap_idx > 0 && min_heap_elem_greater(s->p[parent], last))
+					min_heap_shift_up_(s, e->min_heap_idx, last);
+				else
+					min_heap_shift_down_(s, e->min_heap_idx, last);
+				e->min_heap_idx = -1;
+				return 0;
 			}
-			return;
+			return -1;
 		}
 
-		// bubble_down operation
-		template <typename T> void MinHeap<T>::bubble_down(int index) {
-			int l_index = 2 * index + 1;
-			int r_index = 2 * index + 2;
-			if (l_index >= size()) { return; }
-			if (r_index == size()) {
-				if (data[index] > data[l_index]) { swap_val(index, l_index); }
-				return;
+		template <typename T>
+		int min_heap_reserve(min_heap<T>* s, unsigned n)
+		{
+			if (s->a < n)
+			{
+				T** p;
+				unsigned a = s->a ? s->a * 2 : 8;
+				if (a < n)
+					a = n;
+				if (!(p = (T**)realloc(s->p, a * sizeof *p)))
+					return -1;
+				s->p = p;
+				s->a = a;
 			}
-			int less_index = data[l_index] < data[r_index] ? l_index : r_index;
-			if (data[index] > data[less_index]) {
-				swap_val(index, less_index);
-				bubble_down(less_index);
-			}
-			else {
-				return;
-			}
+			return 0;
 		}
 
-		// swap the values at the two index: i1 and i2
-		template <typename T> void MinHeap<T>::swap_val(int i1, int i2) {
-			T temp = data[i1];
-			data[i1] = data[i2];
-			data[i2] = temp;
+		template <typename T>
+		void min_heap_shift_up_(min_heap<T>* s, unsigned hole_index, T* e)
+		{
+			unsigned parent = (hole_index - 1) / 2;
+			while (hole_index && min_heap_elem_greater(s->p[parent], e))
+			{
+				(s->p[hole_index] = s->p[parent])->min_heap_idx = hole_index;
+				hole_index = parent;
+				parent = (hole_index - 1) / 2;
+			}
+			(s->p[hole_index] = e)->min_heap_idx = hole_index;
 		}
 
+		template <typename T>
+		void min_heap_shift_down_(min_heap<T>* s, unsigned hole_index, T* e)
+		{
+			unsigned min_child = 2 * (hole_index + 1);
+			while (min_child <= s->n)
+			{
+				min_child -= min_child == s->n || min_heap_elem_greater(s->p[min_child], s->p[min_child - 1]);
+				if (!(min_heap_elem_greater(e, s->p[min_child])))
+					break;
+				(s->p[hole_index] = s->p[min_child])->min_heap_idx = hole_index;
+				hole_index = min_child;
+				min_child = 2 * (hole_index + 1);
+			}
+			(s->p[hole_index] = e)->min_heap_idx = hole_index;
+		}
 	}
 }
 

@@ -97,18 +97,26 @@ namespace gsf
 			uint32_t hour_;
 		};
 
+		typedef std::shared_ptr<TimerHandler> TimerHandlerPtr;
+
+		struct TimerEvent
+		{
+			TimerHandlerPtr timer_handler_ptr_;
+			std::chrono::system_clock::time_point tp_;
+			int32_t min_heap_idx;
+		};
+
 		class Timer
 		{
-			typedef std::shared_ptr<TimerHandler> TimerHandlerPtr;
 		public:
 			
 			~Timer();
 			static Timer& instance();
 
 			template <typename T>
-			uint32_t add_timer(T delay, TimerHandlerPtr timer_handler_ptr);
+			TimerEvent * add_timer(T delay, TimerHandlerPtr timer_handler_ptr);
 			
-			int rmv_timer(uint32_t timer_id);
+			int rmv_timer(TimerEvent *e);
 			
 			void update();
 
@@ -116,40 +124,18 @@ namespace gsf
 			Timer();
 			static Timer* instance_;
 
-			struct TimerItem
-			{
-				TimerHandlerPtr timer_handler_ptr_;
-				std::chrono::system_clock::time_point tp_;
-				int32_t timer_id_;
-
-				bool operator < (const TimerItem &item)
-				{
-					return (tp_ < item.tp_);
-				}
-
-				bool operator > (const TimerItem &item)
-				{
-					return (tp_ > item.tp_);
-				}
-			};
-
-			uint32_t update_delay(delay_second delay, TimerHandlerPtr handler, delay_second_tag);
-			uint32_t update_delay(delay_day delay, TimerHandlerPtr handler, delay_day_tag);
-			uint32_t update_delay(delay_week delay, TimerHandlerPtr handler, delay_week_tag);
-			uint32_t update_delay(delay_month delay, TimerHandlerPtr handler, delay_month_tag);
-
-			uint32_t make_timeid();
+			TimerEvent * update_delay(delay_second delay, TimerHandlerPtr handler, delay_second_tag);
+			TimerEvent * update_delay(delay_day delay, TimerHandlerPtr handler, delay_day_tag);
+			TimerEvent * update_delay(delay_week delay, TimerHandlerPtr handler, delay_week_tag);
+			TimerEvent * update_delay(delay_month delay, TimerHandlerPtr handler, delay_month_tag);
 
 		private:
-			static uint32_t time_index_;
 
-			MinHeap<TimerItem> minheap_;
-
-			std::map<uint32_t, bool> mark_map_;	//! 
+			min_heap<TimerEvent> min_heap_;
 		};
 		
 		template <typename T>
-		uint32_t gsf::utils::Timer::add_timer(T delay, TimerHandlerPtr timer_handler_ptr)
+		TimerEvent * gsf::utils::Timer::add_timer(T delay, TimerHandlerPtr timer_handler_ptr)
 		{
 			return update_delay(delay, timer_handler_ptr, typename timer_traits<T>::type());
 		}

@@ -14,7 +14,7 @@ gsf::utils::Timer::~Timer()
 
 gsf::utils::Timer::Timer()
 {
-
+	min_heap_ctor(&min_heap_);
 }
 
 
@@ -28,26 +28,21 @@ gsf::utils::Timer& gsf::utils::Timer::instance()
 }
 
 
-uint32_t gsf::utils::Timer::update_delay(delay_second delay, TimerHandlerPtr handler, delay_second_tag)
+gsf::utils::TimerEvent * gsf::utils::Timer::update_delay(delay_second delay, TimerHandlerPtr handler, delay_second_tag)
 {
-	auto _timeid = make_timeid();
-
 	auto _tp = std::chrono::system_clock::now() + std::chrono::seconds(delay.Second());
-	TimerItem _item;
-	_item.timer_handler_ptr_ = handler;
-	_item.timer_id_ = _timeid;
-	_item.tp_ = _tp;
 	
-	minheap_.add(_item);
-	mark_map_.insert(std::make_pair(_timeid, true));
+	TimerEvent *_event = new TimerEvent();
+	_event->timer_handler_ptr_ = handler;
+	_event->tp_ = _tp;
+	
+	min_heap_push(&min_heap_, _event);
 
-	return _timeid;
+	return _event;
 }
 
-uint32_t gsf::utils::Timer::update_delay(delay_day delay, TimerHandlerPtr handler, delay_day_tag)
+gsf::utils::TimerEvent * gsf::utils::Timer::update_delay(delay_day delay, TimerHandlerPtr handler, delay_day_tag)
 {
-	auto _timeid = make_timeid();
-
 	using namespace std::chrono;
 	//! 
 
@@ -59,72 +54,57 @@ uint32_t gsf::utils::Timer::update_delay(delay_day delay, TimerHandlerPtr handle
 	uint32_t _passed_second = static_cast<uint32_t>(_second.time_since_epoch().count() - _today.time_since_epoch().count() * 24 * 60 * 60);
 	uint32_t _space_second = delay.Hour() * 60 * 60 + delay.Minute() * 60;
 
-	TimerItem _item;
+	TimerEvent *_event = new TimerEvent();
 	if (_space_second > _passed_second){
-		_item.tp_ = _second + seconds(_space_second - _passed_second);
+		_event->tp_ = _second + seconds(_space_second - _passed_second);
 	}
 	else {
-		_item.tp_ = _second + seconds((24 * 60 * 60) - _passed_second - _space_second);
+		_event->tp_ = _second + seconds((24 * 60 * 60) - _passed_second - _space_second);
 	}
 
-	_item.timer_handler_ptr_ = handler;
-	_item.timer_id_ = _timeid;
+	_event->timer_handler_ptr_ = handler;
 
-	minheap_.add(_item);
-	mark_map_.insert(std::make_pair(_timeid, true));
-
-	return _timeid;
+	min_heap_push(&min_heap_, _event);
+	
+	return _event;
 }
 
-uint32_t gsf::utils::Timer::update_delay(delay_week delay, TimerHandlerPtr  handler, delay_week_tag)
+gsf::utils::TimerEvent * gsf::utils::Timer::update_delay(delay_week delay, TimerHandlerPtr  handler, delay_week_tag)
 {
-	auto _timeid = make_timeid();
-
-	return _timeid;
+	
+	return nullptr;
 }
 
-uint32_t gsf::utils::Timer::update_delay(delay_month delay, TimerHandlerPtr handler, delay_month_tag)
+gsf::utils::TimerEvent * gsf::utils::Timer::update_delay(delay_month delay, TimerHandlerPtr handler, delay_month_tag)
 {
-	auto _timeid = make_timeid();
 
-	return _timeid;
+	return nullptr;
 }
 
-int gsf::utils::Timer::rmv_timer(uint32_t timer_id)
+int gsf::utils::Timer::rmv_timer(TimerEvent *e)
 {
-	auto itr = mark_map_.find(timer_id);
-	if (itr != mark_map_.end()){
-		itr->second = false;
-		return 0;
-	}
-	else {
-		return -1;
-	}
+
+	return min_heap_erase(&min_heap_, e);
+
 }
 
 void gsf::utils::Timer::update()
 {
 	using namespace std::chrono;
 
-	if (!minheap_.empty())
+	if (!min_heap_empty(&min_heap_))
 	{
-		TimerItem _item = minheap_.get_min();
+		TimerEvent *_event_ptr = min_heap_top(&min_heap_);
 		time_point<system_clock, seconds> _second = time_point_cast<seconds>(system_clock::now());
 
-		while (_item.tp_ < _second)
+		while (_event_ptr->tp_ < _second)
 		{
-			minheap_.rem_min();
+			min_heap_pop(&min_heap_);
 			
-			auto itr = mark_map_.find(_item.timer_id_);
-			assert(itr != mark_map_.end());
-
-			if (itr->second){
-				_item.timer_handler_ptr_->handleTimeout();
-			}
-			mark_map_.erase(itr);
-
-			if (!minheap_.empty()){
-				_item = minheap_.get_min();
+			_event_ptr->timer_handler_ptr_->handleTimeout();
+			
+			if (!min_heap_empty(&min_heap_)){
+				_event_ptr = min_heap_top(&min_heap_);
 			}
 			else {
 				break;
@@ -133,16 +113,3 @@ void gsf::utils::Timer::update()
 	}
 
 }
-
-uint32_t gsf::utils::Timer::make_timeid()
-{
-	time_index_++;
-
-	if (time_index_ == UINT32_MAX){
-		time_index_ = 0;
-	}
-
-	return time_index_;
-}
-
-uint32_t gsf::utils::Timer::time_index_ = 0;
