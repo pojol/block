@@ -49,6 +49,9 @@ namespace gsf
 		{
 			typedef std::vector<std::pair<uint32_t, evbuffer*>> ProduceVec;
 		public:
+			OBuffer();
+			~OBuffer();
+
 			void mian_thread_init(int threads);
 
 			void write(uint32_t session_id, const char *data, int len);

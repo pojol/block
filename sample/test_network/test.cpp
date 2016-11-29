@@ -54,6 +54,8 @@ public:
     void handler_new_connection(int session_id)
     {
 		printf("new connection session_id : %d\n", session_id);
+
+		gsf::network::Network::instance().write(session_id, "2", 1);
     }
 };
 

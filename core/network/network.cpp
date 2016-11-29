@@ -133,6 +133,8 @@ int32_t gsf::network::Network::init_work_thread()
 		worker_thread_vec_.push_back(thread_ptr);
 	}
 
+	main_thread_ptr_->out_buffer_->mian_thread_init(config_.worker_thread_count_ + 1);
+
 	return 0;
 }
 
@@ -332,5 +334,10 @@ void gsf::network::Network::work_consume_event(evutil_socket_t fd, short event, 
 	}
 
 	vec.clear();
+}
+
+void gsf::network::Network::write(uint32_t session_id, const char *data, uint32_t len)
+{
+	main_thread_ptr_->out_buffer_->write(session_id, data, len);
 }
 

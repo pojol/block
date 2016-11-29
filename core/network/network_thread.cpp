@@ -86,13 +86,27 @@ void gsf::network::IBuffer::consume(std::vector<std::pair<uint32_t, evbuffer*>> 
 	mtx.unlock();
 }
 
+
+gsf::network::OBuffer::OBuffer()
+:thread_count_(0)
+{
+
+}
+
+
+gsf::network::OBuffer::~OBuffer()
+{
+
+}
+
+
 void gsf::network::OBuffer::write(uint32_t session_id, const char *data, int len)
 {
 	//! temp
 	evbuffer *buff = evbuffer_new();
 	evbuffer_add(buff, data, len);
 
-	uint32_t _index = static_cast<uint32_t>(session_id / 10000);
+	uint32_t _index = static_cast<uint32_t>(session_id / 100000);
 	thread_write_vec_[_index].push_back(std::make_pair(session_id, buff));
 }
 
@@ -113,7 +127,7 @@ void gsf::network::OBuffer::produce()
 {
 	mtx.lock();
 
-	for (int i = 0; i < thread_count_; ++i)
+	for (uint32_t i = 0; i < thread_count_; ++i)
 	{
 		if (thread_write_vec_[i].empty()){
 			thread_write_vec_[i].swap(thread_produce_vec_[i]);

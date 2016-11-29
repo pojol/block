@@ -61,6 +61,8 @@ namespace gsf
 
 			AcceptorPtr get_acceptor() { return acceptor_ptr_; }
 
+			void write(uint32_t session_id, const char *data, uint32_t len);
+
 		protected:
 			void accept_conn_new(evutil_socket_t fd);
 
