@@ -51,11 +51,11 @@ void gsf::network::IBuffer::produce()
 {
 	for (auto itr = ibuffer_vec_.begin(); itr != ibuffer_vec_.end();)
 	{
-		//! Õâ¸öbuffer¿ÉÒÔ²»ÓÃnew ºóÐøÓÅ»¯
+		//! è¿™ä¸ªbufferå¯ä»¥ä¸ç”¨new åŽç»­ä¼˜åŒ–
 		evbuffer *buff = evbuffer_new();
 		evbuffer_add_buffer(buff, itr->second);
 
-		//! ÕâÀïÐèÒªÑéÖ¤ÏÂbuffer µÄÍêÕûÐÔ£¬Èç¹û²»ÊÇÒ»¸öÕû°üÔò²»Ñ¹ÈëÏû·Ñ¶ÓÁÐ¡£
+		//! è¿™é‡Œéœ€è¦éªŒè¯ä¸‹buffer çš„å®Œæ•´æ€§ï¼Œå¦‚æžœä¸æ˜¯ä¸€ä¸ªæ•´åŒ…åˆ™ä¸åŽ‹å…¥æ¶ˆè´¹é˜Ÿåˆ—ã€‚
 
 		mtx.lock();
 		consume_vec_.push_back(std::make_pair(itr->first, buff));
@@ -98,10 +98,14 @@ void gsf::network::OBuffer::write(uint32_t session_id, const char *data, int len
 
 void gsf::network::OBuffer::mian_thread_init(int threads)
 {
+	thread_count_ = threads;
 	for (int i = 0; i < threads; ++i)
 	{
-		ProduceVec vec;
-		thread_write_vec_.push_back(vec);
+		ProduceVec write_vec;
+		thread_write_vec_.push_back(write_vec);
+		
+		ProduceVec produce_vec;
+		thread_produce_vec_.push_back(produce_vec);
 	}
 }
 
@@ -109,9 +113,12 @@ void gsf::network::OBuffer::produce()
 {
 	mtx.lock();
 
-	if (!thread_write_vec_.empty()){
-		thread_write_vec_.swap(thread_produce_vec_);
-		thread_write_vec_.clear();
+	for (int i = 0; i < thread_count_; ++i)
+	{
+		if (thread_write_vec_[i].empty()){
+			thread_write_vec_[i].swap(thread_produce_vec_[i]);
+			thread_write_vec_[i].clear();
+		}
 	}
 
 	mtx.unlock();
@@ -121,12 +128,10 @@ void gsf::network::OBuffer::consume(uint32_t thread_index, ProduceVec &vec)
 {
 	mtx.lock();
 
-	if (!thread_produce_vec_.empty()){
-		if (!thread_produce_vec_[thread_index].empty()){
-			thread_produce_vec_[thread_index].swap(vec);
+	if (!thread_produce_vec_[thread_index].empty()){
+		thread_produce_vec_[thread_index].swap(vec);
 
-			thread_produce_vec_[thread_index].clear();
-		}
+		thread_produce_vec_[thread_index].clear();
 	}
 
 	mtx.unlock();
