@@ -129,7 +129,7 @@ void gsf::network::OBuffer::produce()
 
 	for (uint32_t i = 0; i < thread_count_; ++i)
 	{
-		if (thread_write_vec_[i].empty()){
+		if (!thread_write_vec_[i].empty()){
 			thread_write_vec_[i].swap(thread_produce_vec_[i]);
 			thread_write_vec_[i].clear();
 		}

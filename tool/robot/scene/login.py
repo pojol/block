@@ -1,4 +1,7 @@
 import asyncio
+import struct
+
+from gsf.tool.robot.connect_mgr import connect_mgr
 
 class LoginCase(asyncio.Protocol):
 
@@ -9,11 +12,17 @@ class LoginCase(asyncio.Protocol):
         self.account_name = account_name
 
     def connection_made(self, transport):
+        self.transport = transport
         self.is_connect = True
         print ("connection made")
 
+        connect_mgr.try_connect()
+
     def data_received(self, data):
         print ("data received: ", data.decode())
+
+        self.transport.write(struct.pack('<s', b'1'))
+
 
     def eof_received(self):
         self.is_connect = True

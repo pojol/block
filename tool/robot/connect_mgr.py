@@ -1,6 +1,5 @@
 import asyncio
 
-from  scene.login import LoginCase
 
 class ConnectActor:
     def __init__(self, case, task):
@@ -9,6 +8,8 @@ class ConnectActor:
 
 class ConnectMgr:
     actors = {}     #connect actors
+
+    connect_list = []
 
     def open_connect(self, ip, port, case):
         task = asyncio.Task(self.loop.create_connection(lambda : case, ip, port))
@@ -25,9 +26,14 @@ class ConnectMgr:
         else:
             print('close connect warning!', actor_name)
 
-    def append_login(self, account_name, address, port):
+    def try_connect(self):
+        if self.connect_list:
+            arr = self.connect_list.pop()
+            self.open_connect(arr[0], arr[1], arr[2])
 
-        self.open_connect(address, port, LoginCase(account_name))
+    def append_login(self, case, address, port):
+
+        self.connect_list.append([address, port, case])
 
         pass
 

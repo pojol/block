@@ -1,8 +1,8 @@
 import asyncio
 from asyncio import windows_events
 
-from connect_mgr import connect_mgr
-
+from gsf.tool.robot.connect_mgr import connect_mgr
+from gsf.tool.robot.scene.login import LoginCase
 
 
 if __name__ == '__main__':
@@ -11,7 +11,9 @@ if __name__ == '__main__':
 
     connect_mgr.loop = loop
 
-    connect_mgr.append_login("test001" , '127.0.0.1', 9870)
+    for i in range(0,10000):
+        connect_mgr.append_login(LoginCase("test" + str(i)), '127.0.0.1', 8888)
+    connect_mgr.try_connect()
 
     try :
         loop.run_forever()
