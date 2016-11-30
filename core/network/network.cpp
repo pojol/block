@@ -106,7 +106,7 @@ int32_t gsf::network::Network::init_work_thread()
 		evutil_socket_t pipe[2];
 	#ifdef WIN32
 		if (evutil_socketpair(AF_INET, SOCK_STREAM, 0, pipe) < 0){
-	#elseif
+	#else
 		if (evutil_socketpair(AF_UNIX, SOCK_STREAM, 0, pipe) < 0){
 	#endif
 			printf("evutil_socketpair err!\n");
