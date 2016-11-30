@@ -12,7 +12,8 @@
     #include <winsock2.h>
     #include <windows.h>
 #else
-    #include <netinet/in.h>
+	#include <string.h>
+    	#include <netinet/in.h>
 	#include <arpa/inet.h>
 	#include <sys/types.h>
 	#include <sys/socket.h>
@@ -103,7 +104,11 @@ int32_t gsf::network::Network::init_work_thread()
 		NetworkConnect::instance().cq_init(thread_ptr->connect_queue_);
 
 		evutil_socket_t pipe[2];
+	#ifdef WIN32
 		if (evutil_socketpair(AF_INET, SOCK_STREAM, 0, pipe) < 0){
+	#elseif
+		if (evutil_socketpair(AF_UNIX, SOCK_STREAM, 0, pipe) < 0){
+	#endif
 			printf("evutil_socketpair err!\n");
 		}
 		thread_ptr->notify_send_fd_ = pipe[1];
