@@ -1,14 +1,27 @@
 PROJECT(network)
 
 #引用头文件目录
-INCLUDE_DIRECTORIES(
-	${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
-)
+if(WIN32)
+	INCLUDE_DIRECTORIES(
+		${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
+	)
+elseif(UNIX)
+	INCLUDE_DIRECTORIES(
+		${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
+	)
+elseif(APPLE)
+endif()
+
 
 #引用库目录
-LINK_DIRECTORIES(
-	${GSF_SOURCE_DIR}/LIB_D
-)
+if(WIN32)
+	LINK_DIRECTORIES(
+		${GSF_SOURCE_DIR}/LIB_D
+	)
+elseif(UNIX)
+elseif(APPLE)
+endif()
+
 
 FILE(GLOB_RECURSE SRC "*.cpp" "*.h")
 ADD_LIBRARY(network STATIC ${SRC})
@@ -28,7 +41,9 @@ if(MSVC)
 	
 	SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/LIB_D)
 	#TARGET_LINK_LIBRARIES(network ws2_32.lib)	项目本身是静态库不需要链接静态库
-	
-endif(MSVC)
+elseif(UNIX)
+	SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/LIB_D)
+elseif(APPLE)
+endif()
 
 
