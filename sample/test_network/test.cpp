@@ -17,6 +17,7 @@
 #endif // WIN32
 
 #include <network.h>
+#include <network_config.h>
 #include <acceptor.h>
 
 #include <session.h>

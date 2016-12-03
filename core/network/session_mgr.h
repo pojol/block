@@ -23,7 +23,7 @@ namespace gsf
 
 		class SessionMgr
 		{
-			friend class Network;
+			friend class NetworkImpl;
 
 		public:
 			~SessionMgr();
