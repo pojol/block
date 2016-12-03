@@ -14,6 +14,11 @@ namespace gsf
 		struct AcceptorConfig;
 		struct NetworkConfig;
 
+		//event 
+		typedef std::function<void(int)> NewConnectFunc;
+		typedef std::function<void(int, int)> DisConnectFunc;
+		typedef std::function<void()> UpdateFunc;
+
 		class Network
 		{
 
@@ -22,16 +27,20 @@ namespace gsf
 
 			static Network& instance();
 
+			//interface 
+
 			int init(const NetworkConfig &config);
 
 			int start();
 
 			void uninit();
 
-			//! temp
-			void write(uint32_t session_id, const char *data, uint32_t len);
+			int listen(const AcceptorConfig &config, NewConnectFunc func);
 
-			int make_acceptor(const AcceptorConfig &config, std::function<void(int)> func);
+			//! temp
+			int make_connect();
+
+			void write(uint32_t session_id, const char *data, uint32_t len);
 
 		private:
 			Network();

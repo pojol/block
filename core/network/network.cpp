@@ -33,7 +33,7 @@ int gsf::network::Network::start()
 	return NetworkImpl::instance().start();
 }
 
-int gsf::network::Network::make_acceptor(const AcceptorConfig &config, std::function<void(int)> func)
+int gsf::network::Network::listen(const AcceptorConfig &config, std::function<void(int)> func)
 {
 	return NetworkImpl::instance().make_acceptor(config, func);
 }
