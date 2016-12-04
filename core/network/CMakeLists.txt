@@ -2,22 +2,22 @@ PROJECT(network)
 
 #引用头文件目录
 if(WIN32)
-	INCLUDE_DIRECTORIES(
-		${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
-	)
+        INCLUDE_DIRECTORIES(
+                ${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
+        )
 elseif(UNIX)
-	INCLUDE_DIRECTORIES(
-		${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
-	)
+        INCLUDE_DIRECTORIES(
+                ${GSF_SOURCE_DIR}/3rd/libevent/include
+        )
 elseif(APPLE)
 endif()
 
 
 #引用库目录
 if(WIN32)
-	LINK_DIRECTORIES(
-		${GSF_SOURCE_DIR}/LIB_D
-	)
+        LINK_DIRECTORIES(
+                ${GSF_SOURCE_DIR}/3rd/libevent/lib
+        )
 elseif(UNIX)
 elseif(APPLE)
 endif()
@@ -26,9 +26,9 @@ endif()
 FILE(GLOB_RECURSE SRC "*.cpp" "*.h")
 ADD_LIBRARY(network STATIC ${SRC})
 
-if(MSVC)     
+if(MSVC)
     # Use the static C library for all build types
-    foreach(var 
+    foreach(var
         CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
         CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
         CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
@@ -37,13 +37,11 @@ if(MSVC)
       if(${var} MATCHES "/MD")
         string(REGEX REPLACE "/MD" "/MT" ${var} "${${var}}")
       endif()
-    endforeach()    
-	
-	SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/LIB_D)
-	#TARGET_LINK_LIBRARIES(network ws2_32.lib)	项目本身是静态库不需要链接静态库
+    endforeach()
+
+        SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/LIB_D)
+        #TARGET_LINK_LIBRARIES(network ws2_32.lib)      项目本身是静态库不需要链接静态库
 elseif(UNIX)
-	SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/LIB_D)
+        SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/LIB_D)
 elseif(APPLE)
 endif()
-
-
