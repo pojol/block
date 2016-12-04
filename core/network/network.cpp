@@ -28,7 +28,7 @@ int gsf::network::Network::init(const NetworkConfig &config)
 	return NetworkImpl::instance().init(config);
 }
 
-int gsf::network::Network::start()
+int gsf::network::Network::start(UpdateFunc func)
 {
 	return NetworkImpl::instance().start();
 }

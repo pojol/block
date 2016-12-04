@@ -147,6 +147,23 @@ public:
 	}
 */
 
+enum NetWorkState
+{
+	NS_Fast,
+	NS_Slow,
+	NS_Busy,
+};
+
+void update()
+{
+	//gettime
+
+	//todo...
+
+	//gettime
+	//endtime - begintime = network state
+	//if network state change : printf("info")
+}
 
 int main()
 {
@@ -171,12 +188,12 @@ int main()
 
 	LoginServerHandler *accept_handler = new LoginServerHandler();
 
-	if (Network::instance().make_acceptor(_acceptConfig
+	if (Network::instance().listen(_acceptConfig
 		, std::bind(&LoginServerHandler::handler_new_connection, accept_handler, std::placeholders::_1)) < 0){
 		//err
 	}
 
-	gsf::network::Network::instance().start();
+	gsf::network::Network::instance().start(std::bind(&update));
 
 	return 0;
 }

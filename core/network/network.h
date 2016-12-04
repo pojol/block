@@ -21,7 +21,6 @@ namespace gsf
 
 		class Network
 		{
-
 		public:
 			~Network();
 
@@ -31,7 +30,7 @@ namespace gsf
 
 			int init(const NetworkConfig &config);
 
-			int start();
+			int start(UpdateFunc func);
 
 			void uninit();
 
