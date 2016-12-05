@@ -48,7 +48,7 @@ if(MSVC)
         TARGET_LINK_LIBRARIES(test_network ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib network.lib utils.lib)
 
 elseif(UNIX)
-        TARGET_LINK_LIBRARIES(test_network libevent.lib libevent_core.lib libevent_extras.lib network.lib utils.lib)
+        TARGET_LINK_LIBRARIES(test_network libevent.a libevent_core.a libevent_extras.a network.a utils.a)
 elseif(APPLE)
 
 endif()

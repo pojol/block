@@ -37,9 +37,7 @@ namespace gsf
 			SessionPtr make_session(::bufferevent *bev, int fd);
 
 		private:
-			std::vector<int> out_active_vec_;
-			std::vector<int> in_active_vec_;
-
+			
 			typedef std::unordered_map<int32_t, SessionPtr> SessionQueue;
 			SessionQueue session_queue_;
 

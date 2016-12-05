@@ -46,6 +46,6 @@ if(MSVC)
 
         TARGET_LINK_LIBRARIES(test_timer ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib network.lib utils.lib)
 elseif(UNIX)
-        TARGET_LINK_LIBRARIES(test_timer utils.lib)
+        TARGET_LINK_LIBRARIES(test_timer utils.a)
 elseif(APPLE)
 endif()
