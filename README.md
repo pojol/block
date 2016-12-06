@@ -13,7 +13,7 @@
     代码中维护json格式，落地和消息分发使用pb进行序列化和反序列化，如果是mongo考虑直接用bson落地。
 * json2pb
 * protobuf
-* redis （缓存队列，内存快照
+* redis
 * mysql
 * mongodb
 
