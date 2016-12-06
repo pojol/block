@@ -24,7 +24,8 @@ if(WIN32)
         )
 elseif(UNIX)
         LINK_DIRECTORIES(
-                ${GSF_SOURCE_DIR}/LIB_D
+                ${GSF_SOURCE_DIR}/3rd/libevent/lib
+		${GSF_SOURCE_DIR}/LIB_D
         )
 elseif(APPLE)
 endif()
@@ -48,7 +49,7 @@ if(MSVC)
         TARGET_LINK_LIBRARIES(test_network ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib network.lib utils.lib)
 
 elseif(UNIX)
-        TARGET_LINK_LIBRARIES(test_network libevent.a libevent_core.a libevent_extras.a network.a utils.a)
+        TARGET_LINK_LIBRARIES(test_network libnetwork.a libevent.a libevent_core.a libevent_extra.a libutils.a)
 elseif(APPLE)
 
 endif()

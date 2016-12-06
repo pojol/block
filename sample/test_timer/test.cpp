@@ -14,7 +14,11 @@
 #include <timer.h>
 #include <timer_handler.h>
 
-#include <windows.h>
+#if defined(WIN32)
+	#include <windows.h>
+#else
+	#include <unistd.h>
+#endif
 
 
 static int count_ = 0;
@@ -76,7 +80,11 @@ int main()
 	while (1)
 	{
 		Timer::instance().update();
+#if defined(WIN32)
 		Sleep(1);
+#else
+		usleep(1000);
+#endif
 	}
 
 	return 0;
