@@ -5,6 +5,16 @@ namespace gsf
 {
 	namespace network
 	{
+
+		class Message
+		{
+		public:
+
+			void recv();
+			void write();
+
+		};
+
 	}
 }
 

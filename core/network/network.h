@@ -12,10 +12,12 @@ namespace gsf
 	namespace network
 	{
 		struct AcceptorConfig;
+		struct ConnectorConfig;
 		struct NetworkConfig;
 
 		//event 
 		typedef std::function<void(int)> NewConnectFunc;
+		typedef std::function<void(int, int, std::string &, int)> ConnectFailedFunc;
 		typedef std::function<void(int, int)> DisConnectFunc;
 		typedef std::function<void()> UpdateFunc;
 
@@ -36,8 +38,9 @@ namespace gsf
 
 			int listen(const AcceptorConfig &config, NewConnectFunc func);
 
+			int connect(const ConnectorConfig &config, NewConnectFunc new_connect, ConnectFailedFunc connect_failed);
+
 			//! temp
-			int make_connect();
 
 			void write(uint32_t session_id, const char *data, uint32_t len);
 
