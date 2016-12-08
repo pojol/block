@@ -1,6 +1,8 @@
 #ifndef _MESSAGE_HEADER_
 #define _MESSAGE_HEADER_
 
+#include <stdint.h>
+
 namespace gsf
 {
 	namespace network
@@ -9,10 +11,15 @@ namespace gsf
 		class Message
 		{
 		public:
+			~Message();
+			Message();
 
-			void recv();
-			void write();
+			uint32_t get_message_id() const;
+			uint32_t get_session_id() const;
 
+		private:
+			uint32_t message_id_;
+			uint32_t session_id_;
 		};
 
 	}

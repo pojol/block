@@ -48,6 +48,7 @@ namespace gsf
 			Network();
 			static Network* instance_;
 		};
+
 	}
 }
 
