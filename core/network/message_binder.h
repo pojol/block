@@ -4,6 +4,13 @@
 #include <memory>
 #include <unordered_map>
 
+#include <event2/buffer.h>
+
+#include "message.h"
+
+//
+#include <thread>
+
 namespace gsf
 {
 	namespace network
