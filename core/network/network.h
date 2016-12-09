@@ -15,6 +15,8 @@ namespace gsf
 		struct ConnectorConfig;
 		struct NetworkConfig;
 
+		class Binder;
+
 		//event 
 		typedef std::function<void(int)> NewConnectFunc;
 		typedef std::function<void(int, int, std::string &, int)> ConnectFailedFunc;
@@ -39,6 +41,8 @@ namespace gsf
 			int listen(const AcceptorConfig &config, NewConnectFunc func);
 
 			int connect(const ConnectorConfig &config, NewConnectFunc new_connect, ConnectFailedFunc connect_failed);
+
+			void regist_binder(Binder *binder);
 
 			//! temp
 

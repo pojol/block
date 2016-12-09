@@ -296,13 +296,7 @@ void gsf::network::NetworkImpl::main_consume_event(evutil_socket_t fd, short eve
 		// test dispatch
 		for (auto &it : vec)
 		{
-			int len = evbuffer_get_length(it.second);
-			char * buf = (char *)malloc(len);
-			evbuffer_remove(it.second, buf, len);
-
-			std::cout << "thread : " << std::this_thread::get_id() << " session : " << it.first << " recv : " << buf << std::endl;
-
-			evbuffer_free(it.second);
+			NetworkImpl::instance().get_binder()->construct_msg(it.first, it.second);
 		}
 
 		vec.clear();
@@ -342,5 +336,10 @@ void gsf::network::NetworkImpl::work_consume_event(evutil_socket_t fd, short eve
 void gsf::network::NetworkImpl::write(uint32_t session_id, const char *data, uint32_t len)
 {
 	main_thread_ptr_->out_buffer_->write(session_id, data, len);
+}
+
+void gsf::network::NetworkImpl::regist_binder(Binder *binder)
+{
+	binder_ = binder;
 }
 

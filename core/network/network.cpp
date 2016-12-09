@@ -48,3 +48,8 @@ void gsf::network::Network::uninit()
 
 }
 
+void gsf::network::Network::regist_binder(Binder *binder)
+{
+	NetworkImpl::instance().regist_binder(binder);
+}
+

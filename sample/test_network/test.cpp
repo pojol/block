@@ -19,6 +19,7 @@
 #include <network.h>
 #include <network_config.h>
 #include <acceptor.h>
+#include <message_binder.h>
 
 #include <session.h>
 #include <session_mgr.h>
@@ -46,18 +47,38 @@ class Player
 }
 */
 
+class SampleMsg : public gsf::network::Message
+{
+public:
+	typedef std::shared_ptr<SampleMsg> Ptr;
+};
+
 class LoginServerHandler
 {
 public:
     ~LoginServerHandler(){}
+	LoginServerHandler()
+	{
+		gsf::network::MessageBinder<SampleMsg>::instance().
+			regist_msg_proc<LoginServerHandler, &LoginServerHandler::test_msg>(100, this);
+	}
 
     //! new connection bind session to message dispatch
     void handler_new_connection(int session_id)
     {
 		printf("new connection session_id : %d\n", session_id);
 
+		//! bind message register
+		gsf::network::Network::instance().regist_binder(
+			&gsf::network::MessageBinder<SampleMsg>::instance());
+
 		gsf::network::Network::instance().write(session_id, "2", 1);
     }
+
+	void test_msg(SampleMsg::Ptr msg)
+	{
+		std::cout << "heihei" << std::endl;
+	}
 };
 
 

@@ -11,11 +11,15 @@ namespace gsf
 		class Message
 		{
 		public:
-			~Message();
-			Message();
-
-			uint32_t get_message_id() const;
-			uint32_t get_session_id() const;
+			~Message(){}
+			Message()
+			{
+				//test
+				message_id_ = 100;
+			}
+			
+			uint32_t get_message_id() const { return message_id_; }
+			uint32_t get_session_id() const { return session_id_; }
 
 		private:
 			uint32_t message_id_;

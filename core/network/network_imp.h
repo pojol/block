@@ -9,6 +9,8 @@
 #include <event2/util.h>
 #include <event2/listener.h>
 
+#include "message_binder.h"
+
 #include "network_config.h"
 
 namespace gsf
@@ -23,6 +25,7 @@ namespace gsf
 
 		struct ConnectorConfig;
 		class Connector;
+		class Binder;
 
 		struct NetworkConfig;
 
@@ -46,6 +49,8 @@ namespace gsf
 
 			void write(uint32_t session_id, const char *data, uint32_t len);
 
+			void regist_binder(Binder *binder);
+
 		protected:
 			NetworkImpl();
 			static NetworkImpl* instance_;
@@ -54,6 +59,8 @@ namespace gsf
 			NetworkThreadPtr get_main_thread() { return main_thread_ptr_; }
 
 			AcceptorPtr get_acceptor() { return acceptor_ptr_; }
+
+			Binder *get_binder() const { return binder_; }
 
 		protected:
 			void accept_conn_new(evutil_socket_t fd);
@@ -95,6 +102,8 @@ namespace gsf
 
 			::event * work_produce_event_;
 			::event * work_consume_event_;
+
+			Binder *binder_;
 		};
 	}
 }
