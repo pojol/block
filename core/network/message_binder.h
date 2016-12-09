@@ -9,6 +9,7 @@
 #include "message.h"
 
 //
+#include <iostream>
 #include <thread>
 
 namespace gsf
