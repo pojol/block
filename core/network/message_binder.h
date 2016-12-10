@@ -102,14 +102,14 @@ namespace gsf
 		void MessageBinder<MSG>::construct_msg(int session_id, ::evbuffer *buf)
 		{
 			int len = evbuffer_get_length(buf);
-			char * _buf = (char *)malloc(len);
-			evbuffer_remove(buf, _buf, len);
 
-			std::cout << "thread : " << std::this_thread::get_id() << " session : " << session_id << " recv : " << buf << std::endl;
+			auto _block_ptr = std::make_shared<Block>(len);
+			_block_ptr->size_ = len;
+			memcpy(_block_ptr->buf_, buf, len);
 
 			evbuffer_free(buf);
 
-			typename MSG::Ptr msg = std::make_shared<MSG>();
+			typename MSG::Ptr msg = std::make_shared<MSG>(_block_ptr, session_id);
 			dispatch(msg);
 		}
 

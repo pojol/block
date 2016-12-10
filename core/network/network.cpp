@@ -38,9 +38,9 @@ int gsf::network::Network::listen(const AcceptorConfig &config, std::function<vo
 	return NetworkImpl::instance().make_acceptor(config, func);
 }
 
-void gsf::network::Network::write(uint32_t session_id, const char *data, uint32_t len)
+void gsf::network::Network::write(uint32_t session_id, MessagePtr msg)
 {
-	NetworkImpl::instance().write(session_id, data, len);
+	NetworkImpl::instance().write(session_id, msg);
 }
 
 void gsf::network::Network::uninit()

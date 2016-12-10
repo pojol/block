@@ -1,4 +1,4 @@
-#include <signal.h>
+﻿#include <signal.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -16,6 +16,7 @@
 #include <windows.h>
 #endif // WIN32
 
+
 #include <network.h>
 #include <network_config.h>
 #include <acceptor.h>
@@ -23,6 +24,7 @@
 
 #include <session.h>
 #include <session_mgr.h>
+#include <message.h>
 
 #include <iostream>
 
@@ -30,27 +32,36 @@
 #include <timer.h>
 #include <timer_handler.h>
 
-/*
-class PlayerSession : public SessionHandler
-{
-public:
-virtual void connect();
-virtual void disconnect();
-
-virtual void recv();
-virtual void write();
-};
-
-class Player
-{
-
-}
-*/
-
+//! 由用户定制msg
 class SampleMsg : public gsf::network::Message
 {
 public:
 	typedef std::shared_ptr<SampleMsg> Ptr;
+
+	SampleMsg()
+		: gsf::network::Message()
+	{}
+
+	SampleMsg(gsf::network::Block::Ptr blockPtr, uint32_t session_id)
+		: gsf::network::Message(blockPtr, session_id)
+	{
+
+	}
+
+	~SampleMsg()
+	{
+
+	}
+
+	void write(const char* data, size_t size)
+	{
+		
+	}
+
+	void read()
+	{
+
+	}
 };
 
 class LoginServerHandler
@@ -72,101 +83,21 @@ public:
 		gsf::network::Network::instance().regist_binder(
 			&gsf::network::MessageBinder<SampleMsg>::instance());
 
-		gsf::network::Network::instance().write(session_id, "2", 1);
+		//test
+		SampleMsg::Ptr _ret_msg = std::make_shared<SampleMsg>();
+		_ret_msg->write("2", 1);
+		gsf::network::Network::instance().write(session_id, _ret_msg);
     }
 
 	void test_msg(SampleMsg::Ptr msg)
 	{
-		std::cout << "heihei" << std::endl;
+		//test
+		std::cout << " session : " << msg->get_session_id()
+			<< " len : " << msg->get_message_len()
+			<< " message : " << msg->get_message_id() << std::endl;
 	}
 };
 
-
-//! user interface test
-/*
-	class LoginHandler : 
-		public AcceptHandler,
-		public SessionCloseHandler
-	{
-		public:
-			virtual void handle_new_connection(int acceptor_id, int session_id)
-			{
-				gsf::SessionMgr::instance().open(session_id, this);
-			}
-			
-			vittual void handle_close(int session_id
-				, int err_code
-				, int acceptor_id
-				, int connector_id
-				, const std::string &ip
-				, const int port);
-	}
-
-	class Login2GameHandler :
-		public ConnectHandler,
-		public SessionCloseHandler
-	{
-		public:
-			virtual void handle_new_connection(int connector_id, int session_id)
-			{
-				gsf::SessionMgr::instance().open(session_id, this);
-			}
-
-			virtual void handle_connect_failed(int connector_id, int err_code, const std::string &ip, const int port);
-
-			vittual void handle_close(int session_id
-			, int err_code
-			, int acceptor_id
-			, int connector_id
-			, const std::string &ip
-			, const int port);
-	}
-
-	class LoginTimeoutHandler : public TimeOutHandler
-	{
-		public:
-			virtual void time_out(int thread_id, int overtime_time);
-	}
-
-	------init------
-	gsf::NetworkConfig _config(...);
-	gsf::Network::instance().init(_config);
-
-	gsf::MessageSessionBinder<T>::instance();
-
-	//accept
-	gsf::AcceptorConfig _acceptor_config(...);
-	int _acceptor_id = gsf::AcceptorMgr::instance().make_acceptor(&_acceptor_config);
-	if (acceptor_id < 0){
-		//err
-	}
-
-	if (gsf::AcceptorMgr::instance().open(_acceptor_id, new LoginHandler()) < 0){
-		//err
-	}
-
-	//connect
-	gsf::ConnectorConfig _gameserver_connector_config(...);
-	int _connector_id = gsf::ConnectorMgr::instance().make_connector(&_gameserver_connector_config);
-	if (_connector_id < 0){
-		//err
-	}
-
-	if (gsf::ConnectorMgr::instance().open(_connector_id, new Login2GameHandler() < 0){
-		//err
-	}
-
-	gsf::Network::instance().start(new LoginTimeoutHandler());
-	-----decode-----
-
-	class ModuleDecode
-	{
-		void regist()
-		{
-			gsf::MessageSessionBinder<T>::instance().bind(message_id, &class::func);
-		}
-	}
-*/
 
 enum NetWorkState
 {

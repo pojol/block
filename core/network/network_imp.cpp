@@ -333,9 +333,10 @@ void gsf::network::NetworkImpl::work_consume_event(evutil_socket_t fd, short eve
 	vec.clear();
 }
 
-void gsf::network::NetworkImpl::write(uint32_t session_id, const char *data, uint32_t len)
+void gsf::network::NetworkImpl::write(uint32_t session_id, MessagePtr msg)
 {
-	main_thread_ptr_->out_buffer_->write(session_id, data, len);
+	auto _block_ptr = msg->get_block();
+	main_thread_ptr_->out_buffer_->write(session_id, _block_ptr->buf_, _block_ptr->total_);
 }
 
 void gsf::network::NetworkImpl::regist_binder(Binder *binder)

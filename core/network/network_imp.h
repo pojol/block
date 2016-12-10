@@ -26,6 +26,8 @@ namespace gsf
 		struct ConnectorConfig;
 		class Connector;
 		class Binder;
+		class Message;
+		typedef std::shared_ptr<Message> MessagePtr;
 
 		struct NetworkConfig;
 
@@ -47,7 +49,7 @@ namespace gsf
 
 			int make_acceptor(const AcceptorConfig &config, std::function<void(int)> func);
 
-			void write(uint32_t session_id, const char *data, uint32_t len);
+			void write(uint32_t session_id, MessagePtr msg);
 
 			void regist_binder(Binder *binder);
 

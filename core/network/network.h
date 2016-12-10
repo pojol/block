@@ -32,6 +32,8 @@ namespace gsf
 		struct NetworkConfig;
 
 		class Binder;
+		class Message;
+		typedef std::shared_ptr<Message> MessagePtr;
 
 		//! 新的连接回调 
 		typedef std::function<void(int)> NewConnectFunc;
@@ -68,7 +70,7 @@ namespace gsf
 			void regist_binder(Binder *binder);
 
 			//! 向缓冲区写数据，会在周期内发送。
-			void write(uint32_t session_id, const char *data, uint32_t len);
+			void write(uint32_t session_id, MessagePtr msg);
 
 		private:
 			Network();
