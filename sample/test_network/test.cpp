@@ -42,7 +42,7 @@ public:
 		: gsf::network::Message()
 	{}
 
-	SampleMsg(gsf::network::Block::Ptr blockPtr, uint32_t session_id)
+	SampleMsg(gsf::stream::BlockPtr blockPtr, uint32_t session_id)
 		: gsf::network::Message(blockPtr, session_id)
 	{
 

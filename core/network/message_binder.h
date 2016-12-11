@@ -103,7 +103,7 @@ namespace gsf
 		{
 			int len = evbuffer_get_length(buf);
 
-			auto _block_ptr = std::make_shared<Block>(len);
+			auto _block_ptr = std::make_shared<stream::Block>(len);
 			_block_ptr->size_ = len;
 			memcpy(_block_ptr->buf_, buf, len);
 

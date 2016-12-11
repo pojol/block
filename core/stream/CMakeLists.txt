@@ -1,15 +1,11 @@
-PROJECT(network)
+﻿PROJECT(stream)
 
 #引用头文件目录
 if(WIN32)
         INCLUDE_DIRECTORIES(
-                ${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
-				${GSF_SOURCE_DIR}/core/stream
         )
 elseif(UNIX)
         INCLUDE_DIRECTORIES(
-                ${GSF_SOURCE_DIR}/3rd/libevent/include
-				${GSF_SOURCE_DIR}/core/stream
         )
 elseif(APPLE)
 endif()
@@ -18,15 +14,15 @@ endif()
 #引用库目录
 if(WIN32)
         LINK_DIRECTORIES(
-                ${GSF_SOURCE_DIR}/3rd/libevent/lib
         )
 elseif(UNIX)
 elseif(APPLE)
 endif()
 
-
 FILE(GLOB_RECURSE SRC "*.cpp" "*.h")
-ADD_LIBRARY(network STATIC ${SRC})
+ADD_LIBRARY(stream STATIC ${SRC})
+
+SET_TARGET_PROPERTIES(stream PROPERTIES LINKER_LANGUAGE CXX)
 
 if(MSVC)
     # Use the static C library for all build types
@@ -42,7 +38,6 @@ if(MSVC)
     endforeach()
 
         SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/LIB_D)
-        #TARGET_LINK_LIBRARIES(network ws2_32.lib)      项目本身是静态库不需要链接静态库
 elseif(UNIX)
         SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/LIB_D)
 elseif(APPLE)

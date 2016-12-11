@@ -4,25 +4,12 @@
 #include <stdint.h>
 #include <memory>
 
+#include "../stream/block.h"
+
 namespace gsf
 {
 	namespace network
 	{
-
-		struct Block
-		{
-			typedef std::shared_ptr<Block> Ptr;
-
-			Block(int len = 64);
-			~Block();
-
-			bool inc_size(uint32_t inc);
-
-			char *buf_;
-			uint32_t size_;
-			uint32_t total_;
-		};
-
 		class Message
 		{
 		public:
@@ -32,21 +19,23 @@ namespace gsf
 
 			Message();
 
-			Message(Block::Ptr blockPtr, uint32_t session_id)
+			Message(stream::BlockPtr blockPtr, uint32_t session_id)
 				: block_ptr_(blockPtr)
 				, session_id_(session_id)
 			{
 			}
+
+			void pase_message_id();
 			
 			uint32_t get_message_id() const { return message_id_; }
 			uint32_t get_session_id() const { return session_id_; }
 
 			uint32_t get_message_len() const { return 0; }
 
-			Block::Ptr get_block() const { return block_ptr_; }
+			stream::BlockPtr get_block() const { return block_ptr_; }
 
 		protected:
-			Block::Ptr block_ptr_;
+			stream::BlockPtr block_ptr_;
 
 			uint32_t message_id_;
 			uint32_t session_id_;

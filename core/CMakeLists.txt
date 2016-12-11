@@ -1,3 +1,3 @@
-
+ADD_SUBDIRECTORY(stream)
 ADD_SUBDIRECTORY(network)
 
