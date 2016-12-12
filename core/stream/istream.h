@@ -94,9 +94,9 @@ namespace gsf
 		template <typename StreamTraits>
 		inline InputStream<StreamTraits>::InputStream(BlockPtr block) : m_block(block)
 		{
-			m_base = m_block->buffer;
+			m_base = m_block->buf_;
 			m_read = m_base;
-			m_tail = m_read + m_block->size;
+			m_tail = m_read + m_block->size_;
 		}
 
 		template <typename StreamTraits>
@@ -106,7 +106,7 @@ namespace gsf
 				size_t size	
 				) : m_block(block)
 		{
-			m_base = m_block->buffer + start;
+			m_base = m_block->buf_ + start;
 			m_read = m_base;
 			m_tail = m_read + size;
 		}

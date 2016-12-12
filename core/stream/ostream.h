@@ -89,8 +89,8 @@ namespace gsf
 		inline OutputStream<StreamTraits>::OutputStream():
 			m_block(new Block())
 		{
-			m_write = m_block->buffer;
-			m_tail = m_write + m_block->total;
+			m_write = m_block->buf_;
+			m_tail = m_write + m_block->total_;
 		}
 		
 		template <typename StreamTraits>
@@ -204,7 +204,7 @@ namespace gsf
 			size_t incSize = sizeof(T);
 			incDataSize(incSize);
 			o.m_block = m_block;
-			o.m_position = m_write - m_block->buffer;
+			o.m_position = m_write - m_block->buf_;
 			m_write += incSize;
 			return *this;
 		}
@@ -276,8 +276,8 @@ namespace gsf
 		inline void OutputStream<StreamTraits>::clear()
 		{
 			m_block = new Block;
-			m_write = m_block->buffer;
-			m_tail = m_write + m_block->total;
+			m_write = m_block->buf_;
+			m_tail = m_write + m_block->total_;
 		}
 
 		template <typename StreamTraits>
@@ -305,10 +305,10 @@ namespace gsf
 		template <typename StreamTraits>
 		inline void OutputStream<StreamTraits>::incDataSize(size_t incSize)
 		{
-			if (m_block->incDataSize(incSize))
+			if (m_block->inc_size(incSize))
 			{
-				m_write = m_block->buffer + m_block->size - incSize;
-				m_tail = m_block->buffer + m_block->total;
+				m_write = m_block->buf_ + m_block->size_ - incSize;
+				m_tail = m_block->buf_ + m_block->total_;
 			}
 		}
 

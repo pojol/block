@@ -42,26 +42,17 @@ public:
 		: gsf::network::Message()
 	{}
 
-	SampleMsg(gsf::stream::BlockPtr blockPtr, uint32_t session_id)
-		: gsf::network::Message(blockPtr, session_id)
+	SampleMsg(gsf::stream::BlockPtr blockPtr, uint32_t start, uint32_t len, uint32_t session_id)
+		: gsf::network::Message(blockPtr, start, len, session_id)
 	{
 
 	}
 
-	~SampleMsg()
+	virtual ~SampleMsg()
 	{
 
 	}
 
-	void write(const char* data, size_t size)
-	{
-		
-	}
-
-	void read()
-	{
-
-	}
 };
 
 class LoginServerHandler
@@ -85,16 +76,22 @@ public:
 
 		//test
 		SampleMsg::Ptr _ret_msg = std::make_shared<SampleMsg>();
-		_ret_msg->write("2", 1);
+
+		*_ret_msg->get_ostream() << 101;
+		*_ret_msg->get_ostream() << 1;
+
 		gsf::network::Network::instance().write(session_id, _ret_msg);
     }
 
 	void test_msg(SampleMsg::Ptr msg)
 	{
 		//test
-		std::cout << " session : " << msg->get_session_id()
-			<< " len : " << msg->get_message_len()
-			<< " message : " << msg->get_message_id() << std::endl;
+		uint32_t dat;
+		*msg->get_istream() >> dat;
+
+		std::cout << "session : " << msg->get_session_id()
+			<< " message : " << msg->get_message_id() 
+			<< " dat : " << dat << std::endl;
 	}
 };
 

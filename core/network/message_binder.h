@@ -98,6 +98,8 @@ namespace gsf
 			}
 		}
 
+
+
 		template <typename MSG>
 		void MessageBinder<MSG>::construct_msg(int session_id, ::evbuffer *buf)
 		{
@@ -105,11 +107,14 @@ namespace gsf
 
 			auto _block_ptr = std::make_shared<stream::Block>(len);
 			_block_ptr->size_ = len;
-			memcpy(_block_ptr->buf_, buf, len);
+
+			evbuffer_remove(buf, _block_ptr->buf_, len);
+			//memcpy(_block_ptr->buf_, buf, len);
 
 			evbuffer_free(buf);
 
-			typename MSG::Ptr msg = std::make_shared<MSG>(_block_ptr, session_id);
+			typename MSG::Ptr msg = std::make_shared<MSG>(_block_ptr, 0, len, session_id);
+			msg->pase_message_id();
 			dispatch(msg);
 		}
 
