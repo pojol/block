@@ -51,18 +51,36 @@ void gsf::network::IBuffer::produce()
 {
 	for (auto itr = ibuffer_vec_.begin(); itr != ibuffer_vec_.end();)
 	{
-		//! 这个buffer可以不用new 后续优化
-		evbuffer *buff = evbuffer_new();
-		evbuffer_add_buffer(buff, itr->second);
+		uint32_t _pack_len = evbuffer_get_length(itr->second);
+		evbuffer *buff = nullptr;
 
-		//! 这里需要验证下buffer 的完整性，如果不是一个整包则不压入消费队列。
+		evbuffer_copyout(itr->second, recvbuf_, 4);
+		uint32_t *_msg_size = reinterpret_cast<uint32_t *>(recvbuf_);
+		if (_pack_len >= *_msg_size){
+			buff = evbuffer_new();
+		}
+
+		while (_pack_len >= *_msg_size)
+		{
+			evbuffer_remove_buffer(itr->second, buff, *_msg_size);
+
+			_pack_len = evbuffer_get_length(itr->second);
+			if (_pack_len >= 4){
+				evbuffer_copyout(itr->second, recvbuf_, 4);
+				_msg_size = reinterpret_cast<uint32_t *>(recvbuf_);
+			}
+			else {
+				break;
+			}
+		}
 
 		mtx.lock();
-		consume_vec_.push_back(std::make_pair(itr->first, buff));
+		if (buff){
+			consume_vec_.push_back(std::make_pair(itr->first, buff));
+		}
 		mtx.unlock();
 
 		itr = ibuffer_vec_.erase(itr);
-		//++itr;
 	}
 }
 
