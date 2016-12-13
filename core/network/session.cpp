@@ -2,8 +2,6 @@
 #include "network_thread.h"
 #include "session_mgr.h"
 
-#include <event2/buffer.h>
-
 #include <iostream>
 
 gsf::network::Session::Session(int32_t id, ::bufferevent *bev, int fd)
@@ -26,6 +24,8 @@ gsf::network::Session::~Session()
 int gsf::network::Session::init(IBuffer *ibuffer, OBuffer *obuffer)
 {
 	in_buf_ = evbuffer_new();
+	evbuffer_add_cb(in_buf_, gsf::network::Session::read_buffer_cb, this);
+
 	out_buf_ = evbuffer_new();
 
 	thread_in_buffer_ = ibuffer;
@@ -79,4 +79,17 @@ void gsf::network::Session::read(::bufferevent *bev)
 	bufferevent_read_buffer(bev, in_buf_);
 
 	need_read_ = true;
+}
+
+void gsf::network::Session::change_read_state()
+{
+	need_read_ = false;
+}
+
+void gsf::network::Session::read_buffer_cb(::evbuffer *buffer, const ::evbuffer_cb_info *info, void *arg)
+{
+	if (info->n_deleted > 0){
+		auto _session_ptr = static_cast<gsf::network::Session *>(arg);
+		_session_ptr->change_read_state();
+	}
 }

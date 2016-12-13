@@ -2,6 +2,8 @@
 #define _GSF_SESSION_HEADER_
 
 #include <event2/bufferevent.h>
+#include <event2/buffer.h>
+
 #include <stdint.h>
 #include <memory>
 #include <string>
@@ -54,6 +56,8 @@ namespace gsf
 			SessionHandler * get_session_handler() { return session_handler_; }
 
 			void read(::bufferevent *bev);
+			static void read_buffer_cb(::evbuffer *buffer, const ::evbuffer_cb_info *info, void *arg);
+			void change_read_state();
 
 		protected:
 

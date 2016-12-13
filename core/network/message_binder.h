@@ -98,8 +98,6 @@ namespace gsf
 			}
 		}
 
-
-
 		template <typename MSG>
 		void MessageBinder<MSG>::construct_msg(int session_id, ::evbuffer *buf)
 		{

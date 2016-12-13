@@ -24,6 +24,9 @@ namespace gsf
 		class IBuffer
 		{
 		public:
+			IBuffer();
+			~IBuffer();
+
 			void mark_produce(uint32_t session_id, evbuffer *buff);
 
 			void new_connect(uint32_t session_id);
@@ -41,6 +44,8 @@ namespace gsf
 			
 			//! temp
 			std::vector<uint32_t> connect_vec_;
+
+			char * recvbuf_;
 
 			std::mutex mtx;
 		};

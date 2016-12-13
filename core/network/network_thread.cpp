@@ -46,6 +46,17 @@ void gsf::network::IBuffer::new_connect(uint32_t session_id)
 	mtx.unlock();
 }
 
+gsf::network::IBuffer::IBuffer()
+{
+	recvbuf_ = (char*)malloc(4);	//test
+}
+
+gsf::network::IBuffer::~IBuffer()
+{
+	if (recvbuf_){
+		free(recvbuf_);
+	}
+}
 
 void gsf::network::IBuffer::produce()
 {
@@ -103,7 +114,6 @@ void gsf::network::IBuffer::consume(std::vector<std::pair<uint32_t, evbuffer*>> 
 
 	mtx.unlock();
 }
-
 
 gsf::network::OBuffer::OBuffer()
 :thread_count_(0)
