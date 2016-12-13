@@ -55,6 +55,9 @@ public:
 
 };
 
+#include <chrono>
+#include <ctime>
+
 class LoginServerHandler
 {
 public:
@@ -69,6 +72,7 @@ public:
     void handler_new_connection(int session_id)
     {
 		printf("new connection session_id : %d\n", session_id);
+		session_id_ = session_id;
 
 		//! bind message register
 		gsf::network::Network::instance().regist_binder(
@@ -77,10 +81,11 @@ public:
 		//test
 		SampleMsg::Ptr _ret_msg = std::make_shared<SampleMsg>();
 
-		*_ret_msg->get_ostream() << 101;
+		*_ret_msg->get_ostream() << 12;		//size
+		*_ret_msg->get_ostream() << 101;	//mid
 		*_ret_msg->get_ostream() << 1;
 
-		gsf::network::Network::instance().write(session_id, _ret_msg);
+		gsf::network::Network::instance().write(session_id_, _ret_msg);
     }
 
 	void test_msg(SampleMsg::Ptr msg)
@@ -92,7 +97,20 @@ public:
 		std::cout << "session : " << msg->get_session_id()
 			<< " message : " << msg->get_message_id() 
 			<< " dat : " << dat << std::endl;
+
+		//test
+		SampleMsg::Ptr _ret_msg = std::make_shared<SampleMsg>();
+
+		*_ret_msg->get_ostream() << 12;		//size
+		*_ret_msg->get_ostream() << 101;	//mid
+		*_ret_msg->get_ostream() << dat+1;
+
+		gsf::network::Network::instance().write(session_id_, _ret_msg);
 	}
+
+private:
+	uint32_t session_id_;
+	uint32_t index_;
 };
 
 

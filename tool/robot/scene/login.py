@@ -19,12 +19,13 @@ class LoginCase(asyncio.Protocol):
         connect_mgr.try_connect()
 
     def data_received(self, data):
-        fmt = '<II'
+        fmt = '<III'
 
-        mid, dat = struct.unpack(fmt, data)
+        size, mid, dat = struct.unpack(fmt, data)
+        print("recv :",size,mid,dat)
 
         fmt = '<III'
-        self.transport.write(struct.pack(fmt, 12, 100, 2))
+        self.transport.write(struct.pack(fmt, 12, 100, dat+1))
 
 
     def eof_received(self):
