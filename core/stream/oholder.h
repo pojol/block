@@ -38,14 +38,14 @@ namespace gsf
 		template <class T>
 		inline OHolder<T> & OHolder<T>::operator=(const T & v)
 		{
-			* reinterpret_cast<T*>(m_block->buffer + m_position) = v;
+			* reinterpret_cast<T*>(m_block->buf_ + m_position) = v;
 			return *this;
 		}
 
 		template <class T>
 		inline OHolder<T>::operator T & ()
 		{
-			return *reinterpret_cast<T*>(m_block->buffer + m_position);
+			return *reinterpret_cast<T*>(m_block->buf_ + m_position);
 		}
 	}
 }
