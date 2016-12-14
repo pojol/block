@@ -37,3 +37,28 @@ void gsf::network::Message::pase_message_id()
 	*is_ptr_ >> message_id_;
 }
 
+uint32_t gsf::network::Message::get_message_id() const
+{
+	return message_id_;
+}
+
+uint32_t gsf::network::Message::get_session_id() const
+{
+	return session_id_;
+}
+
+gsf::stream::BlockPtr gsf::network::Message::get_out_block() const
+{
+	return os_ptr_->getBlock();
+}
+
+gsf::stream::IStream * gsf::network::Message::get_istream()
+{
+	return is_ptr_;
+}
+
+gsf::stream::OStream * gsf::network::Message::get_ostream()
+{
+	return os_ptr_;
+}
+

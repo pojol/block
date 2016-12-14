@@ -24,15 +24,13 @@ namespace gsf
 
 			void pase_message_id();
 			
-			uint32_t get_message_id() const { return message_id_; }
-			uint32_t get_session_id() const { return session_id_; }
+			uint32_t get_message_id() const;
+			uint32_t get_session_id() const;
 
-			uint32_t get_message_len() const { return 0; }
+			stream::BlockPtr get_out_block() const;
 
-			stream::BlockPtr get_out_block() const { return os_ptr_->getBlock(); }
-
-			stream::IStream * get_istream() { return is_ptr_; }
-			stream::OStream * get_ostream() { return os_ptr_; }
+			stream::IStream * get_istream();
+			stream::OStream * get_ostream();
 
 		protected:
 			stream::IStream *is_ptr_;
