@@ -6,14 +6,14 @@ if(WIN32)
         INCLUDE_DIRECTORIES(
                 ${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
                 ${GSF_SOURCE_DIR}/core/network
-				${GSF_SOURCE_DIR}/core/stream
+				${GSF_SOURCE_DIR}/core
                 ${GSF_SOURCE_DIR}/utils
         )
 elseif(UNIX)
         INCLUDE_DIRECTORIES(
                 ${GSF_SOURCE_DIR}/3rd/libevent/include
                 ${GSF_SOURCE_DIR}/core/network
-				${GSF_SOURCE_DIR}/core/stream
+				${GSF_SOURCE_DIR}/core
                 ${GSF_SOURCE_DIR}/utils
         )
 elseif(APPLE)
@@ -51,7 +51,7 @@ if(MSVC)
         TARGET_LINK_LIBRARIES(test_network stream.lib libevent.lib libevent_core.lib libevent_extras.lib network.lib utils.lib ws2_32.lib)
 
 elseif(UNIX)
-        TARGET_LINK_LIBRARIES(test_network libnetwork.a libevent.a libevent_core.a libevent_extra.a libutils.a)
+        TARGET_LINK_LIBRARIES(test_network libstream.a libnetwork.a libevent.a libevent_core.a libevent_extra.a libutils.a)
 elseif(APPLE)
 
 endif()

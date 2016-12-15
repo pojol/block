@@ -4,8 +4,8 @@
 #include <stdint.h>
 #include <memory>
 
-#include "../stream/istream.h"
-#include "../stream/ostream.h"
+#include <stream/istream.h>
+#include <stream/ostream.h>
 
 namespace gsf
 {

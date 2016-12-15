@@ -4,12 +4,12 @@ PROJECT(network)
 if(WIN32)
         INCLUDE_DIRECTORIES(
                 ${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
-				${GSF_SOURCE_DIR}/core/stream
+				${GSF_SOURCE_DIR}/core
         )
 elseif(UNIX)
         INCLUDE_DIRECTORIES(
                 ${GSF_SOURCE_DIR}/3rd/libevent/include
-				${GSF_SOURCE_DIR}/core/stream
+				${GSF_SOURCE_DIR}/core
         )
 elseif(APPLE)
 endif()

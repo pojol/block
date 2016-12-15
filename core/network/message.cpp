@@ -1,7 +1,5 @@
 #include "message.h"
 
-
-
 gsf::network::Message::Message()
 	: message_id_(0)
 	, session_id_(0)
