@@ -9,7 +9,7 @@
 - [x] 支持消息绑定器（回调至类的成员函数
 - [x] IOStream二进制流处理工具
 - [x] Message (可定制默认采用IOStream，后期扩充定制的protobuf版本
-- [ ] 优化 (ringbuffer 和 不必要的内存分配释放
+- [ ] 优化 (ringbuffer 和 不必要的内存分配释放 ，后续会通过qps、延时、并发数作为性能优化指标
 
 ###分布式&负载均衡
 - [ ] zookeeper (分布式协调
