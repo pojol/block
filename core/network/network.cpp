@@ -30,7 +30,7 @@ int gsf::network::Network::init(const NetworkConfig &config)
 
 int gsf::network::Network::start(UpdateFunc func)
 {
-	return NetworkImpl::instance().start();
+	return NetworkImpl::instance().start(func);
 }
 
 int gsf::network::Network::listen(const AcceptorConfig &config, std::function<void(int)> func)

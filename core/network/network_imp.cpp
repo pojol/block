@@ -79,12 +79,18 @@ int gsf::network::NetworkImpl::init(const NetworkConfig &config)
 	return 0;
 }
 
-int gsf::network::NetworkImpl::start()
+int gsf::network::NetworkImpl::start(std::function<void()> update_func)
 {
+	update_func_ = update_func;
+
 	for (auto &worker : worker_thread_vec_)
 	{
 		worker->th = new std::thread(worker_thread_run, worker); //非空构造会直接启动线程
 	}
+
+	update_event_ = event_new(main_thread_ptr_->event_base_ptr_, -1, EV_PERSIST, update_event, main_thread_ptr_.get());
+	struct timeval tv = { 0, 20 * 1000 };
+	evtimer_add(update_event_, &tv);
 
 	event_base_dispatch(main_thread_ptr_->event_base_ptr_);
 
@@ -342,5 +348,10 @@ void gsf::network::NetworkImpl::write(uint32_t session_id, MessagePtr msg)
 void gsf::network::NetworkImpl::regist_binder(Binder *binder)
 {
 	binder_ = binder;
+}
+
+void gsf::network::NetworkImpl::update_event(evutil_socket_t fd, short event, void *arg)
+{
+	NetworkImpl::instance().get_update_func()();
 }
 

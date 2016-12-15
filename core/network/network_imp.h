@@ -45,7 +45,7 @@ namespace gsf
 
 			int init(const NetworkConfig &config);
 
-			int start();
+			int start(std::function<void()> update_func);
 
 			int make_acceptor(const AcceptorConfig &config, std::function<void(int)> func);
 
@@ -63,6 +63,8 @@ namespace gsf
 			AcceptorPtr get_acceptor() { return acceptor_ptr_; }
 
 			Binder *get_binder() const { return binder_; }
+
+			std::function<void()> get_update_func() { return update_func_; }
 
 		protected:
 			void accept_conn_new(evutil_socket_t fd);
@@ -89,6 +91,8 @@ namespace gsf
 			static void work_produce_event(evutil_socket_t fd, short event, void *arg);
 			static void work_consume_event(evutil_socket_t fd, short event, void *arg);
 
+			static void update_event(evutil_socket_t fd, short event, void *arg);
+
 		private:
 			NetworkConfig config_;
 
@@ -104,6 +108,9 @@ namespace gsf
 
 			::event * work_produce_event_;
 			::event * work_consume_event_;
+
+			::event * update_event_;
+			std::function<void()> update_func_;
 
 			Binder *binder_;
 		};
