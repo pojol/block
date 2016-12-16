@@ -28,14 +28,14 @@ gsf::utils::Timer& gsf::utils::Timer::instance()
 }
 
 
-gsf::utils::TimerEvent * gsf::utils::Timer::update_delay(delay_second delay, TimerHandlerPtr handler, delay_second_tag)
+gsf::utils::TimerEvent * gsf::utils::Timer::update_delay(delay_milliseconds delay, TimerHandlerPtr handler, delay_milliseconds_tag)
 {
-	auto _tp = std::chrono::system_clock::now() + std::chrono::seconds(delay.Second());
+	auto _tp = std::chrono::system_clock::now() + std::chrono::milliseconds(delay.milliseconds());
 	
 	TimerEvent *_event = new TimerEvent();
 	_event->timer_handler_ptr_ = handler;
 	_event->tp_ = _tp;
-	
+
 	min_heap_push(&min_heap_, _event);
 
 	return _event;
@@ -95,9 +95,9 @@ void gsf::utils::Timer::update()
 	if (!min_heap_empty(&min_heap_))
 	{
 		TimerEvent *_event_ptr = min_heap_top(&min_heap_);
-		time_point<system_clock, seconds> _second = time_point_cast<seconds>(system_clock::now());
+		auto _now = time_point_cast<milliseconds>(system_clock::now());
 
-		while (_event_ptr->tp_ < _second)
+		while (_event_ptr->tp_ < _now)
 		{
 			min_heap_pop(&min_heap_);
 			

@@ -24,18 +24,18 @@ namespace gsf
 		};
 
 
-		struct delay_second_tag {};
-		struct delay_second
+		struct delay_milliseconds_tag {};
+		struct delay_milliseconds
 		{
-			typedef delay_second_tag type;
+			typedef delay_milliseconds_tag type;
 			
-			delay_second(uint32_t second)
-				: second_(second)
+			delay_milliseconds(uint32_t milliseconds)
+				: milliseconds_(milliseconds)
 			{}
 			
-			uint32_t Second() const { return second_; }
+			uint32_t milliseconds() const { return milliseconds_; }
 		private:
-			uint32_t second_;
+			uint32_t milliseconds_;
 		};
 
 		/**!
@@ -124,7 +124,7 @@ namespace gsf
 			Timer();
 			static Timer* instance_;
 
-			TimerEvent * update_delay(delay_second delay, TimerHandlerPtr handler, delay_second_tag);
+			TimerEvent * update_delay(delay_milliseconds delay, TimerHandlerPtr handler, delay_milliseconds_tag);
 			TimerEvent * update_delay(delay_day delay, TimerHandlerPtr handler, delay_day_tag);
 			TimerEvent * update_delay(delay_week delay, TimerHandlerPtr handler, delay_week_tag);
 			TimerEvent * update_delay(delay_month delay, TimerHandlerPtr handler, delay_month_tag);

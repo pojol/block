@@ -34,7 +34,7 @@ public:
 	RecommendTest()
 	{
 		using namespace gsf::utils;
-		timer_event_ = Timer::instance().add_timer(delay_second(3)
+		timer_event_ = Timer::instance().add_timer(delay_milliseconds(3000)
 			, makeTimerHandler(&RecommendTest::pt, this, std::string("hello!")));
 	}
 
@@ -71,7 +71,7 @@ int main()
 	for (int i = 0; i < 10; ++i)
 	{
 		//dis(generator)
-		Timer::instance().add_timer(delay_second(i)
+		Timer::instance().add_timer(delay_milliseconds(i)
 			, makeTimerHandler(&TimerTest::pt, tt, i));
 	}
 
