@@ -60,7 +60,7 @@ gsf::network::IBuffer::~IBuffer()
 
 void gsf::network::IBuffer::produce()
 {
-	for (auto itr = ibuffer_vec_.begin(); itr != ibuffer_vec_.end();)
+	for (auto itr = ibuffer_vec_.begin(); itr != ibuffer_vec_.end(); ++itr)
 	{
 		uint32_t _pack_len = evbuffer_get_length(itr->second);
 		evbuffer *buff = nullptr;
@@ -90,9 +90,9 @@ void gsf::network::IBuffer::produce()
 			consume_vec_.push_back(std::make_pair(itr->first, buff));
 		}
 		mtx.unlock();
-
-		itr = ibuffer_vec_.erase(itr);
 	}
+
+	ibuffer_vec_.clear();
 }
 
 void gsf::network::IBuffer::consume(std::vector<std::pair<uint32_t, evbuffer*>> &vec, std::vector<uint32_t> &conn)

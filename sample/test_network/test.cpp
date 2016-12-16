@@ -58,21 +58,34 @@ public:
 #include <chrono>
 #include <ctime>
 
+static uint32_t recv_total = 0;
+static uint32_t prev_total = 0;
+
+static uint32_t old_time = 0;
+
 class LoginServerHandler
 {
 public:
-    ~LoginServerHandler(){}
+    ~LoginServerHandler()
+	{
+		if (time_event_){
+			gsf::utils::Timer::instance().rmv_timer(time_event_);
+		}
+	}
 	LoginServerHandler()
 	{
 		gsf::network::MessageBinder<SampleMsg>::instance().
 			regist_msg_proc<LoginServerHandler, &LoginServerHandler::test_msg>(100, this);
+
+		using namespace gsf::utils;
+		time_event_ = Timer::instance().add_timer(delay_milliseconds(1000)
+			, makeTimerHandler(&LoginServerHandler::tick, this));
 	}
 
     //! new connection bind session to message dispatch
     void handler_new_connection(int session_id)
     {
 		printf("new connection session_id : %d\n", session_id);
-		session_id_ = session_id;
 
 		//! bind message register
 		gsf::network::Network::instance().regist_binder(
@@ -85,8 +98,25 @@ public:
 		*_ret_msg->get_ostream() << 101;	//mid
 		*_ret_msg->get_ostream() << 1;
 
-		gsf::network::Network::instance().write(session_id_, _ret_msg);
+		gsf::network::Network::instance().write(session_id, _ret_msg);
     }
+
+	void tick()
+	{
+		printf("total:%d\n", recv_total);
+		printf("tick:%d\n", recv_total - prev_total);
+
+		prev_total = recv_total;
+
+		using namespace std::chrono;
+		auto _t = time_point_cast<milliseconds>(system_clock::now());
+		printf("delay:%d\n", _t.time_since_epoch().count() - old_time);
+		old_time = _t.time_since_epoch().count();
+
+		using namespace gsf::utils;
+		time_event_ = Timer::instance().add_timer(delay_milliseconds(1000)
+			, makeTimerHandler(&LoginServerHandler::tick, this));
+	}
 
 	void test_msg(SampleMsg::Ptr msg)
 	{
@@ -94,23 +124,28 @@ public:
 		uint32_t dat;
 		*msg->get_istream() >> dat;
 
+		/*
 		std::cout << "session : " << msg->get_session_id()
 			<< " message : " << msg->get_message_id() 
 			<< " dat : " << dat << std::endl;
+		*/
 
 		//test
 		SampleMsg::Ptr _ret_msg = std::make_shared<SampleMsg>();
+
+		recv_total += 1;
 
 		*_ret_msg->get_ostream() << 12;		//size
 		*_ret_msg->get_ostream() << 101;	//mid
 		*_ret_msg->get_ostream() << dat+1;
 
-		gsf::network::Network::instance().write(session_id_, _ret_msg);
+		gsf::network::Network::instance().write(msg->get_session_id(), _ret_msg);
 	}
 
 private:
-	uint32_t session_id_;
 	uint32_t index_;
+
+	gsf::utils::TimerEvent *time_event_;
 };
 
 
@@ -124,8 +159,9 @@ enum NetWorkState
 void update()
 {
 	//gettime
-
+	
 	//todo...
+	gsf::utils::Timer::instance().update();
 
 	//gettime
 	//endtime - begintime = network state

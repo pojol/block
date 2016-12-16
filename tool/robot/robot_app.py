@@ -11,7 +11,7 @@ if __name__ == '__main__':
 
     connect_mgr.loop = loop
 
-    for i in range(0,1):
+    for i in range(0,10000):
         connect_mgr.append_login(LoginCase("test" + str(i)), '127.0.0.1', 8888)
     connect_mgr.try_connect()
 
