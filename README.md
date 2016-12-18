@@ -43,3 +43,8 @@
 * cmake2.8+
 * libevent-2.0.22
 * python3.4+
+
+###支持平台
+- [x] windows
+- [x] linux
+- [ ] apple
