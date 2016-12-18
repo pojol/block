@@ -130,12 +130,45 @@ gsf::network::OBuffer::~OBuffer()
 
 void gsf::network::OBuffer::write(uint32_t session_id, const char *data, int len)
 {
+	queue_push(session_id, data, len);
+
 	//! temp
+	/*
 	evbuffer *buff = evbuffer_new();
 	evbuffer_add(buff, data, len);
 
-	uint32_t _index = static_cast<uint32_t>(session_id / 100000);
+	uint32_t _index = static_cast<uint32_t>(session_id / SESSION_MAX_CONNECT);
 	thread_write_vec_[_index].push_back(std::make_pair(session_id, buff));
+	*/
+}
+
+void gsf::network::OBuffer::queue_push(uint32_t session_id, const char *data, int len)
+{
+	evbuffer *_buf;
+
+	auto _push_back = [&](evbuffer * buf){
+		uint32_t _threads = static_cast<uint32_t>(session_id / SESSION_MAX_CONNECT);
+		active_write_list_[_threads].push_back(std::make_pair(session_id, buf));
+	};
+
+	auto itr = active_index_map_.find(session_id);
+	if (itr == active_index_map_.end()){
+		_buf = evbuffer_new();
+		evbuffer_add(_buf, data, len);
+
+		active_index_map_.insert(std::make_pair(session_id, _buf));
+		_push_back(_buf);
+	}
+	else{
+		_buf = itr->second;
+		uint32_t _olen = evbuffer_get_length(_buf);
+		evbuffer_add(_buf, data, len);
+
+
+		if (_olen == 0){
+			_push_back(_buf);
+		}
+	}
 }
 
 void gsf::network::OBuffer::mian_thread_init(int threads)
@@ -143,11 +176,17 @@ void gsf::network::OBuffer::mian_thread_init(int threads)
 	thread_count_ = threads;
 	for (int i = 0; i < threads; ++i)
 	{
+		/*
 		ProduceVec write_vec;
 		thread_write_vec_.push_back(write_vec);
 		
 		ProduceVec produce_vec;
 		thread_produce_vec_.push_back(produce_vec);
+		*/
+		ProduceVec active_vec;
+		active_write_list_.push_back(active_vec);
+		ProduceVec send_vec;
+		send_write_list_.push_back(send_vec);
 	}
 }
 
@@ -157,10 +196,36 @@ void gsf::network::OBuffer::produce()
 
 	for (uint32_t i = 0; i < thread_count_; ++i)
 	{
+		if (!active_write_list_[i].empty()){
+
+			for (auto itr = active_write_list_[i].begin(); itr != active_write_list_[i].end(); ++itr)
+			{
+				auto _sitr = send_index_map_.find(itr->first);
+				if (_sitr == send_index_map_.end()){
+					evbuffer * _buff = evbuffer_new();
+					evbuffer_add_buffer(_buff, itr->second);
+
+					send_index_map_.insert(std::make_pair(itr->first, _buff));
+					send_write_list_[i].push_back(std::make_pair(itr->first, _buff));
+				}
+				else {
+					uint32_t _len = evbuffer_get_length(_sitr->second);
+					evbuffer_add_buffer(_sitr->second, itr->second);	//move buffer
+					if (_len == 0){
+						send_write_list_[i].push_back(std::make_pair(itr->first, _sitr->second));
+					}
+				}
+			}
+
+			active_write_list_[i].clear();
+		}
+
+		/*
 		if (!thread_write_vec_[i].empty()){
 			thread_write_vec_[i].swap(thread_produce_vec_[i]);
 			thread_write_vec_[i].clear();
 		}
+		*/
 	}
 
 	mtx.unlock();
@@ -170,11 +235,20 @@ void gsf::network::OBuffer::consume(uint32_t thread_index, ProduceVec &vec)
 {
 	mtx.lock();
 
+	if (!send_write_list_[thread_index].empty()){
+
+		send_write_list_[thread_index].swap(vec);
+		send_write_list_[thread_index].clear();
+
+	}
+
+	/*
 	if (!thread_produce_vec_[thread_index].empty()){
 		thread_produce_vec_[thread_index].swap(vec);
 
 		thread_produce_vec_[thread_index].clear();
 	}
+	*/
 
 	mtx.unlock();
 }

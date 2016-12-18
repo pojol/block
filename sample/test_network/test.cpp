@@ -184,8 +184,10 @@ int main()
 	using namespace gsf::network;
 
 	NetworkConfig _config;
+	_config.read_wait_time_ = 200;
+	_config.send_wait_time_ = 200;
 	Network::instance().init(_config);
-    
+
 	AcceptorConfig _acceptConfig;
 	_acceptConfig.port = 8888;
 

@@ -65,10 +65,18 @@ namespace gsf
 
 			void consume(uint32_t thread_index, ProduceVec &vec);
 
+		protected:
+			void queue_push(uint32_t session_id, const char *data, int len);
+
 		private:
 
-			std::vector<ProduceVec> thread_write_vec_;
-			std::vector<ProduceVec> thread_produce_vec_;
+			std::unordered_map<uint32_t, evbuffer*> active_index_map_;
+			std::vector<ProduceVec> active_write_list_;
+			std::unordered_map<uint32_t, evbuffer*> send_index_map_;
+			std::vector<ProduceVec> send_write_list_;
+
+			//std::vector<ProduceVec> thread_write_vec_;
+			//std::vector<ProduceVec> thread_produce_vec_;
 			
 			uint32_t thread_count_;
 			std::mutex mtx;

@@ -333,6 +333,7 @@ void gsf::network::NetworkImpl::work_consume_event(evutil_socket_t fd, short eve
 	for (auto &it : vec)
 	{
 		SessionPtr _seesion = _thread_ptr->session_mgr->find(it.first);
+		uint32_t _len = evbuffer_get_length(it.second);
 		_seesion->write(it.second);
 	}
 

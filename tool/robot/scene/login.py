@@ -20,6 +20,7 @@ class LoginCase(asyncio.Protocol):
 
     def data_received(self, data):
         fmt = '<III'
+
         self.transport.write(struct.pack(fmt, 12, 100, 2))
 
 

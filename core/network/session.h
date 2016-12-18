@@ -15,6 +15,8 @@ namespace gsf
 		class OBuffer;
 		class IBuffer;
 
+		static const uint32_t SESSION_MAX_CONNECT = 100000;
+
 		class SessionCloseHandler
 		{
 		public:
