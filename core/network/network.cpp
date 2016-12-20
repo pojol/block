@@ -33,9 +33,9 @@ int gsf::network::Network::start(UpdateFunc func)
 	return NetworkImpl::instance().start(func);
 }
 
-int gsf::network::Network::listen(const AcceptorConfig &config, std::function<void(int)> func)
+int gsf::network::Network::listen(const AcceptorConfig &config, NewConnectFunc newConnectFunc, DisConnectFunc disConnectFunc)
 {
-	return NetworkImpl::instance().make_acceptor(config, func);
+	return NetworkImpl::instance().make_acceptor(config, newConnectFunc, disConnectFunc);
 }
 
 void gsf::network::Network::write(uint32_t session_id, MessagePtr msg)

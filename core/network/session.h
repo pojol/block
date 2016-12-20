@@ -17,28 +17,6 @@ namespace gsf
 
 		static const uint32_t SESSION_MAX_CONNECT = 100000;
 
-		class SessionCloseHandler
-		{
-		public:
-			virtual ~SessionCloseHandler(){};
-
-			virtual void handle_close(uint32_t session_id
-				, int err_code
-				, int accepor_id
-				, int connector_id
-				, const std::string &ip
-				, const int port) = 0;
-		};
-
-		class SessionHandler
-		{
-		public:
-			virtual ~SessionHandler();
-
-			virtual void handle_data(const char *data) = 0;
-
-		};
-
 		class Session
 		{
 		public:
@@ -49,13 +27,9 @@ namespace gsf
 
 			static void read_cb(::bufferevent *bev, void *ctx);
 
-			static void err_cb(::bufferevent *bev, short what, void *ctx);
-
 			int write(::evbuffer *data);
 
 			int32_t get_id() const { return id_; }
-
-			SessionHandler * get_session_handler() { return session_handler_; }
 
 			void read(::bufferevent *bev);
 			static void read_buffer_cb(::evbuffer *buffer, const ::evbuffer_cb_info *info, void *arg);
@@ -78,8 +52,6 @@ namespace gsf
 			bool need_write_;
 			bool need_read_;
 
-			SessionHandler *session_handler_;
-			SessionCloseHandler *close_handler_;
 		};
 	}
 	

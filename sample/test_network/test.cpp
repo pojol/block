@@ -18,7 +18,6 @@
 
 
 #include <network.h>
-#include <network_config.h>
 #include <acceptor.h>
 #include <message_binder.h>
 
@@ -60,6 +59,7 @@ public:
 
 static uint32_t recv_total = 0;
 static uint32_t prev_total = 0;
+static uint32_t cur_connect = 0;
 
 static uint32_t old_time = 0;
 
@@ -91,6 +91,8 @@ public:
 		gsf::network::Network::instance().regist_binder(
 			&gsf::network::MessageBinder<SampleMsg>::instance());
 
+		cur_connect++;
+
 		//test
 		SampleMsg::Ptr _ret_msg = std::make_shared<SampleMsg>();
 
@@ -101,9 +103,16 @@ public:
 		gsf::network::Network::instance().write(session_id, _ret_msg);
     }
 
+	void handler_connect_close(int session_id)
+	{
+		printf("dis connection session_id : %d\n", session_id);
+		cur_connect--;
+	}
+
 	void tick()
 	{
 		printf("total:%d\n", recv_total);
+		printf("connect:%d\n", cur_connect);
 		printf("tick:%d\n", recv_total - prev_total);
 
 		prev_total = recv_total;
@@ -184,8 +193,7 @@ int main()
 	using namespace gsf::network;
 
 	NetworkConfig _config;
-	_config.read_wait_time_ = 200;
-	_config.send_wait_time_ = 200;
+	_config.buff_wait_time_ = 200;
 	Network::instance().init(_config);
 
 	AcceptorConfig _acceptConfig;
@@ -194,7 +202,8 @@ int main()
 	LoginServerHandler *accept_handler = new LoginServerHandler();
 
 	if (Network::instance().listen(_acceptConfig
-		, std::bind(&LoginServerHandler::handler_new_connection, accept_handler, std::placeholders::_1)) < 0){
+		, std::bind(&LoginServerHandler::handler_new_connection, accept_handler, std::placeholders::_1)
+		, std::bind(&LoginServerHandler::handler_connect_close, accept_handler, std::placeholders::_1)) < 0){
 		//err
 	}
 

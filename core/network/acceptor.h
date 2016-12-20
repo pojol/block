@@ -25,21 +25,28 @@ namespace gsf
 		class Acceptor
 		{
 		public:
-			Acceptor(const AcceptorConfig &config, std::function<void(int)> func);
+			Acceptor(const AcceptorConfig &config, std::function<void(int)> newConnect, std::function<void(int)> disConnect);
 			~Acceptor();
 
 			int close();
 
 			void handler_new_connect(int32_t session_id);
+			void handler_dis_connect(int32_t session_id);
 
 			AcceptorConfig &get_config();
 
 			int get_id() const;
 
+			static void err_cb(::bufferevent *bev, short what, void *ctx);
+
+		protected:
+			
+
 		private:
 			AcceptorConfig config_;
 
-			std::function<void(int)> accept_handler_;
+			std::function<void(int)> new_connect_handler;
+			std::function<void(int)> dis_connect_handler;
 
 			::evconnlistener *listener_ptr_;
 		};

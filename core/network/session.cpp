@@ -8,8 +8,6 @@ gsf::network::Session::Session(int32_t id, ::bufferevent *bev, int fd)
     : id_(id)
     , bev_(bev)
     , fd_(fd)
-	, session_handler_(nullptr)
-	, close_handler_(nullptr)
 	, need_write_(false)
 	, need_read_(false)
 {
@@ -42,26 +40,6 @@ void gsf::network::Session::read_cb(::bufferevent *bev, void *ctx)
 	_session_ptr->read(bev);
 
 	//evbuffer_add_buffer()
-}
-
-void gsf::network::Session::err_cb(::bufferevent *bev, short what, void *ctx)
-{
-	if (what & BEV_EVENT_EOF)  
-	{  
-		/* connection has been closed, do any clean up here */  
-		printf("connection closed\n");  
-	}  
-	else if (what & BEV_EVENT_ERROR)  
-	{  
-		/* check errno to see what error occurred */  
-		printf("some other error\n");  
-	}  
-	else if (what & BEV_EVENT_TIMEOUT)  
-	{  
-		/* must be a timeout event handle, handle it */  
-		printf("Timed out\n");  
-	}  
-	bufferevent_free(bev);
 }
 
 int gsf::network::Session::write(::evbuffer *data)

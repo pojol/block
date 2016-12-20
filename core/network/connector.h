@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <event2/bufferevent.h>
 
 namespace gsf
 {
@@ -35,6 +36,8 @@ namespace gsf
 			uint32_t get_id() const { return id_; }
 
 			void handle_connect_failed(int err_code, const std::string &ip, const int port);
+
+			static void err_cb(::bufferevent *bev, short what, void *ctx);
 
 		private:
 			ConnectorConfig config_;

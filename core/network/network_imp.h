@@ -9,9 +9,8 @@
 #include <event2/util.h>
 #include <event2/listener.h>
 
+#include "network.h"
 #include "message_binder.h"
-
-#include "network_config.h"
 
 namespace gsf
 {
@@ -29,8 +28,6 @@ namespace gsf
 		class Message;
 		typedef std::shared_ptr<Message> MessagePtr;
 
-		struct NetworkConfig;
-
 		class NetworkImpl
 		{
 			typedef std::shared_ptr<Acceptor> AcceptorPtr;
@@ -47,7 +44,7 @@ namespace gsf
 
 			int start(std::function<void()> update_func);
 
-			int make_acceptor(const AcceptorConfig &config, std::function<void(int)> func);
+			int make_acceptor(const AcceptorConfig &config, std::function<void(int)> newConnect, std::function<void(int)> disConnect);
 
 			void write(uint32_t session_id, MessagePtr msg);
 
@@ -85,11 +82,8 @@ namespace gsf
 				, int socklen
 				, void *arg);
 
-			static void main_produce_event(evutil_socket_t fd, short event, void *arg);
-			static void main_consume_event(evutil_socket_t fd, short event, void *arg);
-
-			static void work_produce_event(evutil_socket_t fd, short event, void *arg);
-			static void work_consume_event(evutil_socket_t fd, short event, void *arg);
+			static void main_thread_event(evutil_socket_t fd, short event, void *arg);
+			static void work_thread_event(evutil_socket_t fd, short event, void *arg);
 
 			static void update_event(evutil_socket_t fd, short event, void *arg);
 
@@ -103,11 +97,8 @@ namespace gsf
 			AcceptorPtr acceptor_ptr_;
 			::evconnlistener *accept_listener_;
 
-			::event * produce_event_;
-			::event * consume_event_;
-
-			::event * work_produce_event_;
-			::event * work_consume_event_;
+			::event * main_thread_event_;
+			::event * work_thread_event_;
 
 			::event * update_event_;
 			std::function<void()> update_func_;

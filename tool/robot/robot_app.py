@@ -6,15 +6,15 @@ try:
 except ImportError:
     signal = None
 
-if sys.platfrom == 'win32':
+if sys.platform == 'win32':
     from asyncio import windows_events
 
-from tool.robot.connect_mgr import connect_mgr
-from tool.robot.scene.login import LoginCase
+from gsf.tool.robot.connect_mgr import connect_mgr
+from gsf.tool.robot.scene.login import LoginCase
 
 if __name__ == '__main__':
 
-    if sys.platfrom == 'win32':
+    if sys.platform == 'win32':
         loop = windows_events.ProactorEventLoop()
     else :
         loop = asyncio.get_event_loop()
@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
     connect_mgr.loop = loop
 
-    for i in range(0,5000):
+    for i in range(0,2000):
         connect_mgr.append_login(LoginCase("test" + str(i)), '127.0.0.1', 8888)
     connect_mgr.try_connect()
 

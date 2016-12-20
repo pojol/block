@@ -34,10 +34,9 @@ gsf::network::NetworkImpl* gsf::network::NetworkImpl::instance_ = NULL;
 
 
 gsf::network::NetworkImpl::NetworkImpl()
-	: produce_event_(nullptr)
-	, consume_event_(nullptr)
-	, work_produce_event_(nullptr)
-	, work_consume_event_(nullptr)
+	: main_thread_event_(nullptr)
+	, work_thread_event_(nullptr)
+	, update_event_(nullptr)
 {
 
 }
@@ -55,8 +54,8 @@ gsf::network::NetworkImpl& gsf::network::NetworkImpl::instance()
 
 gsf::network::NetworkImpl::~NetworkImpl()
 {
-	evtimer_del(produce_event_);
-	evtimer_del(consume_event_);
+	evtimer_del(main_thread_event_);
+	evtimer_del(work_thread_event_);
 }
 
 int gsf::network::NetworkImpl::init(const NetworkConfig &config)
@@ -67,12 +66,10 @@ int gsf::network::NetworkImpl::init(const NetworkConfig &config)
 
 	main_thread_ptr_->event_base_ptr_ = event_base_new();
 
-	produce_event_ = event_new(main_thread_ptr_->event_base_ptr_, -1, EV_PERSIST, main_produce_event, main_thread_ptr_.get());
-	consume_event_ = event_new(main_thread_ptr_->event_base_ptr_, -1, EV_PERSIST, main_consume_event, main_thread_ptr_.get());
+	main_thread_event_ = event_new(main_thread_ptr_->event_base_ptr_, -1, EV_PERSIST, main_thread_event, main_thread_ptr_.get());
 
-	struct timeval tv = { 0, config_.read_wait_time_ * 1000 };
-	evtimer_add(produce_event_, &tv);
-	evtimer_add(consume_event_, &tv);
+	struct timeval tv = { 0, (config_.buff_wait_time_ / 2) * 1000 };
+	evtimer_add(main_thread_event_, &tv);
 
 	init_work_thread();
 
@@ -89,7 +86,7 @@ int gsf::network::NetworkImpl::start(std::function<void()> update_func)
 	}
 
 	update_event_ = event_new(main_thread_ptr_->event_base_ptr_, -1, EV_PERSIST, update_event, main_thread_ptr_.get());
-	struct timeval tv = { 0, 20 * 1000 };
+	struct timeval tv = { 0, config_.update_interval_ * 1000 };
 	evtimer_add(update_event_, &tv);
 
 	event_base_dispatch(main_thread_ptr_->event_base_ptr_);
@@ -136,12 +133,10 @@ int32_t gsf::network::NetworkImpl::init_work_thread()
 			event_add(signal, NULL);
 		}
 
-		work_produce_event_ = event_new(thread_ptr->event_base_ptr_, -1, EV_PERSIST, work_produce_event, thread_ptr.get());
-		work_consume_event_ = event_new(thread_ptr->event_base_ptr_, -1, EV_PERSIST, work_consume_event, thread_ptr.get());
+		work_thread_event_ = event_new(thread_ptr->event_base_ptr_, -1, EV_PERSIST, work_thread_event, thread_ptr.get());
 
-		struct timeval tv = { 0, config_.send_wait_time_ * 1000 };
-		evtimer_add(work_produce_event_, &tv);
-		evtimer_add(work_consume_event_, &tv);
+		struct timeval tv = { 0, (config_.buff_wait_time_ / 2) * 1000 };
+		evtimer_add(work_thread_event_, &tv);
 
 		worker_thread_vec_.push_back(thread_ptr);
 	}
@@ -218,7 +213,7 @@ int gsf::network::NetworkImpl::connect_bind(Connector *connector_ptr, const std:
 	}
 
 	auto _session_ptr = main_thread_ptr_->session_mgr->make_session(bev, fd);
-	bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, _session_ptr.get());
+	bufferevent_setcb(bev, Session::read_cb, NULL, Connector::err_cb, _session_ptr.get());
 	bufferevent_enable(bev, EV_READ);
 
 	return 0;
@@ -254,16 +249,16 @@ void gsf::network::NetworkImpl::worker_thread_process(evutil_socket_t fd, short 
 
 			threadPtr->in_buffer_->new_connect(_session_ptr->get_id());
 
-			bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, _session_ptr.get());
+			bufferevent_setcb(bev, Session::read_cb, NULL, Acceptor::err_cb, _session_ptr.get());
 			bufferevent_enable(bev, EV_READ);
 		}
 		break;
 	}
 }
 
-int gsf::network::NetworkImpl::make_acceptor(const AcceptorConfig &config, std::function<void(int)> func)
+int gsf::network::NetworkImpl::make_acceptor(const AcceptorConfig &config, std::function<void(int)> newConnect, std::function<void(int)> disConnect)
 {
-	acceptor_ptr_ = std::make_shared<Acceptor>(config, func);
+	acceptor_ptr_ = std::make_shared<Acceptor>(config, newConnect, disConnect);
 
 	accept_bind(config.address, config.port);
 
@@ -282,17 +277,14 @@ void gsf::network::NetworkImpl::accept_listen_cb(::evconnlistener *listener, evu
 	NetworkImpl::instance().accept_conn_new(fd);
 }
 
-void gsf::network::NetworkImpl::main_produce_event(evutil_socket_t fd, short event, void *arg)
+void gsf::network::NetworkImpl::main_thread_event(evutil_socket_t fd, short event, void *arg)
 {
 	auto *_thread_ptr = static_cast<NetworkThread*>(arg);
 
+	// main produce outbuf
 	_thread_ptr->out_buffer_->produce();
-}
 
-void gsf::network::NetworkImpl::main_consume_event(evutil_socket_t fd, short event, void *arg)
-{
-	auto *_thread_ptr = static_cast<NetworkThread*>(arg);
-
+	// main consume inbuf
 	for (auto &th : NetworkImpl::instance().get_worker_thread())
 	{
 		std::vector<std::pair<uint32_t, evbuffer*>> vec;
@@ -314,17 +306,14 @@ void gsf::network::NetworkImpl::main_consume_event(evutil_socket_t fd, short eve
 	}
 }
 
-void gsf::network::NetworkImpl::work_produce_event(evutil_socket_t fd, short event, void *arg)
+void gsf::network::NetworkImpl::work_thread_event(evutil_socket_t fd, short event, void *arg)
 {
 	auto *_thread_ptr = static_cast<NetworkThread*>(arg);
 
+	//work produce inbuf
 	_thread_ptr->in_buffer_->produce();
-}
 
-void gsf::network::NetworkImpl::work_consume_event(evutil_socket_t fd, short event, void *arg)
-{
-	auto *_thread_ptr = static_cast<NetworkThread*>(arg);
-
+	//work consume outbuf
 	auto _main_thread_ptr = NetworkImpl::instance().get_main_thread();
 
 	std::vector<std::pair<uint32_t, evbuffer*>> vec;
