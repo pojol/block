@@ -109,8 +109,6 @@ namespace gsf
 			evbuffer_remove(buf, _block_ptr->buf_, len);
 			//memcpy(_block_ptr->buf_, buf, len);
 
-			evbuffer_free(buf);
-
 			typename MSG::Ptr msg = std::make_shared<MSG>(_block_ptr, 0, len, session_id);
 			msg->pase_message_id();
 			dispatch(msg);

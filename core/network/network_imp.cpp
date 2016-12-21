@@ -298,8 +298,6 @@ void gsf::network::NetworkImpl::main_thread_event(evutil_socket_t fd, short even
 			NetworkImpl::instance().get_binder()->construct_msg(it.first, it.second);
 		}
 
-		vec.clear();
-
 		for (int i : conn)
 		{
 			NetworkImpl::instance().get_acceptor()->handler_new_connect(i);
