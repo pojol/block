@@ -2,7 +2,6 @@
 
 #include "session.h"
 
-#include "network_imp.h"
 #include "err.h"
 
 #include <event2/event.h>
@@ -44,30 +43,6 @@ int gsf::network::Acceptor::close()
 	evconnlistener_free(listener_ptr_);
 
 	return 0;
-}
-
-void gsf::network::Acceptor::err_cb(::bufferevent *bev, short what, void *ctx)
-{
-	if (what & BEV_EVENT_EOF)
-	{
-		/* connection has been closed, do any clean up here */
-		//printf("connection closed\n");
-
-		Session * _session_ptr = static_cast<Session *>(ctx);
-		NetworkImpl::instance().get_acceptor()->handler_dis_connect(_session_ptr->get_id());
-	}
-	else if (what & BEV_EVENT_ERROR)
-	{
-		/* check errno to see what error occurred */
-		Session * _session_ptr = static_cast<Session *>(ctx);
-		NetworkImpl::instance().get_acceptor()->handler_dis_connect(_session_ptr->get_id());
-	}
-	else if (what & BEV_EVENT_TIMEOUT)
-	{
-		/* must be a timeout event handle, handle it */
-		printf("Timed out\n");
-	}
-	bufferevent_free(bev);
 }
 
 gsf::network::AcceptorConfig & gsf::network::Acceptor::get_config()

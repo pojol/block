@@ -46,6 +46,13 @@ void gsf::network::IBuffer::new_connect(uint32_t session_id)
 	mtx.unlock();
 }
 
+void gsf::network::IBuffer::dis_connect(uint32_t session_id)
+{
+	mtx.lock();
+	disconn_vec_.push_back(session_id);
+	mtx.unlock();
+}
+
 gsf::network::IBuffer::IBuffer()
 {
 	recvbuf_ = (char*)malloc(4);	//test
@@ -95,7 +102,7 @@ void gsf::network::IBuffer::produce()
 	ibuffer_vec_.clear();
 }
 
-void gsf::network::IBuffer::consume(std::vector<std::pair<uint32_t, evbuffer*>> &vec, std::vector<uint32_t> &conn)
+void gsf::network::IBuffer::consume(std::vector<std::pair<uint32_t, evbuffer*>> &vec , std::vector<uint32_t> &conn , std::vector<uint32_t> &disconn)
 {
 	mtx.lock();
 	if (!consume_vec_.empty()){
@@ -110,6 +117,11 @@ void gsf::network::IBuffer::consume(std::vector<std::pair<uint32_t, evbuffer*>> 
 		connect_vec_.swap(conn);
 
 		connect_vec_.clear();
+	}
+
+	if (!disconn_vec_.empty()){
+		disconn_vec_.swap(disconn);
+		disconn_vec_.clear();
 	}
 
 	mtx.unlock();

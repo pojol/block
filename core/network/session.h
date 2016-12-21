@@ -26,6 +26,7 @@ namespace gsf
 			int init(IBuffer *ibuffer, OBuffer *obuffer);
 
 			static void read_cb(::bufferevent *bev, void *ctx);
+			static void err_cb(::bufferevent *bev, short what, void *ctx);
 
 			int write(::evbuffer *data);
 
@@ -34,6 +35,8 @@ namespace gsf
 			void read(::bufferevent *bev);
 			static void read_buffer_cb(::evbuffer *buffer, const ::evbuffer_cb_info *info, void *arg);
 			void change_read_state();
+
+			void dis_connect();
 
 		protected:
 

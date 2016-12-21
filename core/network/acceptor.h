@@ -37,8 +37,6 @@ namespace gsf
 
 			int get_id() const;
 
-			static void err_cb(::bufferevent *bev, short what, void *ctx);
-
 		protected:
 			
 

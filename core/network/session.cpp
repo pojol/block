@@ -42,6 +42,30 @@ void gsf::network::Session::read_cb(::bufferevent *bev, void *ctx)
 	//evbuffer_add_buffer()
 }
 
+void gsf::network::Session::err_cb(::bufferevent *bev, short what, void *ctx)
+{
+	if (what & BEV_EVENT_EOF)
+	{
+		/* connection has been closed, do any clean up here */
+		//printf("connection closed\n");
+
+		Session * _session_ptr = static_cast<Session *>(ctx);
+		_session_ptr->dis_connect();
+	}
+	else if (what & BEV_EVENT_ERROR)
+	{
+		/* check errno to see what error occurred */
+		Session * _session_ptr = static_cast<Session *>(ctx);
+		_session_ptr->dis_connect();
+	}
+	else if (what & BEV_EVENT_TIMEOUT)
+	{
+		/* must be a timeout event handle, handle it */
+		printf("Timed out\n");
+	}
+	bufferevent_free(bev);
+}
+
 int gsf::network::Session::write(::evbuffer *data)
 {
 	evbuffer_write(data, fd_);
@@ -70,4 +94,9 @@ void gsf::network::Session::read_buffer_cb(::evbuffer *buffer, const ::evbuffer_
 		auto _session_ptr = static_cast<gsf::network::Session *>(arg);
 		_session_ptr->change_read_state();
 	}
+}
+
+void gsf::network::Session::dis_connect()
+{
+	thread_in_buffer_->dis_connect(id_);
 }

@@ -213,7 +213,7 @@ int gsf::network::NetworkImpl::connect_bind(Connector *connector_ptr, const std:
 	}
 
 	auto _session_ptr = main_thread_ptr_->session_mgr->make_session(bev, fd);
-	bufferevent_setcb(bev, Session::read_cb, NULL, Connector::err_cb, _session_ptr.get());
+	bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, _session_ptr.get());
 	bufferevent_enable(bev, EV_READ);
 
 	return 0;
@@ -249,7 +249,7 @@ void gsf::network::NetworkImpl::worker_thread_process(evutil_socket_t fd, short 
 
 			threadPtr->in_buffer_->new_connect(_session_ptr->get_id());
 
-			bufferevent_setcb(bev, Session::read_cb, NULL, Acceptor::err_cb, _session_ptr.get());
+			bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, _session_ptr.get());
 			bufferevent_enable(bev, EV_READ);
 		}
 		break;
@@ -289,7 +289,8 @@ void gsf::network::NetworkImpl::main_thread_event(evutil_socket_t fd, short even
 	{
 		std::vector<std::pair<uint32_t, evbuffer*>> vec;
 		std::vector<uint32_t> conn;
-		th->in_buffer_->consume(vec, conn);
+		std::vector<uint32_t> disconn;
+		th->in_buffer_->consume(vec, conn, disconn);
 
 		// test dispatch
 		for (auto &it : vec)
@@ -302,6 +303,11 @@ void gsf::network::NetworkImpl::main_thread_event(evutil_socket_t fd, short even
 		for (int i : conn)
 		{
 			NetworkImpl::instance().get_acceptor()->handler_new_connect(i);
+		}
+
+		for (auto sid : disconn)
+		{
+			NetworkImpl::instance().get_acceptor()->handler_dis_connect(sid);
 		}
 	}
 }

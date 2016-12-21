@@ -30,12 +30,15 @@ namespace gsf
 			void mark_produce(uint32_t session_id, evbuffer *buff);
 
 			void new_connect(uint32_t session_id);
+			void dis_connect(uint32_t session_id);
 
 			//! 生产，把消息填充到ringbuff
 			void produce();
 
 			//! 由主线程取出ringbuff
-			void consume(std::vector<std::pair<uint32_t, evbuffer*>> &vec, std::vector<uint32_t> &conn);
+			void consume(std::vector<std::pair<uint32_t, evbuffer*>> &vec
+				, std::vector<uint32_t> &conn
+				, std::vector<uint32_t> &disconn);
 
 		private:
 			//! produce list
@@ -44,6 +47,7 @@ namespace gsf
 			
 			//! temp
 			std::vector<uint32_t> connect_vec_;
+			std::vector<uint32_t> disconn_vec_;
 
 			char * recvbuf_;
 

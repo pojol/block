@@ -37,8 +37,6 @@ namespace gsf
 
 			void handle_connect_failed(int err_code, const std::string &ip, const int port);
 
-			static void err_cb(::bufferevent *bev, short what, void *ctx);
-
 		private:
 			ConnectorConfig config_;
 			ConnectHandler *handler_;
