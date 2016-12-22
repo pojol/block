@@ -157,14 +157,6 @@ private:
 	gsf::utils::TimerEvent *time_event_;
 };
 
-
-enum NetWorkState
-{
-	NS_Fast,
-	NS_Slow,
-	NS_Busy,
-};
-
 void update()
 {
 	//gettime
