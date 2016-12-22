@@ -61,9 +61,12 @@ namespace gsf
 			void construct_msg(int session_id, ::evbuffer *buf);
 
 		private:
+			MessageBinder();
+
 			static MessageBinder<MSG> *instance_;
 
 		private:
+			char *recv_size_;
 			std::unordered_map<int, DispatchMsg<MSG>> map_;
 		};
 
@@ -71,6 +74,12 @@ namespace gsf
 		MessageBinder<MSG>::~MessageBinder()
 		{
 			map_.clear();
+		}
+
+		template <typename MSG>
+		MessageBinder<MSG>::MessageBinder()
+		{
+			recv_size_ = (char*)malloc(4);
 		}
 
 		template <typename MSG>
@@ -101,17 +110,26 @@ namespace gsf
 		template <typename MSG>
 		void MessageBinder<MSG>::construct_msg(int session_id, ::evbuffer *buf)
 		{
-			int len = evbuffer_get_length(buf);
+			uint32_t _len = 1;
+			while (_len)
+			{
+				evbuffer_copyout(buf, recv_size_, 4);
+				uint32_t _msg_len = *reinterpret_cast<uint32_t*>(recv_size_);
 
-			auto _block_ptr = std::make_shared<stream::Block>(len);
-			_block_ptr->size_ = len;
+				auto _block_ptr = std::make_shared<stream::Block>(_msg_len);
+				_block_ptr->size_ = _msg_len;
 
-			evbuffer_remove(buf, _block_ptr->buf_, len);
-			//memcpy(_block_ptr->buf_, buf, len);
+				evbuffer_remove(buf, _block_ptr->buf_, _msg_len);
+				//memcpy(_block_ptr->buf_, buf, len);
 
-			typename MSG::Ptr msg = std::make_shared<MSG>(_block_ptr, 0, len, session_id);
-			msg->pase_message_id();
-			dispatch(msg);
+				typename MSG::Ptr msg = std::make_shared<MSG>(_block_ptr, 0, _msg_len, session_id);
+				msg->pase_message_id();
+				dispatch(msg);
+
+				_len = evbuffer_get_length(buf);
+			}
+
+			evbuffer_free(buf);
 		}
 
 		template <typename MSG>

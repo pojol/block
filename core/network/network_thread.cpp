@@ -75,15 +75,7 @@ void gsf::network::IBuffer::produce()
 		evbuffer_copyout(itr->second, recvbuf_, 4);
 		uint32_t *_msg_size = reinterpret_cast<uint32_t *>(recvbuf_);
 		if (_pack_len >= *_msg_size){
-
-			auto _map_itr = consume_map_.find(itr->first);
-			if (_map_itr != consume_map_.end()){
-				buff = _map_itr->second;
-			}
-			else {
-				buff = evbuffer_new();
-				consume_map_.insert(std::make_pair(itr->first, buff));
-			}
+			buff = evbuffer_new();
 		}
 
 		while (_pack_len >= *_msg_size)

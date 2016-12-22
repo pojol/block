@@ -43,8 +43,6 @@ namespace gsf
 		private:
 			//! produce list
 			std::vector<std::pair<uint32_t, evbuffer*>> ibuffer_vec_;
-
-			std::unordered_map<uint32_t, evbuffer*> consume_map_;
 			std::vector<std::pair<uint32_t, evbuffer*>> consume_vec_;
 			
 			//! temp
