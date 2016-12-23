@@ -42,6 +42,7 @@ namespace gsf
 			SessionQueue session_queue_;
 
 			uint32_t session_index_;
+			uint32_t session_index_beg_;
 		};
 	}
 }

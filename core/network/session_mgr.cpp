@@ -7,6 +7,7 @@
 gsf::network::SessionMgr::SessionMgr(uint32_t index)
 {
 	session_index_ = index;
+	session_index_beg_ = index;
 }
 
 gsf::network::SessionMgr::~SessionMgr()
@@ -16,7 +17,12 @@ gsf::network::SessionMgr::~SessionMgr()
 
 gsf::network::SessionPtr gsf::network::SessionMgr::make_session(::bufferevent *bev, int fd)
 {
-	session_index_++;
+	if (session_index_ < session_index_beg_ + SESSION_MAX_CONNECT){
+		session_index_++;
+	}
+	else {
+		session_index_ = session_index_beg_;
+	}
 
 	auto _session_ptr = std::make_shared<Session>(session_index_, bev, fd);
 	session_queue_.insert(std::make_pair(_session_ptr->get_id(), _session_ptr));
