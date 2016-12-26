@@ -265,6 +265,13 @@ int gsf::network::NetworkImpl::make_acceptor(const AcceptorConfig &config, std::
 	return 0;
 }
 
+int gsf::network::NetworkImpl::make_connector(const ConnectorConfig &config, std::function<void(int)> newConnect, std::function<void(int, int, std::string&, int)> connFailed)
+{
+
+
+	return 0;
+}
+
 void gsf::network::NetworkImpl::worker_thread_run(NetworkThreadPtr thread_ptr)
 {
 	event_base_dispatch(thread_ptr->event_base_ptr_);

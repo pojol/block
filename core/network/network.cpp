@@ -38,6 +38,11 @@ int gsf::network::Network::listen(const AcceptorConfig &config, NewConnectFunc n
 	return NetworkImpl::instance().make_acceptor(config, newConnectFunc, disConnectFunc);
 }
 
+int gsf::network::Network::connect(const ConnectorConfig &config, NewConnectFunc new_connect, ConnectFailedFunc connect_failed)
+{
+
+}
+
 void gsf::network::Network::write(uint32_t session_id, MessagePtr msg)
 {
 	NetworkImpl::instance().write(session_id, msg);

@@ -46,6 +46,8 @@ namespace gsf
 
 			int make_acceptor(const AcceptorConfig &config, std::function<void(int)> newConnect, std::function<void(int)> disConnect);
 
+			int make_connector(const ConnectorConfig &config, std::function<void(int)> newConnect, std::function<void(int, int, std::string&, int)> connFailed);
+
 			void write(uint32_t session_id, MessagePtr msg);
 
 			void regist_binder(Binder *binder);
