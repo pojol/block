@@ -1,4 +1,4 @@
-#ifndef _NETWORK_IMPL_HEADER_
+﻿#ifndef _NETWORK_IMPL_HEADER_
 #define _NETWORK_IMPL_HEADER_
 
 #include <stdint.h>

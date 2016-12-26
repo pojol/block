@@ -12,6 +12,7 @@
 #include <thread>
 
 #include "session_mgr.h"
+#include "connector_mgr.h"
 #include "network_connect.h"
 
 
@@ -106,6 +107,7 @@ namespace gsf
 			OBuffer *out_buffer_;
 
 			SessionMgr *session_mgr;
+			ConnectorMgr *connect_mgr;
 
 			int index_;
 		};

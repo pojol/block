@@ -40,7 +40,7 @@ int gsf::network::Network::listen(const AcceptorConfig &config, NewConnectFunc n
 
 int gsf::network::Network::connect(const ConnectorConfig &config, NewConnectFunc new_connect, ConnectFailedFunc connect_failed)
 {
-
+	return NetworkImpl::instance().make_connector(config, new_connect, connect_failed);
 }
 
 void gsf::network::Network::write(uint32_t session_id, MessagePtr msg)

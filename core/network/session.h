@@ -16,6 +16,7 @@ namespace gsf
 		class IBuffer;
 
 		static const uint32_t SESSION_MAX_CONNECT = 100000;
+		static const uint32_t CONNECTOR_MAX_CONNECT = 1000;
 
 		class Session
 		{

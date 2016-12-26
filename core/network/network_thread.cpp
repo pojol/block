@@ -22,6 +22,7 @@ gsf::network::NetworkThread::NetworkThread(int index)
 	, index_(index)
 {
 	session_mgr = new SessionMgr(index * SESSION_MAX_CONNECT);
+	connect_mgr = new ConnectorMgr(index * CONNECTOR_MAX_CONNECT);
 
 	in_buffer_ = new IBuffer();
 	out_buffer_ = new OBuffer();

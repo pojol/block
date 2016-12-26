@@ -4,10 +4,8 @@
 
 #include <algorithm>
 
-gsf::network::ConnectorMgr* gsf::network::ConnectorMgr::instance_ = nullptr;
-
-gsf::network::ConnectorMgr::ConnectorMgr()
-        :connector_index_(0)
+gsf::network::ConnectorMgr::ConnectorMgr(uint32_t thread_index)
+        :connector_index_(thread_index)
 {
 
 }
@@ -15,15 +13,6 @@ gsf::network::ConnectorMgr::ConnectorMgr()
 gsf::network::ConnectorMgr::~ConnectorMgr()
 {
 
-}
-
-gsf::network::ConnectorMgr& gsf::network::ConnectorMgr::instance()
-{
-    if (instance_ == nullptr)
-    {
-		instance_ = new gsf::network::ConnectorMgr();
-    }
-    return *instance_;
 }
 
 int gsf::network::ConnectorMgr::make_connector(const ConnectorConfig &config)

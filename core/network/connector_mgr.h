@@ -19,8 +19,7 @@ namespace gsf
 		{
 		public:
 			~ConnectorMgr();
-
-			static ConnectorMgr & instance();
+			ConnectorMgr(uint32_t thread_index);
 
 			int make_connector(const ConnectorConfig &config);
 
@@ -29,10 +28,6 @@ namespace gsf
 			int close(int connector_id);
 
 			ConnectorPtr find_connector(int connector_id);
-
-		protected:
-			ConnectorMgr();
-			static ConnectorMgr *instance_;
 
 		private:
 			typedef std::vector<ConnectorPtr> ConnectorVec;

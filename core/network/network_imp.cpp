@@ -1,4 +1,4 @@
-#include "network_imp.h"
+﻿#include "network_imp.h"
 
 #include "network_thread.h"
 
@@ -82,7 +82,7 @@ int gsf::network::NetworkImpl::start(std::function<void()> update_func)
 
 	for (auto &worker : worker_thread_vec_)
 	{
-		worker->th = new std::thread(worker_thread_run, worker); //�ǿչ����ֱ�������߳�
+		worker->th = new std::thread(worker_thread_run, worker); //非空构造会直接启动线程
 	}
 
 	update_event_ = event_new(main_thread_ptr_->event_base_ptr_, -1, EV_PERSIST, update_event, main_thread_ptr_.get());
@@ -267,8 +267,7 @@ int gsf::network::NetworkImpl::make_acceptor(const AcceptorConfig &config, std::
 
 int gsf::network::NetworkImpl::make_connector(const ConnectorConfig &config, std::function<void(int)> newConnect, std::function<void(int, int, std::string&, int)> connFailed)
 {
-
-
+	//! 如何传递到worker_thread_process， 连接处理最好在统一的函数执行。 
 	return 0;
 }
 
