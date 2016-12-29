@@ -201,5 +201,6 @@ int main()
 
 	gsf::network::Network::instance().start(std::bind(&update));
 
+	gsf::network::Network::instance().uninit();
 	return 0;
 }

@@ -50,7 +50,7 @@ void gsf::network::Network::write(uint32_t session_id, MessagePtr msg)
 
 void gsf::network::Network::uninit()
 {
-
+	NetworkImpl::instance().uninit();
 }
 
 void gsf::network::Network::regist_binder(Binder *binder)

@@ -51,11 +51,9 @@ gsf::network::NetworkImpl& gsf::network::NetworkImpl::instance()
 	return *instance_;
 }
 
-
 gsf::network::NetworkImpl::~NetworkImpl()
 {
-	evtimer_del(main_thread_event_);
-	evtimer_del(work_thread_event_);
+	uninit();
 }
 
 int gsf::network::NetworkImpl::init(const NetworkConfig &config)
@@ -74,6 +72,21 @@ int gsf::network::NetworkImpl::init(const NetworkConfig &config)
 	init_work_thread();
 
 	return 0;
+}
+
+void gsf::network::NetworkImpl::uninit()
+{
+	evconnlistener_free(accept_listener_);
+
+	evtimer_del(main_thread_event_);
+	evtimer_del(work_thread_event_);
+	evtimer_del(update_event_);
+
+	if (binder_){
+		delete binder_;
+		binder_ = nullptr;
+	}
+
 }
 
 int gsf::network::NetworkImpl::start(std::function<void()> update_func)
@@ -146,7 +159,7 @@ int32_t gsf::network::NetworkImpl::init_work_thread()
 	return 0;
 }
 
-static int last_thread = -1;
+static int last_accept_thread = -1;
 
 void gsf::network::NetworkImpl::accept_conn_new(evutil_socket_t fd)
 {
@@ -156,20 +169,20 @@ void gsf::network::NetworkImpl::accept_conn_new(evutil_socket_t fd)
 		return;
 	}
 
-	int tid = (last_thread + 1) % config_.worker_thread_count_;
+	int tid = (last_accept_thread + 1) % config_.worker_thread_count_;
 
-	auto thread_ptr = worker_thread_vec_[tid];
+	auto _thread_ptr = worker_thread_vec_[tid];
 
-	last_thread = tid;
+	last_accept_thread = tid;
 
 	item->sfd = fd;
 
-	NetworkConnect::instance().cq_push(thread_ptr->connect_queue_, item);
+	NetworkConnect::instance().cq_push(_thread_ptr->connect_queue_, item);
 
 	char buf[1];
-	buf[0] = 'c';
-	if (send(thread_ptr->notify_send_fd_, buf, 1, 0) < 0){
-		printf("pipe send err! %d\n", evutil_socket_geterror(thread_ptr->notify_send_fd_)); //
+	buf[0] = 'a';
+	if (send(_thread_ptr->notify_send_fd_, buf, 1, 0) < 0){
+		printf("pipe send err! %d\n", evutil_socket_geterror(_thread_ptr->notify_send_fd_)); //
 	}
 }
 
@@ -231,12 +244,12 @@ void gsf::network::NetworkImpl::worker_thread_process(evutil_socket_t fd, short 
 		printf("pipe recv err!\n");
 	}
 
+	CQ_ITEM *item = NetworkConnect::instance().cq_pop(threadPtr->connect_queue_);
+
 	switch (buf[0])
 	{
-	case 'c':
-		CQ_ITEM *item = NetworkConnect::instance().cq_pop(threadPtr->connect_queue_);
+	case 'a':	//acceptor	
 		if (item){
-
 			::bufferevent *bev;
 			bev = bufferevent_socket_new(threadPtr->event_base_ptr_, item->sfd, BEV_OPT_CLOSE_ON_FREE);
 			if (!bev){
@@ -251,6 +264,11 @@ void gsf::network::NetworkImpl::worker_thread_process(evutil_socket_t fd, short 
 
 			bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, _session_ptr.get());
 			bufferevent_enable(bev, EV_READ);
+		}
+		break;
+	case 'c':	//connector
+		if (item){
+
 		}
 		break;
 	}
@@ -354,4 +372,6 @@ void gsf::network::NetworkImpl::update_event(evutil_socket_t fd, short event, vo
 {
 	NetworkImpl::instance().get_update_func()();
 }
+
+
 

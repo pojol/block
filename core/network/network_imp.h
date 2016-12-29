@@ -41,6 +41,7 @@ namespace gsf
 			static NetworkImpl& instance();
 
 			int init(const NetworkConfig &config);
+			void uninit();
 
 			int start(std::function<void()> update_func);
 

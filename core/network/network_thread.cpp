@@ -30,7 +30,35 @@ gsf::network::NetworkThread::NetworkThread(int index)
 
 gsf::network::NetworkThread::~NetworkThread()
 {
+	if (th){
+		th->join();
+		delete th;
+		th = nullptr;
+	}
 
+	if (connect_queue_){
+		delete connect_queue_;
+		connect_queue_ = nullptr;
+	}
+
+	if (in_buffer_){
+		delete in_buffer_;
+		in_buffer_ = nullptr;
+	}
+
+	if (out_buffer_){
+		delete out_buffer_;
+		out_buffer_ = nullptr;
+	}
+
+	if (session_mgr){
+		delete session_mgr;
+		session_mgr = nullptr;
+	}
+
+	event_del(notify_event_);
+
+	event_base_free(event_base_ptr_);
 }
 
 void gsf::network::IBuffer::mark_produce(uint32_t session_id, evbuffer *buff)
