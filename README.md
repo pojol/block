@@ -9,7 +9,10 @@
 - [x] 支持消息绑定器（回调至类的成员函数
 - [x] IOStream二进制流处理工具
 - [x] Message (可定制默认采用IOStream，后期扩充定制的protobuf版本
-- [ ] 优化 (ringbuffer和不必要的内存分配释放,后面会通过参考QPS,延时,并发数等性能指标进行优化
+- [ ] 优化中... (目前 intel core i7-4790k cpu @4.00GHz windows平台 连接数1000, QPS 70w+ 延时<100ms
+
+
+每秒QPS 80w 平均延时小于100毫秒  连接数1000
 
 ###分布式&负载均衡
 - [ ] zookeeper (分布式协调
