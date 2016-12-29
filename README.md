@@ -12,8 +12,6 @@
 - [ ] 优化中... (目前 intel core i7-4790k cpu @4.00GHz windows平台 连接数1000, QPS 70w+ 延时<100ms
 
 
-每秒QPS 80w 平均延时小于100毫秒  连接数1000
-
 ###分布式&负载均衡
 - [ ] zookeeper (分布式协调
 - [ ] codis （分布式cache
