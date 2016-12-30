@@ -18,7 +18,6 @@
 
 
 #include <network.h>
-#include <acceptor.h>
 #include <message_binder.h>
 
 #include <session.h>
@@ -188,12 +187,9 @@ int main()
 	_config.buff_wait_time_ = 200;
 	Network::instance().init(_config);
 
-	AcceptorConfig _acceptConfig;
-	_acceptConfig.port = 8888;
-
 	LoginServerHandler *accept_handler = new LoginServerHandler();
 
-	if (Network::instance().listen(_acceptConfig
+	if (Network::instance().listen("", 8888
 		, std::bind(&LoginServerHandler::handler_new_connection, accept_handler, std::placeholders::_1)
 		, std::bind(&LoginServerHandler::handler_connect_close, accept_handler, std::placeholders::_1)) < 0){
 		//err
