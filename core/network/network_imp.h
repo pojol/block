@@ -18,19 +18,14 @@ namespace gsf
 	{
 		struct NetworkThread;
 
-		struct AcceptorConfig;
-		class Acceptor;
-		class AcceptHandler;
-
-		struct ConnectorConfig;
-		class Connector;
 		class Binder;
 		class Message;
 		typedef std::shared_ptr<Message> MessagePtr;
 
+
+
 		class NetworkImpl
 		{
-			typedef std::shared_ptr<Acceptor> AcceptorPtr;
 			typedef std::shared_ptr<NetworkThread> NetworkThreadPtr;
 
 			friend class Acceptor;
@@ -45,13 +40,16 @@ namespace gsf
 
 			int start(std::function<void()> update_func);
 
-			int make_acceptor(const AcceptorConfig &config, std::function<void(int)> newConnect, std::function<void(int)> disConnect);
-
-			int make_connector(const ConnectorConfig &config, std::function<void(int)> newConnect, std::function<void(int, int, std::string&, int)> connFailed);
+			int make_acceptor(const std::string &ip, uint32_t port, NewConnectFunc newConnect, DisConnectFunc disConnect);
+			int make_connector(const std::string &ip, uint32_t port, NewConnectFunc newConnect, ConnectFailedFunc connFailed);
 
 			void write(uint32_t session_id, MessagePtr msg);
 
 			void regist_binder(Binder *binder);
+
+			NewConnectFunc newconnect_func;
+			DisConnectFunc disconnect_func;
+			ConnectFailedFunc failconnect_func;
 
 		protected:
 			NetworkImpl();
@@ -60,18 +58,15 @@ namespace gsf
 			std::vector<NetworkThreadPtr> & get_worker_thread() { return worker_thread_vec_; }
 			NetworkThreadPtr get_main_thread() { return main_thread_ptr_; }
 
-			AcceptorPtr get_acceptor() { return acceptor_ptr_; }
-
 			Binder *get_binder() const { return binder_; }
 
 			std::function<void()> get_update_func() { return update_func_; }
 
 		protected:
-			void accept_conn_new(evutil_socket_t fd);
+			void acceptor_conn_new(evutil_socket_t fd);
+			void connector_conn_new(const std::string &ip, uint32_t port);
 
 			void accept_bind(const std::string &ip, int port);
-
-			int connect_bind(Connector *connector_ptr, const std::string &ip, int port);
 
 			int32_t init_work_thread();
 
@@ -97,7 +92,6 @@ namespace gsf
 
 			std::vector<NetworkThreadPtr> worker_thread_vec_;
 
-			AcceptorPtr acceptor_ptr_;
 			::evconnlistener *accept_listener_;
 
 			::event * main_thread_event_;

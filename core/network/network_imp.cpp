@@ -3,8 +3,6 @@
 #include "network_thread.h"
 
 #include "session_mgr.h"
-#include "acceptor.h"
-#include "connector.h"
 #include "session.h"
 #include "err.h"
 
@@ -161,7 +159,7 @@ int32_t gsf::network::NetworkImpl::init_work_thread()
 
 static int last_accept_thread = -1;
 
-void gsf::network::NetworkImpl::accept_conn_new(evutil_socket_t fd)
+void gsf::network::NetworkImpl::acceptor_conn_new(evutil_socket_t fd)
 {
 	CQ_ITEM *item = NetworkConnect::instance().cqi_new();
 	if (!item){
@@ -186,6 +184,32 @@ void gsf::network::NetworkImpl::accept_conn_new(evutil_socket_t fd)
 	}
 }
 
+void gsf::network::NetworkImpl::connector_conn_new(const std::string &ip, uint32_t port)
+{
+	CQ_ITEM *item = NetworkConnect::instance().cqi_new();
+	if (!item){
+		printf("cqi_new err!\n");
+		return;
+	}
+
+	int tid = (last_accept_thread + 1) % config_.worker_thread_count_;
+
+	auto _thread_ptr = worker_thread_vec_[tid];
+
+	last_accept_thread = tid;
+
+	item->connect_ip = ip;
+	item->connect_port = port;
+
+	NetworkConnect::instance().cq_push(_thread_ptr->connect_queue_, item);
+
+	char buf[1];
+	buf[0] = 'c';
+	if (send(_thread_ptr->notify_send_fd_, buf, 1, 0) < 0){
+		printf("pipe send err! %d\n", evutil_socket_geterror(_thread_ptr->notify_send_fd_)); //
+	}
+}
+
 void gsf::network::NetworkImpl::accept_bind(const std::string &ip, int port)
 {
 	struct sockaddr_in sin;
@@ -195,7 +219,7 @@ void gsf::network::NetworkImpl::accept_bind(const std::string &ip, int port)
 
 	accept_listener_ = evconnlistener_new_bind(NetworkImpl::instance().main_thread_ptr_->event_base_ptr_
 		, accept_listen_cb
-		, acceptor_ptr_.get()
+		, NULL
 		, LEV_OPT_REUSEABLE | LEV_OPT_CLOSE_ON_FREE
 		, -1
 		, (sockaddr*)&sin
@@ -204,32 +228,6 @@ void gsf::network::NetworkImpl::accept_bind(const std::string &ip, int port)
 	if (!accept_listener_){
 		printf("accept listen err!\n");
 	}
-}
-
-int gsf::network::NetworkImpl::connect_bind(Connector *connector_ptr, const std::string &ip, int port)
-{
-	::bufferevent *bev = bufferevent_socket_new(main_thread_ptr_->event_base_ptr_, -1, BEV_OPT_CLOSE_ON_FREE);
-	if (!bev){
-		return LIBEVENT_BUFFER_EVENT_CONSTRUCT_ERR;
-	}
-
-	struct sockaddr_in sin;
-	memset(&sin, 0, sizeof(sin));
-	sin.sin_family = AF_INET;
-	sin.sin_port = htons(port);
-	sin.sin_addr.s_addr = inet_addr(ip.c_str());
-
-	int fd = bufferevent_socket_connect(bev, (sockaddr*)&sin, sizeof(sockaddr_in));
-	if (fd < 0){
-		connector_ptr->handle_connect_failed(fd, ip, port);
-		bufferevent_free(bev);
-	}
-
-	auto _session_ptr = main_thread_ptr_->session_mgr->make_session(bev, fd);
-	bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, _session_ptr.get());
-	bufferevent_enable(bev, EV_READ);
-
-	return 0;
 }
 
 void gsf::network::NetworkImpl::worker_thread_process(evutil_socket_t fd, short event, void *arg)
@@ -268,24 +266,48 @@ void gsf::network::NetworkImpl::worker_thread_process(evutil_socket_t fd, short 
 		break;
 	case 'c':	//connector
 		if (item){
+			::bufferevent *bev = bufferevent_socket_new(threadPtr->event_base_ptr_, -1, BEV_OPT_CLOSE_ON_FREE);
+			if (!bev){
+				printf("bufferevent_socket_new err!\n");
+			}
 
+			struct sockaddr_in sin;
+			memset(&sin, 0, sizeof(sin));
+			sin.sin_family = AF_INET;
+			sin.sin_port = htons(item->connect_port);
+			sin.sin_addr.s_addr = inet_addr(item->connect_ip.c_str());
+
+			int fd = bufferevent_socket_connect(bev, (sockaddr*)&sin, sizeof(sockaddr_in));
+			if (fd < 0){
+				threadPtr->in_buffer_->fail_connect(item->connect_ip, item->connect_port);
+				bufferevent_free(bev);
+			}
+
+			auto _session_ptr = threadPtr->session_mgr->make_session(bev, fd);
+			bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, _session_ptr.get());
+			bufferevent_enable(bev, EV_READ);
 		}
 		break;
 	}
 }
 
-int gsf::network::NetworkImpl::make_acceptor(const AcceptorConfig &config, std::function<void(int)> newConnect, std::function<void(int)> disConnect)
+int gsf::network::NetworkImpl::make_acceptor(const std::string &ip, uint32_t port, NewConnectFunc newConnect, DisConnectFunc disConnect)
 {
-	acceptor_ptr_ = std::make_shared<Acceptor>(config, newConnect, disConnect);
+	newconnect_func = newConnect;
+	disconnect_func = disConnect;
 
-	accept_bind(config.address, config.port);
+	accept_bind(ip, port);
 
 	return 0;
 }
 
-int gsf::network::NetworkImpl::make_connector(const ConnectorConfig &config, std::function<void(int)> newConnect, std::function<void(int, int, std::string&, int)> connFailed)
+int gsf::network::NetworkImpl::make_connector(const std::string &ip, uint32_t port, NewConnectFunc newConnect, ConnectFailedFunc connFailed)
 {
-	//! 如何传递到worker_thread_process， 连接处理最好在统一的函数执行。 
+	newconnect_func = newConnect;
+	failconnect_func = connFailed;
+
+	connector_conn_new(ip, port);
+
 	return 0;
 }
 
@@ -296,9 +318,7 @@ void gsf::network::NetworkImpl::worker_thread_run(NetworkThreadPtr thread_ptr)
 
 void gsf::network::NetworkImpl::accept_listen_cb(::evconnlistener *listener, evutil_socket_t fd, sockaddr *sa, int socklen, void *arg)
 {
-	Acceptor *_acceptor_ptr = static_cast<Acceptor*>(arg);
-
-	NetworkImpl::instance().accept_conn_new(fd);
+	NetworkImpl::instance().acceptor_conn_new(fd);
 }
 
 void gsf::network::NetworkImpl::main_thread_event(evutil_socket_t fd, short event, void *arg)
@@ -314,7 +334,8 @@ void gsf::network::NetworkImpl::main_thread_event(evutil_socket_t fd, short even
 		std::vector<std::pair<uint32_t, evbuffer*>> vec;
 		std::vector<uint32_t> conn;
 		std::vector<uint32_t> disconn;
-		th->in_buffer_->consume(vec, conn, disconn);
+		std::vector<std::pair<std::string, uint32_t>> failconn;
+		th->in_buffer_->consume(vec, conn, disconn, failconn);
 
 		// test dispatch
 		for (auto &it : vec)
@@ -324,12 +345,17 @@ void gsf::network::NetworkImpl::main_thread_event(evutil_socket_t fd, short even
 
 		for (int i : conn)
 		{
-			NetworkImpl::instance().get_acceptor()->handler_new_connect(i);
+			NetworkImpl::instance().newconnect_func(i);
 		}
 
 		for (auto sid : disconn)
 		{
-			NetworkImpl::instance().get_acceptor()->handler_dis_connect(sid);
+			NetworkImpl::instance().disconnect_func(sid);
+		}
+
+		for (auto p : failconn)
+		{
+			NetworkImpl::instance().failconnect_func(p.first, p.second);
 		}
 	}
 }

@@ -12,7 +12,6 @@
 #include <thread>
 
 #include "session_mgr.h"
-#include "connector_mgr.h"
 #include "network_connect.h"
 
 
@@ -32,6 +31,7 @@ namespace gsf
 
 			void new_connect(uint32_t session_id);
 			void dis_connect(uint32_t session_id);
+			void fail_connect(const std::string &ip, uint32_t port);
 
 			//! 生产，把消息填充到ringbuff
 			void produce();
@@ -39,7 +39,8 @@ namespace gsf
 			//! 由主线程取出ringbuff
 			void consume(std::vector<std::pair<uint32_t, evbuffer*>> &vec
 				, std::vector<uint32_t> &conn
-				, std::vector<uint32_t> &disconn);
+				, std::vector<uint32_t> &disconn
+				, std::vector<std::pair<std::string, uint32_t>> &failconn);
 
 		private:
 			//! produce list
@@ -49,6 +50,7 @@ namespace gsf
 			//! temp
 			std::vector<uint32_t> connect_vec_;
 			std::vector<uint32_t> disconn_vec_;
+			std::vector<std::pair<std::string, uint32_t>> failconn_vec_;
 
 			char * recvbuf_;
 
@@ -107,7 +109,6 @@ namespace gsf
 			OBuffer *out_buffer_;
 
 			SessionMgr *session_mgr;
-			ConnectorMgr *connect_mgr;
 
 			int index_;
 		};

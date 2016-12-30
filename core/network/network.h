@@ -12,17 +12,6 @@ namespace gsf
 	namespace network
 	{
 		/**!
-			接收器相关配置
-			...
-			*/
-		struct AcceptorConfig;
-
-		/**!
-			连接器相关配置
-			*/
-		struct ConnectorConfig;
-
-		/**!
 			网络层相关配置
 			worker_thread_count_ 线程数，如果不指定将会配置当前物理机核心数的线程（推荐
 			send_wait_time_ 写缓冲的间隔时间，默认20ms
@@ -49,7 +38,7 @@ namespace gsf
 		//! 新的连接回调 
 		typedef std::function<void(int)> NewConnectFunc;
 		//! 连接失败回调
-		typedef std::function<void(int, int, std::string &, int)> ConnectFailedFunc;
+		typedef std::function<void(std::string &, int)> ConnectFailedFunc;
 		//! 失去连接回调
 		typedef std::function<void(int)> DisConnectFunc;
 		//! 更新函数
@@ -72,10 +61,10 @@ namespace gsf
 			void uninit();
 
 			//! 建立侦听器 server
-			int listen(const AcceptorConfig &config, NewConnectFunc newConnectFunc, DisConnectFunc disConnectFunc);
+			int listen(const std::string &ip, uint32_t port, NewConnectFunc newConnectFunc, DisConnectFunc disConnectFunc);
 
 			//! 建立连接器 client
-			int connect(const ConnectorConfig &config, NewConnectFunc new_connect, ConnectFailedFunc connect_failed);
+			int connect(const std::string &ip, uint32_t port, NewConnectFunc new_connect, ConnectFailedFunc connect_failed);
 
 			//! 注册消息绑定器，一般在连接建立后调用，如果不调用此方法将接收不到注册的message事件。
 			void regist_binder(Binder *binder);

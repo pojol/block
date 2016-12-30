@@ -21,9 +21,10 @@ namespace gsf
 		typedef struct conn_queue_item CQ_ITEM;
 		struct conn_queue_item {
 			int             sfd;
-			int             event_flags;
 
-			uint32_t		connector_id;
+			uint32_t		connect_port;
+			std::string		connect_ip;
+
 			uint32_t 		session_id;
 
 			CQ_ITEM          *next;

@@ -33,14 +33,14 @@ int gsf::network::Network::start(UpdateFunc func)
 	return NetworkImpl::instance().start(func);
 }
 
-int gsf::network::Network::listen(const AcceptorConfig &config, NewConnectFunc newConnectFunc, DisConnectFunc disConnectFunc)
+int gsf::network::Network::listen(const std::string &ip, uint32_t port, NewConnectFunc newConnectFunc, DisConnectFunc disConnectFunc)
 {
-	return NetworkImpl::instance().make_acceptor(config, newConnectFunc, disConnectFunc);
+	return NetworkImpl::instance().make_acceptor(ip, port, newConnectFunc, disConnectFunc);
 }
 
-int gsf::network::Network::connect(const ConnectorConfig &config, NewConnectFunc new_connect, ConnectFailedFunc connect_failed)
+int gsf::network::Network::connect(const std::string &ip, uint32_t port, NewConnectFunc new_connect, ConnectFailedFunc connect_failed)
 {
-	return NetworkImpl::instance().make_connector(config, new_connect, connect_failed);
+	return NetworkImpl::instance().make_connector(ip, port, new_connect, connect_failed);
 }
 
 void gsf::network::Network::write(uint32_t session_id, MessagePtr msg)

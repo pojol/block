@@ -22,7 +22,6 @@ gsf::network::NetworkThread::NetworkThread(int index)
 	, index_(index)
 {
 	session_mgr = new SessionMgr(index * SESSION_MAX_CONNECT);
-	connect_mgr = new ConnectorMgr(index * CONNECTOR_MAX_CONNECT);
 
 	in_buffer_ = new IBuffer();
 	out_buffer_ = new OBuffer();
@@ -82,6 +81,14 @@ void gsf::network::IBuffer::dis_connect(uint32_t session_id)
 	mtx.unlock();
 }
 
+void gsf::network::IBuffer::fail_connect(const std::string &ip, uint32_t port)
+{
+	mtx.lock();
+	failconn_vec_.push_back(std::make_pair(ip, port));
+	mtx.unlock();
+}
+
+
 gsf::network::IBuffer::IBuffer()
 {
 	recvbuf_ = (char*)malloc(4);	//test
@@ -131,7 +138,10 @@ void gsf::network::IBuffer::produce()
 	ibuffer_vec_.clear();
 }
 
-void gsf::network::IBuffer::consume(std::vector<std::pair<uint32_t, evbuffer*>> &vec , std::vector<uint32_t> &conn , std::vector<uint32_t> &disconn)
+void gsf::network::IBuffer::consume(std::vector<std::pair<uint32_t, evbuffer*>> &vec 
+	, std::vector<uint32_t> &conn 
+	, std::vector<uint32_t> &disconn
+	, std::vector<std::pair<std::string, uint32_t>> &failconn)
 {
 	mtx.lock();
 	if (!consume_vec_.empty()){
@@ -151,6 +161,11 @@ void gsf::network::IBuffer::consume(std::vector<std::pair<uint32_t, evbuffer*>> 
 	if (!disconn_vec_.empty()){
 		disconn_vec_.swap(disconn);
 		disconn_vec_.clear();
+	}
+
+	if (!failconn_vec_.empty()){
+		failconn_vec_.swap(failconn);
+		failconn_vec_.clear();
 	}
 
 	mtx.unlock();
