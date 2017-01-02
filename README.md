@@ -23,8 +23,12 @@
 - [ ] log4cxx （消息直接写文件，由python工具判断系统空闲时整合到logDB
 
 ###tool
+#####behavior tree
+- [ ] 行为树的核心算法(不止是怪物的AI行为(lua ,还要能模拟玩家的行为(python
+- [ ] 行为树编辑工具
 #####robot
 - [x] 模拟网络连接进行echo和并发测试 (基于python3.4+ asyncio
+- [ ] 基于行为树生成的文件,模拟玩家行为。（用于游戏功能测试
 
 ###Utils
 #####timer
