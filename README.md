@@ -25,7 +25,7 @@
 ###tool
 #####behavior tree
 - [ ] 行为树的核心算法(不止是怪物的AI行为(lua ,还要能模拟玩家的行为(python
-- [ ] 行为树编辑工具(c# winfrom
+- [ ] 行为树编辑工具(c# winform
 
 #####robot
 - [x] 模拟网络连接进行echo和并发测试 (基于python3.4+ asyncio
