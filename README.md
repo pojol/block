@@ -9,7 +9,7 @@
 - [x] 支持消息绑定器
 - [x] IOStream（二进制流处理
 - [x] Message（可定制默认采用IOStream，后期扩充定制的protobuf版本
-- [ ] 优化中... （目前 intel core i7-4790k cpu @4.00GHz 连接数1000, QPS 70w+ 延时<100ms
+- [ ] 优化中... （目前 intel core i7-4790k cpu @4.00GHz QPS 70w+
 
 
 ###distributed
