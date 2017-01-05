@@ -28,7 +28,6 @@ namespace gsf
 		{
 			typedef std::shared_ptr<NetworkThread> NetworkThreadPtr;
 
-			friend class Acceptor;
 			friend class Connector;
 
 		public:
