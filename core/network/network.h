@@ -6,6 +6,7 @@
 #include <memory>
 #include <functional>
 
+#include <single.h>
 
 namespace gsf
 {
@@ -44,12 +45,11 @@ namespace gsf
 		//! 更新函数
 		typedef std::function<void()> UpdateFunc;
 
-		class Network
+		class Network : public utils::Singleton<Network>
 		{
 		public:
+			Network();
 			~Network();
-
-			static Network& instance();
 
 			//! 构建网络层
 			int init(const NetworkConfig &config);
@@ -72,9 +72,6 @@ namespace gsf
 			//! 向缓冲区写数据，会在周期(buff_wait_time_)内发送。
 			void write(uint32_t session_id, MessagePtr msg);
 
-		private:
-			Network();
-			static Network* instance_;
 		};
 
 	}

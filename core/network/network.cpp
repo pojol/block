@@ -2,7 +2,6 @@
 
 #include "network_imp.h"
 
-gsf::network::Network* gsf::network::Network::instance_ = NULL;
 
 gsf::network::Network::Network()
 {
@@ -14,14 +13,6 @@ gsf::network::Network::~Network()
 
 }
 
-gsf::network::Network& gsf::network::Network::instance()
-{
-	if (instance_ == NULL)
-	{
-		instance_ = new gsf::network::Network();
-	}
-	return *instance_;
-}
 
 int gsf::network::Network::init(const NetworkConfig &config)
 {

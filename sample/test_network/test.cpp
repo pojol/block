@@ -87,7 +87,7 @@ public:
 		printf("new connection session_id : %d\n", session_id);
 
 		//! bind message register
-		gsf::network::Network::instance().regist_binder(
+		gsf::network::Network::get_ref().regist_binder(
 			&gsf::network::MessageBinder<SampleMsg>::instance());
 
 		cur_connect++;
@@ -99,7 +99,7 @@ public:
 		*_ret_msg->get_ostream() << 101;	//mid
 		*_ret_msg->get_ostream() << 1;
 
-		gsf::network::Network::instance().write(session_id, _ret_msg);
+		gsf::network::Network::get_ref().write(session_id, _ret_msg);
     }
 
 	void handler_connect_close(int session_id)
@@ -147,7 +147,7 @@ public:
 		*_ret_msg->get_ostream() << 101;	//mid
 		*_ret_msg->get_ostream() << dat+1;
 
-		gsf::network::Network::instance().write(msg->get_session_id(), _ret_msg);
+		gsf::network::Network::get_ref().write(msg->get_session_id(), _ret_msg);
 	}
 
 private:
@@ -183,20 +183,22 @@ int main()
 
 	using namespace gsf::network;
 
+	new Network();
+
 	NetworkConfig _config;
 	_config.buff_wait_time_ = 200;
-	Network::instance().init(_config);
+	Network::get_ref().init(_config);
 
 	LoginServerHandler *accept_handler = new LoginServerHandler();
 
-	if (Network::instance().listen("", 8888
+	if (Network::get_ref().listen("", 8888
 		, std::bind(&LoginServerHandler::handler_new_connection, accept_handler, std::placeholders::_1)
 		, std::bind(&LoginServerHandler::handler_connect_close, accept_handler, std::placeholders::_1)) < 0){
 		//err
 	}
 
-	gsf::network::Network::instance().start(std::bind(&update));
+	Network::get_ref().start(std::bind(&update));
 
-	gsf::network::Network::instance().uninit();
+	Network::get_ref().uninit();
 	return 0;
 }
