@@ -18,7 +18,7 @@ endif()
 #引用库目录
 if(WIN32)
         LINK_DIRECTORIES(
-                ${GSF_SOURCE_DIR}/3rd/libevent/lib
+                ${GSF_SOURCE_DIR}/lib/linux
         )
 elseif(UNIX)
 elseif(APPLE)
@@ -38,12 +38,13 @@ if(MSVC)
       )
       if(${var} MATCHES "/MD")
         string(REGEX REPLACE "/MD" "/MT" ${var} "${${var}}")
+
       endif()
     endforeach()
 
-        SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/LIB_D)
+		SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/windows)        
         #TARGET_LINK_LIBRARIES(network ws2_32.lib)      项目本身是静态库不需要链接静态库
 elseif(UNIX)
-        SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/LIB_D)
+        SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/linux)
 elseif(APPLE)
 endif()

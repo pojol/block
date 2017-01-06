@@ -19,11 +19,11 @@ endif()
 #引用库目录
 if(WIN32)
         LINK_DIRECTORIES(
-        ${GSF_SOURCE_DIR}/LIB_D/Debug
+        ${GSF_SOURCE_DIR}/lib/windows/Debug
         )
 elseif(UNIX)
         LINK_DIRECTORIES(
-        ${GSF_SOURCE_DIR}/LIB_D
+        ${GSF_SOURCE_DIR}/lib/linux
         )
 elseif(APPLE)
 endif()
