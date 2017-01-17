@@ -19,13 +19,8 @@
 ###database (mysql or mongodb
 - [ ] dbproxy (redis
 
-###log
+###数据采集和分析
 - [ ] log4cxx （消息直接写文件，由python工具判断系统空闲时整合到logDB
-
-###tool
-#####behavior tree
-- [ ] 行为树的核心算法(不止是怪物的AI行为(lua ,还要能模拟玩家的行为(python
-- [ ] 行为树编辑工具(c# winform
 
 #####robot
 - [x] 模拟网络连接进行echo和并发测试 (基于python3.4+ asyncio
@@ -38,6 +33,7 @@
 - [x] 支持固定时间点更新 天（例如每天的早上6点10分更新
 - [ ] 支持固定时间点更新 周
 - [ ] 支持固定时间点更新 月
+#####string
 
 ###depend
 * c++11
