@@ -16,6 +16,26 @@
 - [ ] zookeeper (分布式协调
 - [ ] 服务器集群生命周期维护(开启，关闭，状态检视
 
+```python
+#           client *n
+#----------------------------------
+#           login *n
+#----------------------------------
+#       gate *n     gatemgr *1
+#----------------------------------
+#       service *n  servicemgr *1
+#----------------------------------
+#       dbcache *1  access *1
+#----------------------------------
+## login    为client分配gate，可以部署在多台物理机分摊压力
+## gate     客户端和服务器的交互通道，由login指定
+## gatemgr  管理gate，并负责gate的负载均衡
+## service  游戏业务，可以部署在多台物理机
+## servicemgr 管理所有的service,并负责负载均衡
+## access   负责介入第三方相关的业务
+## dbcache  高速缓存，数据库代理（mongodb,mysql
+```
+
 ###database (mysql or mongodb
 - [ ] dbproxy (redis
 
