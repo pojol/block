@@ -13,7 +13,12 @@ elseif(UNIX)
 				${GSF_SOURCE_DIR}/core
 				${GSF_SOURCE_DIR}/utils
         )
-elseif(APPLE)
+elseif(apple)
+	INCLUDE_DIRECTORIES(
+                ${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
+                                ${GSF_SOURCE_DIR}/core
+                                ${GSF_SOURCE_DIR}/utils
+	)
 endif()
 
 
@@ -24,6 +29,9 @@ if(WIN32)
         )
 elseif(UNIX)
 elseif(APPLE)
+	LINK_DIRECTORIES(
+		${GSF_SOURCE_DIR}/lib/apple
+	)
 endif()
 
 
@@ -49,4 +57,5 @@ if(MSVC)
 elseif(UNIX)
         SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/linux)
 elseif(APPLE)
+	SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/apple)
 endif()

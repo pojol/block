@@ -6,7 +6,7 @@
 #include <memory>
 
 #include <stdint.h>
-
+#include <stdlib.h>
 #include "OutOfBound.h"
 
 namespace gsf

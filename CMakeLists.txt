@@ -1,12 +1,12 @@
 PROJECT(GSF)
 
 if(WIN32)
-	
+
 elseif(UNIX)
     set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
     message(STATUS "optional:-std=c++11")
-	
-	set(CMAKE_EXE_LINKER_FLAGS "-lrt")
+
+    set(CMAKE_EXE_LINKER_FLAGS "-lrt")
 elseif(APPLE)
     set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
     message(STATUS "optional:-std=c++11")
