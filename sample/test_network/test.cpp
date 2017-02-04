@@ -8,7 +8,7 @@
 
 #include <sys/types.h>
 
-#include <event2/event-config.h>
+//#include <event2/event-config.h>
 #include <event2/event.h>
 
 #ifdef WIN32
@@ -118,7 +118,7 @@ public:
 
 		using namespace std::chrono;
 		auto _t = time_point_cast<milliseconds>(system_clock::now());
-		printf("delay:%d\n", _t.time_since_epoch().count() - old_time);
+		printf("delay:%lld\n", _t.time_since_epoch().count() - old_time);
 		old_time = _t.time_since_epoch().count();
 
 		using namespace gsf::utils;

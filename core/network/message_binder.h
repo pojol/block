@@ -43,6 +43,7 @@ namespace gsf
 		class Binder
 		{
 		public:
+			virtual ~Binder(){}
 			virtual void construct_msg(int session_id, ::evbuffer *buf) = 0;
 		};
 

@@ -2,35 +2,37 @@ PROJECT(network)
 
 #引用头文件目录
 if(WIN32)
-        INCLUDE_DIRECTORIES(
-                ${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
-				${GSF_SOURCE_DIR}/core
-				${GSF_SOURCE_DIR}/utils
-        )
-elseif(UNIX)
-        INCLUDE_DIRECTORIES(
-                ${GSF_SOURCE_DIR}/3rd/libevent/include
-				${GSF_SOURCE_DIR}/core
-				${GSF_SOURCE_DIR}/utils
-        )
-elseif(apple)
-	INCLUDE_DIRECTORIES(
-                ${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
-                                ${GSF_SOURCE_DIR}/core
-                                ${GSF_SOURCE_DIR}/utils
-	)
+    INCLUDE_DIRECTORIES(
+            ${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
+            ${GSF_SOURCE_DIR}/core
+            ${GSF_SOURCE_DIR}/utils
+    )
+endif()
+if(UNIX)
+    INCLUDE_DIRECTORIES(
+            ${GSF_SOURCE_DIR}/3rd/libevent/include
+            ${GSF_SOURCE_DIR}/core
+            ${GSF_SOURCE_DIR}/utils
+    )
+endif()
+if(APPLE)
+    INCLUDE_DIRECTORIES(
+            ${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
+            ${GSF_SOURCE_DIR}/core
+            ${GSF_SOURCE_DIR}/utils
+    )
 endif()
 
 
 #引用库目录
 if(WIN32)
-        LINK_DIRECTORIES(
-                ${GSF_SOURCE_DIR}/lib/linux
-        )
+    LINK_DIRECTORIES(
+            ${GSF_SOURCE_DIR}/lib/linux
+    )
 elseif(UNIX)
 elseif(APPLE)
 	LINK_DIRECTORIES(
-		${GSF_SOURCE_DIR}/lib/apple
+		${GSF_SOURCE_DIR}/lib/apple/lib
 	)
 endif()
 
@@ -52,7 +54,7 @@ if(MSVC)
       endif()
     endforeach()
 
-		SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/windows)        
+	SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/win)        
         #TARGET_LINK_LIBRARIES(network ws2_32.lib)      项目本身是静态库不需要链接静态库
 elseif(UNIX)
         SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/linux)

@@ -4,6 +4,7 @@
 #include <thread>
 #include <mutex>
 #include <stdlib.h>
+#include <string>
 
 #include <memory>
 // memcache thread.c
