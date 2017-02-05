@@ -1,6 +1,7 @@
 #ifndef _MIN_HEAP_HEAD_
 #define _MIN_HEAP_HEAD_
 
+#include <stdlib.h>
 
 namespace gsf
 {
