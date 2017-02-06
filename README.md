@@ -70,4 +70,4 @@ dbcache  高速缓存，数据库代理（mongodb,mysql
 ###platform
 - [x] windows
 - [x] linux
-- [ ] apple
+- [x] apple
