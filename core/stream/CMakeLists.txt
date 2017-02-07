@@ -5,10 +5,12 @@ PROJECT(stream)
 if(WIN32)
         INCLUDE_DIRECTORIES(
         )
-elseif(UNIX)
+endif()
+if(UNIX)
         INCLUDE_DIRECTORIES(
         )
-elseif(APPLE)
+endif()
+if(APPLE)
 endif()
 
 
@@ -38,7 +40,7 @@ if(MSVC)
       endif()
     endforeach()
 
-        SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/windows)
+        SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/win)
 elseif(UNIX)
         SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/linux)
 elseif(APPLE)

@@ -2,30 +2,33 @@ PROJECT(test_timer)
 
 #引用头文件目录
 if(WIN32)
-        INCLUDE_DIRECTORIES(
-        ${GSF_SOURCE_DIR}/core/network
-        ${GSF_SOURCE_DIR}/utils
-        )
-elseif(UNIX)
-        INCLUDE_DIRECTORIES(
-        ${GSF_SOURCE_DIR}/core/network
-        ${GSF_SOURCE_DIR}/utils
-        )
-
-elseif(APPLE)
+	INCLUDE_DIRECTORIES(
+	${GSF_SOURCE_DIR}/core/network
+	${GSF_SOURCE_DIR}/utils
+	)
+endif()
+if(UNIX)
+	INCLUDE_DIRECTORIES(
+	${GSF_SOURCE_DIR}/core/network
+	${GSF_SOURCE_DIR}/utils
+	)
+endif()
+if(APPLE)
 endif()
 
 
 #引用库目录
 if(WIN32)
-        LINK_DIRECTORIES(
-        ${GSF_SOURCE_DIR}/lib/windows/Debug
-        )
-elseif(UNIX)
-        LINK_DIRECTORIES(
-        ${GSF_SOURCE_DIR}/lib/linux
-        )
-elseif(APPLE)
+	LINK_DIRECTORIES(
+	${GSF_SOURCE_DIR}/lib/win/Debug
+	)
+endif()
+if(UNIX)
+	LINK_DIRECTORIES(
+	${GSF_SOURCE_DIR}/lib/linux
+	)
+endif()
+if(APPLE)
 endif()
 
 FILE(GLOB_RECURSE SRC "*.cpp" "*.h")

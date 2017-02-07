@@ -1,22 +1,21 @@
-
 PROJECT(test_network)
 
 #引用头文件目录
 if(WIN32)
-        INCLUDE_DIRECTORIES(
-                ${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
-                ${GSF_SOURCE_DIR}/core/network
-				${GSF_SOURCE_DIR}/core
-                ${GSF_SOURCE_DIR}/utils
-        )
+	INCLUDE_DIRECTORIES(
+			${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
+			${GSF_SOURCE_DIR}/core/network
+			${GSF_SOURCE_DIR}/core
+			${GSF_SOURCE_DIR}/utils
+	)
 endif()
 if(UNIX)
-        INCLUDE_DIRECTORIES(
-                ${GSF_SOURCE_DIR}/3rd/libevent/include
-                ${GSF_SOURCE_DIR}/core/network
-				${GSF_SOURCE_DIR}/core
-                ${GSF_SOURCE_DIR}/utils
-        )
+	INCLUDE_DIRECTORIES(
+			${GSF_SOURCE_DIR}/3rd/libevent/include
+			${GSF_SOURCE_DIR}/core/network
+			${GSF_SOURCE_DIR}/core
+			${GSF_SOURCE_DIR}/utils
+	)
 endif()
 if(APPLE)
     INCLUDE_DIRECTORIES(
@@ -29,14 +28,16 @@ endif()
 
 #引用库目录
 if(WIN32)
-        LINK_DIRECTORIES(
-                ${GSF_SOURCE_DIR}/lib/windows/Debug
-        )
-elseif(UNIX)
-        LINK_DIRECTORIES(
-				${GSF_SOURCE_DIR}/lib/linux
-        )
-elseif(APPLE)
+	LINK_DIRECTORIES(
+			${GSF_SOURCE_DIR}/lib/win/Debug
+	)
+endif()
+if(UNIX)
+	LINK_DIRECTORIES(
+			${GSF_SOURCE_DIR}/lib/linux
+	)
+endif()
+if(APPLE)
 endif()
 
 FILE(GLOB_RECURSE SRC "*.cpp" "*.h")
@@ -56,9 +57,10 @@ if(MSVC)
     endforeach()
 
         TARGET_LINK_LIBRARIES(test_network stream.lib libevent.lib libevent_core.lib libevent_extras.lib network.lib utils.lib ws2_32.lib)
-
-elseif(UNIX)
+endif()
+if(UNIX)
         TARGET_LINK_LIBRARIES(test_network libstream.a libnetwork.a libevent.a libevent_core.a libevent_extra.a libutils.a)
-elseif(APPLE)
+endif()
+if(APPLE)
 
 endif()
