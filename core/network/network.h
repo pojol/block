@@ -6,7 +6,7 @@
 #include <memory>
 #include <functional>
 
-#include <single.h>
+#include <utils/single.h>
 
 namespace gsf
 {

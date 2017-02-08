@@ -11,8 +11,8 @@
 
 #include <iostream>
 #include <random>
-#include <timer.h>
-#include <timer_handler.h>
+#include <timer/timer.h>
+#include <timer/timer_handler.h>
 
 #if defined(WIN32)
 	#include <windows.h>

@@ -3,14 +3,12 @@ PROJECT(test_timer)
 #引用头文件目录
 if(WIN32)
 	INCLUDE_DIRECTORIES(
-	${GSF_SOURCE_DIR}/core/network
-	${GSF_SOURCE_DIR}/core/utils
+		${GSF_SOURCE_DIR}/core
 	)
 endif()
 if(UNIX)
 	INCLUDE_DIRECTORIES(
-	${GSF_SOURCE_DIR}/core/network
-	${GSF_SOURCE_DIR}/core/utils
+		${GSF_SOURCE_DIR}/core
 	)
 endif()
 if(APPLE)
@@ -47,8 +45,8 @@ if(MSVC)
       endif()
     endforeach()
 
-        TARGET_LINK_LIBRARIES(test_timer ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib network.lib utils.lib)
+        TARGET_LINK_LIBRARIES(test_timer ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib network.lib utils.lib timer.lib)
 elseif(UNIX)
-        TARGET_LINK_LIBRARIES(test_timer utils.a)
+        TARGET_LINK_LIBRARIES(test_timer utils.a timer.a)
 elseif(APPLE)
 endif()

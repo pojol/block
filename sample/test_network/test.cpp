@@ -17,18 +17,18 @@
 #endif // WIN32
 
 
-#include <network.h>
-#include <message_binder.h>
+#include <network/network.h>
+#include <network/message_binder.h>
 
-#include <session.h>
-#include <session_mgr.h>
-#include <message.h>
+#include <network/session.h>
+#include <network/session_mgr.h>
+#include <network/message.h>
 
 #include <iostream>
 
 #include <random>
-#include <timer.h>
-#include <timer_handler.h>
+#include <timer/timer.h>
+#include <timer/timer_handler.h>
 
 //! 由用户定制msg
 class SampleMsg : public gsf::network::Message
