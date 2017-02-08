@@ -4,13 +4,13 @@ PROJECT(test_timer)
 if(WIN32)
 	INCLUDE_DIRECTORIES(
 	${GSF_SOURCE_DIR}/core/network
-	${GSF_SOURCE_DIR}/utils
+	${GSF_SOURCE_DIR}/core/utils
 	)
 endif()
 if(UNIX)
 	INCLUDE_DIRECTORIES(
 	${GSF_SOURCE_DIR}/core/network
-	${GSF_SOURCE_DIR}/utils
+	${GSF_SOURCE_DIR}/core/utils
 	)
 endif()
 if(APPLE)

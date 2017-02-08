@@ -6,7 +6,7 @@ if(WIN32)
 			${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
 			${GSF_SOURCE_DIR}/core/network
 			${GSF_SOURCE_DIR}/core
-			${GSF_SOURCE_DIR}/utils
+			${GSF_SOURCE_DIR}/core/utils
 	)
 endif()
 if(UNIX)
@@ -14,7 +14,7 @@ if(UNIX)
 			${GSF_SOURCE_DIR}/3rd/libevent/include
 			${GSF_SOURCE_DIR}/core/network
 			${GSF_SOURCE_DIR}/core
-			${GSF_SOURCE_DIR}/utils
+			${GSF_SOURCE_DIR}/core/utils
 	)
 endif()
 if(APPLE)
@@ -22,7 +22,7 @@ if(APPLE)
             ${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
             ${GSF_SOURCE_DIR}/core/network
             ${GSF_SOURCE_DIR}/core
-            ${GSF_SOURCE_DIR}/utils
+            ${GSF_SOURCE_DIR}/core/utils
     )
 endif()
 

@@ -1,17 +1,15 @@
-PROJECT(module)
+PROJECT(utils)
 
 #引用头文件目录
 INCLUDE_DIRECTORIES(
-	${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
 )
 
 #引用库目录
 LINK_DIRECTORIES(
-	${GSF_SOURCE_DIR}/LIB_D
 )
 
 FILE(GLOB_RECURSE SRC "*.cpp" "*.h")
-ADD_LIBRARY(module STATIC ${SRC})
+ADD_LIBRARY(utils STATIC ${SRC})
 
 if(MSVC)     
     # Use the static C library for all build types
@@ -25,9 +23,11 @@ if(MSVC)
         string(REGEX REPLACE "/MD" "/MT" ${var} "${${var}}")
       endif()
     endforeach()    
-
-	#TARGET_LINK_LIBRARIES(network ws2_32.lib)	项目本身是静态库不需要链接静态库
-	
-endif(MSVC)
+    
+    SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/win)
+elseif(UNIX)
+	SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/linux)
+elseif(APPLE)
+endif()
 
 
