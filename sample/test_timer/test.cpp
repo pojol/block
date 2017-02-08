@@ -33,15 +33,16 @@ class RecommendTest
 public:
 	RecommendTest()
 	{
-		using namespace gsf::utils;
+		using namespace gsf::timer;
 		timer_event_ = Timer::instance().add_timer(delay_milliseconds(3000)
 			, makeTimerHandler(&RecommendTest::pt, this, std::string("hello!")));
 	}
 
 	~RecommendTest()
 	{
+		using namespace gsf::timer;
 		if (timer_event_){
-			if (gsf::utils::Timer::instance().rmv_timer(timer_event_) == 0){ //! succ
+			if (Timer::instance().rmv_timer(timer_event_) == 0){ //! succ
 				delete timer_event_;
 				timer_event_ = nullptr;
 			}
@@ -57,12 +58,12 @@ public:
 	}
 
 private:
-	gsf::utils::TimerEvent *timer_event_;
+	gsf::timer::TimerEvent *timer_event_;
 };
 
 int main()
 {
-	using namespace gsf::utils;
+	using namespace gsf::timer;
 	TimerTest *tt = new TimerTest();
 	
 	std::default_random_engine generator;

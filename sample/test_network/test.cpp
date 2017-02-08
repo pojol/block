@@ -68,7 +68,7 @@ public:
     ~LoginServerHandler()
 	{
 		if (time_event_){
-			gsf::utils::Timer::instance().rmv_timer(time_event_);
+			gsf::timer::Timer::instance().rmv_timer(time_event_);
 		}
 	}
 	LoginServerHandler()
@@ -76,7 +76,7 @@ public:
 		gsf::network::MessageBinder<SampleMsg>::instance().
 			regist_msg_proc<LoginServerHandler, &LoginServerHandler::test_msg>(100, this);
 
-		using namespace gsf::utils;
+		using namespace gsf::timer;
 		time_event_ = Timer::instance().add_timer(delay_milliseconds(1000)
 			, makeTimerHandler(&LoginServerHandler::tick, this));
 	}
@@ -121,7 +121,7 @@ public:
 		printf("delay:%lld\n", _t.time_since_epoch().count() - old_time);
 		old_time = _t.time_since_epoch().count();
 
-		using namespace gsf::utils;
+		using namespace gsf::timer;
 		time_event_ = Timer::instance().add_timer(delay_milliseconds(1000)
 			, makeTimerHandler(&LoginServerHandler::tick, this));
 	}
@@ -153,7 +153,7 @@ public:
 private:
 	uint32_t index_;
 
-	gsf::utils::TimerEvent *time_event_;
+	gsf::timer::TimerEvent *time_event_;
 };
 
 void update()
@@ -161,7 +161,7 @@ void update()
 	//gettime
 	
 	//todo...
-	gsf::utils::Timer::instance().update();
+	gsf::timer::Timer::instance().update();
 
 	//gettime
 	//endtime - begintime = network state

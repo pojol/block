@@ -1,4 +1,4 @@
-PROJECT(utils)
+PROJECT(event)
 
 #引用头文件目录
 INCLUDE_DIRECTORIES(
@@ -9,7 +9,7 @@ LINK_DIRECTORIES(
 )
 
 FILE(GLOB_RECURSE SRC "*.cpp" "*.h")
-ADD_LIBRARY(utils STATIC ${SRC})
+ADD_LIBRARY(event STATIC ${SRC})
 
 if(MSVC)     
     # Use the static C library for all build types

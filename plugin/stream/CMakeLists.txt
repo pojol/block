@@ -1,17 +1,14 @@
-PROJECT(test_timer)
+
+PROJECT(stream)
 
 #引用头文件目录
 if(WIN32)
-	INCLUDE_DIRECTORIES(
-		${GSF_SOURCE_DIR}/plugin
-		${GSF_SOURCE_DIR}/common
-	)
+        INCLUDE_DIRECTORIES(
+        )
 endif()
 if(UNIX)
-	INCLUDE_DIRECTORIES(
-		${GSF_SOURCE_DIR}/plugin
-		${GSF_SOURCE_DIR}/common
-	)
+        INCLUDE_DIRECTORIES(
+        )
 endif()
 if(APPLE)
 endif()
@@ -19,20 +16,16 @@ endif()
 
 #引用库目录
 if(WIN32)
-	LINK_DIRECTORIES(
-	${GSF_SOURCE_DIR}/lib/win/Debug
-	)
-endif()
-if(UNIX)
-	LINK_DIRECTORIES(
-	${GSF_SOURCE_DIR}/lib/linux
-	)
-endif()
-if(APPLE)
+        LINK_DIRECTORIES(
+        )
+elseif(UNIX)
+elseif(APPLE)
 endif()
 
 FILE(GLOB_RECURSE SRC "*.cpp" "*.h")
-ADD_EXECUTABLE(test_timer ${SRC})
+ADD_LIBRARY(stream STATIC ${SRC})
+
+SET_TARGET_PROPERTIES(stream PROPERTIES LINKER_LANGUAGE CXX)
 
 if(MSVC)
     # Use the static C library for all build types
@@ -47,8 +40,8 @@ if(MSVC)
       endif()
     endforeach()
 
-        TARGET_LINK_LIBRARIES(test_timer ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib network.lib utils.lib timer.lib)
+        SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/win)
 elseif(UNIX)
-        TARGET_LINK_LIBRARIES(test_timer utils.a timer.a)
+        SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/linux)
 elseif(APPLE)
 endif()
