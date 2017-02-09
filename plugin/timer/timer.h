@@ -113,6 +113,9 @@ namespace gsf
 			~Timer();
 			static Timer& instance();
 
+			//template <typename Func, typename ...Args>
+			//void watch_event(uint32_t event, Func fun, Args args);
+
 			template <typename T>
 			TimerEvent * add_timer(T delay, TimerHandlerPtr timer_handler_ptr);
 			

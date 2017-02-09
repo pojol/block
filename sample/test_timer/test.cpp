@@ -61,11 +61,17 @@ private:
 	gsf::timer::TimerEvent *timer_event_;
 };
 
+#include <functional>
+const uint32_t event_delay_milliseconds = 1;
+
 int main()
 {
 	using namespace gsf::timer;
+
 	TimerTest *tt = new TimerTest();
 	
+	//plugin::event::dispatch(event_delay_milliseconds, std::bind(&TimerTest::pt, tt, std::placeholders::_1), 10);
+
 	std::default_random_engine generator;
 	std::uniform_int_distribution<int> dis(0, 10);
 
