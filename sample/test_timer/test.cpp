@@ -64,13 +64,44 @@ private:
 #include <functional>
 const uint32_t event_delay_milliseconds = 1;
 
+class TestTimer
+{
+public:
+	void init()
+	{
+		//regist(event_self, std::bind([](uint32_t event, uint32_t args){
+		//	if (event == timer_event_regist_succeed){
+
+		//	}
+		//	else if (event == timer_event_regist_faild){
+
+		//	}
+		// 	}, ::_1, ::_2));
+
+		//dispatch(event_delay_milliseconds, make_event(&testTimer::click, this), 10);
+	}
+
+	void click()
+	{
+
+	}
+
+	void event_callback(uint32_t event, uint32_t args)
+	{
+
+	}
+};
+
 int main()
 {
 	using namespace gsf::timer;
 
 	TimerTest *tt = new TimerTest();
-	
+
+	//plugin::event::regist(event_callback, std::bind(&TimerTest::class_event_callback, std::placeholders::_1, std::placeholders_2));
+
 	//plugin::event::dispatch(event_delay_milliseconds, std::bind(&TimerTest::pt, tt, std::placeholders::_1), 10);
+	//plugin::event::dispatch(event_delay_milliseconds, make_event(&TimerTest::pt, tt, 10), []{});
 
 	std::default_random_engine generator;
 	std::uniform_int_distribution<int> dis(0, 10);
