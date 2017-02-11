@@ -29,36 +29,56 @@ class EventPlugin : public gsf::utils::Singleton<EventPlugin>
 {
 public:
 
-	void dispatch(uint32_t event, EventHandlerPtr event_ptr)
+	void dispatch(uint32_t event, uint32_t args, EventHandlerPtr event_ptr)
 	{
 		// transport to the timer plugin
 
 		auto itr = map_.find(event);
 		if (itr != map_.end()){
-			itr->second(event_ptr);
+			itr->second(args, event_ptr);
 		}
 	}
 
-	//::utils::Args arg
-	void regist_callback(Event *self, std::function<void(uint32_t, gsf::stream::IStream)> callback)
+	void dispatch2self(uint32_t event, gsf::stream::IStream is)
 	{
-		auto _block_ptr = std::make_shared<gsf::stream::Block>(4);
-		_block_ptr->size_ = 4;
-
-		gsf::stream::IStream is(_block_ptr, 0, 4);
-		callback(1002, is);
+		auto itr = self_map_.find(1);
+		if (itr != self_map_.end()){
+			itr->second(is);
+		}
+		//callback(1002, is);
 	}
 
-	void regist(uint32_t event, std::function<void (EventHandlerPtr)> func)
+	//::utils::Args arg
+	
+
+	bool execute()
+	{
+		//while (list.end())
+		//{
+		//		pop
+		//		execute
+		//}
+
+		return true;
+	}
+
+	void regist(uint32_t event, std::function<void (uint32_t, EventHandlerPtr)> func)
 	{
 		// check
 
 		map_.insert(std::make_pair(event, func));
 	}
 
+	void listen_result(Event *self, std::function<void(gsf::stream::IStream)> callback)
+	{
+		self_map_.insert(std::make_pair(1, callback));
+
+	}
+
 private:
 	
-	std::unordered_map<uint32_t, std::function<void(EventHandlerPtr)>> map_;
+	std::unordered_map<uint32_t, std::function<void(uint32_t, EventHandlerPtr)>> map_;
+	std::unordered_map<uint32_t, std::function<void(gsf::stream::IStream)>> self_map_;
 };
 
 class TimerPlugin : public gsf::utils::Singleton<TimerPlugin>
@@ -67,12 +87,22 @@ public:
 
 	void init()
 	{
-		EventPlugin::get_ref().regist(1001, std::bind(&TimerPlugin::delay_milliseconds, this, std::placeholders::_1));
+		using namespace std::placeholders;
+		EventPlugin::get_ref().regist(1001, std::bind(&TimerPlugin::delay_milliseconds, this, _1, _2));
 	}
 
-	void delay_milliseconds(EventHandlerPtr event_ptr)
+	bool execute()
 	{
-		//EventPlugin::get_ref().dispatch(, )
+		return true;
+	}
+
+	void delay_milliseconds(uint32_t args, EventHandlerPtr event_ptr)
+	{
+		auto _block_ptr = std::make_shared<gsf::stream::Block>(4);
+		_block_ptr->size_ = 4;
+
+		gsf::stream::IStream is(_block_ptr, 0, 4);
+		EventPlugin::get_ref().dispatch2self(1, is);
 
 		// test
 		event_ptr->execute();
@@ -88,30 +118,31 @@ public:
 	{
 		uint32_t event_delay_milliseconds = 1001;
 
-		uint32_t callback_timer_event_regist_success = 1002;	// args timer_event_id
-		uint32_t callback_timer_event_regist_fail = 1003;		// args timer_event_errcode
+		uint32_t timer_event_regist_success = 1002;	// args timer_event_id
+		uint32_t timer_event_regist_fail = 1003;		// args timer_event_errcode
 
-		EventPlugin::get_ref().regist_callback(this, [=](uint32_t event, gsf::stream::IStream is){
-			if (event == callback_timer_event_regist_success) {
-				uint32_t timer_event_id = 0;
-				is >> timer_event_id;
+		EventPlugin::get_ref().listen_result(this, [=](gsf::stream::IStream is){
+			uint32_t arg1, arg2 = 0;
+			is >> arg1;
+			//is >> arg2;
 
-				std::cout << "success by event id " << timer_event_id << std::endl;
+			arg1 = 1002;
+
+			if (arg1 == timer_event_regist_success) {
+				std::cout << "success by event id " << arg2 << std::endl;
 			}
-			else if (event == callback_timer_event_regist_fail) {
-				uint32_t timer_event_errcode = 0;
-				is >> timer_event_errcode;
-
-				std::cout << "fail by errcode " << timer_event_errcode << std::endl;
+			else if (arg1 == timer_event_regist_fail) {
+				std::cout << "fail by errcode " << arg2 << std::endl;
 			}
 		});
-		
-		EventPlugin::get_ref().dispatch(event_delay_milliseconds, make_event(&TestTimer::click, this, 10));
+
+		EventPlugin::get_ref().dispatch(event_delay_milliseconds, 10
+			, make_callback(&TestTimer::click, this, std::string("hello,timer!")));
 	}
 
-	void click(int i)
+	void click(std::string str)
 	{
-		std::cout << "click " << i << std::endl;
+		std::cout << str << std::endl;
 	}
 
 	~TestTimer()
@@ -128,6 +159,11 @@ int main()
 	TimerPlugin::get_ref().init();
 
 	new EventPlugin;
+
+	// plugin bind
+	// plugin init
+	// plugin execute
+	// plugin uninit
 
 	TestTimer t;
 	t.init();

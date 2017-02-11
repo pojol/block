@@ -61,36 +61,6 @@ private:
 	gsf::timer::TimerEvent *timer_event_;
 };
 
-#include <functional>
-const uint32_t event_delay_milliseconds = 1;
-
-class TestTimer
-{
-public:
-	void init()
-	{
-		//regist(event_self, std::bind([](uint32_t event, uint32_t args){
-		//	if (event == timer_event_regist_succeed){
-
-		//	}
-		//	else if (event == timer_event_regist_faild){
-
-		//	}
-		// 	}, ::_1, ::_2));
-
-		//dispatch(event_delay_milliseconds, make_event(&testTimer::click, this), 10);
-	}
-
-	void click()
-	{
-
-	}
-
-	void event_callback(uint32_t event, uint32_t args)
-	{
-
-	}
-};
 
 int main()
 {
