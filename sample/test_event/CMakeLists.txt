@@ -3,6 +3,8 @@ PROJECT(test_event)
 #引用头文件目录
 if(WIN32)
 	INCLUDE_DIRECTORIES(
+		${GSF_SOURCE_DIR}/plugin
+		${GSF_SOURCE_DIR}/common
 	)
 endif()
 if(UNIX)
@@ -17,6 +19,7 @@ endif()
 #引用库目录
 if(WIN32)
 	LINK_DIRECTORIES(
+	    ${GSF_SOURCE_DIR}/lib/win/Debug
 	)
 endif()
 if(UNIX)
@@ -41,7 +44,7 @@ if(MSVC)
         string(REGEX REPLACE "/MD" "/MT" ${var} "${${var}}")
       endif()
     endforeach()
-
+	TARGET_LINK_LIBRARIES(test_event stream.lib libevent.lib libevent_core.lib libevent_extras.lib network.lib utils.lib timer.lib ws2_32.lib)
 endif()
 if(UNIX)
 endif()
