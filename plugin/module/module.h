@@ -1,13 +1,20 @@
 #ifndef _GSF_MODULE_HEADER_
 #define _GSF_MODULE_HEADER_
 
-using namespace gsf
+namespace gsf
 {
-	using namespace plugin
+	namespace core
 	{
-		class module
+		class Module
 		{
+		public:
+			virtual void after_init();
+			virtual void init();
 
+			virtual void execute();
+
+			virtual void before_shut();
+			virtual void shut();
 		};
 	}
 }
