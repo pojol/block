@@ -7,7 +7,7 @@ namespace gsf
 	{
 		class Module
 		{
-		public:
+		protected:
 			virtual void after_init();
 			virtual void init();
 

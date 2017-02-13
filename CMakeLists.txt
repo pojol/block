@@ -1,6 +1,5 @@
 PROJECT(GSF)
 
-	set(CMAKE_VS_PLATFORM_TOOLSET "v120")
 if(WIN32)
 
 endif()

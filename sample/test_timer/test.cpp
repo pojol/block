@@ -11,89 +11,72 @@
 
 #include <iostream>
 #include <random>
-#include <timer/timer.h>
-#include <timer/timer_handler.h>
+
+#include <module/application.h>
+#include <event/event.h>
+#include <stream/istream.h>
+#include <stream/ostream.h>
 
 #if defined(WIN32)
 	#include <windows.h>
 #else
 	#include <unistd.h>
+#include "../../modules/timer/timer_event_list.h"
+
 #endif
 
-
-static int count_ = 0;
-class TimerTest
+class TestTimerApp : public gsf::core::Application
 {
 public:
-	void pt(int i) { printf("%d\n", i); ++count_; }
+
+
+
 };
 
-class RecommendTest
+class TestClickModule
+        : public gsf::core::Module
+        , public gsf::core::Door
 {
 public:
-	RecommendTest()
+	void init()
 	{
-		using namespace gsf::timer;
-		timer_event_ = Timer::instance().add_timer(delay_milliseconds(3000)
-			, makeTimerHandler(&RecommendTest::pt, this, std::string("hello!")));
+		using namespace gsf::core;
+
+        listen(this, std::bind([=](uint32_t event, gsf::stream::OStream os){
+            uint32_t arg1 = 0, arg2 = 0;
+            gsf::stream::IStream is(os.getBlock());
+            is >> arg1;
+            is >> arg2;
+
+            if (arg1 == 1){
+                std::cout << "success by event id : " << arg2 << std::endl;
+            }
+            else {
+                std::cout << "fail by errcode : " << arg2 << std::endl;
+            }
+        }));
+
+        gsf::stream::OStream os;
+        os << 10;
+        dispatch(event_delay_milliseconds
+                , os, make_callback(&TestClickModule::click, this, std::string("hello,timer!")));
 	}
 
-	~RecommendTest()
+	void click(std::string &str)
 	{
-		using namespace gsf::timer;
-		if (timer_event_){
-			if (Timer::instance().rmv_timer(timer_event_) == 0){ //! succ
-				delete timer_event_;
-				timer_event_ = nullptr;
-			}
-		}
+		std::cout << str << std::endl;
 	}
-
-	void pt(std::string str)
-	{
-		std::cout << str.c_str() << std::endl;
-
-		delete timer_event_;
-		timer_event_ = nullptr;
-	}
-
-private:
-	gsf::timer::TimerEvent *timer_event_;
 };
 
 
 int main()
 {
-	using namespace gsf::timer;
+	TestTimerApp app;
 
-	TimerTest *tt = new TimerTest();
+	app.regist_module(gsf::core::EventModule::get_ptr());
+    app.regist_module(new TestClickModule);
 
-	//plugin::event::regist(event_callback, std::bind(&TimerTest::class_event_callback, std::placeholders::_1, std::placeholders_2));
-
-	//plugin::event::dispatch(event_delay_milliseconds, std::bind(&TimerTest::pt, tt, std::placeholders::_1), 10);
-	//plugin::event::dispatch(event_delay_milliseconds, make_event(&TimerTest::pt, tt, 10), []{});
-
-	std::default_random_engine generator;
-	std::uniform_int_distribution<int> dis(0, 10);
-
-	for (int i = 0; i < 10; ++i)
-	{
-		//dis(generator)
-		Timer::instance().add_timer(delay_milliseconds(i)
-			, makeTimerHandler(&TimerTest::pt, tt, i));
-	}
-
-	RecommendTest test;
-
-	while (1)
-	{
-		Timer::instance().update();
-#if defined(WIN32)
-		Sleep(1);
-#else
-		usleep(1000);
-#endif
-	}
+	app.run();
 
 	return 0;
 }

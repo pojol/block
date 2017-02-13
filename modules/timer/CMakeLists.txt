@@ -2,6 +2,8 @@ PROJECT(timer)
 
 #引用头文件目录
 INCLUDE_DIRECTORIES(
+        ${GSF_SOURCE_DIR}/plugin
+        ${GSF_SOURCE_DIR}/common
 )
 
 #引用库目录

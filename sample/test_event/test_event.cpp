@@ -160,10 +160,7 @@ int main()
 
 	new EventPlugin;
 
-	// plugin bind
-	// plugin init
-	// plugin execute
-	// plugin uninit
+
 
 	TestTimer t;
 	t.init();

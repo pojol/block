@@ -4,6 +4,7 @@ PROJECT(test_timer)
 if(WIN32)
 	INCLUDE_DIRECTORIES(
 		${GSF_SOURCE_DIR}/plugin
+			${GSF_SOURCE_DIR}/modules
 		${GSF_SOURCE_DIR}/common
 	)
 endif()
