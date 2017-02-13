@@ -101,6 +101,7 @@ int gsf::network::NetworkImpl::start(std::function<void()> update_func)
 	evtimer_add(update_event_, &tv);
 
 	event_base_dispatch(main_thread_ptr_->event_base_ptr_);
+	//event_base_loop(main_thread_ptr_->event_base_ptr_, EVLOOP_ONCE | EVLOOP_NONBLOCK);
 
 	return 0;
 }
