@@ -3,14 +3,14 @@ PROJECT(test_timer)
 #引用头文件目录
 if(WIN32)
 	INCLUDE_DIRECTORIES(
-		${GSF_SOURCE_DIR}/plugin
+		${GSF_SOURCE_DIR}/core
 			${GSF_SOURCE_DIR}/modules
 		${GSF_SOURCE_DIR}/common
 	)
 endif()
 if(UNIX)
 	INCLUDE_DIRECTORIES(
-		${GSF_SOURCE_DIR}/plugin
+		${GSF_SOURCE_DIR}/core
 		${GSF_SOURCE_DIR}/common
 	)
 endif()

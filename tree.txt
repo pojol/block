@@ -3,18 +3,16 @@
 │   └── libevent-2.0.22-stable
 ├── common
 ├── document
+├── core
+│   ├── event
+│   ├── module
+│   └── stream
 ├── modules
 │   ├── log
 │   ├── network
 │   ├── package
 │   └── timer
-├── plugin
-│   ├── event
-│   ├── module
-│   └── stream
 └── sample
     ├── test_event
     ├── test_network
     └── test_timer
-
-8 directories

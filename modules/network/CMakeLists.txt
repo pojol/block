@@ -4,21 +4,21 @@ PROJECT(network)
 if(WIN32)
     INCLUDE_DIRECTORIES(
             ${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
-            ${GSF_SOURCE_DIR}/plugin
+            ${GSF_SOURCE_DIR}/core
 			${GSF_SOURCE_DIR}/common
     )
 endif()
 if(UNIX)
     INCLUDE_DIRECTORIES(
             ${GSF_SOURCE_DIR}/3rd/libevent/include
-            ${GSF_SOURCE_DIR}/plugin
+            ${GSF_SOURCE_DIR}/core
 			${GSF_SOURCE_DIR}/common
 			)
 endif()
 if(APPLE)
     INCLUDE_DIRECTORIES(
             ${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
-            ${GSF_SOURCE_DIR}/plugin
+            ${GSF_SOURCE_DIR}/core
 			${GSF_SOURCE_DIR}/common
 			)
 endif()
