@@ -19,12 +19,13 @@
 #include <stream/istream.h>
 #include <stream/ostream.h>
 
+#include <timer/timer.h>
+#include <timer/timer_event_list.h>
+
 #if defined(WIN32)
 	#include <windows.h>
 #else
 	#include <unistd.h>
-#include "../../modules/timer/timer_event_list.h"
-
 #endif
 
 class TestTimerApp : public gsf::core::Application
@@ -59,8 +60,11 @@ public:
             }
         }));
 
+		gsf::utils::Any self = this;
+		gsf::utils::Any miliseconds = 10;
+
         dispatch(event_delay_milliseconds
-                , std::make_tuple(Any(this), Any(10))
+                , std::make_tuple(self, miliseconds)
                 , make_callback(&TestClickModule::click, this, std::string("hello,timer!")));
 	}
 
@@ -75,7 +79,8 @@ int main()
 {
 	TestTimerApp app;
 
-	app.regist_module(gsf::core::EventModule::get_ptr());
+	app.regist_module(new gsf::core::EventModule);
+	app.regist_module(new gsf::modules::Timer);
     app.regist_module(new TestClickModule);
 
 	app.run();

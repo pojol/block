@@ -36,7 +36,6 @@ namespace gsf
 
 		class EventModule
 				: public Module
-				, public gsf::utils::Singleton<EventModule>
 		{
 		public:
 

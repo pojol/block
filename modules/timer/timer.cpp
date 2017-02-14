@@ -52,8 +52,8 @@ void gsf::timer::Timer::execute()
 
 void gsf::timer::Timer::delay_milliseconds(std::tuple<gsf::utils::Any> args, gsf::core::EventHandlerPtr callback)
 {
-    uint32_t _sender = std::get<0>(args).AnyCast<uint32_t>();
-    uint32_t _milliseconds = std::get<1>(args).AnyCast<uint32_t>();
+	uint32_t _sender = std::get<0>(args).AnyCast<uint32_t>();
+	uint32_t _milliseconds;// = std::get<1>(args).AnyCast<uint32_t>();
 
 	auto _tp = std::chrono::system_clock::now() + std::chrono::milliseconds(_milliseconds);
 
@@ -70,8 +70,8 @@ void gsf::timer::Timer::delay_day(std::tuple<gsf::utils::Any> args, gsf::core::E
 	using namespace std::chrono;
 	//!
     uint32_t _sender = std::get<0>(args).AnyCast<uint32_t>();
-    uint32_t _hour = std::get<1>(args).AnyCast<uint32_t>();
-    uint32_t _minute = std::get<2>(args).AnyCast<uint32_t>();
+	uint32_t _hour;// = std::get<1>(args).AnyCast<uint32_t>();
+    uint32_t _minute;// = std::get<2>(args).AnyCast<uint32_t>();
 
 	typedef duration<int, std::ratio<60 * 60 * 24>> dur_day;
 	time_point<system_clock, dur_day> _today = time_point_cast<dur_day>(system_clock::now());

@@ -5,7 +5,7 @@
 
 namespace gsf
 {
-	namespace timer
+	namespace modules
 	{
 		template <typename T>
 		struct min_heap

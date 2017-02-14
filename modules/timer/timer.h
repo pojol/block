@@ -16,11 +16,10 @@
 #include <stream/istream.h>
 #include <event/event.h>
 
-#include "../../common/any.h"
 
 namespace gsf
 {
-	namespace timer
+	namespace modules
 	{
 		struct TimerEvent
 		{
