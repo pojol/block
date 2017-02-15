@@ -11,7 +11,6 @@
 
 #include <iostream>
 #include <random>
-#include "../../common/any.h"
 #include <tuple>
 
 #include <module/application.h>
@@ -44,9 +43,10 @@ public:
 	void init()
 	{
 		using namespace gsf::core;
-        using namespace gsf::utils;
+        using namespace gsf::stream;
 
-        listen(this, std::bind([=](uint32_t event, gsf::stream::OStream os){
+		/*
+        listen(this, std::bind([=](gsf::stream::OStream os, EventHandlerPtr callback){
             uint32_t arg1 = 0, arg2 = 0;
             gsf::stream::IStream is(os.getBlock());
             is >> arg1;
@@ -59,16 +59,23 @@ public:
                 std::cout << "fail by errcode : " << arg2 << std::endl;
             }
         }));
+		*/
+		listen(this, std::bind(&TestClickModule::testf, this, std::placeholders::_1, std::placeholders::_2));
 
-		gsf::utils::Any self = this;
-		gsf::utils::Any miliseconds = 10;
+		OStream os;
+		os << 1 << 10;
 
         dispatch(event_delay_milliseconds
-                , std::make_tuple(self, miliseconds)
+                , os
                 , make_callback(&TestClickModule::click, this, std::string("hello,timer!")));
 	}
 
-	void click(std::string &str)
+	void testf(gsf::stream::OStream os, gsf::core::EventHandlerPtr callback)
+	{
+
+	}
+
+	void click(std::string str)
 	{
 		std::cout << str << std::endl;
 	}

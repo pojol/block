@@ -5,19 +5,19 @@
 #include <assert.h>
 
 
-gsf::timer::Timer::~Timer()
+gsf::modules::Timer::~Timer()
 {
 
 }
 
 
-gsf::timer::Timer::Timer()
+gsf::modules::Timer::Timer()
 {
 	min_heap_ctor(&min_heap_);
 }
 
 
-void gsf::timer::Timer::init()
+void gsf::modules::Timer::init()
 {
 	using namespace std::placeholders;
 
@@ -25,7 +25,7 @@ void gsf::timer::Timer::init()
     listen(event_delay_day, std::bind(&Timer::delay_day, this, _1, _2));
 }
 
-void gsf::timer::Timer::execute()
+void gsf::modules::Timer::execute()
 {
 	using namespace std::chrono;
 
@@ -50,10 +50,13 @@ void gsf::timer::Timer::execute()
 	}
 }
 
-void gsf::timer::Timer::delay_milliseconds(std::tuple<gsf::utils::Any> args, gsf::core::EventHandlerPtr callback)
+void gsf::modules::Timer::delay_milliseconds(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback)
 {
-	uint32_t _sender = std::get<0>(args).AnyCast<uint32_t>();
-	uint32_t _milliseconds;// = std::get<1>(args).AnyCast<uint32_t>();
+	gsf::stream::IStream is(args.getBlock());
+	uint32_t _sender = 0;
+	uint32_t _milliseconds = 0;
+	is >> _sender;
+	is >> _milliseconds;
 
 	auto _tp = std::chrono::system_clock::now() + std::chrono::milliseconds(_milliseconds);
 
@@ -65,13 +68,13 @@ void gsf::timer::Timer::delay_milliseconds(std::tuple<gsf::utils::Any> args, gsf
 
 }
 
-void gsf::timer::Timer::delay_day(std::tuple<gsf::utils::Any> args, gsf::core::EventHandlerPtr callback)
+void gsf::modules::Timer::delay_day(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback)
 {
 	using namespace std::chrono;
-	//!
-    uint32_t _sender = std::get<0>(args).AnyCast<uint32_t>();
-	uint32_t _hour;// = std::get<1>(args).AnyCast<uint32_t>();
-    uint32_t _minute;// = std::get<2>(args).AnyCast<uint32_t>();
+
+	gsf::stream::IStream is(args.getBlock());
+	uint32_t _sender = 0, _hour = 0, _minute = 0;
+	is >> _sender >> _hour >> _minute;
 
 	typedef duration<int, std::ratio<60 * 60 * 24>> dur_day;
 	time_point<system_clock, dur_day> _today = time_point_cast<dur_day>(system_clock::now());
@@ -94,15 +97,7 @@ void gsf::timer::Timer::delay_day(std::tuple<gsf::utils::Any> args, gsf::core::E
 	min_heap_push(&min_heap_, _event);
 }
 
-void gsf::timer::Timer::delay_week(std::tuple<gsf::utils::Any> args, gsf::core::EventHandlerPtr callback)
-{
 
-}
-
-void gsf::timer::Timer::delay_month(std::tuple<gsf::utils::Any> args, gsf::core::EventHandlerPtr callback)
-{
-
-}
 
 //int gsf::timer::Timer::rmv_timer(TimerEvent *e)
 //{

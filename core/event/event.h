@@ -5,9 +5,6 @@
 #ifndef _GSF_EVENT_HEADER_
 #define _GSF_EVENT_HEADER_
 
-#include "../../common/single.h"
-#include "../../common/any.h"
-
 #include "../module/module.h"
 #include "event_handler.h"
 
@@ -15,20 +12,23 @@
 #include <tuple>
 #include <unordered_map>
 
+#include <stream/istream.h>
+#include <stream/ostream.h>
+
 namespace gsf
 {
     namespace core
     {
-		typedef std::function<void(uint32_t, std::tuple<gsf::utils::Any>)> EventFunc;
+		typedef std::function<void(gsf::stream::OStream, EventHandlerPtr)> EventFunc;
 
 		class Door
 		{
 		public:
-			virtual void listen(Door *self, EventFunc func){}
+			virtual void listen(Door *self, EventFunc func) {}
 
 			virtual void listen(uint32_t event, EventFunc func) {}
 
-			virtual void dispatch(uint32_t event, std::tuple<gsf::utils::Any> args, EventHandlerPtr callback = nullptr){}
+			virtual void dispatch(uint32_t event, gsf::stream::OStream args, EventHandlerPtr callback = nullptr){}
 
         protected:
 

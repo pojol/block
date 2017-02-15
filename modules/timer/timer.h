@@ -36,7 +36,7 @@ namespace gsf
 		public:
 			
 			~Timer();
-
+			Timer();
 
 		protected:
 
@@ -45,12 +45,11 @@ namespace gsf
             void execute();
 
 		private:
-			Timer();
 
-			void delay_milliseconds(std::tuple<gsf::utils::Any> args, gsf::core::EventHandlerPtr callback);
-			void delay_day(std::tuple<gsf::utils::Any> args, gsf::core::EventHandlerPtr callback);
-			void delay_week(std::tuple<gsf::utils::Any> args, gsf::core::EventHandlerPtr callback);
-			void delay_month(std::tuple<gsf::utils::Any> args, gsf::core::EventHandlerPtr callback);
+			void delay_milliseconds(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback);
+			void delay_day(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback);
+			//void delay_week(std::tuple<gsf::utils::Any> args, gsf::core::EventHandlerPtr callback);
+			//void delay_month(std::tuple<gsf::utils::Any> args, gsf::core::EventHandlerPtr callback);
 
             void remove_timer();
 
