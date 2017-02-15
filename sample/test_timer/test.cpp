@@ -66,11 +66,6 @@ public:
                 , make_callback(&TestClickModule::click, this, std::string("hello,timer!")));
 	}
 
-	void testf(gsf::stream::OStream os, gsf::core::EventHandlerPtr callback)
-	{
-
-	}
-
 	void click(std::string str)
 	{
 		std::cout << str << std::endl;
