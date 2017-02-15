@@ -45,8 +45,7 @@ public:
 		using namespace gsf::core;
         using namespace gsf::stream;
 
-		/*
-        listen(this, std::bind([=](gsf::stream::OStream os, EventHandlerPtr callback){
+        listen(this, [=](gsf::stream::OStream os, EventHandlerPtr callback){
             uint32_t arg1 = 0, arg2 = 0;
             gsf::stream::IStream is(os.getBlock());
             is >> arg1;
@@ -58,9 +57,7 @@ public:
             else {
                 std::cout << "fail by errcode : " << arg2 << std::endl;
             }
-        }));
-		*/
-		listen(this, std::bind(&TestClickModule::testf, this, std::placeholders::_1, std::placeholders::_2));
+        });
 
 		OStream os;
 		os << 1 << 10;
