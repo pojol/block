@@ -60,7 +60,7 @@ public:
         });
 
 		OStream args;
-		args << 1 << 10;
+		args << 1 << 1;
 
         dispatch(event_delay_milliseconds , args
                 , make_callback(&TestClickModule::click, this, std::string("hello,timer!")));
@@ -76,8 +76,9 @@ public:
 int main()
 {
 	TestTimerApp app;
+	new gsf::core::EventModule;
 
-	app.regist_module(new gsf::core::EventModule);
+	app.regist_module(gsf::core::EventModule::get_ptr());
 	app.regist_module(new gsf::modules::Timer);
     app.regist_module(new TestClickModule);
 

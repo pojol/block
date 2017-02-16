@@ -66,6 +66,10 @@ void gsf::modules::Timer::delay_milliseconds(gsf::stream::OStream args, gsf::cor
 
 	min_heap_push(&min_heap_, _event);
 
+	// result
+	gsf::stream::OStream os;
+	os << 1 << 11;
+	dispatch(_sender, os, nullptr);
 }
 
 void gsf::modules::Timer::delay_day(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback)

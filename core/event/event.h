@@ -59,7 +59,7 @@ namespace gsf
         private:
 			std::unordered_map<uint32_t, EventFunc> map_;
 
-			std::vector<std::tuple<uint32_t, gsf::stream::OStream, EventHandlerPtr>> list_;
+			std::list<std::tuple<uint32_t, gsf::stream::OStream, EventHandlerPtr>> list_;
 		};
     }
 }

@@ -20,6 +20,15 @@ void gsf::core::Application::regist_module(Module *m)
 
 void gsf::core::Application::run()
 {
+	//! init
+	auto _itr = module_list_.begin();
+	while (_itr != module_list_.end())
+	{
+		(*_itr)->init();
+		++_itr;
+	}
+
+	//! run
 	while (!shutdown_)
 	{
 		using namespace std::chrono;
