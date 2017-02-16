@@ -15,6 +15,8 @@
 #include <stream/istream.h>
 #include <stream/ostream.h>
 
+#include "../../common/single.h"
+
 namespace gsf
 {
     namespace core
@@ -24,27 +26,40 @@ namespace gsf
 		class Door
 		{
 		public:
-			virtual void listen(Door *self, EventFunc func) {}
+			Door();
 
-			virtual void listen(uint32_t event, EventFunc func) {}
+			uint32_t get_id() const { return door_id_; }
 
-			virtual void dispatch(uint32_t event, gsf::stream::OStream args, EventHandlerPtr callback = nullptr){}
+			virtual void listen(Door *self, EventFunc func);
+
+			virtual void listen(uint32_t event, EventFunc func);
+
+			virtual void dispatch(uint32_t event, gsf::stream::OStream args, EventHandlerPtr callback = nullptr);
 
         protected:
-
+			uint32_t door_id_;
 		};
 
 		class EventModule
-				: public Module
+				: public gsf::utils::Singleton<EventModule>
+				, public Module
 		{
+			friend class Door;
+
 		public:
 
 
 		protected:
 			void execute();
 
-        private:
+			void add_event(uint32_t event, EventFunc func);
 
+			void add_cmd(uint32_t event, gsf::stream::OStream args, EventHandlerPtr callback = nullptr);
+
+        private:
+			std::unordered_map<uint32_t, EventFunc> map_;
+
+			std::vector<std::tuple<uint32_t, gsf::stream::OStream, EventHandlerPtr>> list_;
 		};
     }
 }
