@@ -59,3 +59,4 @@ lib/apple/lib/pkgconfig/libevent.pc
 lib/apple/lib/pkgconfig/libevent_openssl.pc
 lib/apple/lib/pkgconfig/libevent_pthreads.pc
 lib/linux/libstream.a
+lib/
