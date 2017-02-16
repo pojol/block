@@ -1,18 +1,52 @@
-.
+﻿.
 ├── 3rd
 │   └── libevent-2.0.22-stable
 ├── common
 ├── document
-├── core
+├── core			核心层，被其他模块依赖
 │   ├── event
 │   ├── module
 │   └── stream
-├── modules
+├── modules			框架模块层，由多个框架模块组成
 │   ├── log
 │   ├── network
 │   ├── package
 │   └── timer
-└── sample
+└── sample			应用层， 由多个应用模块组成
     ├── test_event
     ├── test_network
     └── test_timer
+
+所有的模块相互之间都没有依赖，所有的交互通过事件通知。
+
+framework
+[core | modules ]
+
+所有的模块都注册到app由app的线程统一调度
+模块拥有的接口
+virtual void after_init();
+virtual void init();
+
+virtual void execute();
+
+virtual void before_shut();
+virtual void shut();
+
+驱动过程
+app::run()
+{
+	while(true)
+	{
+		module.execute()
+		module.next()
+		
+		sleep()
+	}
+}
+
+事件处理 所有需要监听发送事件的类需要继承door （可以认为是一个module的门户
+// 事件ID， 事件参数， 回调函数（可以为空
+dispatch(event_delay_milliseconds , args, make_callback(&TestClickModule::click, this, std::string("hello,timer!")));
+
+// door对象，处理函数
+listen(this, [=](gsf::stream::OStream os, EventHandlerPtr callback) {})

@@ -7,6 +7,7 @@ namespace gsf
 	{
 		class Module
 		{
+			friend class Application;
 		protected:
 			virtual void after_init();
 			virtual void init();

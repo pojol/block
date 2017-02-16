@@ -59,10 +59,10 @@ public:
             }
         });
 
-		OStream os;
-		os << 1 << 10;
+		OStream args;
+		args << 1 << 10;
 
-        dispatch(event_delay_milliseconds , os
+        dispatch(event_delay_milliseconds , args
                 , make_callback(&TestClickModule::click, this, std::string("hello,timer!")));
 	}
 

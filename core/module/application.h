@@ -3,6 +3,7 @@
 
 #include "module.h"
 
+#include <list>
 
 namespace gsf
 {
@@ -13,6 +14,8 @@ namespace gsf
 
 		public:
 
+			Application();
+
 			void init_args();
 
 			void regist_module(Module *module);
@@ -22,6 +25,10 @@ namespace gsf
 			void exit();
 
 		private:
+
+			std::list<Module *> module_list_;
+
+			bool shutdown_;
 
 		};
 	}
