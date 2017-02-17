@@ -60,7 +60,7 @@ public:
         });
 
 		OStream args;
-		args << 1 << 1;
+		args << 1 << 3000;
 
         dispatch(event_delay_milliseconds , args
                 , make_callback(&TestClickModule::click, this, std::string("hello,timer!")));
