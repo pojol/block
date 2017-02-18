@@ -27,8 +27,6 @@
 #include <iostream>
 
 #include <random>
-#include <timer/timer.h>
-#include <timer/timer_handler.h>
 
 //! 由用户定制msg
 class SampleMsg : public gsf::network::Message
@@ -67,18 +65,13 @@ class LoginServerHandler
 public:
     ~LoginServerHandler()
 	{
-		if (time_event_){
-			gsf::timer::Timer::instance().rmv_timer(time_event_);
-		}
+
 	}
 	LoginServerHandler()
 	{
 		gsf::network::MessageBinder<SampleMsg>::instance().
 			regist_msg_proc<LoginServerHandler, &LoginServerHandler::test_msg>(100, this);
 
-		using namespace gsf::timer;
-		time_event_ = Timer::instance().add_timer(delay_milliseconds(1000)
-			, makeTimerHandler(&LoginServerHandler::tick, this));
 	}
 
     //! new connection bind session to message dispatch
@@ -108,24 +101,6 @@ public:
 		cur_connect--;
 	}
 
-	void tick()
-	{
-		printf("total:%d\n", recv_total);
-		printf("connect:%d\n", cur_connect);
-		printf("tick:%d\n", recv_total - prev_total);
-
-		prev_total = recv_total;
-
-		using namespace std::chrono;
-		auto _t = time_point_cast<milliseconds>(system_clock::now());
-		printf("delay:%lld\n", _t.time_since_epoch().count() - old_time);
-		old_time = _t.time_since_epoch().count();
-
-		using namespace gsf::timer;
-		time_event_ = Timer::instance().add_timer(delay_milliseconds(1000)
-			, makeTimerHandler(&LoginServerHandler::tick, this));
-	}
-
 	void test_msg(SampleMsg::Ptr msg)
 	{
 		//test
@@ -153,19 +128,11 @@ public:
 private:
 	uint32_t index_;
 
-	gsf::timer::TimerEvent *time_event_;
 };
 
 void update()
 {
-	//gettime
-	
-	//todo...
-	gsf::timer::Timer::instance().update();
 
-	//gettime
-	//endtime - begintime = network state
-	//if network state change : printf("info")
 }
 
 int main()
