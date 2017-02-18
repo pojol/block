@@ -28,7 +28,7 @@ namespace gsf
 		public:
 			Door();
 
-			uint32_t get_id() const { return door_id_; }
+			uint32_t get_door_id() const { return door_id_; }
 
 			virtual void listen(Door *self, EventFunc func);
 

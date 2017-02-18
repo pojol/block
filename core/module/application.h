@@ -3,6 +3,7 @@
 
 #include "module.h"
 
+#include <stdint.h>
 #include <list>
 
 namespace gsf
@@ -22,7 +23,12 @@ namespace gsf
 
 			void run();
 
+			virtual void tick() {}
+
 			void exit();
+
+		protected:
+			uint32_t delay_;
 
 		private:
 

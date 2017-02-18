@@ -34,7 +34,7 @@ gsf::core::Door::Door()
 
 void gsf::core::Door::listen(Door *self, EventFunc func)
 {
-	EventModule::get_ref().add_event(self->get_id(), func);
+	EventModule::get_ref().add_event(self->get_door_id(), func);
 }
 
 void gsf::core::Door::dispatch(uint32_t event, gsf::stream::OStream args, EventHandlerPtr callback /*= nullptr*/)
