@@ -156,6 +156,7 @@ int main()
 	_config.buff_wait_time_ = 200;
 	Network::get_ref().init(_config);
 
+
 	LoginServerHandler *accept_handler = new LoginServerHandler();
 
 	if (Network::get_ref().listen("", 8888

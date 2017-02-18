@@ -1,4 +1,4 @@
-PROJECT(package)
+PROJECT(msg_pool)
 
 #引用头文件目录
 INCLUDE_DIRECTORIES(
@@ -9,7 +9,7 @@ LINK_DIRECTORIES(
 )
 
 FILE(GLOB_RECURSE SRC "*.cpp" "*.h")
-ADD_LIBRARY(package STATIC ${SRC})
+ADD_LIBRARY(msg_pool STATIC ${SRC})
 
 if(MSVC)     
     # Use the static C library for all build types
