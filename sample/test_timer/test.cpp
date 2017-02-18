@@ -27,11 +27,22 @@
 	#include <unistd.h>
 #endif
 
+static int test_tick = -1;
+
 class TestTimerApp : public gsf::core::Application
 {
 public:
 
+	void tick()
+	{
+		int t = (test_tick + 1) % 50;
 
+		if (t == 0){
+			printf("delay %d\n", delay_);
+		}
+
+		test_tick = t;
+	}
 
 };
 
@@ -43,32 +54,73 @@ public:
 	void init()
 	{
 		using namespace gsf::core;
-        using namespace gsf::stream;
+		using namespace gsf::stream;
 
-        listen(this, [=](gsf::stream::OStream os, EventHandlerPtr callback){
-            uint32_t arg1 = 0, arg2 = 0;
-            gsf::stream::IStream is(os.getBlock());
-            is >> arg1;
-            is >> arg2;
+		/* test1
+		listen(this, [=](gsf::stream::OStream os, EventHandlerPtr callback){
+		uint32_t arg1 = 0, arg2 = 0;
+		gsf::stream::IStream is(os.getBlock());
+		is >> arg1;
+		is >> arg2;
 
-            if (arg1 == 1){
-                std::cout << "success by event id : " << arg2 << std::endl;
-            }
-            else {
-                std::cout << "fail by errcode : " << arg2 << std::endl;
-            }
-        });
+		if (arg1 == event_id::timer::make_timer_success){
+		std::cout << "success by event id : " << arg2 << std::endl;
+		}
+		else {
+		std::cout << "fail by errcode : " << arg2 << std::endl;
+		}
+		});
 
 		OStream args;
-		args << 1 << 3000;
+		args << get_door_id() << 3000;
 
-        dispatch(event_delay_milliseconds , args
-                , make_callback(&TestClickModule::click, this, std::string("hello,timer!")));
+		dispatch(event_id::timer::delay_milliseconds , args
+		, make_callback(&TestClickModule::test_1, this, std::string("hello,timer!")));
+		*/
+
+		// test2
+		listen(this, [=](gsf::stream::OStream os, EventHandlerPtr callback){
+			uint32_t arg1 = 0, arg2 = 0;
+			gsf::stream::IStream is(os.getBlock());
+			is >> arg1 >> arg2;
+
+			if (arg1 == event_id::timer::make_timer_success && arg2 == 4){
+
+				OStream rArags;
+				rArags << get_door_id() << arg2;
+				dispatch(event_id::timer::remove_timer, rArags, nullptr);
+			}
+		});
+
+		for (int i = 0; i < 10; ++i)
+		{
+			OStream args;
+			args << get_door_id() << i * 1000;
+
+			dispatch(event_id::timer::delay_milliseconds, args
+				, make_callback(&TestClickModule::test_2, this, i));
+		}
+		
+
+		/* test3
+		for (int i = 0; i < 10 * 10000; ++i)
+		{
+			OStream args;
+			args << get_door_id() << i * 10;
+
+			dispatch(event_id::timer::delay_milliseconds, args, make_callback(&TestClickModule::test_2, this, i));
+		}
+		*/
 	}
 
-	void click(std::string str)
+	void test_1(std::string str)
 	{
 		std::cout << str << std::endl;
+	}
+
+	void test_2(int i)
+	{
+		std::cout << i << std::endl;
 	}
 };
 

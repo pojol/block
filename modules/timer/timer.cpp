@@ -12,8 +12,8 @@ gsf::modules::Timer::~Timer()
 
 
 gsf::modules::Timer::Timer()
+	:timer_id_(0)
 {
-
 }
 
 
@@ -21,9 +21,9 @@ void gsf::modules::Timer::init()
 {
 	using namespace std::placeholders;
 
-	listen(event_delay_milliseconds, std::bind(&Timer::delay_milliseconds, this, _1, _2));
-    listen(event_delay_day, std::bind(&Timer::delay_day, this, _1, _2));
-	listen(event_remove_timer, std::bind(&Timer::remove_timer, this, _1, _2));
+	listen(event_id::timer::delay_milliseconds, std::bind(&Timer::delay_milliseconds, this, _1, _2));
+	listen(event_id::timer::delay_day, std::bind(&Timer::delay_day, this, _1, _2));
+	listen(event_id::timer::remove_timer, std::bind(&Timer::remove_timer, this, _1, _2));
 }
 
 void gsf::modules::Timer::execute()
@@ -60,7 +60,7 @@ void gsf::modules::Timer::delay_milliseconds(gsf::stream::OStream args, gsf::cor
 
 	auto _tp = std::chrono::system_clock::now() + std::chrono::milliseconds(_milliseconds);
 
-	auto _event = std::make_shared<TimerEvent>();
+	auto _event = std::make_shared<TimerEvent>(make_timer_id());
 	_event->timer_handler_ptr_ = callback;
 	_event->tp_ = _tp;
 
@@ -68,7 +68,7 @@ void gsf::modules::Timer::delay_milliseconds(gsf::stream::OStream args, gsf::cor
 
 	// result
 	gsf::stream::OStream os;
-	os << 1 << _event->get_id();
+	os << event_id::timer::make_timer_success << _event->get_id();
 	dispatch(_sender, os, nullptr);
 }
 
@@ -88,7 +88,7 @@ void gsf::modules::Timer::delay_day(gsf::stream::OStream args, gsf::core::EventH
 	uint32_t _passed_second = static_cast<uint32_t>(_second.time_since_epoch().count() - _today.time_since_epoch().count() * 24 * 60 * 60);
 	uint32_t _space_second = _hour * 60 * 60 + _minute * 60;
 
-	auto _event = std::make_shared<TimerEvent>();
+	auto _event = std::make_shared<TimerEvent>(make_timer_id());
 	if (_space_second > _passed_second){
 		_event->tp_ = _second + seconds(_space_second - _passed_second);
 	}
@@ -102,15 +102,15 @@ void gsf::modules::Timer::delay_day(gsf::stream::OStream args, gsf::core::EventH
 
 	// result
 	gsf::stream::OStream os;
-	os << 1 << _event->get_id();
+	os << event_id::timer::make_timer_success << _event->get_id();
 	dispatch(_sender, os, nullptr);
 }
 
 void gsf::modules::Timer::remove_timer(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback)
 {
 	gsf::stream::IStream is(args.getBlock());
-	uint32_t _timer_id;
-	is >> _timer_id;
+	uint32_t _sender = 0, _timer_id = 0;
+	is >> _sender >> _timer_id;
 
 	auto itr = map_.find(_timer_id);
 	if (itr != map_.end()) {
@@ -118,8 +118,17 @@ void gsf::modules::Timer::remove_timer(gsf::stream::OStream args, gsf::core::Eve
 	}
 }
 
-// make time id
-gsf::modules::TimerEvent::TimerEvent()
+uint32_t gsf::modules::Timer::make_timer_id()
 {
+	if (timer_id_ == UINT32_MAX){
+		timer_id_ = 0;
+	}
 
+	return timer_id_++;
+}
+
+gsf::modules::TimerEvent::TimerEvent(uint32_t id)
+	:timerid_(id)
+{
+	
 }

@@ -21,7 +21,7 @@ namespace gsf
 	{
 		struct TimerEvent
 		{
-			TimerEvent();
+			TimerEvent(uint32_t id);
 
             gsf::core::EventHandlerPtr timer_handler_ptr_;
 			std::chrono::system_clock::time_point tp_;
@@ -61,9 +61,12 @@ namespace gsf
 
             void remove_timer(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback);
 
+			uint32_t make_timer_id();
+
 		private:
 
 			std::map<uint32_t, TimerEventPtr> map_;
+			uint32_t timer_id_;
 		};
 
 
