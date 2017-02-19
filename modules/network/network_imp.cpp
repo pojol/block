@@ -60,12 +60,6 @@ int gsf::network::NetworkImpl::init()
 
 	main_thread_ptr_->event_base_ptr_ = event_base_new();
 
-	main_thread_event_ = event_new(main_thread_ptr_->event_base_ptr_, -1, EV_PERSIST, main_thread_event, main_thread_ptr_.get());
-
-	// temp
-	struct timeval tv = { 0, (20) * 1000 };
-	evtimer_add(main_thread_event_, &tv);
-
 	init_work_thread();
 
 	return 0;
@@ -75,7 +69,6 @@ void gsf::network::NetworkImpl::uninit()
 {
 	evconnlistener_free(accept_listener_);
 
-	evtimer_del(main_thread_event_);
 	evtimer_del(work_thread_event_);
 	evtimer_del(update_event_);
 
@@ -109,6 +102,42 @@ int gsf::network::NetworkImpl::start()
 void gsf::network::NetworkImpl::execute()
 {
 	event_base_loop(main_thread_ptr_->event_base_ptr_, EVLOOP_ONCE | EVLOOP_NONBLOCK);
+
+	// main produce outbuf
+	main_thread_ptr_->out_buffer_->produce();
+
+	// main consume inbuf
+	for (auto &th : get_worker_thread())
+	{
+		std::vector<std::pair<uint32_t, evbuffer*>> vec;
+		std::vector<uint32_t> conn;
+		std::vector<uint32_t> disconn;
+		std::vector<std::pair<std::string, uint32_t>> failconn;
+		th->in_buffer_->consume(vec, conn, disconn, failconn);
+
+		// test dispatch
+		for (auto &it : vec)
+		{
+			//get_binder()->construct_msg(it.first, it.second);
+		}
+
+		for (int i : conn)
+		{
+			gsf::stream::OStream args;
+			args << 1 << i;
+			dispatch(1, args, nullptr);
+		}
+
+		for (auto sid : disconn)
+		{
+			//NetworkImpl::instance().disconnect_func(sid);
+		}
+
+		for (auto p : failconn)
+		{
+			//NetworkImpl::instance().failconnect_func(p.first, p.second);
+		}
+	}
 }
 
 int32_t gsf::network::NetworkImpl::init_work_thread()
@@ -326,45 +355,6 @@ void gsf::network::NetworkImpl::worker_thread_run(NetworkThreadPtr thread_ptr)
 void gsf::network::NetworkImpl::accept_listen_cb(::evconnlistener *listener, evutil_socket_t fd, sockaddr *sa, int socklen, void *arg)
 {
 	NetworkImpl::instance().acceptor_conn_new(fd);
-}
-
-void gsf::network::NetworkImpl::main_thread_event(evutil_socket_t fd, short event, void *arg)
-{
-	auto *_thread_ptr = static_cast<NetworkThread*>(arg);
-
-	// main produce outbuf
-	_thread_ptr->out_buffer_->produce();
-
-	// main consume inbuf
-	for (auto &th : NetworkImpl::instance().get_worker_thread())
-	{
-		std::vector<std::pair<uint32_t, evbuffer*>> vec;
-		std::vector<uint32_t> conn;
-		std::vector<uint32_t> disconn;
-		std::vector<std::pair<std::string, uint32_t>> failconn;
-		th->in_buffer_->consume(vec, conn, disconn, failconn);
-
-		// test dispatch
-		for (auto &it : vec)
-		{
-			NetworkImpl::instance().get_binder()->construct_msg(it.first, it.second);
-		}
-
-		for (int i : conn)
-		{
-			//NetworkImpl::instance().newconnect_func(i);
-		}
-
-		for (auto sid : disconn)
-		{
-			//NetworkImpl::instance().disconnect_func(sid);
-		}
-
-		for (auto p : failconn)
-		{
-			//NetworkImpl::instance().failconnect_func(p.first, p.second);
-		}
-	}
 }
 
 void gsf::network::NetworkImpl::work_thread_event(evutil_socket_t fd, short event, void *arg)

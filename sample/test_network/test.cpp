@@ -57,7 +57,7 @@ public:
 
 		// 
 		gsf::stream::OStream args;
-		args << get_door_id() << std::string("127.0.0.1") << uint32_t(8888);
+		args << get_door_id() << std::string("127.0.0.1") << uint32_t(8001);
 
 		dispatch(event_id::network::make_acceptor, args, nullptr);
 
@@ -68,7 +68,12 @@ public:
 
 	void network_result(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback)
 	{
+		gsf::stream::IStream is(args.getBlock());
+		uint32_t _type;
+		uint32_t _session;
+		is >> _type >> _session;
 
+		std::cout << "type " << _type << " " << "session " << _session << std::endl;
 	}
 
 };

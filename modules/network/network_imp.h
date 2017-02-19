@@ -23,8 +23,9 @@ namespace gsf
 		typedef std::shared_ptr<Message> MessagePtr;
 
 
-
+		//temp public 
 		class NetworkImpl
+			: public gsf::core::Door
 		{
 			typedef std::shared_ptr<NetworkThread> NetworkThreadPtr;
 
@@ -79,7 +80,6 @@ namespace gsf
 				, int socklen
 				, void *arg);
 
-			static void main_thread_event(evutil_socket_t fd, short event, void *arg);
 			static void work_thread_event(evutil_socket_t fd, short event, void *arg);
 
 		private:
