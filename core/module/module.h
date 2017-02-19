@@ -9,13 +9,13 @@ namespace gsf
 		{
 			friend class Application;
 		protected:
-			virtual void after_init();
+			virtual void before_init();
 			virtual void init();
 
 			virtual void execute();
 
-			virtual void before_shut();
 			virtual void shut();
+			virtual void after_shut();
 		};
 	}
 }

@@ -8,132 +8,70 @@
 
 #include <sys/types.h>
 
-//#include <event2/event-config.h>
-#include <event2/event.h>
 
 #ifdef WIN32
 #include <winsock2.h>
 #include <windows.h>
 #endif // WIN32
 
+#include <module/application.h>
+#include <event/event.h>
+#include <stream/istream.h>
+#include <stream/ostream.h>
 
 #include <network/network.h>
-#include <network/message_binder.h>
-
-#include <network/session.h>
-#include <network/session_mgr.h>
-#include <network/message.h>
 
 #include <iostream>
 
 #include <random>
 
-//! 由用户定制msg
-class SampleMsg : public gsf::network::Message
+static int test_tick = -1;
+
+class TestNetworkApp : public gsf::core::Application
 {
 public:
-	typedef std::shared_ptr<SampleMsg> Ptr;
-
-	SampleMsg()
-		: gsf::network::Message()
-	{}
-
-	SampleMsg(gsf::stream::BlockPtr blockPtr, uint32_t start, uint32_t len, uint32_t session_id)
-		: gsf::network::Message(blockPtr, start, len, session_id)
+	void tick()
 	{
+		int t = (test_tick + 1) % 50;
 
+		if (t == 0){
+			//printf("delay %d\n", delay_);
+		}
+
+		test_tick = t;
 	}
 
-	virtual ~SampleMsg()
+};
+
+class TestNetworkModule
+	: public gsf::core::Module
+	, public gsf::core::Door
+{
+public:
+
+	void init()
+	{
+		listen(this, std::bind(&TestNetworkModule::network_result, this
+			, std::placeholders::_1
+			, std::placeholders::_2));
+
+		// 
+		gsf::stream::OStream args;
+		args << get_door_id() << std::string("127.0.0.1") << uint32_t(8888);
+
+		dispatch(event_id::network::make_acceptor, args, nullptr);
+
+		//
+		gsf::stream::OStream nargs;
+		dispatch(event_id::network::start_network, nargs, nullptr);
+	}
+
+	void network_result(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback)
 	{
 
 	}
 
 };
-
-#include <chrono>
-#include <ctime>
-
-static uint32_t recv_total = 0;
-static uint32_t prev_total = 0;
-static uint32_t cur_connect = 0;
-
-static uint32_t old_time = 0;
-
-class LoginServerHandler
-{
-public:
-    ~LoginServerHandler()
-	{
-
-	}
-	LoginServerHandler()
-	{
-		gsf::network::MessageBinder<SampleMsg>::instance().
-			regist_msg_proc<LoginServerHandler, &LoginServerHandler::test_msg>(100, this);
-
-	}
-
-    //! new connection bind session to message dispatch
-    void handler_new_connection(int session_id)
-    {
-		printf("new connection session_id : %d\n", session_id);
-
-		//! bind message register
-		gsf::network::Network::get_ref().regist_binder(
-			&gsf::network::MessageBinder<SampleMsg>::instance());
-
-		cur_connect++;
-
-		//test
-		SampleMsg::Ptr _ret_msg = std::make_shared<SampleMsg>();
-
-		*_ret_msg->get_ostream() << 12;		//size
-		*_ret_msg->get_ostream() << 101;	//mid
-		*_ret_msg->get_ostream() << 1;
-
-		gsf::network::Network::get_ref().write(session_id, _ret_msg);
-    }
-
-	void handler_connect_close(int session_id)
-	{
-		printf("dis connection session_id : %d\n", session_id);
-		cur_connect--;
-	}
-
-	void test_msg(SampleMsg::Ptr msg)
-	{
-		//test
-		uint32_t dat;
-		*msg->get_istream() >> dat;
-
-		/*
-		std::cout << "session : " << msg->get_session_id()
-			<< " message : " << msg->get_message_id() 
-			<< " dat : " << dat << std::endl;
-		*/
-
-		//test
-		SampleMsg::Ptr _ret_msg = std::make_shared<SampleMsg>();
-
-		recv_total += 1;
-
-		*_ret_msg->get_ostream() << 12;		//size
-		*_ret_msg->get_ostream() << 101;	//mid
-		*_ret_msg->get_ostream() << dat+1;
-
-		gsf::network::Network::get_ref().write(msg->get_session_id(), _ret_msg);
-	}
-
-private:
-	uint32_t index_;
-
-};
-
-void update()
-{
-
-}
 
 int main()
 {
@@ -148,25 +86,15 @@ int main()
 	}
 #endif // WIN32
 
-	using namespace gsf::network;
 
-	new Network();
+	TestNetworkApp app;
+	new gsf::core::EventModule;
 
-	NetworkConfig _config;
-	_config.buff_wait_time_ = 200;
-	Network::get_ref().init(_config);
+	app.regist_module(gsf::core::EventModule::get_ptr());
+	app.regist_module(new gsf::network::NetworkModule);
+	app.regist_module(new TestNetworkModule);
 
+	app.run();
 
-	LoginServerHandler *accept_handler = new LoginServerHandler();
-
-	if (Network::get_ref().listen("", 8888
-		, std::bind(&LoginServerHandler::handler_new_connection, accept_handler, std::placeholders::_1)
-		, std::bind(&LoginServerHandler::handler_connect_close, accept_handler, std::placeholders::_1)) < 0){
-		//err
-	}
-
-	Network::get_ref().start(std::bind(&update));
-
-	Network::get_ref().uninit();
 	return 0;
 }

@@ -3,49 +3,61 @@
 #include "network_imp.h"
 
 
-gsf::network::Network::Network()
+gsf::network::NetworkModule::NetworkModule()
 {
 
 }
 
-gsf::network::Network::~Network()
+gsf::network::NetworkModule::~NetworkModule()
 {
 
 }
 
-
-int gsf::network::Network::init(const NetworkConfig &config)
+void gsf::network::NetworkModule::before_init()
 {
-	return NetworkImpl::instance().init(config);
+	gsf::network::NetworkImpl::instance().init();
 }
 
-int gsf::network::Network::start(UpdateFunc func)
+void gsf::network::NetworkModule::init()
 {
-	return NetworkImpl::instance().start(func);
+	listen(event_id::network::start_network, std::bind(&NetworkModule::start, this
+		, std::placeholders::_1
+		, std::placeholders::_2));
+
+	listen(event_id::network::make_acceptor, std::bind(&NetworkModule::make_acceptor, this
+		, std::placeholders::_1
+		, std::placeholders::_2));
 }
 
-int gsf::network::Network::listen(const std::string &ip, uint32_t port, NewConnectFunc newConnectFunc, DisConnectFunc disConnectFunc)
+void gsf::network::NetworkModule::execute()
 {
-	return NetworkImpl::instance().make_acceptor(ip, port, newConnectFunc, disConnectFunc);
+	gsf::network::NetworkImpl::instance().execute();
 }
 
-int gsf::network::Network::connect(const std::string &ip, uint32_t port, NewConnectFunc new_connect, ConnectFailedFunc connect_failed)
+void gsf::network::NetworkModule::shut()
 {
-	return NetworkImpl::instance().make_connector(ip, port, new_connect, connect_failed);
+
 }
 
-void gsf::network::Network::write(uint32_t session_id, MessagePtr msg)
+void gsf::network::NetworkModule::after_shut()
 {
-	NetworkImpl::instance().write(session_id, msg);
+
 }
 
-void gsf::network::Network::uninit()
+void gsf::network::NetworkModule::start(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback)
 {
-	NetworkImpl::instance().uninit();
+	gsf::network::NetworkImpl::instance().start();
 }
 
-void gsf::network::Network::regist_binder(Binder *binder)
+void gsf::network::NetworkModule::make_acceptor(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback)
 {
-	NetworkImpl::instance().regist_binder(binder);
+	gsf::stream::IStream is(args.getBlock());
+	uint32_t _door;
+	std::string _ip;
+	uint32_t _port;
+	is >> _door >> _ip >> _port;
+
+	gsf::network::NetworkImpl::instance().make_acceptor(_ip, _port, callback);
 }
+
 

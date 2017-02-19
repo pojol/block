@@ -131,7 +131,7 @@ int main()
 	new gsf::core::EventModule;
 
 	app.regist_module(gsf::core::EventModule::get_ptr());
-	app.regist_module(new gsf::modules::Timer);
+	app.regist_module(new gsf::modules::TimerModule);
     app.regist_module(new TestClickModule);
 
 	app.run();

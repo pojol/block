@@ -21,8 +21,16 @@ void gsf::core::Application::regist_module(Module *m)
 
 void gsf::core::Application::run()
 {
-	//! init
+	//! before init
 	auto _itr = module_list_.begin();
+	while (_itr != module_list_.end())
+	{
+		(*_itr)->before_init();
+		++_itr;
+	}
+
+	//! init
+	_itr = module_list_.begin();
 	while (_itr != module_list_.end())
 	{
 		(*_itr)->init();
@@ -56,6 +64,22 @@ void gsf::core::Application::run()
 		else {
 
 		}
+	}
+
+	//! 
+	_itr = module_list_.begin();
+	while (_itr != module_list_.end())
+	{
+		(*_itr)->shut();
+		++_itr;
+	}
+
+	//!
+	_itr = module_list_.begin();
+	while (_itr != module_list_.end())
+	{
+		(*_itr)->after_shut();
+		++_itr;
 	}
 
 }

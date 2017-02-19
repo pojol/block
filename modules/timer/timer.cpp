@@ -1,32 +1,30 @@
 #include "timer.h"
 
-#include "timer_event_list.h"
-
 #include <assert.h>
 
 
-gsf::modules::Timer::~Timer()
+gsf::modules::TimerModule::~TimerModule()
 {
 
 }
 
 
-gsf::modules::Timer::Timer()
+gsf::modules::TimerModule::TimerModule()
 	:timer_id_(0)
 {
 }
 
 
-void gsf::modules::Timer::init()
+void gsf::modules::TimerModule::init()
 {
 	using namespace std::placeholders;
 
-	listen(event_id::timer::delay_milliseconds, std::bind(&Timer::delay_milliseconds, this, _1, _2));
-	listen(event_id::timer::delay_day, std::bind(&Timer::delay_day, this, _1, _2));
-	listen(event_id::timer::remove_timer, std::bind(&Timer::remove_timer, this, _1, _2));
+	listen(event_id::timer::delay_milliseconds, std::bind(&TimerModule::delay_milliseconds, this, _1, _2));
+	listen(event_id::timer::delay_day, std::bind(&TimerModule::delay_day, this, _1, _2));
+	listen(event_id::timer::remove_timer, std::bind(&TimerModule::remove_timer, this, _1, _2));
 }
 
-void gsf::modules::Timer::execute()
+void gsf::modules::TimerModule::execute()
 {
 	using namespace std::chrono;
 	
@@ -50,7 +48,7 @@ void gsf::modules::Timer::execute()
 	}
 }
 
-void gsf::modules::Timer::delay_milliseconds(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback)
+void gsf::modules::TimerModule::delay_milliseconds(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback)
 {
 	gsf::stream::IStream is(args.getBlock());
 	uint32_t _sender = 0;
@@ -72,7 +70,7 @@ void gsf::modules::Timer::delay_milliseconds(gsf::stream::OStream args, gsf::cor
 	dispatch(_sender, os, nullptr);
 }
 
-void gsf::modules::Timer::delay_day(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback)
+void gsf::modules::TimerModule::delay_day(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback)
 {
 	using namespace std::chrono;
 
@@ -106,7 +104,7 @@ void gsf::modules::Timer::delay_day(gsf::stream::OStream args, gsf::core::EventH
 	dispatch(_sender, os, nullptr);
 }
 
-void gsf::modules::Timer::remove_timer(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback)
+void gsf::modules::TimerModule::remove_timer(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback)
 {
 	gsf::stream::IStream is(args.getBlock());
 	uint32_t _sender = 0, _timer_id = 0;
@@ -118,7 +116,7 @@ void gsf::modules::Timer::remove_timer(gsf::stream::OStream args, gsf::core::Eve
 	}
 }
 
-uint32_t gsf::modules::Timer::make_timer_id()
+uint32_t gsf::modules::TimerModule::make_timer_id()
 {
 	if (timer_id_ == UINT32_MAX){
 		timer_id_ = 0;

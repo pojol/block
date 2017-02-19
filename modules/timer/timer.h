@@ -14,6 +14,8 @@
 #include <stream/istream.h>
 #include <event/event.h>
 
+#include "timer_event_list.h"
+
 
 namespace gsf
 {
@@ -37,14 +39,14 @@ namespace gsf
 
 		typedef std::shared_ptr<TimerEvent> TimerEventPtr;
 
-		class Timer
+		class TimerModule
                 : public gsf::core::Module
                 , public gsf::core::Door
 		{
 		public:
 			
-			~Timer();
-			Timer();
+			~TimerModule();
+			TimerModule();
 
 		protected:
 

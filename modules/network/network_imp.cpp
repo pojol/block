@@ -54,17 +54,16 @@ gsf::network::NetworkImpl::~NetworkImpl()
 	uninit();
 }
 
-int gsf::network::NetworkImpl::init(const NetworkConfig &config)
+int gsf::network::NetworkImpl::init()
 {
-	config_ = config;
-
 	main_thread_ptr_ = std::make_shared<NetworkThread>(0);
 
 	main_thread_ptr_->event_base_ptr_ = event_base_new();
 
 	main_thread_event_ = event_new(main_thread_ptr_->event_base_ptr_, -1, EV_PERSIST, main_thread_event, main_thread_ptr_.get());
 
-	struct timeval tv = { 0, (config_.buff_wait_time_ / 2) * 1000 };
+	// temp
+	struct timeval tv = { 0, (20) * 1000 };
 	evtimer_add(main_thread_event_, &tv);
 
 	init_work_thread();
@@ -87,31 +86,39 @@ void gsf::network::NetworkImpl::uninit()
 
 }
 
-int gsf::network::NetworkImpl::start(std::function<void()> update_func)
+int gsf::network::NetworkImpl::start()
 {
-	update_func_ = update_func;
-
 	for (auto &worker : worker_thread_vec_)
 	{
 		worker->th = new std::thread(worker_thread_run, worker); //非空构造会直接启动线程
 	}
 
-	update_event_ = event_new(main_thread_ptr_->event_base_ptr_, -1, EV_PERSIST, update_event, main_thread_ptr_.get());
-	struct timeval tv = { 0, config_.update_interval_ * 1000 };
+	/*
+	update_event_ = event_new(main_thread_ptr_->event_base_ptr_, -1, EV_PERSIST, NULL, main_thread_ptr_.get());
+	// temp
+	struct timeval tv = { 0, 20 * 1000 };
 	evtimer_add(update_event_, &tv);
+	*/
 
-	event_base_dispatch(main_thread_ptr_->event_base_ptr_);
+	//event_base_dispatch(main_thread_ptr_->event_base_ptr_);
 	//event_base_loop(main_thread_ptr_->event_base_ptr_, EVLOOP_ONCE | EVLOOP_NONBLOCK);
 
 	return 0;
 }
 
+void gsf::network::NetworkImpl::execute()
+{
+	event_base_loop(main_thread_ptr_->event_base_ptr_, EVLOOP_ONCE | EVLOOP_NONBLOCK);
+}
+
 int32_t gsf::network::NetworkImpl::init_work_thread()
 {
-	if (config_.worker_thread_count_ == 1){
-		config_.worker_thread_count_ = std::thread::hardware_concurrency() - 1;
-	}
-	for (int i = 0; i < config_.worker_thread_count_; ++i)
+	//if (config_.worker_thread_count_ == 1){
+		//config_.worker_thread_count_ = std::thread::hardware_concurrency() - 1;
+	//}
+	work_thread_num_ = std::thread::hardware_concurrency() - 1;
+
+	for (int i = 0; i < work_thread_num_; ++i)
 	{
 		auto thread_ptr = std::make_shared<NetworkThread>(i + 1);
 
@@ -147,13 +154,14 @@ int32_t gsf::network::NetworkImpl::init_work_thread()
 
 		work_thread_event_ = event_new(thread_ptr->event_base_ptr_, -1, EV_PERSIST, work_thread_event, thread_ptr.get());
 
-		struct timeval tv = { 0, (config_.buff_wait_time_ / 2) * 1000 };
+		//temp
+		struct timeval tv = { 0, (20) * 1000 };
 		evtimer_add(work_thread_event_, &tv);
 
 		worker_thread_vec_.push_back(thread_ptr);
 	}
 
-	main_thread_ptr_->out_buffer_->mian_thread_init(config_.worker_thread_count_ + 1);
+	main_thread_ptr_->out_buffer_->mian_thread_init(work_thread_num_ + 1);
 
 	return 0;
 }
@@ -168,7 +176,7 @@ void gsf::network::NetworkImpl::acceptor_conn_new(evutil_socket_t fd)
 		return;
 	}
 
-	int tid = (last_accept_thread + 1) % config_.worker_thread_count_;
+	int tid = (last_accept_thread + 1) % work_thread_num_;
 
 	auto _thread_ptr = worker_thread_vec_[tid];
 
@@ -193,7 +201,7 @@ void gsf::network::NetworkImpl::connector_conn_new(const std::string &ip, uint32
 		return;
 	}
 
-	int tid = (last_accept_thread + 1) % config_.worker_thread_count_;
+	int tid = (last_accept_thread + 1) % work_thread_num_;
 
 	auto _thread_ptr = worker_thread_vec_[tid];
 
@@ -292,20 +300,18 @@ void gsf::network::NetworkImpl::worker_thread_process(evutil_socket_t fd, short 
 	}
 }
 
-int gsf::network::NetworkImpl::make_acceptor(const std::string &ip, uint32_t port, NewConnectFunc newConnect, DisConnectFunc disConnect)
+int gsf::network::NetworkImpl::make_acceptor(const std::string &ip, uint32_t port, gsf::core::EventHandlerPtr callback)
 {
-	newconnect_func = newConnect;
-	disconnect_func = disConnect;
+	accept_callback_ = callback;
 
 	accept_bind(ip, port);
 
 	return 0;
 }
 
-int gsf::network::NetworkImpl::make_connector(const std::string &ip, uint32_t port, NewConnectFunc newConnect, ConnectFailedFunc connFailed)
+int gsf::network::NetworkImpl::make_connector(const std::string &ip, uint32_t port, gsf::core::EventHandlerPtr callback)
 {
-	newconnect_func = newConnect;
-	failconnect_func = connFailed;
+	connect_callback_ = callback;
 
 	connector_conn_new(ip, port);
 
@@ -346,17 +352,17 @@ void gsf::network::NetworkImpl::main_thread_event(evutil_socket_t fd, short even
 
 		for (int i : conn)
 		{
-			NetworkImpl::instance().newconnect_func(i);
+			//NetworkImpl::instance().newconnect_func(i);
 		}
 
 		for (auto sid : disconn)
 		{
-			NetworkImpl::instance().disconnect_func(sid);
+			//NetworkImpl::instance().disconnect_func(sid);
 		}
 
 		for (auto p : failconn)
 		{
-			NetworkImpl::instance().failconnect_func(p.first, p.second);
+			//NetworkImpl::instance().failconnect_func(p.first, p.second);
 		}
 	}
 }
@@ -393,11 +399,6 @@ void gsf::network::NetworkImpl::write(uint32_t session_id, MessagePtr msg)
 void gsf::network::NetworkImpl::regist_binder(Binder *binder)
 {
 	binder_ = binder;
-}
-
-void gsf::network::NetworkImpl::update_event(evutil_socket_t fd, short event, void *arg)
-{
-	NetworkImpl::instance().get_update_func()();
 }
 
 

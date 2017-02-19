@@ -34,21 +34,21 @@ namespace gsf
 			~NetworkImpl();
 			static NetworkImpl& instance();
 
-			int init(const NetworkConfig &config);
+			int init();
 			void uninit();
 
-			int start(std::function<void()> update_func);
+			int start();
+			void execute();
 
-			int make_acceptor(const std::string &ip, uint32_t port, NewConnectFunc newConnect, DisConnectFunc disConnect);
-			int make_connector(const std::string &ip, uint32_t port, NewConnectFunc newConnect, ConnectFailedFunc connFailed);
+			int make_acceptor(const std::string &ip, uint32_t port, gsf::core::EventHandlerPtr callback);
+			int make_connector(const std::string &ip, uint32_t port, gsf::core::EventHandlerPtr callback);
 
 			void write(uint32_t session_id, MessagePtr msg);
 
 			void regist_binder(Binder *binder);
 
-			NewConnectFunc newconnect_func;
-			DisConnectFunc disconnect_func;
-			ConnectFailedFunc failconnect_func;
+			gsf::core::EventHandlerPtr accept_callback_;
+			gsf::core::EventHandlerPtr connect_callback_;
 
 		protected:
 			NetworkImpl();
@@ -82,10 +82,9 @@ namespace gsf
 			static void main_thread_event(evutil_socket_t fd, short event, void *arg);
 			static void work_thread_event(evutil_socket_t fd, short event, void *arg);
 
-			static void update_event(evutil_socket_t fd, short event, void *arg);
-
 		private:
-			NetworkConfig config_;
+
+			uint32_t work_thread_num_;
 
 			NetworkThreadPtr main_thread_ptr_;
 
