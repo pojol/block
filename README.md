@@ -23,6 +23,7 @@ layer 2
 ----------
 
 > 游戏中的模块
+
 ```python
     virtual void before_init();
 	virtual void init();
@@ -37,6 +38,7 @@ layer 3
 ----------
 
 > 事件层
+
 ```python
     virtual void listen()
     virtual void dispatch()
