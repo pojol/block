@@ -23,7 +23,7 @@ framework
 > 模块层，游戏中的任何业务逻辑，包括底层组件都由module构成。module包含以下方法，不同的module之间只能通过event交互。
 
 ```python
-    	virtual void before_init()
+	virtual void before_init()
 	virtual void init()
 
 	virtual void execute()
@@ -62,5 +62,5 @@ timer
 	args << get_door_id() << 1000;
 
 	dispatch(event_id::timer::delay_milliseconds , args
-		, make_callback(&TestClickModule::test_1, this, std::string("hello,timer!")));
+		, make_callback(&class::func, this, std::string("hello,timer!")));
 ```
