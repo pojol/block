@@ -7,39 +7,60 @@ framework
 
 ```python
     ##
-    #3      door
+    #3    door
     #   
     #2    network     mailbox      timer    other_module    user_module              
     ##       ↓           ↓          ↓         ↓               ↓
     #1------------------------------------------------------------------> run
 ```
 
-layer 1
+1 app layer 
 ----------
+> 应用层，主要控制游戏的主循环，管理所有注册进来的module。
 
-> 游戏的主循环，所有执行的module都需要注册进来。
-
-layer 2
+2 module layer
 ----------
-
-> 游戏中的模块
+> 模块层，游戏中的任何业务逻辑，包括底层组件都由module构成。module包含以下方法，不同的module之间只能通过event交互。
 
 ```python
-    virtual void before_init();
-	virtual void init();
+    	virtual void before_init()
+	virtual void init()
 
-	virtual void execute();
+	virtual void execute()
 
-	virtual void shut();
-	virtual void after_shut();
+	virtual void shut()
+	virtual void after_shut()
 ```
 
-layer 3
+3 event layer
 ----------
-
-> 事件层
+> 事件层，用于在不同模块之间传递消息。
 
 ```python
     virtual void listen()
     virtual void dispatch()
+```
+
+timer
+----------
+```c++
+	listen_callback(event_id::timer::make_timer_success, [=](gsf::stream::OStream os) {
+		uint32_t _timer_id = 0;
+		gsf::stream::IStream is(os.getBlock());
+		is >> _timer_id;
+		std::cout << "success by event id : " << _timer_id << std::endl;
+	});
+
+	listen_callback(event_id::timer::make_timer_fail, [=](gsf::stream::OStream os) {
+		uint32_t _err_id = 0;
+		gsf::stream::IStream is(os.getBlock());
+		is >> _err_id;
+		std::cout << "fail by error id : " << _err_id << std::endl;
+	});
+
+	OStream args;
+	args << get_door_id() << 1000;
+
+	dispatch(event_id::timer::delay_milliseconds , args
+		, make_callback(&TestClickModule::test_1, this, std::string("hello,timer!")));
 ```
