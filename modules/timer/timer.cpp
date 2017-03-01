@@ -10,7 +10,7 @@ gsf::modules::TimerModule::~TimerModule()
 
 
 gsf::modules::TimerModule::TimerModule()
-	:timer_id_(0)
+	:timer_id_(1)
 {
 }
 
@@ -19,9 +19,9 @@ void gsf::modules::TimerModule::init()
 {
 	using namespace std::placeholders;
 
-	listen(event_id::timer::delay_milliseconds, std::bind(&TimerModule::delay_milliseconds, this, _1, _2));
-	listen(event_id::timer::delay_day, std::bind(&TimerModule::delay_day, this, _1, _2));
-	listen(event_id::timer::remove_timer, std::bind(&TimerModule::remove_timer, this, _1, _2));
+	listen(event_id::timer::delay_milliseconds	, std::bind(&TimerModule::delay_milliseconds, this, _1, _2));
+	listen(event_id::timer::delay_day			, std::bind(&TimerModule::delay_day, this, _1, _2));
+	listen(event_id::timer::remove_timer		, std::bind(&TimerModule::remove_timer, this, _1, _2));
 }
 
 void gsf::modules::TimerModule::execute()
@@ -66,8 +66,8 @@ void gsf::modules::TimerModule::delay_milliseconds(gsf::stream::OStream args, gs
 
 	// result
 	gsf::stream::OStream os;
-	os << event_id::timer::make_timer_success << _event->get_id();
-	dispatch(_sender, os, nullptr);
+	os << _event->get_id();
+	dispatch(_sender, event_id::timer::make_timer_success, os);
 }
 
 void gsf::modules::TimerModule::delay_day(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback)
@@ -100,8 +100,8 @@ void gsf::modules::TimerModule::delay_day(gsf::stream::OStream args, gsf::core::
 
 	// result
 	gsf::stream::OStream os;
-	os << event_id::timer::make_timer_success << _event->get_id();
-	dispatch(_sender, os, nullptr);
+	os << _event->get_id();
+	dispatch(_sender, event_id::timer::make_timer_success, os);
 }
 
 void gsf::modules::TimerModule::remove_timer(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback)
@@ -119,7 +119,7 @@ void gsf::modules::TimerModule::remove_timer(gsf::stream::OStream args, gsf::cor
 uint32_t gsf::modules::TimerModule::make_timer_id()
 {
 	if (timer_id_ == UINT32_MAX){
-		timer_id_ = 0;
+		timer_id_ = 1;
 	}
 
 	return timer_id_++;

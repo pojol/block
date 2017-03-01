@@ -53,42 +53,46 @@ class TestClickModule
 public:
 	void init()
 	{
+		tick_ = 0;
+
 		using namespace gsf::core;
 		using namespace gsf::stream;
 
-		/* test1
-		listen(this, [=](gsf::stream::OStream os, EventHandlerPtr callback){
-		uint32_t arg1 = 0, arg2 = 0;
-		gsf::stream::IStream is(os.getBlock());
-		is >> arg1;
-		is >> arg2;
+		// test1
+		
+		listen_callback(event_id::timer::make_timer_success, [=](gsf::stream::OStream os) {
+			uint32_t _timer_id = 0;
+			gsf::stream::IStream is(os.getBlock());
+			is >> _timer_id;
+			std::cout << "success by event id : " << _timer_id << std::endl;
+		});
 
-		if (arg1 == event_id::timer::make_timer_success){
-		std::cout << "success by event id : " << arg2 << std::endl;
-		}
-		else {
-		std::cout << "fail by errcode : " << arg2 << std::endl;
-		}
+		listen_callback(event_id::timer::make_timer_fail, [=](gsf::stream::OStream os) {
+			uint32_t _err_id = 0;
+			gsf::stream::IStream is(os.getBlock());
+			is >> _err_id;
+			std::cout << "fail by error id : " << _err_id << std::endl;
 		});
 
 		OStream args;
 		args << get_door_id() << 3000;
 
 		dispatch(event_id::timer::delay_milliseconds , args
-		, make_callback(&TestClickModule::test_1, this, std::string("hello,timer!")));
-		*/
+			, make_callback(&TestClickModule::test_1, this, std::string("hello,timer!")));
+		
 
 		// test2
-		listen(this, [=](gsf::stream::OStream os, EventHandlerPtr callback){
-			uint32_t arg1 = 0, arg2 = 0;
+		/*
+		listen_callback(event_id::timer::make_timer_success, [&](gsf::stream::OStream os) {
+			tick_++;
+			uint32_t _timer_id = 0;
 			gsf::stream::IStream is(os.getBlock());
-			is >> arg1 >> arg2;
+			is >> _timer_id;
 
-			if (arg1 == event_id::timer::make_timer_success && arg2 == 4){
-
-				OStream rArags;
-				rArags << get_door_id() << arg2;
-				dispatch(event_id::timer::remove_timer, rArags, nullptr);
+			if (tick_ == 4) {
+				OStream args;
+				args << get_door_id() << _timer_id;
+				dispatch(event_id::timer::remove_timer, args, nullptr);
 			}
 		});
 
@@ -100,8 +104,7 @@ public:
 			dispatch(event_id::timer::delay_milliseconds, args
 				, make_callback(&TestClickModule::test_2, this, i));
 		}
-		
-
+		*/
 		/* test3
 		for (int i = 0; i < 10 * 10000; ++i)
 		{
@@ -122,6 +125,9 @@ public:
 	{
 		std::cout << i << std::endl;
 	}
+
+private:
+	uint32_t tick_;
 };
 
 

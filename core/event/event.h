@@ -30,12 +30,13 @@ namespace gsf
 
 			uint32_t get_door_id() const { return door_id_; }
 
-			virtual void listen(Door *self, EventFunc func);
+			virtual void listen(uint32_t door, EventFunc func);
 
-			virtual void listen(uint32_t event, EventFunc func);
+			virtual void listen_callback(uint32_t sub_event, std::function<void(gsf::stream::OStream)> func);
 
-			virtual void dispatch(uint32_t event, gsf::stream::OStream args, EventHandlerPtr callback = nullptr);
+			virtual void dispatch(uint32_t door, gsf::stream::OStream args, EventHandlerPtr callback = nullptr);
 
+			virtual void dispatch(uint32_t door, uint32_t sub_event, gsf::stream::OStream args);
         protected:
 			uint32_t door_id_;
 		};
@@ -47,19 +48,31 @@ namespace gsf
 			friend class Door;
 
 		public:
-
+			EventModule();
 
 		protected:
 			void execute();
 
 			void add_event(uint32_t event, EventFunc func);
 
-			void add_cmd(uint32_t event, gsf::stream::OStream args, EventHandlerPtr callback = nullptr);
+			void add_event(uint32_t event, std::function<void(gsf::stream::OStream)> func);
+
+			void add_cmd(uint32_t door, gsf::stream::OStream args, EventHandlerPtr callback = nullptr);
+
+			void add_cmd(uint32_t door, uint32_t sub_event, gsf::stream::OStream args);
+
+			uint32_t make_door_id();
 
         private:
 			std::unordered_map<uint32_t, EventFunc> map_;
 
 			std::list<std::tuple<uint32_t, gsf::stream::OStream, EventHandlerPtr>> list_;
+
+			std::unordered_map<uint32_t, std::function<void(gsf::stream::OStream)>> callback_map_;
+
+			std::list<std::tuple<uint32_t, gsf::stream::OStream>> callback_list_;
+
+			uint32_t door_id_;
 		};
     }
 }
