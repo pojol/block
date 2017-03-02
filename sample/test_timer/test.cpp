@@ -75,7 +75,7 @@ public:
 		});
 
 		OStream args;
-		args << get_door_id() << 3000;
+		args << get_door_id() << 1000;
 
 		dispatch(event_id::timer::delay_milliseconds , args
 			, make_callback(&TestClickModule::test_1, this, std::string("hello,timer!")));
