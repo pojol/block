@@ -6,9 +6,9 @@ enum AType
 
 class Arg
 {
-	typedef Variant<uint32_t, std::string> av;
+	typedef Variant<bool, uint32_t, int32_t, uint64_t, int64_t, std::string> av;
 public:
-	void set_uint(const uint32_t var)
+	void set_uint32(const uint32_t var)
 	{
 		type_ = AT_UINT;
 		v_ = uint32_t(var);
@@ -45,21 +45,41 @@ public:
 	void add(const uint32_t value)
 	{
 		auto _arg = std::make_shared<Arg>();
-		_arg->set_uint(value);
+		_arg->set_uint32(value);
 
 		size_++;
 		arg_list_.push_back(_arg);
 	}
 
+	const uint32_t pop_uint32(const int index)
+	{
+		auto var = arg_list_[index];
+
+		return var->v_.Get<uint32_t>();
+	}
+
 	const std::string & pop_string(const int index)
 	{
-		// ¼ì²éindex
+
+		// æ£€æŸ¥index
 
 		auto var = arg_list_[index];
 
-		// ¼ì²éÀàÐÍ
+		// æ£€æŸ¥ç±»åž‹
 
 		return var->v_.Get<std::string>();
+	}
+
+	Args & operator << (const uint32_t value)
+	{
+		add(value);
+		return *this;
+	}
+
+	Args & operator << (const std::string &value)
+	{
+		add(value);
+		return *this;
 	}
 
 	int get_count() const
@@ -78,4 +98,9 @@ private:
 	args.add("hello");
 
 	std::cout << args.pop_string(0).c_str() << std::endl;
+	
+	Args args;
+	args << 10 << "hello";
+
+	std::cout << args.pop_uint32(0) << args.pop_string(1).c_str() << std::endl;
 */
