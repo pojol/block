@@ -259,7 +259,7 @@ namespace gsf
 		{
 			return Index<T, Types...>::value;
 		}
-/*
+/* 这里在clang编译器有错误
 		template<typename F>
 		void Visit(F&& f)
 		{

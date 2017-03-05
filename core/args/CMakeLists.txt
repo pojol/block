@@ -1,0 +1,13 @@
+PROJECT(event)
+
+#引用头文件目录
+INCLUDE_DIRECTORIES(
+	${GSF_SOURCE_DIR}/core
+)
+
+#引用库目录
+LINK_DIRECTORIES(
+)
+
+FILE(GLOB_RECURSE SRC "*.cpp" "*.h")
+

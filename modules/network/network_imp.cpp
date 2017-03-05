@@ -123,9 +123,9 @@ void gsf::network::NetworkImpl::execute()
 
 		for (int i : conn)
 		{
-			gsf::stream::OStream args;
-			args << 1 << i;
-			dispatch(1, args, nullptr);
+			//gsf::stream::OStream args;
+			//args << 1 << i;
+			//dispatch(1, args, nullptr);
 		}
 
 		for (auto sid : disconn)

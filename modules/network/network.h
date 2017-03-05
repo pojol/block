@@ -33,9 +33,9 @@ namespace gsf
 
 		private:
 
-			void start(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback);
+			void start(gsf::Args args, gsf::core::EventHandlerPtr callback);
 
-			void make_acceptor(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback);
+			void make_acceptor(gsf::Args args, gsf::core::EventHandlerPtr callback);
 
 		};
 

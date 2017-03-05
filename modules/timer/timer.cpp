@@ -103,7 +103,6 @@ void gsf::modules::TimerModule::delay_day(gsf::Args args, gsf::core::EventHandle
 
 void gsf::modules::TimerModule::remove_timer(gsf::Args args, gsf::core::EventHandlerPtr callback)
 {
-	gsf::stream::IStream is(args.getBlock());
 	uint32_t _sender = args.pop_uint32(0);
 	uint32_t _timer_id = args.pop_uint32(1);
 

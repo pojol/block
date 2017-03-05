@@ -17,6 +17,11 @@ namespace event_id
 
 		const uint32_t make_connector = 2003;
 
+
+		//! result code
+		const uint32_t new_connect = 1;
+		const uint32_t dis_connect = 2;
+		const uint32_t fail_connect = 3;
 	}
 }
 

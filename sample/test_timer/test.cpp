@@ -8,15 +8,12 @@
 
 #include <sys/types.h>
 
-
 #include <iostream>
 #include <random>
 #include <tuple>
 
 #include <module/application.h>
 #include <event/event.h>
-#include <stream/istream.h>
-#include <stream/ostream.h>
 
 #include <timer/timer.h>
 #include <timer/timer_event_list.h>
@@ -56,7 +53,6 @@ public:
 		tick_ = 0;
 
 		using namespace gsf::core;
-		using namespace gsf::stream;
 
 		// test1
 		
@@ -112,7 +108,7 @@ public:
 
 	void test_1(std::string str)
 	{
-		std::cout << str << std::endl;
+		std::cout << str.c_str() << std::endl;
 	}
 
 	void test_2(int i)

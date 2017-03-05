@@ -16,8 +16,6 @@
 
 #include <module/application.h>
 #include <event/event.h>
-#include <stream/istream.h>
-#include <stream/ostream.h>
 
 #include <network/network.h>
 
@@ -51,29 +49,21 @@ public:
 
 	void init()
 	{
-		listen(this, std::bind(&TestNetworkModule::network_result, this
-			, std::placeholders::_1
-			, std::placeholders::_2));
+		listen_callback(event_id::network::new_connect, [=](gsf::Args args){
+		});
+
+		listen_callback(event_id::network::dis_connect, [=](gsf::Args args){
+		});
 
 		// 
-		gsf::stream::OStream args;
-		args << get_door_id() << std::string("127.0.0.1") << uint32_t(8001);
+		gsf::Args _a_args;
+		_a_args << get_door_id() << std::string("127.0.0.1") << uint32_t(8001);
 
-		dispatch(event_id::network::make_acceptor, args, nullptr);
+		dispatch(event_id::network::make_acceptor, _a_args);
 
 		//
-		gsf::stream::OStream nargs;
-		dispatch(event_id::network::start_network, nargs, nullptr);
-	}
-
-	void network_result(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback)
-	{
-		gsf::stream::IStream is(args.getBlock());
-		uint32_t _type;
-		uint32_t _session;
-		is >> _type >> _session;
-
-		std::cout << "type " << _type << " " << "session " << _session << std::endl;
+		gsf::Args _s_args;
+		dispatch(event_id::network::start_network, _s_args);
 	}
 
 };
