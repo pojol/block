@@ -10,10 +10,10 @@
 
 #include <functional>
 #include <tuple>
+#include <list>
 #include <unordered_map>
 
-#include <stream/istream.h>
-#include <stream/ostream.h>
+#include <args/vars.h>
 
 #include "../../common/single.h"
 
@@ -21,7 +21,7 @@ namespace gsf
 {
     namespace core
     {
-		typedef std::function<void(gsf::stream::OStream, EventHandlerPtr)> EventFunc;
+		typedef std::function<void(gsf::Args, EventHandlerPtr)> EventFunc;
 
 		class Door
 		{
@@ -32,11 +32,11 @@ namespace gsf
 
 			virtual void listen(uint32_t door, EventFunc func);
 
-			virtual void listen_callback(uint32_t sub_event, std::function<void(gsf::stream::OStream)> func);
+			virtual void listen_callback(uint32_t sub_event, std::function<void(gsf::Args)> func);
 
-			virtual void dispatch(uint32_t door, gsf::stream::OStream args, EventHandlerPtr callback = nullptr);
+			virtual void dispatch(uint32_t door, gsf::Args, EventHandlerPtr callback = nullptr);
 
-			virtual void dispatch(uint32_t door, uint32_t sub_event, gsf::stream::OStream args);
+			virtual void dispatch(uint32_t door, uint32_t sub_event, gsf::Args args);
         protected:
 			uint32_t door_id_;
 		};
@@ -55,22 +55,22 @@ namespace gsf
 
 			void add_event(uint32_t event, EventFunc func);
 
-			void add_event(uint32_t event, std::function<void(gsf::stream::OStream)> func);
+			void add_event(uint32_t event, std::function<void(gsf::Args)> func);
 
-			void add_cmd(uint32_t door, gsf::stream::OStream args, EventHandlerPtr callback = nullptr);
+			void add_cmd(uint32_t door, gsf::Args args, EventHandlerPtr callback = nullptr);
 
-			void add_cmd(uint32_t door, uint32_t sub_event, gsf::stream::OStream args);
+			void add_cmd(uint32_t door, uint32_t sub_event, gsf::Args args);
 
 			uint32_t make_door_id();
 
         private:
 			std::unordered_map<uint32_t, EventFunc> map_;
 
-			std::list<std::tuple<uint32_t, gsf::stream::OStream, EventHandlerPtr>> list_;
+			std::list<std::tuple<uint32_t, gsf::Args, EventHandlerPtr>> list_;
 
-			std::unordered_map<uint32_t, std::function<void(gsf::stream::OStream)>> callback_map_;
+			std::unordered_map<uint32_t, std::function<void(gsf::Args)>> callback_map_;
 
-			std::list<std::tuple<uint32_t, gsf::stream::OStream>> callback_list_;
+			std::list<std::tuple<uint32_t, gsf::Args>> callback_list_;
 
 			uint32_t door_id_;
 		};

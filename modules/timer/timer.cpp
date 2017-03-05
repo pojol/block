@@ -48,13 +48,10 @@ void gsf::modules::TimerModule::execute()
 	}
 }
 
-void gsf::modules::TimerModule::delay_milliseconds(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback)
+void gsf::modules::TimerModule::delay_milliseconds(gsf::Args args, gsf::core::EventHandlerPtr callback)
 {
-	gsf::stream::IStream is(args.getBlock());
-	uint32_t _sender = 0;
-	uint32_t _milliseconds = 0;
-	is >> _sender;
-	is >> _milliseconds;
+	uint32_t _sender = args.pop_uint32(0);
+	uint32_t _milliseconds = args.pop_uint32(1);
 
 	auto _tp = std::chrono::system_clock::now() + std::chrono::milliseconds(_milliseconds);
 
@@ -65,18 +62,18 @@ void gsf::modules::TimerModule::delay_milliseconds(gsf::stream::OStream args, gs
 	map_.insert(std::make_pair(_event->get_id(), _event));
 
 	// result
-	gsf::stream::OStream os;
-	os << _event->get_id();
-	dispatch(_sender, event_id::timer::make_timer_success, os);
+	gsf::Args _res;
+	_res << _event->get_id();
+	dispatch(_sender, event_id::timer::make_timer_success, _res);
 }
 
-void gsf::modules::TimerModule::delay_day(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback)
+void gsf::modules::TimerModule::delay_day(gsf::Args args, gsf::core::EventHandlerPtr callback)
 {
 	using namespace std::chrono;
 
-	gsf::stream::IStream is(args.getBlock());
-	uint32_t _sender = 0, _hour = 0, _minute = 0;
-	is >> _sender >> _hour >> _minute;
+	uint32_t _sender = args.pop_uint32(0);
+	uint32_t _hour = args.pop_uint32(1);
+	uint32_t _minute = args.pop_uint32(2);
 
 	typedef duration<int, std::ratio<60 * 60 * 24>> dur_day;
 	time_point<system_clock, dur_day> _today = time_point_cast<dur_day>(system_clock::now());
@@ -99,16 +96,16 @@ void gsf::modules::TimerModule::delay_day(gsf::stream::OStream args, gsf::core::
 	map_.insert(std::make_pair(_event->get_id(), _event));
 
 	// result
-	gsf::stream::OStream os;
-	os << _event->get_id();
-	dispatch(_sender, event_id::timer::make_timer_success, os);
+	gsf::Args _res;
+	_res << _event->get_id();
+	dispatch(_sender, event_id::timer::make_timer_success, _res);
 }
 
-void gsf::modules::TimerModule::remove_timer(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback)
+void gsf::modules::TimerModule::remove_timer(gsf::Args args, gsf::core::EventHandlerPtr callback)
 {
 	gsf::stream::IStream is(args.getBlock());
-	uint32_t _sender = 0, _timer_id = 0;
-	is >> _sender >> _timer_id;
+	uint32_t _sender = args.pop_uint32(0);
+	uint32_t _timer_id = args.pop_uint32(1);
 
 	auto itr = map_.find(_timer_id);
 	if (itr != map_.end()) {

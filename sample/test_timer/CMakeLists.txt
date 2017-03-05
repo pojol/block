@@ -15,6 +15,11 @@ if(UNIX)
 	)
 endif()
 if(APPLE)
+	INCLUDE_DIRECTORIES(
+                ${GSF_SOURCE_DIR}/core
+                ${GSF_SOURCE_DIR}/modules
+                ${GSF_SOURCE_DIR}/common
+        )
 endif()
 
 

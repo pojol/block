@@ -33,17 +33,17 @@ void gsf::core::EventModule::add_event(uint32_t event, EventFunc func)
 	map_.insert(std::make_pair(event, func));
 }
 
-void gsf::core::EventModule::add_event(uint32_t event, std::function<void(gsf::stream::OStream)> func)
+void gsf::core::EventModule::add_event(uint32_t event, std::function<void(gsf::Args)> func)
 {
 	callback_map_.insert(std::make_pair(event, func));
 }
 
-void gsf::core::EventModule::add_cmd(uint32_t door, gsf::stream::OStream args, EventHandlerPtr callback /*= nullptr*/)
+void gsf::core::EventModule::add_cmd(uint32_t door, gsf::Args args, EventHandlerPtr callback /*= nullptr*/)
 {
 	list_.push_back(std::make_tuple(door, args, callback));
 }
 
-void gsf::core::EventModule::add_cmd(uint32_t door, uint32_t sub_event, gsf::stream::OStream args)
+void gsf::core::EventModule::add_cmd(uint32_t door, uint32_t sub_event, gsf::Args args)
 {
 	callback_list_.push_back(std::make_tuple(door + sub_event, args));
 }
@@ -69,12 +69,12 @@ gsf::core::Door::Door()
 	door_id_ = EventModule::get_ref().make_door_id();
 }
 
-void gsf::core::Door::dispatch(uint32_t door, gsf::stream::OStream args, EventHandlerPtr callback /*= nullptr*/)
+void gsf::core::Door::dispatch(uint32_t door, gsf::Args args, EventHandlerPtr callback /*= nullptr*/)
 {
 	EventModule::get_ref().add_cmd(door, args, callback);
 }
 
-void gsf::core::Door::dispatch(uint32_t door, uint32_t sub_event, gsf::stream::OStream args)
+void gsf::core::Door::dispatch(uint32_t door, uint32_t sub_event, gsf::Args args)
 {
 	EventModule::get_ref().add_cmd(door, sub_event, args);
 }
@@ -84,7 +84,7 @@ void gsf::core::Door::listen(uint32_t door, EventFunc func)
 	EventModule::get_ref().add_event(door, func);
 }
 
-void gsf::core::Door::listen_callback(uint32_t sub_event, std::function<void(gsf::stream::OStream)> func)
+void gsf::core::Door::listen_callback(uint32_t sub_event, std::function<void(gsf::Args)> func)
 {
 	EventModule::get_ref().add_event(get_door_id() + sub_event, func);
 }

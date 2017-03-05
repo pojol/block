@@ -1,106 +1,121 @@
-enum AType
+#ifndef _GSF_VARS_HEADER_
+#define _GSF_VARS_HEADER_
+
+#include "variant.h"
+#include <vector>
+
+namespace gsf
 {
-	AT_UINT,
-	AT_STRING,
-};
-
-class Arg
-{
-	typedef Variant<bool, uint32_t, int32_t, uint64_t, int64_t, std::string> av;
-public:
-	void set_uint32(const uint32_t var)
+	enum AType
 	{
-		type_ = AT_UINT;
-		v_ = uint32_t(var);
-	}
+		AT_BOOL,
+		AT_UINT32,
+		AT_INT32,
+		AT_UINT64,
+		AT_INT64,
+		AT_STRING,
+	};
 
-	void set_string(const std::string &var)
+	class Arg
 	{
-		type_ = AT_STRING;
-		v_ = std::string(var);
-	}
+		typedef Variant<bool, uint32_t, int32_t, uint64_t, int64_t, std::string> av;
+	public:
+		void set_uint32(const uint32_t var)
+		{
+			type_ = AT_UINT32;
+			v_ = uint32_t(var);
+		}
 
-	AType type_;
-	av v_;
-};
+		void set_string(const std::string &var)
+		{
+			type_ = AT_STRING;
+			v_ = std::string(var);
+		}
 
-class Args
-{
-public:
-	Args()
-		: size_(0)
+		AType type_;
+		av v_;
+	};
+
+	class Args
 	{
+	public:
+		Args()
+			: size_(0)
+		{
 
-	}
+		}
 
-	void add(const std::string &value)
-	{
-		auto _arg = std::make_shared<Arg>();
-		_arg->set_string(value);
+		void add(const uint32_t value)
+		{
+			auto _arg = std::make_shared<Arg>();
+			_arg->set_uint32(value);
 
-		size_++;
-		arg_list_.push_back(_arg);
-	}
+			size_++;
+			arg_list_.push_back(_arg);
+		}
 
-	void add(const uint32_t value)
-	{
-		auto _arg = std::make_shared<Arg>();
-		_arg->set_uint32(value);
+		void add(const std::string &value)
+		{
+			auto _arg = std::make_shared<Arg>();
+			_arg->set_string(value);
 
-		size_++;
-		arg_list_.push_back(_arg);
-	}
+			size_++;
+			arg_list_.push_back(_arg);
+		}
 
-	const uint32_t pop_uint32(const int index)
-	{
-		auto var = arg_list_[index];
+		const uint32_t pop_uint32(const int index)
+		{
+			auto var = arg_list_[index];
 
-		return var->v_.Get<uint32_t>();
-	}
+			return var->v_.Get<uint32_t>();
+		}
 
-	const std::string & pop_string(const int index)
-	{
+		const std::string & pop_string(const int index)
+		{
 
-		// 检查index
+			// 检查index
 
-		auto var = arg_list_[index];
+			auto var = arg_list_[index];
 
-		// 检查类型
+			// 检查类型
 
-		return var->v_.Get<std::string>();
-	}
+			return var->v_.Get<std::string>();
+		}
 
-	Args & operator << (const uint32_t value)
-	{
-		add(value);
-		return *this;
-	}
+		Args & operator << (const uint32_t value)
+		{
+			add(value);
+			return *this;
+		}
 
-	Args & operator << (const std::string &value)
-	{
-		add(value);
-		return *this;
-	}
+		Args & operator << (const std::string &value)
+		{
+			add(value);
+			return *this;
+		}
 
-	int get_count() const
-	{
-		return size_;
-	}
+		int get_count() const
+		{
+			return size_;
+		}
 
-private:
-	std::vector<std::shared_ptr<Arg>> arg_list_;
+	private:
+		std::vector<std::shared_ptr<Arg>> arg_list_;
 
-	int size_;
-};
+		int size_;
+	};
 
-/*
-	Args args;
-	args.add("hello");
+	/*
+		Args args;
+		args.add("hello");
 
-	std::cout << args.pop_string(0).c_str() << std::endl;
-	
-	Args args;
-	args << 10 << "hello";
+		std::cout << args.pop_string(0).c_str() << std::endl;
+		
+		Args args;
+		args << 10 << "hello";
 
-	std::cout << args.pop_uint32(0) << args.pop_string(1).c_str() << std::endl;
-*/
+		std::cout << args.pop_uint32(0) << args.pop_string(1).c_str() << std::endl;
+	*/
+}
+
+#endif

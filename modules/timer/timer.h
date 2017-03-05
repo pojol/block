@@ -10,8 +10,7 @@
 #include <tuple>
 
 #include <module/module.h>
-#include <stream/ostream.h>
-#include <stream/istream.h>
+#include <args/vars.h>
 #include <event/event.h>
 
 #include "timer_event_list.h"
@@ -56,12 +55,12 @@ namespace gsf
 
 		private:
 
-			void delay_milliseconds(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback);
-			void delay_day(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback);
+			void delay_milliseconds(gsf::Args args, gsf::core::EventHandlerPtr callback);
+			void delay_day(gsf::Args args, gsf::core::EventHandlerPtr callback);
 			//void delay_week(std::tuple<gsf::utils::Any> args, gsf::core::EventHandlerPtr callback);
 			//void delay_month(std::tuple<gsf::utils::Any> args, gsf::core::EventHandlerPtr callback);
 
-            void remove_timer(gsf::stream::OStream args, gsf::core::EventHandlerPtr callback);
+            void remove_timer(gsf::Args args, gsf::core::EventHandlerPtr callback);
 
 			uint32_t make_timer_id();
 

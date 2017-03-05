@@ -60,21 +60,15 @@ public:
 
 		// test1
 		
-		listen_callback(event_id::timer::make_timer_success, [=](gsf::stream::OStream os) {
-			uint32_t _timer_id = 0;
-			gsf::stream::IStream is(os.getBlock());
-			is >> _timer_id;
-			std::cout << "success by event id : " << _timer_id << std::endl;
+		listen_callback(event_id::timer::make_timer_success, [=](gsf::Args args) {
+			std::cout << "success by event id : " << args.pop_uint32(0) << std::endl;
 		});
 
-		listen_callback(event_id::timer::make_timer_fail, [=](gsf::stream::OStream os) {
-			uint32_t _err_id = 0;
-			gsf::stream::IStream is(os.getBlock());
-			is >> _err_id;
-			std::cout << "fail by error id : " << _err_id << std::endl;
+		listen_callback(event_id::timer::make_timer_fail, [=](gsf::Args args) {
+			std::cout << "fail by error id : " << args.pop_uint32(0) << std::endl;
 		});
 
-		OStream args;
+		gsf::Args args;
 		args << get_door_id() << 1000;
 
 		dispatch(event_id::timer::delay_milliseconds , args
