@@ -16,8 +16,8 @@ namespace gsf
 	namespace network
 	{
 		class NetworkModule
-			: public gsf::core::Module
-			, public gsf::core::Door
+			: public gsf::Module
+			, public gsf::Door
 		{
 		public:
 			NetworkModule();
@@ -33,9 +33,9 @@ namespace gsf
 
 		private:
 
-			void start(gsf::Args args, gsf::core::EventHandlerPtr callback);
+			void start(gsf::Args args, gsf::EventHandlerPtr callback);
 
-			void make_acceptor(gsf::Args args, gsf::core::EventHandlerPtr callback);
+			void make_acceptor(gsf::Args args, gsf::EventHandlerPtr callback);
 
 		};
 

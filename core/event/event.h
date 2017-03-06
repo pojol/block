@@ -19,62 +19,102 @@
 
 namespace gsf
 {
-    namespace core
-    {
-		typedef std::function<void(gsf::Args, EventHandlerPtr)> EventFunc;
+	typedef std::function<void(gsf::Args, EventHandlerPtr)> EventFunc;
 
-		class Door
+	// 如果需要监听多个同步事件,辅助类
+	struct AllSuccess
+	{
+		void listen(gsf::Door *door, std::vector<uint32_t> vec, std::function<void ()> func)
 		{
-		public:
-			Door();
+			count_ = vec.size();
 
-			uint32_t get_door_id() const { return door_id_; }
+			for (auto itr = vec.begin(); itr != vec.end(); ++itr)
+			{
+				door->listen_callback(*itr, [&](gsf::Args args){
+					count_--;
 
-			virtual void listen(uint32_t door, EventFunc func);
+					if (count_ == 0) {
+						func();
+					}
+				});
+			}
 
-			virtual void listen_callback(uint32_t sub_event, std::function<void(gsf::Args)> func);
+		}
+		
+	private:
+		uint32_t count_;
+	};
 
-			virtual void dispatch(uint32_t door, gsf::Args, EventHandlerPtr callback = nullptr);
+	//AllSuccess as;
+	//as.listen(this, {event_id::timer::make_timer_success}, [&](){
+	//	std::cout << "success !" << std::endl;
+	//});
 
-			virtual void dispatch(uint32_t door, uint32_t sub_event, gsf::Args args);
-        protected:
-			uint32_t door_id_;
-		};
-
-		class EventModule
-				: public gsf::utils::Singleton<EventModule>
-				, public Module
+	struct AnyoneFail
+	{
+		void listen(gsf::Door * door, std::vector<uint32_t> vec, std::function<void ()> func)
 		{
-			friend class Door;
+			for (auto itr = vec.begin(); itr != vec.end(); ++itr)
+			{
+				door->listen_callback(*itr, [&](gsf::Args args){
+					func();
+					return;
+				})
+			}
+		}
+	};
 
-		public:
-			EventModule();
+	class Door
+	{
+	public:
+		Door();
 
-		protected:
-			void execute();
+		uint32_t get_door_id() const { return door_id_; }
 
-			void add_event(uint32_t event, EventFunc func);
+		virtual void listen(uint32_t door, EventFunc func);
 
-			void add_event(uint32_t event, std::function<void(gsf::Args)> func);
+		virtual void listen_callback(uint32_t sub_event, std::function<void(gsf::Args)> func);
 
-			void add_cmd(uint32_t door, gsf::Args args, EventHandlerPtr callback = nullptr);
+		virtual void dispatch(uint32_t door, gsf::Args, EventHandlerPtr callback = nullptr);
 
-			void add_cmd(uint32_t door, uint32_t sub_event, gsf::Args args);
+		virtual void dispatch(uint32_t door, uint32_t sub_event, gsf::Args args);
+    protected:
+		uint32_t door_id_;
+	};
 
-			uint32_t make_door_id();
+	class EventModule
+			: public gsf::utils::Singleton<EventModule>
+			, public Module
+	{
+		friend class Door;
 
-        private:
-			std::unordered_map<uint32_t, EventFunc> map_;
+	public:
+		EventModule();
 
-			std::list<std::tuple<uint32_t, gsf::Args, EventHandlerPtr>> list_;
+	protected:
+		void execute();
 
-			std::unordered_map<uint32_t, std::function<void(gsf::Args)>> callback_map_;
+		void add_event(uint32_t event, EventFunc func);
 
-			std::list<std::tuple<uint32_t, gsf::Args>> callback_list_;
+		void add_event(uint32_t event, std::function<void(gsf::Args)> func);
 
-			uint32_t door_id_;
-		};
-    }
+		void add_cmd(uint32_t door, gsf::Args args, EventHandlerPtr callback = nullptr);
+
+		void add_cmd(uint32_t door, uint32_t sub_event, gsf::Args args);
+
+		uint32_t make_door_id();
+
+    private:
+		std::unordered_map<uint32_t, EventFunc> map_;
+
+		std::list<std::tuple<uint32_t, gsf::Args, EventHandlerPtr>> list_;
+
+		std::unordered_map<uint32_t, std::function<void(gsf::Args)>> callback_map_;
+
+		std::list<std::tuple<uint32_t, gsf::Args>> callback_list_;
+
+		uint32_t door_id_;
+	};
 }
 
 #endif

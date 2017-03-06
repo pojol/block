@@ -329,7 +329,7 @@ void gsf::network::NetworkImpl::worker_thread_process(evutil_socket_t fd, short 
 	}
 }
 
-int gsf::network::NetworkImpl::make_acceptor(const std::string &ip, uint32_t port, gsf::core::EventHandlerPtr callback)
+int gsf::network::NetworkImpl::make_acceptor(const std::string &ip, uint32_t port, gsf::EventHandlerPtr callback)
 {
 	accept_callback_ = callback;
 
@@ -338,7 +338,7 @@ int gsf::network::NetworkImpl::make_acceptor(const std::string &ip, uint32_t por
 	return 0;
 }
 
-int gsf::network::NetworkImpl::make_connector(const std::string &ip, uint32_t port, gsf::core::EventHandlerPtr callback)
+int gsf::network::NetworkImpl::make_connector(const std::string &ip, uint32_t port, gsf::EventHandlerPtr callback)
 {
 	connect_callback_ = callback;
 

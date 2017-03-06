@@ -3,21 +3,18 @@
 
 namespace gsf
 {
-	namespace core
+	class Module
 	{
-		class Module
-		{
-			friend class Application;
-		protected:
-			virtual void before_init();
-			virtual void init();
+		friend class Application;
+	protected:
+		virtual void before_init();
+		virtual void init();
 
-			virtual void execute();
+		virtual void execute();
 
-			virtual void shut();
-			virtual void after_shut();
-		};
-	}
+		virtual void shut();
+		virtual void after_shut();
+	};
 }
 
 

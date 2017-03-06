@@ -9,11 +9,11 @@ namespace gsf
 	namespace modules
 	{
 		class Mailbox
-			: public gsf::core::Module
-			, public gsf::core::Door
+			: public gsf::Module
+			, public gsf::Door
 		{
 		public:
-			Mailbox();
+			Mailbox(); 
 			~Mailbox();
 
 			virtual void before_init();

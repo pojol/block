@@ -111,7 +111,7 @@ namespace gsf
 		{
 			#ifdef _DEBUG
 				assert(index >= 0 && index < size_);
-			#elif
+			#else
 				if (index < 0 || index >= size_){
 					return false;
 				}
@@ -125,7 +125,7 @@ namespace gsf
 		{
 			#ifdef _DEBUG
 				assert(index >= 0 && index < size_);
-			#elif
+			#else
 				if (index < 0 || index >= size_){
 					return 0;
 				}
@@ -139,7 +139,7 @@ namespace gsf
 		{
 			#ifdef _DEBUG
 				assert(index >= 0 && index < size_);
-			#elif
+			#else
 				if (index < 0 || index >= size_){
 					return 0;
 				}
@@ -153,7 +153,7 @@ namespace gsf
 		{
 			#ifdef _DEBUG
 				assert(index >= 0 && index < size_);
-			#elif
+			#else
 				if (index < 0 || index >= size_){
 					return 0;
 				}
@@ -167,7 +167,7 @@ namespace gsf
 		{
 			#ifdef _DEBUG
 				assert(index >= 0 && index < size_);
-			#elif
+			#else
 				if (index < 0 || index >= size_){
 					return 0;
 				}
@@ -182,7 +182,7 @@ namespace gsf
 
 			#ifdef _DEBUG
 				assert(index >= 0 && index < size_);
-			#elif
+			#else
 				if (index < 0 || index >= size_){
 					return "";
 				}

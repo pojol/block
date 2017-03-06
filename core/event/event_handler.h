@@ -5,29 +5,26 @@
 
 namespace gsf
 {
-	namespace core
+	class EventHandler
 	{
-		class EventHandler
-		{
-		public:
-			EventHandler();
+	public:
+		EventHandler();
 
-			virtual ~EventHandler();
+		virtual ~EventHandler();
 
-			virtual void execute() = 0;
-		};
+		virtual void execute() = 0;
+	};
 
-		inline EventHandler::EventHandler()
-		{
+	inline EventHandler::EventHandler()
+	{
 
-		}
-		inline EventHandler::~EventHandler()
-		{
+	}
+	inline EventHandler::~EventHandler()
+	{
 
-		}
+	}
 
 #include "make_event_handler.h"
-	}
 }
 
 #endif

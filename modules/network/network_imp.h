@@ -25,7 +25,7 @@ namespace gsf
 
 		//temp public 
 		class NetworkImpl
-			: public gsf::core::Door
+			: public gsf::Door
 		{
 			typedef std::shared_ptr<NetworkThread> NetworkThreadPtr;
 
@@ -41,15 +41,15 @@ namespace gsf
 			int start();
 			void execute();
 
-			int make_acceptor(const std::string &ip, uint32_t port, gsf::core::EventHandlerPtr callback);
-			int make_connector(const std::string &ip, uint32_t port, gsf::core::EventHandlerPtr callback);
+			int make_acceptor(const std::string &ip, uint32_t port, gsf::EventHandlerPtr callback);
+			int make_connector(const std::string &ip, uint32_t port, gsf::EventHandlerPtr callback);
 
 			void write(uint32_t session_id, MessagePtr msg);
 
 			void regist_binder(Binder *binder);
 
-			gsf::core::EventHandlerPtr accept_callback_;
-			gsf::core::EventHandlerPtr connect_callback_;
+			gsf::EventHandlerPtr accept_callback_;
+			gsf::EventHandlerPtr connect_callback_;
 
 		protected:
 			NetworkImpl();

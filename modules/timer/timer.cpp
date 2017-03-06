@@ -48,7 +48,7 @@ void gsf::modules::TimerModule::execute()
 	}
 }
 
-void gsf::modules::TimerModule::delay_milliseconds(gsf::Args args, gsf::core::EventHandlerPtr callback)
+void gsf::modules::TimerModule::delay_milliseconds(gsf::Args args, gsf::EventHandlerPtr callback)
 {
 	uint32_t _sender = args.pop_uint32(0);
 	uint32_t _milliseconds = args.pop_uint32(1);
@@ -67,7 +67,7 @@ void gsf::modules::TimerModule::delay_milliseconds(gsf::Args args, gsf::core::Ev
 	dispatch(_sender, event_id::timer::make_timer_success, _res);
 }
 
-void gsf::modules::TimerModule::delay_day(gsf::Args args, gsf::core::EventHandlerPtr callback)
+void gsf::modules::TimerModule::delay_day(gsf::Args args, gsf::EventHandlerPtr callback)
 {
 	using namespace std::chrono;
 
@@ -101,7 +101,7 @@ void gsf::modules::TimerModule::delay_day(gsf::Args args, gsf::core::EventHandle
 	dispatch(_sender, event_id::timer::make_timer_success, _res);
 }
 
-void gsf::modules::TimerModule::remove_timer(gsf::Args args, gsf::core::EventHandlerPtr callback)
+void gsf::modules::TimerModule::remove_timer(gsf::Args args, gsf::EventHandlerPtr callback)
 {
 	uint32_t _sender = args.pop_uint32(0);
 	uint32_t _timer_id = args.pop_uint32(1);

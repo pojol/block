@@ -1,26 +1,26 @@
 #include "module.h"
 
-void gsf::core::Module::before_init()
+void gsf::Module::before_init()
 {
 
 }
 
-void gsf::core::Module::init()
+void gsf::Module::init()
 {
 
 }
 
-void gsf::core::Module::execute()
+void gsf::Module::execute()
 {
 
 }
 
-void gsf::core::Module::shut()
+void gsf::Module::shut()
 {
 
 }
 
-void gsf::core::Module::after_shut()
+void gsf::Module::after_shut()
 {
 
 }

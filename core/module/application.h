@@ -8,36 +8,33 @@
 
 namespace gsf
 {
-	namespace core
+	class Application
 	{
-		class Application
-		{
 
-		public:
+	public:
 
-			Application();
+		Application();
 
-			void init_args();
+		void init_args();
 
-			void regist_module(Module *module);
+		void regist_module(Module *module);
 
-			void run();
+		void run();
 
-			virtual void tick() {}
+		virtual void tick() {}
 
-			void exit();
+		void exit();
 
-		protected:
-			uint32_t delay_;
+	protected:
+		uint32_t delay_;
 
-		private:
+	private:
 
-			std::list<Module *> module_list_;
+		std::list<Module *> module_list_;
 
-			bool shutdown_;
+		bool shutdown_;
 
-		};
-	}
+	};
 }
 
 #endif

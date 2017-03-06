@@ -7,19 +7,19 @@
 #include <windows.h>
 #endif // WIN32
 
-gsf::core::Application::Application()
+gsf::Application::Application()
 	: shutdown_(false)
 	, delay_(20)
 {
 
 }
 
-void gsf::core::Application::regist_module(Module *m)
+void gsf::Application::regist_module(Module *m)
 {
 	module_list_.push_back(m);
 }
 
-void gsf::core::Application::run()
+void gsf::Application::run()
 {
 	//! before init
 	auto _itr = module_list_.begin();

@@ -25,7 +25,7 @@
 
 static int test_tick = -1;
 
-class TestNetworkApp : public gsf::core::Application
+class TestNetworkApp : public gsf::Application
 {
 public:
 	void tick()
@@ -42,8 +42,8 @@ public:
 };
 
 class TestNetworkModule
-	: public gsf::core::Module
-	, public gsf::core::Door
+	: public gsf::Module
+	, public gsf::Door
 {
 public:
 
@@ -83,9 +83,9 @@ int main()
 
 
 	TestNetworkApp app;
-	new gsf::core::EventModule;
+	new gsf::EventModule;
 
-	app.regist_module(gsf::core::EventModule::get_ptr());
+	app.regist_module(gsf::EventModule::get_ptr());
 	app.regist_module(new gsf::network::NetworkModule);
 	app.regist_module(new TestNetworkModule);
 

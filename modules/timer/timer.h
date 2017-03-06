@@ -23,7 +23,7 @@ namespace gsf
 		{
 			TimerEvent(uint32_t id);
 
-            gsf::core::EventHandlerPtr timer_handler_ptr_;
+            gsf::EventHandlerPtr timer_handler_ptr_;
 			std::chrono::system_clock::time_point tp_;
 			uint32_t timerid_;
 
@@ -38,8 +38,8 @@ namespace gsf
 		typedef std::shared_ptr<TimerEvent> TimerEventPtr;
 
 		class TimerModule
-                : public gsf::core::Module
-                , public gsf::core::Door
+                : public gsf::Module
+                , public gsf::Door
 		{
 		public:
 			
@@ -54,12 +54,12 @@ namespace gsf
 
 		private:
 
-			void delay_milliseconds(gsf::Args args, gsf::core::EventHandlerPtr callback);
-			void delay_day(gsf::Args args, gsf::core::EventHandlerPtr callback);
-			//void delay_week(std::tuple<gsf::utils::Any> args, gsf::core::EventHandlerPtr callback);
-			//void delay_month(std::tuple<gsf::utils::Any> args, gsf::core::EventHandlerPtr callback);
+			void delay_milliseconds(gsf::Args args, gsf::EventHandlerPtr callback);
+			void delay_day(gsf::Args args, gsf::EventHandlerPtr callback);
+			//void delay_week(std::tuple<gsf::utils::Any> args, gsf::EventHandlerPtr callback);
+			//void delay_month(std::tuple<gsf::utils::Any> args, gsf::EventHandlerPtr callback);
 
-            void remove_timer(gsf::Args args, gsf::core::EventHandlerPtr callback);
+            void remove_timer(gsf::Args args, gsf::EventHandlerPtr callback);
 
 			uint32_t make_timer_id();
 

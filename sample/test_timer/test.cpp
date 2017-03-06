@@ -44,18 +44,15 @@ public:
 };
 
 class TestClickModule
-        : public gsf::core::Module
-        , public gsf::core::Door
+        : public gsf::Module
+        , public gsf::Door
 {
 public:
 	void init()
 	{
 		tick_ = 0;
 
-		using namespace gsf::core;
-
 		// test1
-		
 		listen_callback(event_id::timer::make_timer_success, [=](gsf::Args args) {
 			std::cout << "success by event id : " << args.pop_uint32(0) << std::endl;
 		});
@@ -65,43 +62,45 @@ public:
 		});
 
 		gsf::Args args;
-		args << get_door_id() << 1000;
+		args << get_door_id() << uint32_t(1000);
 
-		dispatch(event_id::timer::delay_milliseconds , args
+		dispatch(event_id::timer::delay_milliseconds 
+			, args
 			, make_callback(&TestClickModule::test_1, this, std::string("hello,timer!")));
 		
 
 		// test2
-		/*
-		listen_callback(event_id::timer::make_timer_success, [&](gsf::stream::OStream os) {
+		/*		
+		listen_callback(event_id::timer::make_timer_success, [&](gsf::Args os) {
 			tick_++;
-			uint32_t _timer_id = 0;
-			gsf::stream::IStream is(os.getBlock());
-			is >> _timer_id;
+			uint32_t _timer_id = os.pop_uint32(10);
 
 			if (tick_ == 4) {
-				OStream args;
+				gsf::Args args;
 				args << get_door_id() << _timer_id;
-				dispatch(event_id::timer::remove_timer, args, nullptr);
+				dispatch(event_id::timer::remove_timer, args);
 			}
 		});
 
 		for (int i = 0; i < 10; ++i)
 		{
-			OStream args;
-			args << get_door_id() << i * 1000;
+			gsf::Args args;
+			args << get_door_id() << uint32_t(i * 1000);
 
-			dispatch(event_id::timer::delay_milliseconds, args
+			dispatch(event_id::timer::delay_milliseconds
+				, args
 				, make_callback(&TestClickModule::test_2, this, i));
 		}
 		*/
 		/* test3
 		for (int i = 0; i < 10 * 10000; ++i)
 		{
-			OStream args;
-			args << get_door_id() << i * 10;
+			gsf::Args args;
+			args << get_door_id() << uint32_t(i * 10);
 
-			dispatch(event_id::timer::delay_milliseconds, args, make_callback(&TestClickModule::test_2, this, i));
+			dispatch(event_id::timer::delay_milliseconds
+				, args
+				, make_callback(&TestClickModule::test_2, this, i));
 		}
 		*/
 	}
@@ -124,9 +123,9 @@ private:
 int main()
 {
 	TestTimerApp app;
-	new gsf::core::EventModule;
+	new gsf::EventModule;
 
-	app.regist_module(gsf::core::EventModule::get_ptr());
+	app.regist_module(gsf::EventModule::get_ptr());
 	app.regist_module(new gsf::modules::TimerModule);
     app.regist_module(new TestClickModule);
 

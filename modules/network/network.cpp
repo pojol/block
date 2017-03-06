@@ -44,12 +44,12 @@ void gsf::network::NetworkModule::after_shut()
 
 }
 
-void gsf::network::NetworkModule::start(gsf::Args args, gsf::core::EventHandlerPtr callback)
+void gsf::network::NetworkModule::start(gsf::Args args, gsf::EventHandlerPtr callback)
 {
 	gsf::network::NetworkImpl::instance().start();
 }
 
-void gsf::network::NetworkModule::make_acceptor(gsf::Args args, gsf::core::EventHandlerPtr callback)
+void gsf::network::NetworkModule::make_acceptor(gsf::Args args, gsf::EventHandlerPtr callback)
 {
 	uint32_t _door = args.pop_uint32(0);
 	std::string _ip = args.pop_string(1);
