@@ -10,7 +10,6 @@
 #include <tuple>
 
 #include <module/module.h>
-#include <args/vars.h>
 #include <event/event.h>
 
 #include "timer_event_list.h"
