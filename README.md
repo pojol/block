@@ -44,17 +44,33 @@ framework
 timer
 ----------
 ```c++
-	listen_callback(event_id::timer::make_timer_success, [=](gsf::Args args) {
+	listen(make_event<gsf::modules::TimerModule>(event_id::timer::make_timer_success)
+		, [=](gsf::Args args, gsf::EventHandlerPtr callback) {
 		std::cout << "success by event id : " << args.pop_uint32(0) << std::endl;
 	});
 
-	listen_callback(event_id::timer::make_timer_fail, [=](gsf::Args args) {
-		std::cout << "fail by error id : " << args.pop_uint32(0) << std::endl;
+	gsf::Args args;
+	args << get_door_id<TestClickModule>() << uint32_t(1000);
+
+	dispatch(make_event<gsf::modules::TimerModule>(event_id::timer::delay_milliseconds)
+		, args
+		, make_callback(&TestClickModule::test_1, this, std::string("hello,timer!")));
+```
+
+network
+----------
+```c++
+	listen(make_event<Client2LoginModule>(event_id::network::new_connect)
+		, [=](gsf::Args args, gsf::EventHandlerPtr callback) {
+		std::cout << "new connect fd = " << args.pop_uint32(0) << std::endl;
+	});
+
+	listen(make_event<Client2LoginModule>(event_id::network::dis_connect)
+		, [=](gsf::Args args, gsf::EventHandlerPtr callback){
+		std::cout << "dis connect fd = " << args.pop_uint32(0) << std::endl;
 	});
 
 	gsf::Args args;
-	args << get_door_id() << 1000;
-
-	dispatch(event_id::timer::delay_milliseconds , args
-		, make_callback(&TestClickModule::test_1, this, std::string("hello,timer!")));
+	args << get_door_id<Client2LoginProxy>() << std::string("127.0.0.1") << uint32_t(8001);
+	dispatch(make_event<Client2LoginModule>(event_id::network::make_acceptor), args);
 ```
