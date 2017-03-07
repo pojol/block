@@ -6,6 +6,8 @@
 #include <memory>
 #include <unordered_map>
 
+#include "../../common/single.h"
+
 #include <event2/bufferevent.h>
 
 namespace gsf
@@ -23,18 +25,19 @@ namespace gsf
 
 		class SessionMgr
 		{
-			friend class NetworkImpl;
-
 		public:
 			~SessionMgr();
-			SessionMgr(uint32_t index);
+			SessionMgr();
 
-			int close(int session_id);
+			void set_need_close(int fd);
 
-			SessionPtr find(int session_id);
+			void close();
 
-		protected:
+			SessionPtr find(int fd);
+
 			SessionPtr make_session(::bufferevent *bev, int fd);
+
+			int cur_max_connet() const;
 
 		private:
 			
@@ -42,7 +45,6 @@ namespace gsf
 			SessionQueue session_queue_;
 
 			uint32_t session_index_;
-			uint32_t session_index_beg_;
 		};
 	}
 }

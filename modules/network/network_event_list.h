@@ -11,11 +11,9 @@ namespace event_id
 {
 	namespace network
 	{
-		const uint32_t start_network = 2001;
+		const uint32_t make_acceptor = 2001;
 
-		const uint32_t make_acceptor = 2002;
-
-		const uint32_t make_connector = 2003;
+		const uint32_t make_connector = 2002;
 
 
 		//! result code

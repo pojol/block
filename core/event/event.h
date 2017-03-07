@@ -11,6 +11,7 @@
 #include <functional>
 #include <tuple>
 #include <list>
+#include <vector>
 #include <unordered_map>
 
 #include <args/args.h>
@@ -20,49 +21,6 @@
 namespace gsf
 {
 	typedef std::function<void(gsf::Args, EventHandlerPtr)> EventFunc;
-
-	// 如果需要监听多个同步事件,辅助类
-	struct AllSuccess
-	{
-		void listen(gsf::Door *door, std::vector<uint32_t> vec, std::function<void ()> func)
-		{
-			count_ = vec.size();
-
-			for (auto itr = vec.begin(); itr != vec.end(); ++itr)
-			{
-				door->listen_callback(*itr, [&](gsf::Args args){
-					count_--;
-
-					if (count_ == 0) {
-						func();
-					}
-				});
-			}
-
-		}
-		
-	private:
-		uint32_t count_;
-	};
-
-	//AllSuccess as;
-	//as.listen(this, {event_id::timer::make_timer_success}, [&](){
-	//	std::cout << "success !" << std::endl;
-	//});
-
-	struct AnyoneFail
-	{
-		void listen(gsf::Door * door, std::vector<uint32_t> vec, std::function<void ()> func)
-		{
-			for (auto itr = vec.begin(); itr != vec.end(); ++itr)
-			{
-				door->listen_callback(*itr, [&](gsf::Args args){
-					func();
-					return;
-				})
-			}
-		}
-	};
 
 	class Door
 	{
@@ -80,6 +38,49 @@ namespace gsf
 		virtual void dispatch(uint32_t door, uint32_t sub_event, gsf::Args args);
     protected:
 		uint32_t door_id_;
+	};
+
+	// 如果需要监听多个同步事件,辅助类
+	struct AllSuccess
+	{
+		void listen(gsf::Door *door, std::vector<uint32_t> vec, std::function<void()> func)
+		{
+			count_ = vec.size();
+
+			for (auto itr = vec.begin(); itr != vec.end(); ++itr)
+			{
+				door->listen_callback(*itr, [&](gsf::Args args) {
+					count_--;
+
+					if (count_ == 0) {
+						func();
+					}
+				});
+			}
+
+		}
+
+	private:
+		uint32_t count_;
+	};
+
+	//AllSuccess as;
+	//as.listen(this, {event_id::timer::make_timer_success}, [&](){
+	//	std::cout << "success !" << std::endl;
+	//});
+
+	struct AnyoneFail
+	{
+		void listen(gsf::Door * door, std::vector<uint32_t> vec, std::function<void()> func)
+		{
+			for (auto itr = vec.begin(); itr != vec.end(); ++itr)
+			{
+				door->listen_callback(*itr, [&](gsf::Args args) {
+					func();
+					return;
+				});
+			}
+		}
 	};
 
 	class EventModule

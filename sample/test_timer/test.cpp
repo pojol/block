@@ -26,7 +26,7 @@
 
 static int test_tick = -1;
 
-class TestTimerApp : public gsf::core::Application
+class TestTimerApp : public gsf::Application
 {
 public:
 

@@ -16,46 +16,31 @@ namespace gsf
 		class IBuffer;
 
 		static const uint32_t SESSION_MAX_CONNECT = 100000;
-		static const uint32_t CONNECTOR_MAX_CONNECT = 1000;
 
 		class Session
 		{
 		public:
-			Session(int32_t id, ::bufferevent *bev, int fd);
+			Session(::bufferevent *bev, int fd);
 			~Session();
-
-			int init(IBuffer *ibuffer, OBuffer *obuffer);
 
 			static void read_cb(::bufferevent *bev, void *ctx);
 			static void err_cb(::bufferevent *bev, short what, void *ctx);
 
 			int write(::evbuffer *data);
-
-			int32_t get_id() const { return id_; }
-
 			void read(::bufferevent *bev);
-			static void read_buffer_cb(::evbuffer *buffer, const ::evbuffer_cb_info *info, void *arg);
-			void change_read_state();
 
 			void dis_connect();
+
+			int32_t get_id() const { return fd_; }
 
 		protected:
 
 		private:
-			uint32_t id_;
-
 			int fd_;
 			::bufferevent *bev_;
 
-			IBuffer *thread_in_buffer_;
-			OBuffer *thread_out_buffer_;
-
 			::evbuffer *in_buf_;
 			::evbuffer *out_buf_;
-
-			bool need_write_;
-			bool need_read_;
-
 		};
 	}
 	
