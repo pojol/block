@@ -21,6 +21,7 @@
 namespace gsf
 {
 	typedef std::function<void(gsf::Args, EventHandlerPtr)> EventFunc;
+	typedef std::pair<uint32_t, uint32_t> EventPair;
 
 	class Door
 	{
@@ -29,18 +30,27 @@ namespace gsf
 
 		uint32_t get_door_id() const { return door_id_; }
 
-		virtual void listen(uint32_t door, EventFunc func);
+		virtual void listen(EventPair ep, EventFunc func);
 
-		virtual void listen_callback(uint32_t sub_event, std::function<void(gsf::Args)> func);
+		virtual void dispatch(EventPair ep, gsf::Args args, EventHandlerPtr callback = nullptr);
 
-		virtual void dispatch(uint32_t door, gsf::Args, EventHandlerPtr callback = nullptr);
+		template <typename T>
+		std::pair<uint32_t, uint32_t> make_event(uint32_t event)
+		{
+			return std::make_pair(typeid(T).hash_code(), event);
+		}
 
-		virtual void dispatch(uint32_t door, uint32_t sub_event, gsf::Args args);
+		std::pair<uint32_t, uint32_t> make_event(uint32_t type, uint32_t event)
+		{
+			return std::make_pair(type, event);
+		}
+
     protected:
 		uint32_t door_id_;
 	};
 
 	// 如果需要监听多个同步事件,辅助类
+	/*
 	struct AllSuccess
 	{
 		void listen(gsf::Door *door, std::vector<uint32_t> vec, std::function<void()> func)
@@ -82,6 +92,7 @@ namespace gsf
 			}
 		}
 	};
+	*/
 
 	class EventModule
 			: public gsf::utils::Singleton<EventModule>
@@ -95,24 +106,20 @@ namespace gsf
 	protected:
 		void execute();
 
-		void add_event(uint32_t event, EventFunc func);
+		void bind_event(uint32_t type_id, uint32_t event, EventFunc func);
 
-		void add_event(uint32_t event, std::function<void(gsf::Args)> func);
-
-		void add_cmd(uint32_t door, gsf::Args args, EventHandlerPtr callback = nullptr);
-
-		void add_cmd(uint32_t door, uint32_t sub_event, gsf::Args args);
+		void add_cmd(uint32_t type_id, uint32_t event, gsf::Args args, EventHandlerPtr callback = nullptr);
 
 		uint32_t make_door_id();
 
     private:
-		std::unordered_map<uint32_t, EventFunc> map_;
+		typedef std::unordered_map<uint32_t, EventFunc> InnerMap;
+		typedef std::unordered_map<uint32_t, InnerMap> TypeMap;
 
-		std::list<std::tuple<uint32_t, gsf::Args, EventHandlerPtr>> list_;
+		typedef std::list<std::tuple<uint32_t, uint32_t, gsf::Args, EventHandlerPtr>> CmdList;
 
-		std::unordered_map<uint32_t, std::function<void(gsf::Args)>> callback_map_;
-
-		std::list<std::tuple<uint32_t, gsf::Args>> callback_list_;
+		TypeMap type_map_;
+		CmdList cmd_list_;
 
 		uint32_t door_id_;
 	};

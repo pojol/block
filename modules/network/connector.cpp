@@ -28,7 +28,8 @@ void gsf::network::ConnectorModule::before_init()
 
 void gsf::network::ConnectorModule::init()
 {
-	listen(event_id::network::make_connector, std::bind(&ConnectorModule::make_connector, this
+	listen(make_event<ConnectorModule>(event_id::network::make_connector)
+		, std::bind(&ConnectorModule::make_connector, this
 		, std::placeholders::_1
 		, std::placeholders::_2));
 }
@@ -82,5 +83,5 @@ void gsf::network::ConnectorModule::make_connector(gsf::Args args, gsf::EventHan
 
 	gsf::Args res;
 	res << uint32_t(_fd);
-	dispatch(door_id_, event_id::network::new_connect, res);
+	dispatch(make_event(door_id_, event_id::network::new_connect), res);
 }

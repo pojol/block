@@ -3,49 +3,21 @@
 
 void gsf::EventModule::execute()
 {
-	while (!list_.empty())
+	while (!cmd_list_.empty())
 	{
-		auto itr = list_.begin();
+		auto itr = cmd_list_.begin();
 
-		auto fitr = map_.find(std::get<0>(*itr));
-		if (fitr != map_.end()) {
-			fitr->second(std::get<1>(*itr), std::get<2>(*itr));
+		auto tItr = type_map_.find(std::get<0>(*itr));
+		if (tItr != type_map_.end()) {
+			auto iItr = tItr->second.find(std::get<1>(*itr));
+			if (iItr != tItr->second.end()) {
+				iItr->second(std::get<2>(*itr), std::get<3>(*itr));
+			}
 		}
 
-		list_.pop_front();
+		cmd_list_.pop_front();
 	}
 
-	while (!callback_list_.empty())
-	{
-		auto itr = callback_list_.begin();
-
-		auto fitr = callback_map_.find(std::get<0>(*itr));
-		if (fitr != callback_map_.end()) {
-			fitr->second(std::get<1>(*itr));
-		}
-
-		callback_list_.pop_front();
-	}
-}
-
-void gsf::EventModule::add_event(uint32_t event, EventFunc func)
-{
-	map_.insert(std::make_pair(event, func));
-}
-
-void gsf::EventModule::add_event(uint32_t event, std::function<void(gsf::Args)> func)
-{
-	callback_map_.insert(std::make_pair(event, func));
-}
-
-void gsf::EventModule::add_cmd(uint32_t door, gsf::Args args, EventHandlerPtr callback /*= nullptr*/)
-{
-	list_.push_back(std::make_tuple(door, args, callback));
-}
-
-void gsf::EventModule::add_cmd(uint32_t door, uint32_t sub_event, gsf::Args args)
-{
-	callback_list_.push_back(std::make_tuple(door + sub_event, args));
 }
 
 gsf::EventModule::EventModule()
@@ -63,28 +35,49 @@ uint32_t gsf::EventModule::make_door_id()
 	return door_id_++;
 }
 
+void gsf::EventModule::bind_event(uint32_t type_id, uint32_t event, EventFunc func)
+{
+	auto regf = [&](InnerMap &itr) {
+		itr.insert(std::make_pair(event, func));
+	};
+
+	auto typeItr = type_map_.find(type_id);
+	if (typeItr != type_map_.end()) {
+
+		auto eventItr = typeItr->second.find(event);
+		if (eventItr != typeItr->second.end()) {
+			printf("repeated event!\n");
+			return;
+		}
+		
+		regf(typeItr->second);
+	}
+	else {
+		InnerMap _map;
+		regf(_map);
+
+		type_map_.insert(std::make_pair(type_id, _map));
+	}
+}
+
+void gsf::EventModule::add_cmd(uint32_t type_id, uint32_t event, gsf::Args args, EventHandlerPtr callback /*= nullptr*/)
+{
+	cmd_list_.push_back(std::make_tuple(type_id, event, args, callback));
+}
+
 gsf::Door::Door()
 {
 	// make id
 	door_id_ = EventModule::get_ref().make_door_id();
 }
 
-void gsf::Door::dispatch(uint32_t door, gsf::Args args, EventHandlerPtr callback /*= nullptr*/)
+
+void gsf::Door::listen(EventPair ep, EventFunc func)
 {
-	EventModule::get_ref().add_cmd(door, args, callback);
+	EventModule::get_ref().bind_event(ep.first, ep.second, func);
 }
 
-void gsf::Door::dispatch(uint32_t door, uint32_t sub_event, gsf::Args args)
+void gsf::Door::dispatch(EventPair ep, gsf::Args args, EventHandlerPtr callback /* = nullptr */)
 {
-	EventModule::get_ref().add_cmd(door, sub_event, args);
-}
-
-void gsf::Door::listen(uint32_t door, EventFunc func)
-{
-	EventModule::get_ref().add_event(door, func);
-}
-
-void gsf::Door::listen_callback(uint32_t sub_event, std::function<void(gsf::Args)> func)
-{
-	EventModule::get_ref().add_event(get_door_id() + sub_event, func);
+	EventModule::get_ref().add_cmd(ep.first, ep.second, args, callback);
 }

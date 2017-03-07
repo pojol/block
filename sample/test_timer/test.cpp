@@ -53,18 +53,20 @@ public:
 		tick_ = 0;
 
 		// test1
-		listen_callback(event_id::timer::make_timer_success, [=](gsf::Args args) {
+		listen(make_event<gsf::modules::TimerModule>(event_id::timer::make_timer_success)
+			, [=](gsf::Args args, gsf::EventHandlerPtr callback) {
 			std::cout << "success by event id : " << args.pop_uint32(0) << std::endl;
 		});
 
-		listen_callback(event_id::timer::make_timer_fail, [=](gsf::Args args) {
+		listen(make_event<gsf::modules::TimerModule>(event_id::timer::make_timer_fail)
+			, [=](gsf::Args args, gsf::EventHandlerPtr callback) {
 			std::cout << "fail by error id : " << args.pop_uint32(0) << std::endl;
 		});
 
 		gsf::Args args;
 		args << get_door_id() << uint32_t(1000);
 
-		dispatch(event_id::timer::delay_milliseconds 
+		dispatch(make_event<gsf::modules::TimerModule>(event_id::timer::delay_milliseconds)
 			, args
 			, make_callback(&TestClickModule::test_1, this, std::string("hello,timer!")));
 		

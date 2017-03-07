@@ -27,7 +27,8 @@ void gsf::network::AcceptorModule::before_init()
 
 void gsf::network::AcceptorModule::init()
 {
-	listen(event_id::network::make_acceptor, std::bind(&AcceptorModule::make_acceptor, this
+	listen(make_event<AcceptorModule>(event_id::network::make_acceptor)
+		, std::bind(&AcceptorModule::make_acceptor, this
 		, std::placeholders::_1
 		, std::placeholders::_2));
 }
@@ -89,13 +90,13 @@ void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, 
 
 	if (network_ptr_->session_mgr_->find(fd)) {
 		network_ptr_->session_mgr_->set_need_close(fd);
-		printf("repeated fd %d", fd);
+		printf("repeated fd %d\n", fd);
 		return;
 	}
 
 	// check max connect
 	if (network_ptr_->session_mgr_->cur_max_connet() >= SESSION_MAX_CONNECT) {
-		printf("upper limit session!");
+		printf("upper limit session!\n");
 		return;
 	}
 
@@ -113,6 +114,6 @@ void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, 
 	// dispatch event connect
 	gsf::Args args;
 	args << uint32_t(fd);
-	network_ptr_->dispatch(network_ptr_->door_id_, event_id::network::new_connect, args);
+	network_ptr_->dispatch(network_ptr_->make_event(network_ptr_->door_id_, event_id::network::new_connect), args);
 }
 
