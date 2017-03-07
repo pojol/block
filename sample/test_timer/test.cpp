@@ -64,7 +64,7 @@ public:
 		});
 
 		gsf::Args args;
-		args << get_door_id() << uint32_t(1000);
+		args << get_door_id<TestClickModule>() << uint32_t(1000);
 
 		dispatch(make_event<gsf::modules::TimerModule>(event_id::timer::delay_milliseconds)
 			, args

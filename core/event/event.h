@@ -28,7 +28,8 @@ namespace gsf
 	public:
 		Door();
 
-		uint32_t get_door_id() const { return door_id_; }
+		template <typename T>
+		uint32_t get_door_id() const { return typeid(T).hash_code(); }
 
 		virtual void listen(EventPair ep, EventFunc func);
 

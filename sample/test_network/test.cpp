@@ -51,17 +51,26 @@ private:
 
 };
 
-class TestNetworkModule
+class Client2LoginProxy
 	: public gsf::Module
 	, public gsf::Door
 {
 public:
 	void init()
 	{
-		//! 这样？
-		listen(make_event<Client2LoginModule>(event_id::network::new_connect), [=](gsf::Args args, gsf::EventHandlerPtr callback) {
-			
+		listen(make_event<Client2LoginModule>(event_id::network::new_connect)
+			, [=](gsf::Args args, gsf::EventHandlerPtr callback) {
+			std::cout << "new connect fd = " << args.pop_uint32(0) << std::endl;
 		});
+
+		listen(make_event<Client2LoginModule>(event_id::network::dis_connect)
+			, [=](gsf::Args args, gsf::EventHandlerPtr callback){
+			std::cout << "dis connect fd = " << args.pop_uint32(0) << std::endl;
+		});
+
+		gsf::Args args;
+		args << get_door_id<Client2LoginProxy>() << std::string("127.0.0.1") << uint32_t(8001);
+		dispatch(make_event<Client2LoginModule>(event_id::network::make_acceptor), args);
 	}
 };
 
@@ -84,7 +93,7 @@ int main()
 
 	app.regist_module(gsf::EventModule::get_ptr());
 	app.regist_module(new Client2LoginModule);
-	app.regist_module(new TestNetworkModule);
+	app.regist_module(new Client2LoginProxy);
 
 	app.run();
 
