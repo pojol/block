@@ -27,7 +27,7 @@ void gsf::network::AcceptorModule::before_init()
 
 void gsf::network::AcceptorModule::init()
 {
-	listen(make_event<AcceptorModule>(event_id::network::make_acceptor)
+	listen(make_event(module_id_, event_id::network::make_acceptor)
 		, std::bind(&AcceptorModule::make_acceptor, this
 		, std::placeholders::_1
 		, std::placeholders::_2));

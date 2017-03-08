@@ -21,33 +21,18 @@
 namespace gsf
 {
 	typedef std::function<void(gsf::Args, EventHandlerPtr)> EventFunc;
+
 	typedef std::pair<uint32_t, uint32_t> EventPair;
+	typedef std::function<void(gsf::Args, EventHandlerPtr)> EventFunc;
 
 	class Door
 	{
 	public:
 		Door();
 
-		template <typename T>
-		uint32_t get_door_id() const { return typeid(T).hash_code(); }
-
 		virtual void listen(EventPair ep, EventFunc func);
 
 		virtual void dispatch(EventPair ep, gsf::Args args, EventHandlerPtr callback = nullptr);
-
-		template <typename T>
-		std::pair<uint32_t, uint32_t> make_event(uint32_t event)
-		{
-			return std::make_pair(typeid(T).hash_code(), event);
-		}
-
-		std::pair<uint32_t, uint32_t> make_event(uint32_t type, uint32_t event)
-		{
-			return std::make_pair(type, event);
-		}
-
-    protected:
-		uint32_t door_id_;
 	};
 
 	// 如果需要监听多个同步事件,辅助类
@@ -111,8 +96,6 @@ namespace gsf
 
 		void add_cmd(uint32_t type_id, uint32_t event, gsf::Args args, EventHandlerPtr callback = nullptr);
 
-		uint32_t make_door_id();
-
     private:
 		typedef std::unordered_map<uint32_t, EventFunc> InnerMap;
 		typedef std::unordered_map<uint32_t, InnerMap> TypeMap;
@@ -121,8 +104,6 @@ namespace gsf
 
 		TypeMap type_map_;
 		CmdList cmd_list_;
-
-		uint32_t door_id_;
 	};
 }
 

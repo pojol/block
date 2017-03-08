@@ -21,19 +21,10 @@ void gsf::EventModule::execute()
 }
 
 gsf::EventModule::EventModule()
-	: door_id_(1)
 {
 
 }
 
-uint32_t gsf::EventModule::make_door_id()
-{
-	if (door_id_ == UINT32_MAX) {
-		door_id_ = 1;
-	}
-
-	return door_id_++;
-}
 
 void gsf::EventModule::bind_event(uint32_t type_id, uint32_t event, EventFunc func)
 {
@@ -67,8 +58,6 @@ void gsf::EventModule::add_cmd(uint32_t type_id, uint32_t event, gsf::Args args,
 
 gsf::Door::Door()
 {
-	// make id
-	door_id_ = EventModule::get_ref().make_door_id();
 }
 
 

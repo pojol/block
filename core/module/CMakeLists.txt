@@ -4,6 +4,7 @@ PROJECT(module)
 #引用头文件目录
 if(WIN32)
         INCLUDE_DIRECTORIES(
+			${GSF_SOURCE_DIR}/core
         )
 endif()
 if(UNIX)

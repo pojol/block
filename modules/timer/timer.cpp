@@ -19,13 +19,13 @@ void gsf::modules::TimerModule::init()
 {
 	using namespace std::placeholders;
 
-	listen(make_event<TimerModule>(event_id::timer::delay_milliseconds)	
+	listen(make_event(module_id_, event_id::timer::delay_milliseconds)	
 		, std::bind(&TimerModule::delay_milliseconds, this, _1, _2));
 	
-	listen(make_event<TimerModule>(event_id::timer::delay_day)			
+	listen(make_event(module_id_, event_id::timer::delay_day)
 		, std::bind(&TimerModule::delay_day, this, _1, _2));
 	
-	listen(make_event<TimerModule>(event_id::timer::remove_timer)		
+	listen(make_event(module_id_, event_id::timer::remove_timer)
 		, std::bind(&TimerModule::remove_timer, this, _1, _2));
 }
 

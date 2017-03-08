@@ -28,7 +28,7 @@ void gsf::network::ConnectorModule::before_init()
 
 void gsf::network::ConnectorModule::init()
 {
-	listen(make_event<ConnectorModule>(event_id::network::make_connector)
+	listen(make_event(module_id_, event_id::network::make_connector)
 		, std::bind(&ConnectorModule::make_connector, this
 		, std::placeholders::_1
 		, std::placeholders::_2));

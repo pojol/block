@@ -24,3 +24,13 @@ void gsf::Module::after_shut()
 {
 
 }
+
+gsf::Module::Module()
+{
+
+}
+
+gsf::Module::~Module()
+{
+
+}

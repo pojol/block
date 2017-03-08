@@ -10,13 +10,9 @@
 gsf::Application::Application()
 	: shutdown_(false)
 	, delay_(20)
+	, module_id_(1)
 {
 
-}
-
-void gsf::Application::regist_module(Module *m)
-{
-	module_list_.push_back(m);
 }
 
 void gsf::Application::run()
@@ -82,4 +78,13 @@ void gsf::Application::run()
 		++_itr;
 	}
 
+}
+
+uint32_t gsf::Application::make_module_id()
+{
+	if (module_id_ == UINT32_MAX) {
+		module_id_ = 1;
+	}
+
+	return module_id_++;
 }
