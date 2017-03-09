@@ -24,26 +24,6 @@
 
 #include <random>
 
-static int test_tick = -1;
-
-class TestNetworkApp 
-	: public gsf::Application
-	, public gsf::utils::Singleton<TestNetworkApp>
-{
-public:
-	void tick()
-	{
-		int t = (test_tick + 1) % 50;
-
-		if (t == 0){
-			//printf("delay %d\n", delay_);
-		}
-
-		test_tick = t;
-	}
-
-};
-
 class Client2LoginModule
 	: public gsf::network::AcceptorModule
 {
@@ -60,21 +40,21 @@ class Client2LoginProxy
 public:
 	void init()
 	{
-		uint32_t _c2l_id = TestNetworkApp::get_ref().find_module_id<Client2LoginModule>();
+		uint32_t _c2l_id = AppRef.find_module_id<Client2LoginModule>();
 
-		listen(make_event(event_id::network::new_connect)
+		listen(this, event_id::network::new_connect
 			, [=](gsf::Args args, gsf::EventHandlerPtr callback) {
 			std::cout << "new connect fd = " << args.pop_uint32(0) << std::endl;
 		});
 
-		listen(make_event(event_id::network::dis_connect)
+		listen(this, event_id::network::dis_connect
 			, [=](gsf::Args args, gsf::EventHandlerPtr callback){
 			std::cout << "dis connect fd = " << args.pop_uint32(0) << std::endl;
 		});
 
 		gsf::Args args;
 		args << get_module_id() << std::string("127.0.0.1") << uint32_t(8001);
-		dispatch(make_event(_c2l_id, event_id::network::make_acceptor), args);
+		dispatch(_c2l_id, event_id::network::make_acceptor, args);
 	}
 };
 
@@ -91,14 +71,14 @@ int main()
 	}
 #endif // WIN32
 
-	new TestNetworkApp;
+	new gsf::Application;
 	new gsf::EventModule;
 
-	TestNetworkApp::get_ref().regist_module(gsf::EventModule::get_ptr());
-	TestNetworkApp::get_ref().regist_module(new Client2LoginModule);
-	TestNetworkApp::get_ref().regist_module(new Client2LoginProxy);
+	AppRef.regist_module(gsf::EventModule::get_ptr());
+	AppRef.regist_module(new Client2LoginModule);
+	AppRef.regist_module(new Client2LoginProxy);
 
-	TestNetworkApp::get_ref().run();
+	AppRef.run();
 
 	return 0;
 }

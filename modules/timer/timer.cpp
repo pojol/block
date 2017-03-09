@@ -19,13 +19,13 @@ void gsf::modules::TimerModule::init()
 {
 	using namespace std::placeholders;
 
-	listen(make_event(module_id_, event_id::timer::delay_milliseconds)	
+	listen(this, event_id::timer::delay_milliseconds	
 		, std::bind(&TimerModule::delay_milliseconds, this, _1, _2));
 	
-	listen(make_event(module_id_, event_id::timer::delay_day)
+	listen(this, event_id::timer::delay_day
 		, std::bind(&TimerModule::delay_day, this, _1, _2));
 	
-	listen(make_event(module_id_, event_id::timer::remove_timer)
+	listen(this, event_id::timer::remove_timer
 		, std::bind(&TimerModule::remove_timer, this, _1, _2));
 }
 
@@ -69,7 +69,7 @@ void gsf::modules::TimerModule::delay_milliseconds(gsf::Args args, gsf::EventHan
 	// result
 	gsf::Args _res;
 	_res << _event->get_id();
-	dispatch(make_event(_sender, event_id::timer::make_timer_success), _res);
+	dispatch(_sender, event_id::timer::make_timer_success, _res);
 }
 
 void gsf::modules::TimerModule::delay_day(gsf::Args args, gsf::EventHandlerPtr callback)
@@ -103,7 +103,7 @@ void gsf::modules::TimerModule::delay_day(gsf::Args args, gsf::EventHandlerPtr c
 	// result
 	gsf::Args _res;
 	_res << _event->get_id();
-	dispatch(make_event(_sender, event_id::timer::make_timer_success), _res);
+	dispatch(_sender, event_id::timer::make_timer_success, _res);
 }
 
 void gsf::modules::TimerModule::remove_timer(gsf::Args args, gsf::EventHandlerPtr callback)

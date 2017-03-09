@@ -24,27 +24,6 @@
 	#include <unistd.h>
 #endif
 
-static int test_tick = -1;
-
-class TestTimerApp 
-	: public gsf::Application
-	, public gsf::utils::Singleton<TestTimerApp>
-{
-public:
-
-	void tick()
-	{
-		int t = (test_tick + 1) % 50;
-
-		if (t == 0){
-			printf("delay %d\n", delay_);
-		}
-
-		test_tick = t;
-	}
-
-};
-
 class TestClickModule
         : public gsf::Module
         , public gsf::Door
@@ -53,15 +32,15 @@ public:
 	void init()
 	{
 		tick_ = 0;
-		uint32_t _timer_module_id = TestTimerApp::get_ref().find_module_id<gsf::modules::TimerModule>();
+		uint32_t _timer_module_id = AppRef.find_module_id<gsf::modules::TimerModule>();
 
 		// test1
-		listen(make_event(event_id::timer::make_timer_success)
+		listen(this, event_id::timer::make_timer_success
 			, [=](gsf::Args args, gsf::EventHandlerPtr callback) {
 			std::cout << "success by event id : " << args.pop_uint32(0) << std::endl;
 		});
 
-		listen(make_event(event_id::timer::make_timer_fail)
+		listen(this, event_id::timer::make_timer_fail
 			, [=](gsf::Args args, gsf::EventHandlerPtr callback) {
 			std::cout << "fail by error id : " << args.pop_uint32(0) << std::endl;
 		});
@@ -69,7 +48,7 @@ public:
 		gsf::Args args;
 		args << get_module_id() << uint32_t(1000);
 
-		dispatch(make_event(_timer_module_id, event_id::timer::delay_milliseconds)
+		dispatch(_timer_module_id, event_id::timer::delay_milliseconds
 			, args
 			, make_callback(&TestClickModule::test_1, this, std::string("hello,timer!")));
 		
@@ -127,14 +106,14 @@ private:
 
 int main()
 {
-	new TestTimerApp;
+	new gsf::Application;
 	new gsf::EventModule;
 
-	TestTimerApp::get_ref().regist_module(gsf::EventModule::get_ptr());
-	TestTimerApp::get_ref().regist_module(new gsf::modules::TimerModule);
-	TestTimerApp::get_ref().regist_module(new TestClickModule);
+	AppRef.regist_module(gsf::EventModule::get_ptr());
+	AppRef.regist_module(new gsf::modules::TimerModule);
+	AppRef.regist_module(new TestClickModule);
 
-	TestTimerApp::get_ref().run();
+	AppRef.run();
 
 	return 0;
 }

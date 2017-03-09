@@ -10,7 +10,6 @@ namespace gsf
 	{
 		class Mailbox
 			: public gsf::Module
-			, public gsf::Door
 		{
 		public:
 			Mailbox(); 

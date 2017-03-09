@@ -24,15 +24,16 @@ namespace gsf
 
 	typedef std::pair<uint32_t, uint32_t> EventPair;
 	typedef std::function<void(gsf::Args, EventHandlerPtr)> EventFunc;
+	class Module;
 
 	class Door
 	{
 	public:
 		Door();
 
-		virtual void listen(EventPair ep, EventFunc func);
+		virtual void listen(Module *target, uint32_t event, EventFunc func);
 
-		virtual void dispatch(EventPair ep, gsf::Args args, EventHandlerPtr callback = nullptr);
+		virtual void dispatch(uint32_t target, uint32_t event, gsf::Args args, EventHandlerPtr callback = nullptr);
 	};
 
 	// 如果需要监听多个同步事件,辅助类

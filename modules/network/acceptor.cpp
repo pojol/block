@@ -27,7 +27,7 @@ void gsf::network::AcceptorModule::before_init()
 
 void gsf::network::AcceptorModule::init()
 {
-	listen(make_event(module_id_, event_id::network::make_acceptor)
+	listen(this, event_id::network::make_acceptor
 		, std::bind(&AcceptorModule::make_acceptor, this
 		, std::placeholders::_1
 		, std::placeholders::_2));
@@ -114,6 +114,6 @@ void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, 
 	// dispatch event connect
 	gsf::Args args;
 	args << uint32_t(fd);
-	network_ptr_->dispatch(network_ptr_->make_event(network_ptr_->door_id_, event_id::network::new_connect), args);
+	network_ptr_->dispatch(network_ptr_->door_id_, event_id::network::new_connect, args);
 }
 

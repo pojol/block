@@ -61,12 +61,12 @@ gsf::Door::Door()
 }
 
 
-void gsf::Door::listen(EventPair ep, EventFunc func)
+void gsf::Door::listen(Module *target, uint32_t event, EventFunc func)
 {
-	EventModule::get_ref().bind_event(ep.first, ep.second, func);
+	EventModule::get_ref().bind_event(target->get_module_id(), event, func);
 }
 
-void gsf::Door::dispatch(EventPair ep, gsf::Args args, EventHandlerPtr callback /* = nullptr */)
+void gsf::Door::dispatch(uint32_t target, uint32_t event, gsf::Args args, EventHandlerPtr callback /* = nullptr */)
 {
-	EventModule::get_ref().add_cmd(ep.first, ep.second, args, callback);
+	EventModule::get_ref().add_cmd(target, event, args, callback);
 }

@@ -4,6 +4,7 @@
 #include "variant.h"
 #include <vector>
 #include <assert.h>
+#include <memory>
 
 namespace gsf
 {
