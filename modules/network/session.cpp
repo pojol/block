@@ -59,8 +59,39 @@ void gsf::network::Session::read(::bufferevent *bev)
 {
 	bufferevent_read_buffer(bev, in_buf_);
 
-	//! 将完整的一个消息包取出，派发到对应的mgr中
-	remote_callback(1001, std::string("hello"));
+	uint32_t _buf_len = evbuffer_get_length(in_buf_);
+
+	char * _head = (char*)malloc(MSG_SIZE_LEN);
+	evbuffer_copyout(in_buf_, _head, MSG_SIZE_LEN);
+
+	uint32_t *_msg_size = reinterpret_cast<uint32_t*>(_head);
+
+	evbuffer *_buff = nullptr;
+	if (_buf_len >= *_msg_size) {
+		_buff = evbuffer_new();
+	}
+
+	while (_buf_len >= *_msg_size)
+	{
+		evbuffer_remove_buffer(in_buf_, _buff, *_msg_size);
+
+		//! 取出消息id
+		evbuffer_remove(_buff, _head, MSG_SIZE_LEN);
+		uint32_t _msg_len = *reinterpret_cast<uint32_t*>(_head);
+		evbuffer_remove(_buff, _head, MSG_SIZE_LEN);
+		uint32_t _msg_id = *reinterpret_cast<uint32_t*>(_head);
+		//! 
+		remote_callback(_msg_id, std::string("hello"));
+
+		_buf_len = evbuffer_get_length(in_buf_);
+		if (_buf_len > MSG_SIZE_LEN) {
+			evbuffer_copyout(in_buf_, _head, MSG_SIZE_LEN);
+			_msg_size = reinterpret_cast<uint32_t*>(_head);
+		}
+		else {
+			break;
+		}
+	}
 }
 
 void gsf::network::Session::dis_connect()

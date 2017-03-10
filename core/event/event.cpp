@@ -69,8 +69,9 @@ void gsf::EventModule::add_cmd(uint32_t type_id, uint32_t event, gsf::Args args,
 {
 	if (event == event_id::network::bind_remote_callback) {
 
-		uint32_t _msg_id = args.pop_uint32(0);
-		auto _func = args.pop_remote_callback(1);
+		uint32_t _module_id = args.pop_uint32(0);	//预留在这里，如果是分布式则需要将这次注册同步到协调Server
+		uint32_t _msg_id = args.pop_uint32(1);
+		auto _func = args.pop_remote_callback(2);
 
 		remote_map_.insert(std::make_pair(_msg_id, _func));
 

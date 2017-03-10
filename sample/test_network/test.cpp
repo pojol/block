@@ -43,7 +43,7 @@ public:
 		{
 			//! 向协议绑定器申请，module 和 协议的绑定.
 			gsf::Args args;
-			args << nod.first << nod.second;
+			args << get_module_id() << nod.first << nod.second;
 			dispatch(_em_id, event_id::network::bind_remote_callback, args);
 		}
 	}
@@ -51,6 +51,8 @@ public:
 	void test_remote(std::string str)
 	{
 		std::cout << str.c_str() << std::endl;
+
+	
 	}
 
 };
