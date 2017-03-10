@@ -3,6 +3,7 @@ PROJECT(event)
 #引用头文件目录
 INCLUDE_DIRECTORIES(
 	${GSF_SOURCE_DIR}/core
+	${GSF_SOURCE_DIR}/modules
 )
 
 #引用库目录

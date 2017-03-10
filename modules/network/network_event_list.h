@@ -15,6 +15,8 @@ namespace event_id
 
 		const uint32_t make_connector = 2002;
 
+		const uint32_t bind_remote_callback = 2003;
+
 
 		//! result code
 		const uint32_t new_connect = 1;

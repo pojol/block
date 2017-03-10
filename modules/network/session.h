@@ -4,6 +4,8 @@
 #include <event2/bufferevent.h>
 #include <event2/buffer.h>
 
+#include <event/event.h>
+
 #include <stdint.h>
 #include <memory>
 #include <string>
@@ -18,6 +20,7 @@ namespace gsf
 		static const uint32_t SESSION_MAX_CONNECT = 100000;
 
 		class Session
+			: public gsf::Door
 		{
 		public:
 			Session(::bufferevent *bev, int fd);

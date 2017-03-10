@@ -58,6 +58,9 @@ int gsf::network::Session::write(::evbuffer *data)
 void gsf::network::Session::read(::bufferevent *bev)
 {
 	bufferevent_read_buffer(bev, in_buf_);
+
+	//! 将完整的一个消息包取出，派发到对应的mgr中
+	remote_callback(1001, std::string("hello"));
 }
 
 void gsf::network::Session::dis_connect()

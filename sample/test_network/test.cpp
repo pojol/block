@@ -24,6 +24,37 @@
 
 #include <random>
 
+
+class EntityMgr
+	: public gsf::Module
+	, public gsf::Door
+{
+public:
+
+	void init()
+	{
+		uint32_t _em_id = AppRef.find_module_id<gsf::EventModule>();
+
+		auto arr = {
+			std::make_pair(uint32_t(1001), std::bind(&EntityMgr::test_remote, this, std::placeholders::_1)),
+		};
+
+		for (auto nod : arr)
+		{
+			//! 向协议绑定器申请，module 和 协议的绑定.
+			gsf::Args args;
+			args << nod.first << nod.second;
+			dispatch(_em_id, event_id::network::bind_remote_callback, args);
+		}
+	}
+
+	void test_remote(std::string str)
+	{
+		std::cout << str.c_str() << std::endl;
+	}
+
+};
+
 class Client2LoginModule
 	: public gsf::network::AcceptorModule
 {
@@ -77,6 +108,7 @@ int main()
 	AppRef.regist_module(gsf::EventModule::get_ptr());
 	AppRef.regist_module(new Client2LoginModule);
 	AppRef.regist_module(new Client2LoginProxy);
+	AppRef.regist_module(new EntityMgr);
 
 	AppRef.run();
 

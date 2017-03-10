@@ -1,5 +1,6 @@
 #include "event.h"
 
+#include <network/network_event_list.h>
 
 void gsf::EventModule::execute()
 {
@@ -16,6 +17,19 @@ void gsf::EventModule::execute()
 		}
 
 		cmd_list_.pop_front();
+	}
+
+	while (!remote_callback_list_.empty())
+	{
+		auto itr = remote_callback_list_.begin();
+
+		auto fItr = remote_map_.find(itr->first);
+		if (fItr != remote_map_.end())
+		{
+			fItr->second(itr->second);
+		}
+
+		remote_callback_list_.pop_front();
 	}
 
 }
@@ -53,13 +67,27 @@ void gsf::EventModule::bind_event(uint32_t type_id, uint32_t event, EventFunc fu
 
 void gsf::EventModule::add_cmd(uint32_t type_id, uint32_t event, gsf::Args args, EventHandlerPtr callback /*= nullptr*/)
 {
+	if (event == event_id::network::bind_remote_callback) {
+
+		uint32_t _msg_id = args.pop_uint32(0);
+		auto _func = args.pop_remote_callback(1);
+
+		remote_map_.insert(std::make_pair(_msg_id, _func));
+
+		return;
+	}
+
 	cmd_list_.push_back(std::make_tuple(type_id, event, args, callback));
+}
+
+void gsf::EventModule::add_remote_callback(uint32_t msg_id, std::string str)
+{
+	remote_callback_list_.push_back(std::make_pair(msg_id, str));
 }
 
 gsf::Door::Door()
 {
 }
-
 
 void gsf::Door::listen(Module *target, uint32_t event, EventFunc func)
 {
@@ -69,4 +97,14 @@ void gsf::Door::listen(Module *target, uint32_t event, EventFunc func)
 void gsf::Door::dispatch(uint32_t target, uint32_t event, gsf::Args args, EventHandlerPtr callback /* = nullptr */)
 {
 	EventModule::get_ref().add_cmd(target, event, args, callback);
+}
+
+void gsf::Door::remote_callback(uint32_t msg_id, std::string str)
+{
+	EventModule::get_ref().add_remote_callback(msg_id, str);
+}
+
+void gsf::Door::remote(uint32_t fd, std::string str)
+{
+
 }

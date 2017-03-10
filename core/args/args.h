@@ -10,7 +10,7 @@ namespace gsf
 {
 	class Arg
 	{
-		typedef Variant<bool, uint32_t, int32_t, uint64_t, int64_t, std::string> av;
+		typedef Variant<bool, uint32_t, int32_t, uint64_t, int64_t, std::string, std::function<void(std::string)>> av;
 	public:
 		void set_bool(const bool var)
 		{
@@ -40,6 +40,11 @@ namespace gsf
 		void set_string(const std::string &var)
 		{
 			v_ = std::string(var);
+		}
+
+		void set_remote_callback(std::function<void(std::string)> var)
+		{
+			v_ = var;
 		}
 
 		av v_;
@@ -103,6 +108,15 @@ namespace gsf
 		{
 			auto _arg = std::make_shared<Arg>();
 			_arg->set_string(value);
+
+			size_++;
+			arg_list_.push_back(_arg);
+		}
+
+		void add(std::function<void(std::string)> func)
+		{
+			auto _arg = std::make_shared<Arg>();
+			_arg->set_remote_callback(func);
 
 			size_++;
 			arg_list_.push_back(_arg);
@@ -180,7 +194,6 @@ namespace gsf
 
 		const std::string & pop_string(const int index)
 		{
-
 			#ifdef _DEBUG
 				assert(index >= 0 && index < size_);
 			#else
@@ -191,6 +204,19 @@ namespace gsf
 
 			auto var = arg_list_[index];
 			return var->v_.Get<std::string>();
+		}
+
+		const std::function<void(std::string)> pop_remote_callback(const int index)
+		{
+#ifdef _DEBUG
+			assert(index >= 0 && index < size_);
+#else
+			if (index < 0 || index >= size_) {
+				return nullptr;
+			}
+#endif
+			auto var = arg_list_[index];
+			return var->v_.Get<std::function<void(std::string)>>();
 		}
 
 		Args & operator << (const bool value)
@@ -224,6 +250,12 @@ namespace gsf
 		}
 
 		Args & operator << (const std::string &value)
+		{
+			add(value);
+			return *this;
+		}
+
+		Args & operator << (std::function<void(std::string)> value)
 		{
 			add(value);
 			return *this;
