@@ -11,17 +11,17 @@
 --------
 
 > * apps
-    * login
-    * dbproxy
-    * cell
-    * scheduler
-    * monitor
+   * login
+   * dbproxy
+   * cell
+   * scheduler
+   * monitor
 > * modules
-    * acceptor
-    * connector
-    * message_queue
-    * meta_data
-    * timer
+   * acceptor
+   * connector
+   * message_queue
+   * meta_data
+   * timer
     
 --------
 
