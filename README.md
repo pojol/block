@@ -11,7 +11,8 @@
 --------
 
 > * apps
-    * dbproxy
+    * login
+    * dbproxy
     * cell
     * scheduler
     * monitor
