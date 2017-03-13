@@ -7,7 +7,7 @@
 #include <list>
 #include <unordered_map>
 
-#include "../common/single.h"
+#include "../../common/single.h"
 
 namespace gsf
 {
