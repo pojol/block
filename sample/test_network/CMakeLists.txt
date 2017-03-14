@@ -3,6 +3,7 @@ PROJECT(test_network)
 #引用头文件目录
 if(WIN32)
 	INCLUDE_DIRECTORIES(
+			${GSF_SOURCE_DIR}/3rd/protobuf-3.2.0/src
 			${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
 			${GSF_SOURCE_DIR}/core
 			${GSF_SOURCE_DIR}/modules
@@ -56,7 +57,7 @@ if(MSVC)
       endif()
     endforeach()
 
-        TARGET_LINK_LIBRARIES(test_network libevent.lib libevent_core.lib libevent_extras.lib network.lib module.lib event.lib stream.lib ws2_32.lib)
+        TARGET_LINK_LIBRARIES(test_network libevent.lib libevent_core.lib libevent_extras.lib network.lib module.lib event.lib stream.lib ws2_32.lib libprotocd.lib libprotobufd.lib)
 endif()
 if(UNIX)
         TARGET_LINK_LIBRARIES(test_network libstream.a libnetwork.a libevent.a libevent_core.a libevent_extra.a libutils.a libtimer.a)
