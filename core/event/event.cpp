@@ -81,9 +81,9 @@ void gsf::EventModule::add_cmd(uint32_t type_id, uint32_t event, gsf::Args args,
 	cmd_list_.push_back(std::make_tuple(type_id, event, args, callback));
 }
 
-void gsf::EventModule::add_remote_callback(uint32_t msg_id, std::string str)
+void gsf::EventModule::add_remote_callback(uint32_t msg_id, char *block)
 {
-	remote_callback_list_.push_back(std::make_pair(msg_id, str));
+	remote_callback_list_.push_back(std::make_pair(msg_id, block));
 }
 
 gsf::Door::Door()
@@ -100,9 +100,9 @@ void gsf::Door::dispatch(uint32_t target, uint32_t event, gsf::Args args, EventH
 	EventModule::get_ref().add_cmd(target, event, args, callback);
 }
 
-void gsf::Door::remote_callback(uint32_t msg_id, std::string str)
+void gsf::Door::remote_callback(uint32_t msg_id, char *block)
 {
-	EventModule::get_ref().add_remote_callback(msg_id, str);
+	EventModule::get_ref().add_remote_callback(msg_id, block);
 }
 
 void gsf::Door::remote(uint32_t fd, std::string str)

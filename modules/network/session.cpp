@@ -3,6 +3,8 @@
 
 #include <iostream>
 
+#include <google/protobuf/message.h>
+
 gsf::network::Session::Session(::bufferevent *bev, int fd)
     : bev_(bev)
     , fd_(fd)
@@ -80,8 +82,11 @@ void gsf::network::Session::read(::bufferevent *bev)
 		uint32_t _msg_len = *reinterpret_cast<uint32_t*>(_head);
 		evbuffer_remove(_buff, _head, MSG_SIZE_LEN);
 		uint32_t _msg_id = *reinterpret_cast<uint32_t*>(_head);
+
 		//! 
-		remote_callback(_msg_id, std::string("hello"));
+		char *_block = (char*)malloc(_msg_len - 8);
+		evbuffer_remove(_buff, _block, _msg_len - 8);
+		remote_callback(_msg_id, _block);
 
 		_buf_len = evbuffer_get_length(in_buf_);
 		if (_buf_len > MSG_SIZE_LEN) {

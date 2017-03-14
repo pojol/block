@@ -35,7 +35,7 @@ namespace gsf
 
 		virtual void dispatch(uint32_t target, uint32_t event, gsf::Args args, EventHandlerPtr callback = nullptr);
 
-		virtual void remote_callback(uint32_t msg_id, std::string str);
+		virtual void remote_callback(uint32_t msg_id, char *block);
 
 		virtual void remote(uint32_t fd, std::string str);
 
@@ -103,7 +103,7 @@ namespace gsf
 
 		void add_cmd(uint32_t type_id, uint32_t event, gsf::Args args, EventHandlerPtr callback = nullptr);
 
-		void add_remote_callback(uint32_t msg_id, std::string str);
+		void add_remote_callback(uint32_t msg_id, char *block);
 
     private:
 		typedef std::unordered_map<uint32_t, EventFunc> InnerMap;
@@ -111,9 +111,9 @@ namespace gsf
 
 		typedef std::list<std::tuple<uint32_t, uint32_t, gsf::Args, EventHandlerPtr>> CmdList;
 
-		typedef std::list<std::pair<uint32_t, std::string>> RemoteCallbackList;
+		typedef std::list<std::pair<uint32_t, char *>> RemoteCallbackList;
 
-		typedef std::unordered_map<uint32_t, std::function<void(std::string)>> RemoteMap;
+		typedef std::unordered_map<uint32_t, std::function<void(char *)>> RemoteMap;
 
 		TypeMap type_map_;
 		CmdList cmd_list_;

@@ -24,6 +24,8 @@
 
 #include <random>
 
+#include <google/protobuf/message.h>
+#include "test.pb.h"
 
 class EntityMgr
 	: public gsf::Module
@@ -48,11 +50,12 @@ public:
 		}
 	}
 
-	void test_remote(std::string str)
+	void test_remote(char *block)
 	{
-		std::cout << str.c_str() << std::endl;
-
-	
+		test::info _info;
+		_info.ParseFromArray(block, 9);
+		
+		std::cout << _info.id() << " " << _info.name() << std::endl;
 	}
 
 };

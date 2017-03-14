@@ -10,7 +10,7 @@ namespace gsf
 {
 	class Arg
 	{
-		typedef Variant<bool, uint32_t, int32_t, uint64_t, int64_t, std::string, std::function<void(std::string)>> av;
+		typedef Variant<bool, uint32_t, int32_t, uint64_t, int64_t, std::string, std::function<void(char *)>> av;
 	public:
 		void set_bool(const bool var)
 		{
@@ -42,7 +42,7 @@ namespace gsf
 			v_ = std::string(var);
 		}
 
-		void set_remote_callback(std::function<void(std::string)> var)
+		void set_remote_callback(std::function<void(char *)> var)
 		{
 			v_ = var;
 		}
@@ -113,7 +113,7 @@ namespace gsf
 			arg_list_.push_back(_arg);
 		}
 
-		void add(std::function<void(std::string)> func)
+		void add(std::function<void(char *)> func)
 		{
 			auto _arg = std::make_shared<Arg>();
 			_arg->set_remote_callback(func);
@@ -206,7 +206,7 @@ namespace gsf
 			return var->v_.Get<std::string>();
 		}
 
-		const std::function<void(std::string)> pop_remote_callback(const int index)
+		const std::function<void(char *)> pop_remote_callback(const int index)
 		{
 #ifdef _DEBUG
 			assert(index >= 0 && index < size_);
@@ -216,7 +216,7 @@ namespace gsf
 			}
 #endif
 			auto var = arg_list_[index];
-			return var->v_.Get<std::function<void(std::string)>>();
+			return var->v_.Get<std::function<void(char *)>>();
 		}
 
 		Args & operator << (const bool value)
@@ -255,7 +255,7 @@ namespace gsf
 			return *this;
 		}
 
-		Args & operator << (std::function<void(std::string)> value)
+		Args & operator << (std::function<void(char *)> value)
 		{
 			add(value);
 			return *this;
