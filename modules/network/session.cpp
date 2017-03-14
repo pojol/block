@@ -3,8 +3,6 @@
 
 #include <iostream>
 
-#include <google/protobuf/message.h>
-
 gsf::network::Session::Session(::bufferevent *bev, int fd)
     : bev_(bev)
     , fd_(fd)
