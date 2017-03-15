@@ -1,6 +1,8 @@
 #include "session.h"
 #include "session_mgr.h"
 
+#include <args/block.h>
+
 #include <iostream>
 
 gsf::network::Session::Session(::bufferevent *bev, int fd)
@@ -82,9 +84,9 @@ void gsf::network::Session::read(::bufferevent *bev)
 		uint32_t _msg_id = *reinterpret_cast<uint32_t*>(_head);
 
 		//! 
-		char *_block = (char*)malloc(_msg_len - 8);
-		evbuffer_remove(_buff, _block, _msg_len - 8);
-		remote_callback(_msg_id, _block);
+		auto _blockptr = std::make_shared<Block>(_msg_len - 8);
+		evbuffer_remove(_buff, _blockptr->buf_, _blockptr->size_);
+		remote_callback(_msg_id, _blockptr);
 
 		_buf_len = evbuffer_get_length(in_buf_);
 		if (_buf_len > MSG_SIZE_LEN) {

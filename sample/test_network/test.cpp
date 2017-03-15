@@ -24,7 +24,6 @@
 
 #include <random>
 
-#include <google/protobuf/message.h>
 #include "test.pb.h"
 
 class EntityMgr
@@ -50,11 +49,10 @@ public:
 		}
 	}
 
-	void test_remote(char *block)
+	void test_remote(gsf::BlockPtr blockptr)
 	{
-		test::info _info;
-		_info.ParseFromArray(block, 9);
-		
+		test_network::Info _info;
+		_info.ParseFromArray(blockptr->buf_, blockptr->size_);
 		std::cout << _info.id() << " " << _info.name() << std::endl;
 	}
 
@@ -106,6 +104,8 @@ int main()
 		exit(1);
 	}
 #endif // WIN32
+
+	GOOGLE_PROTOBUF_VERIFY_VERSION;
 
 	new gsf::Application;
 	new gsf::EventModule;

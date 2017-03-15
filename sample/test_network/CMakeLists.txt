@@ -41,7 +41,7 @@ endif()
 if(APPLE)
 endif()
 
-FILE(GLOB_RECURSE SRC "*.cpp" "*.h")
+FILE(GLOB_RECURSE SRC "*.cpp" "*.h" "*.cc")
 ADD_EXECUTABLE(test_network ${SRC})
 
 if(MSVC)
