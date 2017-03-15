@@ -26,7 +26,7 @@ namespace gsf
 			: public gsf::Door
 		{
 		public:
-			Session(::bufferevent *bev, int fd);
+			Session(::bufferevent *bev, int fd, int door, std::function<void (int)> disconnect_callback);
 			~Session();
 
 			static void read_cb(::bufferevent *bev, void *ctx);
@@ -43,6 +43,10 @@ namespace gsf
 
 		private:
 			int fd_;
+			int door_;
+
+			std::function<void(int)> disconnect_callback_;
+
 			::bufferevent *bev_;
 
 			::evbuffer *in_buf_;

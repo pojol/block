@@ -35,14 +35,16 @@ namespace gsf
 
 			SessionPtr find(int fd);
 
-			SessionPtr make_session(::bufferevent *bev, int fd);
+			SessionPtr make_session(::bufferevent *bev, int fd, int door);
 
 			int cur_max_connet() const;
 
 		private:
-			
+
 			typedef std::unordered_map<int32_t, SessionPtr> SessionQueue;
 			SessionQueue session_queue_;
+
+			std::vector<int> disconnect_vec_;
 
 			uint32_t session_index_;
 		};

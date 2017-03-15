@@ -1,14 +1,18 @@
 #include "session.h"
 #include "session_mgr.h"
 
-#include <args/block.h>
+#include <args/args.h>
+#include "network_event_list.h"
 
 #include <iostream>
 
-gsf::network::Session::Session(::bufferevent *bev, int fd)
+gsf::network::Session::Session(::bufferevent *bev, int fd, int door, std::function<void (int)> disconnect_callback)
     : bev_(bev)
     , fd_(fd)
+	, door_(door)
 {
+	disconnect_callback_ = disconnect_callback;
+
 	in_buf_ = evbuffer_new();
 	out_buf_ = evbuffer_new();
 }
@@ -101,5 +105,9 @@ void gsf::network::Session::read(::bufferevent *bev)
 
 void gsf::network::Session::dis_connect()
 {
+	disconnect_callback_(fd_);
 
+	gsf::Args args;
+	args << uint32_t(fd_);
+	dispatch(door_, event_id::network::dis_connect, args);
 }

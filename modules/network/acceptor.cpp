@@ -107,7 +107,7 @@ void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, 
 		return;
 	}
 
-	auto _session_ptr = network_ptr_->session_mgr_->make_session(bev, fd);
+	auto _session_ptr = network_ptr_->session_mgr_->make_session(bev, fd, network_ptr_->door_id_);
 	bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, _session_ptr.get());
 	bufferevent_enable(bev, EV_READ | EV_WRITE);
 

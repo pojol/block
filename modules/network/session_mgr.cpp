@@ -13,9 +13,9 @@ gsf::network::SessionMgr::~SessionMgr()
 
 }
 
-gsf::network::SessionPtr gsf::network::SessionMgr::make_session(::bufferevent *bev, int fd)
+gsf::network::SessionPtr gsf::network::SessionMgr::make_session(::bufferevent *bev, int fd, int door)
 {
-	auto _session_ptr = std::make_shared<Session>(bev, fd);
+	auto _session_ptr = std::make_shared<Session>(bev, fd, door, std::bind(&SessionMgr::set_need_close, this, std::placeholders::_1));
 	session_queue_.insert(std::make_pair(fd, _session_ptr));
 
 	return _session_ptr;
@@ -33,12 +33,20 @@ gsf::network::SessionPtr gsf::network::SessionMgr::find(int fd)
 
 void gsf::network::SessionMgr::set_need_close(int fd)
 {
-
+	disconnect_vec_.push_back(fd);
 }
 
 void gsf::network::SessionMgr::close()
 {
+	for (int fd : disconnect_vec_)
+	{
+		auto _itr = session_queue_.find(fd);
+		if (_itr != session_queue_.end()) {
+			session_queue_.erase(_itr);
+		}
+	}
 
+	disconnect_vec_.clear();
 }
 
 int gsf::network::SessionMgr::cur_max_connet() const

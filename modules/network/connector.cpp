@@ -88,11 +88,16 @@ void gsf::network::ConnectorModule::make_connector(gsf::Args args, gsf::EventHan
 		return;
 	}
 
-	session_ptr_ = std::make_shared<Session>(_bev_ptr, _fd);
+	session_ptr_ = std::make_shared<Session>(_bev_ptr, _fd, _door, std::bind(&ConnectorModule::need_close_session, this, std::placeholders::_1));
 	bufferevent_setcb(_bev_ptr, Session::read_cb, NULL, Session::err_cb, session_ptr_.get());
 	bufferevent_enable(_bev_ptr, EV_READ | EV_WRITE);
 
 	gsf::Args res;
 	res << uint32_t(_fd);
 	dispatch(door_id_, event_id::network::new_connect, res);
+}
+
+void gsf::network::ConnectorModule::need_close_session(int fd)
+{
+	// 
 }

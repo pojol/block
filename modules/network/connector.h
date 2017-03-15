@@ -40,6 +40,7 @@ namespace gsf
 		private:
 			void make_connector(gsf::Args args, gsf::EventHandlerPtr callback);
 			
+			void need_close_session(int fd);
 
 		private:
 
