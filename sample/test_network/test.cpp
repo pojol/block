@@ -26,6 +26,15 @@
 
 #include "test.pb.h"
 
+class Client2LoginModule
+	: public gsf::network::AcceptorModule
+{
+public:
+
+private:
+
+};
+
 class EntityMgr
 	: public gsf::Module
 	, public gsf::Door
@@ -55,21 +64,10 @@ public:
 		_info.ParseFromArray(blockptr->buf_, blockptr->size_);
 		std::cout << _info.id() << " " << _info.name() << std::endl;
 
-		int _len = _info.ByteSize();
-		auto _msg = std::make_shared<gsf::Block>(_len);
-		if (_info.SerializeToArray(_msg->buf_, _len)) {
+		_info.set_name("world");
 
-		}
+		AppRef.sendmsg<Client2LoginModule>(this, fd, 1002, _info);
 	}
-
-};
-
-class Client2LoginModule
-	: public gsf::network::AcceptorModule
-{
-public:
-
-private:
 
 };
 

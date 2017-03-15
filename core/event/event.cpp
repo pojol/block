@@ -32,6 +32,17 @@ void gsf::EventModule::execute()
 		remote_callback_list_.pop_front();
 	}
 
+	while (!remote_event_list_.empty())
+	{
+		auto itr = remote_event_list_.begin();
+
+		auto fitr = remote_event_map_.find(std::get<0>(*itr));
+		if (fitr != remote_event_map_.end()){
+			fitr->second(std::get<1>(*itr), std::get<2>(*itr), std::get<3>(*itr));
+		}
+
+		remote_event_list_.pop_front();
+	}
 }
 
 gsf::EventModule::EventModule()
@@ -65,6 +76,14 @@ void gsf::EventModule::bind_event(uint32_t type_id, uint32_t event, EventFunc fu
 	}
 }
 
+void gsf::EventModule::bind_remote_event(uint32_t type_id, RemoteEventFunc func)
+{
+	auto itr = remote_event_map_.find(type_id);
+	if (itr != remote_event_map_.end()){
+		remote_event_map_.insert(std::make_pair(type_id, func));
+	}
+}
+
 void gsf::EventModule::add_cmd(uint32_t type_id, uint32_t event, gsf::Args args, EventHandlerPtr callback /*= nullptr*/)
 {
 	if (event == event_id::network::bind_remote_callback) {
@@ -86,6 +105,11 @@ void gsf::EventModule::add_remote_callback(uint32_t msg_id, uint32_t fd, BlockPt
 	remote_callback_list_.push_back(std::make_tuple(msg_id, fd, blockptr));
 }
 
+void gsf::EventModule::add_remote_cmd(uint32_t type_id, std::vector<uint32_t> fd_list, uint32_t msg_id, BlockPtr blockptr)
+{
+	remote_event_list_.push_back(std::make_tuple(type_id, fd_list, msg_id, blockptr));
+}
+
 gsf::Door::Door()
 {
 }
@@ -100,12 +124,19 @@ void gsf::Door::dispatch(uint32_t target, uint32_t event, gsf::Args args, EventH
 	EventModule::get_ref().add_cmd(target, event, args, callback);
 }
 
-void gsf::Door::remote_callback(uint32_t msg_id, uint32_t fd, BlockPtr blockptr)
+void gsf::Door::remote_callback(uint32_t fd, uint32_t msg_id, BlockPtr blockptr)
 {
 	EventModule::get_ref().add_remote_callback(msg_id, fd, blockptr);
 }
 
-void gsf::Door::sendmsg(uint32_t fd, uint32_t msg_id, BlockPtr blockptr)
+void gsf::Door::listen_remote(Module *target, RemoteEventFunc func)
 {
+	EventModule::get_ref().bind_remote_event(target->get_module_id(), func);
+}
 
+void gsf::Door::dispatch_remote(uint32_t target, uint32_t fd, uint32_t msg_id, BlockPtr blockptr)
+{
+	std::vector<uint32_t> fd_list;
+	fd_list.push_back(fd);
+	EventModule::get_ref().add_remote_cmd(target, fd_list, msg_id, blockptr);
 }

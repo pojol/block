@@ -21,10 +21,10 @@
 
 namespace gsf
 {
-	typedef std::function<void(gsf::Args, EventHandlerPtr)> EventFunc;
-
 	typedef std::pair<uint32_t, uint32_t> EventPair;
 	typedef std::function<void(gsf::Args, EventHandlerPtr)> EventFunc;
+	typedef std::function<void(std::vector<uint32_t>, uint32_t, BlockPtr)> RemoteEventFunc;
+
 	class Module;
 
 	class Door
@@ -36,9 +36,11 @@ namespace gsf
 
 		virtual void dispatch(uint32_t target, uint32_t event, gsf::Args args, EventHandlerPtr callback = nullptr);
 
-		virtual void remote_callback(uint32_t msg_id, uint32_t fd, BlockPtr blockptr);
+		virtual void listen_remote(Module *target, RemoteEventFunc func);
 
-		virtual void sendmsg(uint32_t fd, uint32_t msg_id, BlockPtr blockptr);
+		virtual void dispatch_remote(uint32_t target, uint32_t fd, uint32_t msg_id, BlockPtr blockptr);
+
+		virtual void remote_callback(uint32_t fd, uint32_t msg_id, BlockPtr blockptr);
 
 	private:
 	};
@@ -102,7 +104,11 @@ namespace gsf
 
 		void bind_event(uint32_t type_id, uint32_t event, EventFunc func);
 
+		void bind_remote_event(uint32_t type_id, RemoteEventFunc func);
+
 		void add_cmd(uint32_t type_id, uint32_t event, gsf::Args args, EventHandlerPtr callback = nullptr);
+
+		void add_remote_cmd(uint32_t type_id, std::vector<uint32_t> fd_list, uint32_t msg_id, BlockPtr blockptr);
 
 		void add_remote_callback(uint32_t msg_id, uint32_t fd, BlockPtr blockptr);
 
@@ -121,6 +127,10 @@ namespace gsf
 
 		RemoteCallbackList remote_callback_list_;
 		RemoteMap remote_map_;
+
+		//! 绑定发送socket消息函数
+		std::unordered_map<uint32_t, RemoteEventFunc> remote_event_map_;
+		std::list<std::tuple<uint32_t, std::vector<uint32_t>, uint32_t, BlockPtr>> remote_event_list_;
 	};
 }
 

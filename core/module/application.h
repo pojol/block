@@ -1,6 +1,7 @@
 #ifndef _GSF_APPLICATION_HEADER_
 #define _GSF_APPLICATION_HEADER_
 
+#include <event/event.h>
 #include "module.h"
 
 #include <stdint.h>
@@ -26,6 +27,9 @@ namespace gsf
 		template <typename T>
 		uint32_t find_module_id();
 
+		template <typename M, typename T>
+		void sendmsg(Door *door, uint32_t fd, uint32_t msg_id, T msg);
+
 		void run();
 
 		virtual void tick() {}
@@ -47,6 +51,18 @@ namespace gsf
 
 		uint32_t module_id_;
 	};
+
+	template <typename M, typename T>
+	void gsf::Application::sendmsg(Door *door, uint32_t fd, uint32_t msg_id, T msg)
+	{
+		uint32_t _nid = find_module_id<M>();
+
+		int _len = msg.ByteSize();
+		auto _msg = std::make_shared<gsf::Block>(_len);
+		msg.SerializeToArray(_msg->buf_, _len);
+
+		door->dispatch_remote(_nid, fd, msg_id, _msg);
+	}
 
 	template <typename T>
 	void gsf::Application::regist_module(T *module)

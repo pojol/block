@@ -32,7 +32,7 @@ namespace gsf
 			static void read_cb(::bufferevent *bev, void *ctx);
 			static void err_cb(::bufferevent *bev, short what, void *ctx);
 
-			int write(::evbuffer *data);
+			int write(uint32_t msg_id, BlockPtr blockptr);
 			void read(::bufferevent *bev);
 
 			void dis_connect();

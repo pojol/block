@@ -31,6 +31,12 @@ void gsf::network::AcceptorModule::init()
 		, std::bind(&AcceptorModule::make_acceptor, this
 		, std::placeholders::_1
 		, std::placeholders::_2));
+
+	listen_remote(this
+		, std::bind(&AcceptorModule::send_msg, this
+		, std::placeholders::_1
+		, std::placeholders::_2
+		, std::placeholders::_3));
 }
 
 void gsf::network::AcceptorModule::execute()
@@ -115,5 +121,16 @@ void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, 
 	gsf::Args args;
 	args << uint32_t(fd);
 	network_ptr_->dispatch(network_ptr_->door_id_, event_id::network::new_connect, args);
+}
+
+void gsf::network::AcceptorModule::send_msg(std::vector<uint32_t> fd_vec, uint32_t msg_id, BlockPtr blockptr)
+{
+	for (auto fd : fd_vec)
+	{
+		auto _session_ptr = session_mgr_->find(fd);
+		if (_session_ptr){
+			_session_ptr->write(msg_id, blockptr);
+		}
+	}
 }
 

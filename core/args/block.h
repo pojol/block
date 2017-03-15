@@ -20,6 +20,12 @@ namespace gsf
 			free(buf_);
 		}
 
+		void push_msghead(uint32_t len, uint32_t msg_id)
+		{
+			// 这里要考虑下大小端的问题。
+			
+		}
+
 		char *buf_;
 		uint32_t size_;
 	};

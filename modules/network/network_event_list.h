@@ -17,7 +17,6 @@ namespace event_id
 
 		const uint32_t bind_remote_callback = 2003;
 
-
 		//! result code
 		const uint32_t new_connect = 1;
 		const uint32_t dis_connect = 2;

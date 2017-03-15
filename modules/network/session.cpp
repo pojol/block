@@ -55,9 +55,14 @@ void gsf::network::Session::err_cb(::bufferevent *bev, short what, void *ctx)
 	bufferevent_free(bev);
 }
 
-int gsf::network::Session::write(::evbuffer *data)
+int gsf::network::Session::write(uint32_t msg_id, BlockPtr blockptr)
 {
-	evbuffer_write(data, fd_);
+	::evbuffer * buf = evbuffer_new();
+
+	blockptr->push_msghead(blockptr->size_ + MSG_SIZE_LEN + MSG_ID_LEN, msg_id);
+	evbuffer_add(buf, blockptr->buf_, blockptr->size_);
+
+	evbuffer_write(buf, fd_);
 	return 0;
 }
 
@@ -90,7 +95,7 @@ void gsf::network::Session::read(::bufferevent *bev)
 		//! 
 		auto _blockptr = std::make_shared<Block>(_msg_len - 8);
 		evbuffer_remove(_buff, _blockptr->buf_, _blockptr->size_);
-		remote_callback(_msg_id, fd_, _blockptr);
+		remote_callback(fd_, _msg_id, _blockptr);
 
 		_buf_len = evbuffer_get_length(in_buf_);
 		if (_buf_len > MSG_SIZE_LEN) {
