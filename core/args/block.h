@@ -15,6 +15,11 @@ namespace gsf
 			buf_ = (char*)malloc(size_);
 		}
 
+		~Block()
+		{
+			free(buf_);
+		}
+
 		char *buf_;
 		uint32_t size_;
 	};
