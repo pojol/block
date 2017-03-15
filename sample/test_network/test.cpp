@@ -37,7 +37,7 @@ public:
 		uint32_t _em_id = AppRef.find_module_id<gsf::EventModule>();
 
 		auto arr = {
-			std::make_pair(uint32_t(1001), std::bind(&EntityMgr::test_remote, this, std::placeholders::_1)),
+			std::make_pair(uint32_t(1001), std::bind(&EntityMgr::test_remote, this, std::placeholders::_1, std::placeholders::_2)),
 		};
 
 		for (auto nod : arr)
@@ -49,11 +49,17 @@ public:
 		}
 	}
 
-	void test_remote(gsf::BlockPtr blockptr)
+	void test_remote(uint32_t fd, gsf::BlockPtr blockptr)
 	{
 		test_network::Info _info;
 		_info.ParseFromArray(blockptr->buf_, blockptr->size_);
 		std::cout << _info.id() << " " << _info.name() << std::endl;
+
+		int _len = _info.ByteSize();
+		auto _msg = std::make_shared<gsf::Block>(_len);
+		if (_info.SerializeToArray(_msg->buf_, _len)) {
+
+		}
 	}
 
 };

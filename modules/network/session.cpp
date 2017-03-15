@@ -90,7 +90,7 @@ void gsf::network::Session::read(::bufferevent *bev)
 		//! 
 		auto _blockptr = std::make_shared<Block>(_msg_len - 8);
 		evbuffer_remove(_buff, _blockptr->buf_, _blockptr->size_);
-		remote_callback(_msg_id, _blockptr);
+		remote_callback(_msg_id, fd_, _blockptr);
 
 		_buf_len = evbuffer_get_length(in_buf_);
 		if (_buf_len > MSG_SIZE_LEN) {
