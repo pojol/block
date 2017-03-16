@@ -58,8 +58,9 @@ namespace gsf
 		uint32_t _nid = find_module_id<M>();
 
 		int _len = msg.ByteSize();
-		auto _msg = std::make_shared<gsf::Block>(_len);
-		msg.SerializeToArray(_msg->buf_, _len);
+		auto _msg = std::make_shared<gsf::Block>(fd, msg_id, _len);
+
+		msg.SerializeToArray(_msg->buf_ + _msg->pos_, _len);
 
 		door->dispatch_remote(_nid, fd, msg_id, _msg);
 	}

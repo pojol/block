@@ -5,29 +5,46 @@
 
 namespace gsf
 {
-	// ¶Ôchar*×öÏÂ¼òÒ×·â×°£¬·½±ã»ØÊÕºÍÊ¹ÓÃ
+	// å¯¹äºŒè¿›åˆ¶å—åšä¸‹ç®€å•å°è£…ï¼Œ æ–¹ä¾¿å›æ”¶å†…å­˜ã€‚
 
 	struct Block
 	{
 		Block(uint32_t size)
 			: size_(size)
+			, pos_(0)
 		{
 			buf_ = (char*)malloc(size_);
+		}
+
+		Block(uint32_t fd, uint32_t msg_id, uint32_t len)
+			: size_(len + sizeof(fd) + sizeof(msg_id))
+			, pos_(0)
+		{
+			//! æš‚ä¸è€ƒè™‘å¤§å°ç«¯
+			buf_ = (char*)malloc(size_);
+
+			push_uint32(len, buf_ + pos_);
+			pos_ += sizeof(len);
+
+			push_uint32(msg_id, buf_ + pos_);
+			pos_ += sizeof(msg_id);
+		}
+
+		void push_uint32(uint32_t val, char *buf)
+		{
+			*(uint32_t*)(void*)buf = val;
 		}
 
 		~Block()
 		{
 			free(buf_);
-		}
-
-		void push_msghead(uint32_t len, uint32_t msg_id)
-		{
-			// ÕâÀïÒª¿¼ÂÇÏÂ´óĞ¡¶ËµÄÎÊÌâ¡£
-			
+			size_ = 0;
+			pos_ = 0;
 		}
 
 		char *buf_;
 		uint32_t size_;
+		uint32_t pos_;
 	};
 
 	typedef std::shared_ptr<Block> BlockPtr;

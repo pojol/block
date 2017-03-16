@@ -24,8 +24,7 @@ void gsf::EventModule::execute()
 		auto itr = remote_callback_list_.begin();
 
 		auto fItr = remote_map_.find(std::get<0>(*itr));
-		if (fItr != remote_map_.end())
-		{
+		if (fItr != remote_map_.end()) {
 			fItr->second(std::get<1>(*itr), std::get<2>(*itr));
 		}
 
@@ -36,7 +35,8 @@ void gsf::EventModule::execute()
 	{
 		auto itr = remote_event_list_.begin();
 
-		auto fitr = remote_event_map_.find(std::get<0>(*itr));
+		uint32_t _door = std::get<0>(*itr);
+		auto fitr = remote_event_map_.find(_door);
 		if (fitr != remote_event_map_.end()){
 			fitr->second(std::get<1>(*itr), std::get<2>(*itr), std::get<3>(*itr));
 		}
@@ -80,8 +80,10 @@ void gsf::EventModule::bind_remote_event(uint32_t type_id, RemoteEventFunc func)
 {
 	auto itr = remote_event_map_.find(type_id);
 	if (itr != remote_event_map_.end()){
-		remote_event_map_.insert(std::make_pair(type_id, func));
+		return;
 	}
+
+	remote_event_map_.insert(std::make_pair(type_id, func));
 }
 
 void gsf::EventModule::add_cmd(uint32_t type_id, uint32_t event, gsf::Args args, EventHandlerPtr callback /*= nullptr*/)
