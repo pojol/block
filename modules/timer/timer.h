@@ -39,7 +39,7 @@ namespace gsf
 
 		class TimerModule
                 : public gsf::Module
-                , public gsf::Door
+                , public gsf::IEvent
 		{
 		public:
 			

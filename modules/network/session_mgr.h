@@ -35,7 +35,7 @@ namespace gsf
 
 			SessionPtr find(int fd);
 
-			SessionPtr make_session(::bufferevent *bev, int fd, int door);
+			SessionPtr make_session(::bufferevent *bev, int fd, int module_id);
 
 			int cur_max_connet() const;
 

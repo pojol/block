@@ -62,11 +62,11 @@ void gsf::network::AcceptorModule::after_shut()
 
 void gsf::network::AcceptorModule::make_acceptor(gsf::Args args, gsf::EventHandlerPtr callback)
 {
-	uint32_t _door = args.pop_uint32(0);
+	uint32_t _module_id = args.pop_uint32(0);
 	std::string _ip = args.pop_string(1);
 	uint32_t _port = args.pop_uint32(2);
 
-	door_id_ = _door;
+	module_id_ = _module_id;	//! 绑定代理Module的id
 	accept_bind(_ip, _port);
 }
 
@@ -113,14 +113,14 @@ void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, 
 		return;
 	}
 
-	auto _session_ptr = network_ptr_->session_mgr_->make_session(bev, fd, network_ptr_->door_id_);
+	auto _session_ptr = network_ptr_->session_mgr_->make_session(bev, fd, network_ptr_->module_id_);
 	bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, _session_ptr.get());
 	bufferevent_enable(bev, EV_READ | EV_WRITE);
 
 	// dispatch event connect
 	gsf::Args args;
 	args << uint32_t(fd);
-	network_ptr_->dispatch(network_ptr_->door_id_, event_id::network::new_connect, args);
+	network_ptr_->dispatch(network_ptr_->module_id_, event_id::network::new_connect, args);
 }
 
 void gsf::network::AcceptorModule::send_msg(std::vector<uint32_t> fd_vec, uint32_t msg_id, BlockPtr blockptr)

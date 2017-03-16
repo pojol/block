@@ -28,7 +28,7 @@ namespace gsf
 		uint32_t find_module_id();
 
 		template <typename M, typename T>
-		void sendmsg(Door *door, uint32_t fd, uint32_t msg_id, T msg);
+		void sendmsg(IEvent *event_ptr, uint32_t fd, uint32_t msg_id, T msg);
 
 		void run();
 
@@ -53,7 +53,7 @@ namespace gsf
 	};
 
 	template <typename M, typename T>
-	void gsf::Application::sendmsg(Door *door, uint32_t fd, uint32_t msg_id, T msg)
+	void gsf::Application::sendmsg(IEvent *event_ptr, uint32_t fd, uint32_t msg_id, T msg)
 	{
 		uint32_t _nid = find_module_id<M>();
 
@@ -62,7 +62,7 @@ namespace gsf
 
 		msg.SerializeToArray(_msg->buf_ + _msg->pos_, _len);
 
-		door->dispatch_remote(_nid, fd, msg_id, _msg);
+		event_ptr->dispatch_remote(_nid, fd, msg_id, _msg);
 	}
 
 	template <typename T>

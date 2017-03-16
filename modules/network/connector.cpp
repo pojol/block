@@ -64,11 +64,11 @@ void gsf::network::ConnectorModule::after_shut()
 
 void gsf::network::ConnectorModule::make_connector(gsf::Args args, gsf::EventHandlerPtr callback)
 {
-	uint32_t _door = args.pop_uint32(0);
+	uint32_t _module_id = args.pop_uint32(0);
 	std::string _ip = args.pop_string(1);
 	uint32_t _port = args.pop_uint32(2);
 
-	door_id_ = _door;
+	module_id_ = _module_id;
 
 	::bufferevent *_bev_ptr = bufferevent_socket_new(event_base_ptr_, -1, BEV_OPT_CLOSE_ON_FREE);
 	if (!_bev_ptr) {
@@ -88,13 +88,13 @@ void gsf::network::ConnectorModule::make_connector(gsf::Args args, gsf::EventHan
 		return;
 	}
 
-	session_ptr_ = std::make_shared<Session>(_bev_ptr, _fd, _door, std::bind(&ConnectorModule::need_close_session, this, std::placeholders::_1));
+	session_ptr_ = std::make_shared<Session>(_bev_ptr, _fd, _module_id, std::bind(&ConnectorModule::need_close_session, this, std::placeholders::_1));
 	bufferevent_setcb(_bev_ptr, Session::read_cb, NULL, Session::err_cb, session_ptr_.get());
 	bufferevent_enable(_bev_ptr, EV_READ | EV_WRITE);
 
 	gsf::Args res;
 	res << uint32_t(_fd);
-	dispatch(door_id_, event_id::network::new_connect, res);
+	dispatch(_module_id, event_id::network::new_connect, res);
 }
 
 void gsf::network::ConnectorModule::need_close_session(int fd)

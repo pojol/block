@@ -5,6 +5,8 @@
 #ifndef _GSF_EVENT_HEADER_
 #define _GSF_EVENT_HEADER_
 
+#pragma warning(disable:4819)
+
 #include "../module/module.h"
 #include "event_handler.h"
 
@@ -27,19 +29,37 @@ namespace gsf
 
 	class Module;
 
-	class Door
+	class IEvent
 	{
 	public:
-		Door();
+		IEvent();
 
+		// --local--
+		/**!
+			用于侦听模块之间的消息
+		*/
 		virtual void listen(Module *target, uint32_t event, EventFunc func);
 
+		/**!
+			用于将事件发往不同模块
+		*/
 		virtual void dispatch(uint32_t target, uint32_t event, gsf::Args args, EventHandlerPtr callback = nullptr);
 
+
+		// --remote--
+		/**!
+			侦听向远程发送的事件
+		*/
 		virtual void listen_remote(Module *target, RemoteEventFunc func);
 
+		/**!
+			向远程发送
+		*/
 		virtual void dispatch_remote(uint32_t target, uint32_t fd, uint32_t msg_id, BlockPtr blockptr);
 
+		/**!
+			远程消息订阅的callback
+		*/
 		virtual void remote_callback(uint32_t fd, uint32_t msg_id, BlockPtr blockptr);
 
 	private:
@@ -49,13 +69,13 @@ namespace gsf
 	/*
 	struct AllSuccess
 	{
-		void listen(gsf::Door *door, std::vector<uint32_t> vec, std::function<void()> func)
+		void listen(gsf::IEvent *IEvent, std::vector<uint32_t> vec, std::function<void()> func)
 		{
 			count_ = vec.size();
 
 			for (auto itr = vec.begin(); itr != vec.end(); ++itr)
 			{
-				door->listen_callback(*itr, [&](gsf::Args args) {
+				IEvent->listen_callback(*itr, [&](gsf::Args args) {
 					count_--;
 
 					if (count_ == 0) {
@@ -77,11 +97,11 @@ namespace gsf
 
 	struct AnyoneFail
 	{
-		void listen(gsf::Door * door, std::vector<uint32_t> vec, std::function<void()> func)
+		void listen(gsf::IEvent * event_id, std::vector<uint32_t> vec, std::function<void()> func)
 		{
 			for (auto itr = vec.begin(); itr != vec.end(); ++itr)
 			{
-				door->listen_callback(*itr, [&](gsf::Args args) {
+				event_id->listen_callback(*itr, [&](gsf::Args args) {
 					func();
 					return;
 				});
@@ -94,7 +114,7 @@ namespace gsf
 			: public gsf::utils::Singleton<EventModule>
 			, public Module
 	{
-		friend class Door;
+		friend class IEvent;
 
 	public:
 		EventModule();

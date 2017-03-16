@@ -37,7 +37,7 @@ private:
 
 class EntityMgr
 	: public gsf::Module
-	, public gsf::Door
+	, public gsf::IEvent
 {
 public:
 
@@ -73,7 +73,7 @@ public:
 
 class Client2LoginProxy
 	: public gsf::Module
-	, public gsf::Door
+	, public gsf::IEvent
 {
 public:
 	void init()

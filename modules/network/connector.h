@@ -23,7 +23,7 @@ namespace gsf
 
 		class ConnectorModule
 			: public gsf::Module
-			, public gsf::Door
+			, public gsf::IEvent
 		{
 		public:
 			ConnectorModule();
@@ -44,7 +44,7 @@ namespace gsf
 
 		private:
 
-			uint32_t door_id_;
+			uint32_t module_id_;
 
 			event_base *event_base_ptr_;
 

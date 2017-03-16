@@ -35,8 +35,8 @@ void gsf::EventModule::execute()
 	{
 		auto itr = remote_event_list_.begin();
 
-		uint32_t _door = std::get<0>(*itr);
-		auto fitr = remote_event_map_.find(_door);
+		uint32_t _event_id = std::get<0>(*itr);
+		auto fitr = remote_event_map_.find(_event_id);
 		if (fitr != remote_event_map_.end()){
 			fitr->second(std::get<1>(*itr), std::get<2>(*itr), std::get<3>(*itr));
 		}
@@ -112,31 +112,31 @@ void gsf::EventModule::add_remote_cmd(uint32_t type_id, std::vector<uint32_t> fd
 	remote_event_list_.push_back(std::make_tuple(type_id, fd_list, msg_id, blockptr));
 }
 
-gsf::Door::Door()
+gsf::IEvent::IEvent()
 {
 }
 
-void gsf::Door::listen(Module *target, uint32_t event, EventFunc func)
+void gsf::IEvent::listen(Module *target, uint32_t event, EventFunc func)
 {
 	EventModule::get_ref().bind_event(target->get_module_id(), event, func);
 }
 
-void gsf::Door::dispatch(uint32_t target, uint32_t event, gsf::Args args, EventHandlerPtr callback /* = nullptr */)
+void gsf::IEvent::dispatch(uint32_t target, uint32_t event, gsf::Args args, EventHandlerPtr callback /* = nullptr */)
 {
 	EventModule::get_ref().add_cmd(target, event, args, callback);
 }
 
-void gsf::Door::remote_callback(uint32_t fd, uint32_t msg_id, BlockPtr blockptr)
+void gsf::IEvent::remote_callback(uint32_t fd, uint32_t msg_id, BlockPtr blockptr)
 {
 	EventModule::get_ref().add_remote_callback(msg_id, fd, blockptr);
 }
 
-void gsf::Door::listen_remote(Module *target, RemoteEventFunc func)
+void gsf::IEvent::listen_remote(Module *target, RemoteEventFunc func)
 {
 	EventModule::get_ref().bind_remote_event(target->get_module_id(), func);
 }
 
-void gsf::Door::dispatch_remote(uint32_t target, uint32_t fd, uint32_t msg_id, BlockPtr blockptr)
+void gsf::IEvent::dispatch_remote(uint32_t target, uint32_t fd, uint32_t msg_id, BlockPtr blockptr)
 {
 	std::vector<uint32_t> fd_list;
 	fd_list.push_back(fd);

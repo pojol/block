@@ -23,10 +23,10 @@ namespace gsf
 		static const uint32_t MSG_ID_LEN = 4;
 
 		class Session
-			: public gsf::Door
+			: public gsf::IEvent
 		{
 		public:
-			Session(::bufferevent *bev, int fd, int door, std::function<void (int)> disconnect_callback);
+			Session(::bufferevent *bev, int fd, int event_id, std::function<void (int)> disconnect_callback);
 			~Session();
 
 			static void read_cb(::bufferevent *bev, void *ctx);
@@ -43,7 +43,7 @@ namespace gsf
 
 		private:
 			int fd_;
-			int door_;
+			int module_id_;
 
 			std::function<void(int)> disconnect_callback_;
 

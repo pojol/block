@@ -26,7 +26,7 @@
 
 class TestClickModule
         : public gsf::Module
-        , public gsf::Door
+        , public gsf::IEvent
 {
 public:
 	void init()

@@ -22,7 +22,7 @@ namespace gsf
 
 		class AcceptorModule
 			: public gsf::Module
-			, public gsf::Door
+			, public gsf::IEvent
 		{
 		public:
 			AcceptorModule();
@@ -50,7 +50,7 @@ namespace gsf
 
 		private:
 
-			uint32_t door_id_;
+			uint32_t module_id_;
 
 			SessionMgr *session_mgr_;
 
