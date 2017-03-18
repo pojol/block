@@ -18,20 +18,6 @@
   * Args 
       * 结构可以填充事件的参数（可扩充类型，和数量。
 * 部署分布式结构
-
---------
-> * apps
-   * login
-   * dbproxy
-   * cell
-   * scheduler
-   * monitor
-> * modules
-   * acceptor
-   * connector
-   * message_queue
-   * meta_data
-   * timer
     
 --------
 
@@ -44,7 +30,7 @@
 
 --------
 
-> * network
+> * network sample
 ```c++
 class Client2LoginProxy
 	: public gsf::Module
@@ -83,7 +69,7 @@ public:
 	{
 		uint32_t _em_id = AppRef.find_module_id<gsf::EventModule>();
         
-        using std::placeholders;
+        	using std::placeholders;
 		auto arr = {
 			std::make_pair(uint32_t(1001), std::bind(&EntityMgr::fun_msg1001, this, _1, _2)),
 			std::make_pair(uint32_t(1002), std::bind(&EntityMgr::fun_msg1002, this, _1, _2)),
@@ -106,7 +92,7 @@ public:
 
 		_info.set_name("world");
         
-        //! 向client发出消息
+        	//! 向client发出消息
 		AppRef.sendmsg<C2LAcceptorModule>(this, fd, 1002, _info);
 	}
 };
