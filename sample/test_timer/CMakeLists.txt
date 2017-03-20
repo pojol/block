@@ -53,7 +53,7 @@ if(MSVC)
       endif()
     endforeach()
 
-        TARGET_LINK_LIBRARIES(test_timer ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib module.lib event.lib stream.lib timer.lib)
+        TARGET_LINK_LIBRARIES(test_timer ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib module.lib event.lib timer.lib)
 elseif(UNIX)
         TARGET_LINK_LIBRARIES(test_timer utils.a timer.a)
 elseif(APPLE)

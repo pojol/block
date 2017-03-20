@@ -57,7 +57,7 @@ if(MSVC)
       endif()
     endforeach()
 
-        TARGET_LINK_LIBRARIES(test_network libevent.lib libevent_core.lib libevent_extras.lib network.lib module.lib event.lib stream.lib ws2_32.lib libprotocd.lib libprotobufd.lib)
+        TARGET_LINK_LIBRARIES(test_network libevent.lib libevent_core.lib libevent_extras.lib network.lib module.lib event.lib ws2_32.lib libprotocd.lib libprotobufd.lib libglog_static.lib log.lib)
 endif()
 if(UNIX)
         TARGET_LINK_LIBRARIES(test_network libstream.a libnetwork.a libevent.a libevent_core.a libevent_extra.a libutils.a libtimer.a)

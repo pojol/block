@@ -20,6 +20,8 @@
 #include <network/acceptor.h>
 #include <network/connector.h>
 
+#include <log/log.h>
+
 #include <iostream>
 
 #include <random>
@@ -43,6 +45,15 @@ public:
 
 	void init()
 	{
+		//test
+		gsf::Args cfg;
+		cfg << std::string("network_test") << std::string("E:\\github\\gsf\\build\\bin");
+		dispatch(AppRef.find_module_id<gsf::modules::LogModule>(), event_id::log::init, cfg);
+
+		gsf::Args args;
+		args << std::string("hello, log!");
+		dispatch(AppRef.find_module_id<gsf::modules::LogModule>(), event_id::log::info, args);
+
 		uint32_t _em_id = AppRef.find_module_id<gsf::EventModule>();
 
 		auto arr = {
@@ -115,6 +126,7 @@ int main()
 	new gsf::EventModule;
 
 	AppRef.regist_module(gsf::EventModule::get_ptr());
+	AppRef.regist_module(new gsf::modules::LogModule);
 	AppRef.regist_module(new Client2LoginModule);
 	AppRef.regist_module(new Client2LoginProxy);
 	AppRef.regist_module(new EntityMgr);
