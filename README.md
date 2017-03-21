@@ -24,8 +24,9 @@
 * depend
     * c++11
     * cmake 2.8+
-    * google protobuf   
-    * libevent2.x       
+    * google protobuf 3.2.0
+    * google glog 0.3.4
+    * libevent 2.0.22
     * redis
 
 --------
