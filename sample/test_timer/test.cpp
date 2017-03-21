@@ -35,12 +35,12 @@ public:
 		uint32_t _timer_module_id = AppRef.find_module_id<gsf::modules::TimerModule>();
 
 		// test1
-		listen(this, event_id::timer::make_timer_success
+		listen(this, eid::timer::make_timer_success
 			, [=](gsf::Args args, gsf::EventHandlerPtr callback) {
 			std::cout << "success by event id : " << args.pop_uint32(0) << std::endl;
 		});
 
-		listen(this, event_id::timer::make_timer_fail
+		listen(this, eid::timer::make_timer_fail
 			, [=](gsf::Args args, gsf::EventHandlerPtr callback) {
 			std::cout << "fail by error id : " << args.pop_uint32(0) << std::endl;
 		});
@@ -48,21 +48,21 @@ public:
 		gsf::Args args;
 		args << get_module_id() << uint32_t(1000);
 
-		dispatch(_timer_module_id, event_id::timer::delay_milliseconds
+		dispatch(_timer_module_id, eid::timer::delay_milliseconds
 			, args
 			, make_callback(&TestClickModule::test_1, this, std::string("hello,timer!")));
 		
 
 		// test2
 		/*		
-		listen_callback(event_id::timer::make_timer_success, [&](gsf::Args os) {
+		listen_callback(eid::timer::make_timer_success, [&](gsf::Args os) {
 			tick_++;
 			uint32_t _timer_id = os.pop_uint32(10);
 
 			if (tick_ == 4) {
 				gsf::Args args;
 				args << get_door_id() << _timer_id;
-				dispatch(event_id::timer::remove_timer, args);
+				dispatch(eid::timer::remove_timer, args);
 			}
 		});
 
@@ -71,7 +71,7 @@ public:
 			gsf::Args args;
 			args << get_door_id() << uint32_t(i * 1000);
 
-			dispatch(event_id::timer::delay_milliseconds
+			dispatch(eid::timer::delay_milliseconds
 				, args
 				, make_callback(&TestClickModule::test_2, this, i));
 		}
@@ -82,7 +82,7 @@ public:
 			gsf::Args args;
 			args << get_door_id() << uint32_t(i * 10);
 
-			dispatch(event_id::timer::delay_milliseconds
+			dispatch(eid::timer::delay_milliseconds
 				, args
 				, make_callback(&TestClickModule::test_2, this, i));
 		}

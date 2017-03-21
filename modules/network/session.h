@@ -26,7 +26,7 @@ namespace gsf
 			: public gsf::IEvent
 		{
 		public:
-			Session(::bufferevent *bev, int fd, int event_id, std::function<void (int)> disconnect_callback);
+			Session(::bufferevent *bev, int fd, int eid, std::function<void (int)> disconnect_callback);
 			~Session();
 
 			static void read_cb(::bufferevent *bev, void *ctx);

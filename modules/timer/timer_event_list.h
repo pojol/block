@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-namespace event_id
+namespace eid
 {
 	namespace timer
 	{
@@ -23,7 +23,7 @@ namespace event_id
 		//! args {"uint32_t":module_id, "uint32_t":day, "uint32_t":hour}
 		const uint32_t delay_month = 1004;
 
-		//! args {"uint32_t":module_id, "uint32_t":event_id}
+		//! args {"uint32_t":module_id, "uint32_t":eid}
 		const uint32_t remove_timer = 1005;
 
 

@@ -112,5 +112,5 @@ void gsf::network::Session::dis_connect()
 
 	gsf::Args args;
 	args << uint32_t(fd_);
-	dispatch(module_id_, event_id::network::dis_connect, args);
+	dispatch(module_id_, eid::network::dis_connect, args);
 }

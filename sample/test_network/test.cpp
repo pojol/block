@@ -28,7 +28,15 @@
 
 #include "test.pb.h"
 
-class Client2LoginModule
+class AppFace
+{
+public:
+
+
+
+};
+
+class Client2LoginServer
 	: public gsf::network::AcceptorModule
 {
 public:
@@ -45,14 +53,27 @@ public:
 
 	void init()
 	{
-		//test
-		gsf::Args cfg;
-		cfg << std::string("network_test") << std::string("E:\\github\\gsf\\build\\bin");
-		dispatch(AppRef.find_module_id<gsf::modules::LogModule>(), event_id::log::init, cfg);
+		char _path[512];
+		GetModuleFileName(NULL, _path, 512);
+		//取出文件路径
+		for (int i = strlen(_path); i >= 0; i--)
+		{
+			if (_path[i] == '\\')
+			{
+				_path[i] = '\0';
+				break;
+			}
+		}
 
-		gsf::Args args;
-		args << std::string("hello, log!");
-		dispatch(AppRef.find_module_id<gsf::modules::LogModule>(), event_id::log::info, args);
+		//test
+		dispatch(AppRef.find_module_id<gsf::modules::LogModule>(), eid::log::init, gsf::Args(std::string(_path)));
+
+		dispatch(AppRef.find_module_id<gsf::modules::LogModule>(), eid::log::info
+			, gsf::Args(uint32_t(111), std::string(" info, log!")));
+		dispatch(AppRef.find_module_id<gsf::modules::LogModule>(), eid::log::warning
+			, gsf::Args(uint32_t(111), std::string(" warning, log!")));
+		dispatch(AppRef.find_module_id<gsf::modules::LogModule>(), eid::log::error
+			, gsf::Args(uint32_t(111), std::string(" err, log!")));
 
 		uint32_t _em_id = AppRef.find_module_id<gsf::EventModule>();
 
@@ -65,7 +86,7 @@ public:
 			//! 向协议绑定器申请，module 和 协议的绑定.
 			gsf::Args args;
 			args << get_module_id() << nod.first << nod.second;
-			dispatch(_em_id, event_id::network::bind_remote_callback, args);
+			dispatch(_em_id, eid::network::bind_remote_callback, args);
 		}
 	}
 
@@ -77,7 +98,7 @@ public:
 
 		_info.set_name("world");
 
-		AppRef.sendmsg<Client2LoginModule>(this, fd, 1002, _info);
+		AppRef.sendmsg<Client2LoginServer>(this, fd, 1002, _info);
 	}
 
 };
@@ -89,21 +110,21 @@ class Client2LoginProxy
 public:
 	void init()
 	{
-		uint32_t _c2l_id = AppRef.find_module_id<Client2LoginModule>();
+		uint32_t _c2l_id = AppRef.find_module_id<Client2LoginServer>();
 
-		listen(this, event_id::network::new_connect
+		listen(this, eid::network::new_connect
 			, [=](gsf::Args args, gsf::EventHandlerPtr callback) {
 			std::cout << "new connect fd = " << args.pop_uint32(0) << std::endl;
 		});
 
-		listen(this, event_id::network::dis_connect
+		listen(this, eid::network::dis_connect
 			, [=](gsf::Args args, gsf::EventHandlerPtr callback){
 			std::cout << "dis connect fd = " << args.pop_uint32(0) << std::endl;
 		});
 
 		gsf::Args args;
 		args << get_module_id() << std::string("127.0.0.1") << uint32_t(8001);
-		dispatch(_c2l_id, event_id::network::make_acceptor, args);
+		dispatch(_c2l_id, eid::network::make_acceptor, args);
 	}
 };
 
@@ -127,7 +148,7 @@ int main()
 
 	AppRef.regist_module(gsf::EventModule::get_ptr());
 	AppRef.regist_module(new gsf::modules::LogModule);
-	AppRef.regist_module(new Client2LoginModule);
+	AppRef.regist_module(new Client2LoginServer);
 	AppRef.regist_module(new Client2LoginProxy);
 	AppRef.regist_module(new EntityMgr);
 

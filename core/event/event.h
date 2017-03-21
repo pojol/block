@@ -91,17 +91,17 @@ namespace gsf
 	};
 
 	//AllSuccess as;
-	//as.listen(this, {event_id::timer::make_timer_success}, [&](){
+	//as.listen(this, {eid::timer::make_timer_success}, [&](){
 	//	std::cout << "success !" << std::endl;
 	//});
 
 	struct AnyoneFail
 	{
-		void listen(gsf::IEvent * event_id, std::vector<uint32_t> vec, std::function<void()> func)
+		void listen(gsf::IEvent * eid, std::vector<uint32_t> vec, std::function<void()> func)
 		{
 			for (auto itr = vec.begin(); itr != vec.end(); ++itr)
 			{
-				event_id->listen_callback(*itr, [&](gsf::Args args) {
+				eid->listen_callback(*itr, [&](gsf::Args args) {
 					func();
 					return;
 				});

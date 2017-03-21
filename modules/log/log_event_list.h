@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-namespace event_id
+namespace eid
 {
 	namespace log
 	{

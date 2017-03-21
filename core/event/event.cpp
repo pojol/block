@@ -35,8 +35,8 @@ void gsf::EventModule::execute()
 	{
 		auto itr = remote_event_list_.begin();
 
-		uint32_t _event_id = std::get<0>(*itr);
-		auto fitr = remote_event_map_.find(_event_id);
+		uint32_t _eid = std::get<0>(*itr);
+		auto fitr = remote_event_map_.find(_eid);
 		if (fitr != remote_event_map_.end()){
 			fitr->second(std::get<1>(*itr), std::get<2>(*itr), std::get<3>(*itr));
 		}
@@ -88,7 +88,7 @@ void gsf::EventModule::bind_remote_event(uint32_t type_id, RemoteEventFunc func)
 
 void gsf::EventModule::add_cmd(uint32_t type_id, uint32_t event, gsf::Args args, EventHandlerPtr callback /*= nullptr*/)
 {
-	if (event == event_id::network::bind_remote_callback) {
+	if (event == eid::network::bind_remote_callback) {
 
 		uint32_t _module_id = args.pop_uint32(0);	//预留在这里，如果是分布式则需要将这次注册同步到协调Server
 		uint32_t _msg_id = args.pop_uint32(1);

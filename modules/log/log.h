@@ -31,7 +31,7 @@ namespace gsf
 			void log_error(gsf::Args args, gsf::EventHandlerPtr callback);
 
 		private:
-			std::list <std::pair<uint32_t, std::string>> log_;
+			std::list <std::pair<uint32_t, gsf::Args>> log_;
 		};
 	}
 }

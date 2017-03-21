@@ -19,39 +19,47 @@ namespace gsf
 		void set_bool(const bool var)
 		{
 			v_ = bool(var);
+			idx_ = 0;
 		}
 
 		void set_uint32(const uint32_t var)
 		{
 			v_ = uint32_t(var);
+			idx_ = 1;
 		}
 
 		void set_int32(const int32_t var)
 		{
 			v_ = int32_t(var);
+			idx_ = 2;
 		}
 
 		void set_uint64(const uint64_t var)
 		{
 			v_ = uint64_t(var);
+			idx_ = 3;
 		}
 
 		void set_int64(const int64_t var)
 		{
 			v_ = int64_t(var);
+			idx_ = 4;
 		}
 
 		void set_string(const std::string &var)
 		{
 			v_ = std::string(var);
+			idx_ = 5;
 		}
 
 		void set_remote_callback(RemoteFunc var)
 		{
 			v_ = var;
+			idx_ = 6;
 		}
 
 		av v_;
+		uint32_t idx_;
 	};
 
 	class Args
@@ -61,6 +69,30 @@ namespace gsf
 			: size_(0)
 		{
 
+		}
+
+		template <typename T1>
+		Args(T1 arg1)
+			: size_(0)
+		{	
+			add(arg1);
+		}
+
+		template <typename T1, typename T2>
+		Args(T1 arg1, T2 arg2)
+			: size_(0)
+		{
+			add(arg1);
+			add(arg2);
+		}
+
+		template <typename T1, typename T2, typename T3>
+		Args(T1 arg1, T2 arg2, T3 arg3)
+			: size_(0)
+		{
+			add(arg1);
+			add(arg2);
+			add(arg3);
 		}
 
 		void add(const bool value)
@@ -221,6 +253,12 @@ namespace gsf
 #endif
 			auto var = arg_list_[index];
 			return var->v_.Get<RemoteFunc>();
+		}
+
+		uint32_t get_typeid(const int index)
+		{
+			auto var = arg_list_[index];
+			return var->idx_;
 		}
 
 		Args & operator << (const bool value)

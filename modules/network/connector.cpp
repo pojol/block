@@ -39,7 +39,7 @@ void gsf::network::ConnectorModule::before_init()
 
 void gsf::network::ConnectorModule::init()
 {
-	listen(this, event_id::network::make_connector
+	listen(this, eid::network::make_connector
 		, std::bind(&ConnectorModule::make_connector, this
 		, std::placeholders::_1
 		, std::placeholders::_2));
@@ -94,7 +94,7 @@ void gsf::network::ConnectorModule::make_connector(gsf::Args args, gsf::EventHan
 
 	gsf::Args res;
 	res << uint32_t(_fd);
-	dispatch(_module_id, event_id::network::new_connect, res);
+	dispatch(_module_id, eid::network::new_connect, res);
 }
 
 void gsf::network::ConnectorModule::need_close_session(int fd)
