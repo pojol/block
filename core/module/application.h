@@ -8,12 +8,9 @@
 #include <list>
 #include <unordered_map>
 
-#include "../../common/single.h"
-
 namespace gsf
 {
 	class Application
-		: public gsf::utils::Singleton<Application>
 	{
 
 	public:
@@ -93,7 +90,5 @@ namespace gsf
 		return 0;
 	}
 }
-
-#define AppRef gsf::Application::get_ref()
 
 #endif

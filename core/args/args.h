@@ -95,6 +95,27 @@ namespace gsf
 			add(arg3);
 		}
 
+		template <typename T1, typename T2, typename T3, typename T4>
+		Args(T1 arg1, T2 arg2, T3 arg3, T4 arg4)
+			: size_(0)
+		{
+			add(arg1);
+			add(arg2);
+			add(arg3);
+			add(arg4);
+		}
+
+		template <typename T1, typename T2, typename T3, typename T4, typename T5>
+		Args(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5)
+			: size_(0)
+		{
+			add(arg1);
+			add(arg2);
+			add(arg3);
+			add(arg4);
+			add(arg5);
+		}
+
 		void add(const bool value)
 		{
 			auto _arg = std::make_shared<Arg>();

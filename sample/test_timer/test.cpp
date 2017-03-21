@@ -24,6 +24,32 @@
 	#include <unistd.h>
 #endif
 
+class AppFace
+	: public gsf::utils::Singleton<AppFace>
+	, public gsf::IEvent
+{
+public:
+
+	void init(gsf::Application *app)
+	{
+		app_ = app;
+	}
+
+	template <typename M>
+	uint32_t get_module_id();
+
+private:
+	gsf::Application *app_;
+};
+
+template <typename M>
+uint32_t AppFace::get_module_id()
+{
+	return app_->find_module_id<M>();
+}
+
+#define Face AppFace::get_ref()
+
 class TestClickModule
         : public gsf::Module
         , public gsf::IEvent
@@ -32,7 +58,7 @@ public:
 	void init()
 	{
 		tick_ = 0;
-		uint32_t _timer_module_id = AppRef.find_module_id<gsf::modules::TimerModule>();
+		uint32_t _timer_module_id = Face.get_module_id<gsf::modules::TimerModule>();
 
 		// test1
 		listen(this, eid::timer::make_timer_success
@@ -106,14 +132,16 @@ private:
 
 int main()
 {
-	new gsf::Application;
+	auto appptr = new gsf::Application;
 	new gsf::EventModule;
+	new AppFace;
 
-	AppRef.regist_module(gsf::EventModule::get_ptr());
-	AppRef.regist_module(new gsf::modules::TimerModule);
-	AppRef.regist_module(new TestClickModule);
+	appptr->regist_module(gsf::EventModule::get_ptr());
+	appptr->regist_module(new gsf::modules::TimerModule);
+	appptr->regist_module(new TestClickModule);
 
-	AppRef.run();
+	Face.init(appptr);
+	appptr->run();
 
 	return 0;
 }

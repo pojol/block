@@ -28,13 +28,85 @@
 
 #include "test.pb.h"
 
+#include "../../common/single.h"
+
 class AppFace
+	: public gsf::utils::Singleton<AppFace>
+	, public gsf::IEvent
 {
 public:
 
+	void init(gsf::Application *app)
+	{
+		app_ = app;
 
+		char _path[512];
+		GetModuleFileName(NULL, _path, 512);
+		//取出文件路径
+		for (int i = strlen(_path); i >= 0; i--)
+		{
+			if (_path[i] == '\\')
+			{
+				_path[i] = '\0';
+				break;
+			}
+		}
 
+		//test
+		dispatch2<gsf::modules::LogModule>(eid::log::init, gsf::Args(std::string(_path)));
+	}
+
+	void log_info(gsf::Args args);
+	void log_warning(gsf::Args args);
+	void log_err(gsf::Args args);
+
+	template <typename M, typename T>
+	void send_msg(IEvent *event_ptr, uint32_t fd, uint32_t msg_id, T msg);
+
+	template <typename M>
+	uint32_t get_module_id();
+
+	template <typename M>
+	void dispatch2(uint32_t eid, gsf::Args args);
+
+private:
+	gsf::Application *app_;
 };
+
+template <typename M>
+void AppFace::dispatch2(uint32_t eid, gsf::Args args)
+{
+	dispatch(app_->find_module_id<M>(), eid, args);
+}
+
+template <typename M>
+uint32_t AppFace::get_module_id()
+{
+	return app_->find_module_id<M>();
+}
+
+template <typename M, typename T>
+void AppFace::send_msg(IEvent *event_ptr, uint32_t fd, uint32_t msg_id, T msg)
+{
+	app_->sendmsg<M>(event_ptr, fd, msg_id, msg);
+}
+
+void AppFace::log_info(gsf::Args args)
+{
+	dispatch(app_->find_module_id<gsf::modules::LogModule>(), eid::log::info, args);
+}
+
+void AppFace::log_warning(gsf::Args args)
+{
+	dispatch(app_->find_module_id<gsf::modules::LogModule>(), eid::log::warning, args);
+}
+
+void AppFace::log_err(gsf::Args args)
+{
+	dispatch(app_->find_module_id<gsf::modules::LogModule>(), eid::log::error, args);
+}
+
+#define Face AppFace::get_ref()
 
 class Client2LoginServer
 	: public gsf::network::AcceptorModule
@@ -53,29 +125,11 @@ public:
 
 	void init()
 	{
-		char _path[512];
-		GetModuleFileName(NULL, _path, 512);
-		//取出文件路径
-		for (int i = strlen(_path); i >= 0; i--)
-		{
-			if (_path[i] == '\\')
-			{
-				_path[i] = '\0';
-				break;
-			}
-		}
+		Face.log_info(gsf::Args(uint32_t(111), std::string(" info, log!")));
+		Face.log_warning(gsf::Args(uint32_t(111), std::string(" warning, log!")));
+		Face.log_err(gsf::Args(uint32_t(111), std::string(" err, log!")));
 
-		//test
-		dispatch(AppRef.find_module_id<gsf::modules::LogModule>(), eid::log::init, gsf::Args(std::string(_path)));
-
-		dispatch(AppRef.find_module_id<gsf::modules::LogModule>(), eid::log::info
-			, gsf::Args(uint32_t(111), std::string(" info, log!")));
-		dispatch(AppRef.find_module_id<gsf::modules::LogModule>(), eid::log::warning
-			, gsf::Args(uint32_t(111), std::string(" warning, log!")));
-		dispatch(AppRef.find_module_id<gsf::modules::LogModule>(), eid::log::error
-			, gsf::Args(uint32_t(111), std::string(" err, log!")));
-
-		uint32_t _em_id = AppRef.find_module_id<gsf::EventModule>();
+		uint32_t _em_id = Face.get_module_id<gsf::EventModule>();
 
 		auto arr = {
 			std::make_pair(uint32_t(1001), std::bind(&EntityMgr::test_remote, this, std::placeholders::_1, std::placeholders::_2)),
@@ -94,11 +148,11 @@ public:
 	{
 		test_network::Info _info;
 		_info.ParseFromArray(blockptr->buf_, blockptr->size_);
-		std::cout << _info.id() << " " << _info.name() << std::endl;
+		Face.log_info(gsf::Args(_info.id(), std::string(" "), _info.name()));
 
 		_info.set_name("world");
 
-		AppRef.sendmsg<Client2LoginServer>(this, fd, 1002, _info);
+		Face.send_msg<Client2LoginServer>(this, fd, 1002, _info);
 	}
 
 };
@@ -110,7 +164,7 @@ class Client2LoginProxy
 public:
 	void init()
 	{
-		uint32_t _c2l_id = AppRef.find_module_id<Client2LoginServer>();
+		uint32_t _c2l_id = Face.get_module_id<Client2LoginServer>();
 
 		listen(this, eid::network::new_connect
 			, [=](gsf::Args args, gsf::EventHandlerPtr callback) {
@@ -124,7 +178,7 @@ public:
 
 		gsf::Args args;
 		args << get_module_id() << std::string("127.0.0.1") << uint32_t(8001);
-		dispatch(_c2l_id, eid::network::make_acceptor, args);
+		Face.dispatch2<Client2LoginServer>(eid::network::make_acceptor, args);
 	}
 };
 
@@ -143,16 +197,19 @@ int main()
 
 	GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-	new gsf::Application;
+	gsf::Application *appptr = new gsf::Application();
+	
+	new AppFace;
 	new gsf::EventModule;
+	
+	appptr->regist_module(gsf::EventModule::get_ptr());
+	appptr->regist_module(new gsf::modules::LogModule);
+	appptr->regist_module(new Client2LoginServer);
+	appptr->regist_module(new Client2LoginProxy);
+	appptr->regist_module(new EntityMgr);
 
-	AppRef.regist_module(gsf::EventModule::get_ptr());
-	AppRef.regist_module(new gsf::modules::LogModule);
-	AppRef.regist_module(new Client2LoginServer);
-	AppRef.regist_module(new Client2LoginProxy);
-	AppRef.regist_module(new EntityMgr);
-
-	AppRef.run();
+	Face.init(appptr);
+	appptr->run();
 
 	return 0;
 }
