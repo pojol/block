@@ -26,8 +26,8 @@ void gsf::modules::LuaScriptModule::execute()
 	for (auto itr : lua_map_)
 	{
 		lua_State *_L = itr.second;
-
-		int _err = lua_pcall(_L, 0, 0, 0);
+		
+		//! 这里是否可以通过将定制的module注册到lua，通过lua来调用c++类的execute
 	}
 }
 
@@ -42,13 +42,14 @@ void gsf::modules::LuaScriptModule::create_impl(gsf::Args args, gsf::EventHandle
 
 	uint32_t _module_id = args.pop_uint32(0);
 	std::string _path = args.pop_string(1);
-	std::string _file = args.pop_string(2);
 
 	lua_State *_L = luaL_newstate();
 	luaL_openlibs(_L);
 
-	int _err = luaL_dofile(_L, "F:\\github\\gsf\\sample\\test_script\\test_script.lua");
-	lua_getglobal(_L, "execute");
+	int _err = luaL_dofile(_L, _path.c_str());
+	_err = lua_getglobal(_L, "test_module");
+	if (!lua_istable(_L, -1)) {
+	}
 
 	lua_map_.push_back(std::make_pair(_module_id, _L));
 }

@@ -29,6 +29,7 @@ uint32_t AppFace::get_module_id()
 
 #define Face AppFace::get_ref()
 
+
 class TestLuaModule
 	: public gsf::Module
 	, public gsf::IEvent
@@ -39,20 +40,11 @@ public:
 	{
 		//test
 		dispatch(Face.get_module_id<gsf::modules::LuaScriptModule>(), eid::lua_proxy::create
-			, gsf::Args(get_module_id(), std::string("F:\\github\\gsf\\sample\\test_script")
-			, std::string("test_script.lua")));
+			, gsf::Args(get_module_id()
+			, std::string("E:/github/gsf/sample/test_script/test_script.lua")));
 	}
 
-	void execute()
-	{
-
-	}
-
-	void shut()
-	{
-
-	}
-
+	
 };
 
 int main()
