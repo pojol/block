@@ -6,19 +6,15 @@
 --------
 * 框架的驱动方式
   * application
-      * 管理所有的module，并在run方法内调度所有module的execute。
   * module 
-      * 框架中的所有逻辑都由module包装，注册进application。
 * Module之间的通信
   * IEvent 
-      * 提供事件接口，如果module需要监听或者派发事件则需要继承这个接口。
-      * 任何module都不能直接访问其他module，需要通过事件来传递消息。
   * find_module_id 
-      * 接口可以通过静态类型找到目标module的id
   * Args 
-      * 结构可以填充事件的参数（可扩充类型，和数量。
 * 部署分布式结构
-    
+  * t
+  
+--------
 ```python
 ---------------------------------------------------------->app
     ↑ regist    ↑      ↑        ↑         ↑       ↑
@@ -39,8 +35,8 @@
     * google protobuf 3.2.0
     * google glog 0.3.4
     * libevent 2.0.22
+    * lua 5.3
     * redis
-
 --------
 
 > * network sample
