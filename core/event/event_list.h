@@ -55,7 +55,11 @@ namespace eid
 
 	namespace lua_proxy
 	{
-		
+		const uint32_t create = 4001;
+
+		const uint32_t reload = 4002;
+
+		const uint32_t destroy = 4003;
 	}
 }
 

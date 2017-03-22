@@ -13,7 +13,7 @@ namespace gsf
 		Module();
 		virtual ~Module();
 
-		uint32_t get_module_id() const { return module_id_; }
+		uint32_t get_module_id() { return module_id_; }
 
 	protected:
 		virtual void before_init();

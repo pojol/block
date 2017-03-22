@@ -4,6 +4,14 @@
 #include <module/module.h>
 #include <event/event.h>
 
+extern "C"{
+	#include <lauxlib.h>
+	#include <lua.h>
+	#include <lualib.h>
+}
+
+#include <vector>
+
 namespace gsf
 {
 	namespace modules
@@ -20,6 +28,15 @@ namespace gsf
 
 		private:
 
+			void create_impl(gsf::Args args, gsf::EventHandlerPtr callback);
+
+			void destroy_impl(gsf::Args args, gsf::EventHandlerPtr callback);
+
+			void reload_impl(gsf::Args args, gsf::EventHandlerPtr callback);
+
+		private:
+
+			std::vector<std::pair<uint32_t, lua_State*>> lua_map_;
 		};
 	}
 }
