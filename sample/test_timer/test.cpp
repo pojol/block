@@ -16,7 +16,6 @@
 #include <event/event.h>
 
 #include <timer/timer.h>
-#include <timer/timer_event_list.h>
 
 #if defined(WIN32)
 	#include <windows.h>

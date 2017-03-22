@@ -151,7 +151,6 @@ public:
 		Face.log_info(gsf::Args(_info.id(), std::string(" "), _info.name()));
 
 		_info.set_name("world");
-
 		Face.send_msg<Client2LoginServer>(this, fd, 1002, _info);
 	}
 

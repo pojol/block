@@ -1,7 +1,5 @@
 #include "event.h"
 
-#include <network/network_event_list.h>
-
 void gsf::EventModule::execute()
 {
 	while (!cmd_list_.empty())

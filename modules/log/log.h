@@ -4,8 +4,6 @@
 #include <module/module.h>
 #include <event/event.h>
 
-#include "log_event_list.h"
-
 #include <list>
 
 namespace gsf

@@ -12,8 +12,6 @@
 #include <event2/util.h>
 #include <event2/listener.h>
 
-#include "network_event_list.h"
-
 namespace gsf
 {
 	namespace network
