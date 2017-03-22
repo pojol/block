@@ -52,6 +52,11 @@ namespace eid
 		const uint32_t make_timer_success = 3006;
 		const uint32_t make_timer_fail = 3007;
 	}
+
+	namespace lua_proxy
+	{
+		
+	}
 }
 
 #endif

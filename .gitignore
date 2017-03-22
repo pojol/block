@@ -1,5 +1,6 @@
 /build/*
 3rd/libevent-2.0.22-stable/*
+3rd/*
 /.idea/*
 tool/robot/__pycache__/
 tool/robot/scene/__pycache__/login.cpython-35.pyc
