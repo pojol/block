@@ -19,6 +19,17 @@
       * 结构可以填充事件的参数（可扩充类型，和数量。
 * 部署分布式结构
     
+```python
+---------------------------------------------------------->app
+    ↑ regist    ↑      ↑        ↑         ↑       ↑
+ network       log   event    dbproxy   timer   script
+ 
+ #程序所有的逻辑都由module实现，通过注册由app统一驱动。每个module都拥有唯一ID。
+ #如果是分布式则通过协调服务器生成后统一通知到每个app
+ #module 提供beforeinit, init, execute, shut, aftershut 五个方法，其中execute在每个服务器帧中调用。
+ #script module 由lua_state实现，使用方式同c++ module。 用户可以选择用自己喜欢的方式实现module
+```
+
 --------
 
 * depend
