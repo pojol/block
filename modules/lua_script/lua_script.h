@@ -28,15 +28,18 @@ namespace gsf
 
 		private:
 
-			void create_impl(gsf::Args args, gsf::EventHandlerPtr callback);
+			void create_event(gsf::Args args, gsf::EventHandlerPtr callback);
+			void create(uint32_t module_id, std::string path);
 
-			void destroy_impl(gsf::Args args, gsf::EventHandlerPtr callback);
+			void destroy_event(gsf::Args args, gsf::EventHandlerPtr callback);
+			void destroy(uint32_t module_id);
 
-			void reload_impl(gsf::Args args, gsf::EventHandlerPtr callback);
+			void reload_event(gsf::Args args, gsf::EventHandlerPtr callback);
 
 		private:
 
-			std::vector<std::pair<uint32_t, lua_State*>> lua_map_;
+			typedef std::vector<std::pair<uint32_t, lua_State*>> StateMap;
+			StateMap lua_map_;
 		};
 	}
 }

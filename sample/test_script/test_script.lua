@@ -1,17 +1,13 @@
-local test_module = {
-	init = function() end,
-	execute = function() end,
-	shut = function() end,
-}
+module = {}
 
-test_module.init = function()
+function module:init()
 	print(1)
 end
 
-test_module.execute = function()
+function module:execute()
 	print("hi")
 end
 
-test_module.shut = function()
+function module:shut()
 	print(2)
 end
