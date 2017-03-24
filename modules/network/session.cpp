@@ -5,9 +5,8 @@
 
 #include <iostream>
 
-gsf::network::Session::Session(::bufferevent *bev, int fd, int module_id, std::function<void (int)> disconnect_callback)
-    : bev_(bev)
-    , fd_(fd)
+gsf::network::Session::Session(int fd, int module_id, std::function<void (int)> disconnect_callback)
+    : fd_(fd)
 	, module_id_(module_id)
 {
 	disconnect_callback_ = disconnect_callback;
@@ -18,7 +17,13 @@ gsf::network::Session::Session(::bufferevent *bev, int fd, int module_id, std::f
 
 gsf::network::Session::~Session()
 {
+	if (in_buf_) {
+		evbuffer_free(in_buf_);
+	}
 	
+	if (out_buf_) {
+		evbuffer_free(out_buf_); 
+	}
 }
 
 void gsf::network::Session::read_cb(::bufferevent *bev, void *ctx)

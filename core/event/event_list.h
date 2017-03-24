@@ -19,15 +19,18 @@ namespace eid
 	namespace network
 	{
 		const uint32_t make_acceptor = 2001;
-
 		const uint32_t make_connector = 2002;
-
 		const uint32_t bind_remote_callback = 2003;
 
 		//! result code
 		const uint32_t new_connect = 2004;
 		const uint32_t dis_connect = 2005;
 		const uint32_t fail_connect = 2006;
+
+		const int32_t err_repeated_fd = -2001;				// repeated fd
+		const int32_t err_upper_limit_session = -2002;		// upper limit session!
+		const int32_t err_socket_new = -2003;				// bufferevent_socket_new err!
+		const int32_t err_socket_connect = -2004;			// bufferevent_socket_connect err!
 	}
 
 	namespace timer

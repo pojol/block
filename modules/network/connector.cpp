@@ -47,6 +47,8 @@ void gsf::network::ConnectorModule::init()
 
 void gsf::network::ConnectorModule::execute()
 {
+	//! 先处理断连
+
 	if (event_base_ptr_) {
 		event_base_loop(event_base_ptr_, EVLOOP_ONCE | EVLOOP_NONBLOCK);
 	}
@@ -70,34 +72,43 @@ void gsf::network::ConnectorModule::make_connector(gsf::Args args, gsf::EventHan
 
 	module_id_ = _module_id;
 
-	::bufferevent *_bev_ptr = bufferevent_socket_new(event_base_ptr_, -1, BEV_OPT_CLOSE_ON_FREE);
-	if (!_bev_ptr) {
-		printf("bufferevent_socket_new err!\n");
-		return;
+	int32_t _ret = 0;
+	int _fd = 0;
+	::bufferevent *_bev_ptr;
+
+	do {
+		_bev_ptr = bufferevent_socket_new(event_base_ptr_, -1, BEV_OPT_CLOSE_ON_FREE);
+		if (!_bev_ptr) {
+			_ret = eid::network::err_socket_new;
+			break;
+		}
+
+		struct sockaddr_in _sin;
+		memset(&_sin, 0, sizeof(_sin));
+		_sin.sin_family = AF_INET;
+		_sin.sin_port = htons(_port);
+		_sin.sin_addr.s_addr = inet_addr(_ip.c_str());
+
+		_fd = bufferevent_socket_connect(_bev_ptr, (sockaddr*)&_sin, sizeof(sockaddr_in));
+		if (_fd < 0) {
+			_ret = eid::network::err_socket_connect;
+			break;
+		}
+	} while (0);
+
+	if (_ret == 0) {
+		session_ptr_ = std::make_shared<Session>(_fd, _module_id, std::bind(&ConnectorModule::need_close_session, this, std::placeholders::_1));
+		bufferevent_setcb(_bev_ptr, Session::read_cb, NULL, Session::err_cb, session_ptr_.get());
+		bufferevent_enable(_bev_ptr, EV_READ | EV_WRITE);
+
+		gsf::Args res;
+		res << uint32_t(_fd);
+		dispatch(_module_id, eid::network::new_connect, res);
 	}
-
-	struct sockaddr_in _sin;
-	memset(&_sin, 0, sizeof(_sin));
-	_sin.sin_family = AF_INET;
-	_sin.sin_port = htons(_port);
-	_sin.sin_addr.s_addr = inet_addr(_ip.c_str());
-
-	int _fd = bufferevent_socket_connect(_bev_ptr, (sockaddr*)&_sin, sizeof(sockaddr_in));
-	if (_fd < 0) {
-		printf("bufferevent_socket_connect err!\n");
-		return;
-	}
-
-	session_ptr_ = std::make_shared<Session>(_bev_ptr, _fd, _module_id, std::bind(&ConnectorModule::need_close_session, this, std::placeholders::_1));
-	bufferevent_setcb(_bev_ptr, Session::read_cb, NULL, Session::err_cb, session_ptr_.get());
-	bufferevent_enable(_bev_ptr, EV_READ | EV_WRITE);
-
-	gsf::Args res;
-	res << uint32_t(_fd);
-	dispatch(_module_id, eid::network::new_connect, res);
 }
 
 void gsf::network::ConnectorModule::need_close_session(int fd)
 {
 	// 
+	disconnect_vec_.push_back(fd);
 }

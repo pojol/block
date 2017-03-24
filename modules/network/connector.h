@@ -47,6 +47,8 @@ namespace gsf
 			event_base *event_base_ptr_;
 
 			SessionPtr session_ptr_;
+
+			std::vector<int> disconnect_vec_;
 		};
 
 	}

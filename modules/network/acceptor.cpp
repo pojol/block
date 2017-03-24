@@ -93,34 +93,41 @@ void gsf::network::AcceptorModule::accept_bind(const std::string &ip, int port)
 void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, evutil_socket_t fd, sockaddr *sa, int socklen, void *arg)
 {
 	gsf::network::AcceptorModule *network_ptr_ = (gsf::network::AcceptorModule*)arg;
-
-	if (network_ptr_->session_mgr_->find(fd)) {
-		network_ptr_->session_mgr_->set_need_close(fd);
-		printf("repeated fd %d\n", fd);
-		return;
-	}
-
-	// check max connect
-	if (network_ptr_->session_mgr_->cur_max_connet() >= SESSION_MAX_CONNECT) {
-		printf("upper limit session!\n");
-		return;
-	}
-
 	::bufferevent *bev;
-	bev = bufferevent_socket_new(network_ptr_->event_base_ptr_, fd, BEV_OPT_CLOSE_ON_FREE);
-	if (!bev) {
-		printf("bufferevent_socket_new err!\n");
-		return;
+	int32_t _ret = 0;
+
+	do
+	{
+		if (network_ptr_->session_mgr_->find(fd)) {
+			network_ptr_->session_mgr_->set_need_close(fd);
+			_ret = eid::network::err_repeated_fd;
+			break;
+		}
+
+		// check max connect
+		if (network_ptr_->session_mgr_->cur_max_connet() >= SESSION_MAX_CONNECT) {
+			_ret = eid::network::err_upper_limit_session;
+			break;
+		}
+
+		bev = bufferevent_socket_new(network_ptr_->event_base_ptr_, fd, BEV_OPT_CLOSE_ON_FREE);
+		if (!bev) {
+			_ret = eid::network::err_socket_new;
+			break;
+		}
+
+	} while (0);
+
+	if (0 == _ret) {
+		auto _session_ptr = network_ptr_->session_mgr_->make_session(fd, network_ptr_->module_id_);
+		bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, _session_ptr.get());
+		bufferevent_enable(bev, EV_READ | EV_WRITE);
+
+		// dispatch event connect
+		gsf::Args args;
+		args << uint32_t(fd);
+		network_ptr_->dispatch(network_ptr_->module_id_, eid::network::new_connect, args);
 	}
-
-	auto _session_ptr = network_ptr_->session_mgr_->make_session(bev, fd, network_ptr_->module_id_);
-	bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, _session_ptr.get());
-	bufferevent_enable(bev, EV_READ | EV_WRITE);
-
-	// dispatch event connect
-	gsf::Args args;
-	args << uint32_t(fd);
-	network_ptr_->dispatch(network_ptr_->module_id_, eid::network::new_connect, args);
 }
 
 void gsf::network::AcceptorModule::send_msg(std::vector<uint32_t> fd_vec, uint32_t msg_id, BlockPtr blockptr)
