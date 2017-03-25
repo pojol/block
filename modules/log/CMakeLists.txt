@@ -4,7 +4,7 @@ PROJECT(log)
 INCLUDE_DIRECTORIES(
 	${GSF_SOURCE_DIR}/core
 	${GSF_SOURCE_DIR}/common
-	${GSF_SOURCE_DIR}/3rd/glog-0.3.4/src
+	${GSF_SOURCE_DIR}/3rd/glog-master/src
 )
 
 #引用库目录

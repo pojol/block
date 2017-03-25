@@ -54,7 +54,7 @@ namespace gsf
 		virtual void listen_remote(Module *target, RemoteEventFunc func);
 
 		/**!
-			向远程发送
+			向远程发送, 内部RPC调用的时候记得要有超时，防止产生故障时数据丢失。
 		*/
 		virtual void dispatch_remote(uint32_t target, uint32_t fd, uint32_t msg_id, BlockPtr blockptr);
 
