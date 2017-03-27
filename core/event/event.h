@@ -34,6 +34,7 @@ namespace gsf
 	{
 	public:
 		IEvent();
+		virtual ~IEvent();
 
 		// --local--
 		/**!

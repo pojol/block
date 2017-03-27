@@ -11,6 +11,7 @@ extern "C"{
 }
 
 #include <vector>
+#include <string>
 
 namespace gsf
 {
@@ -32,13 +33,16 @@ namespace gsf
 			void create(uint32_t module_id, std::string path);
 
 			void destroy_event(gsf::Args args, gsf::EventHandlerPtr callback);
-			void destroy(uint32_t module_id);
+			int destroy(uint32_t module_id);
 
 			void reload_event(gsf::Args args, gsf::EventHandlerPtr callback);
 
-		private:
+			int pcall(lua_State *L, const char * func);
 
-			typedef std::vector<std::pair<uint32_t, lua_State*>> StateMap;
+		private:
+			uint32_t log_module_;
+
+			typedef std::vector<std::tuple<uint32_t, lua_State*, std::string>> StateMap;
 			StateMap lua_map_;
 		};
 	}

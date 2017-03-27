@@ -54,7 +54,7 @@ if(MSVC)
       endif()
     endforeach()
 
-        TARGET_LINK_LIBRARIES(test_script ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib module.lib event.lib lua_script.lib lua53.lib)
+        TARGET_LINK_LIBRARIES(test_script ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib module.lib event.lib lua_script.lib lua53.lib glog.lib log.lib)
 elseif(UNIX)
         TARGET_LINK_LIBRARIES(test_script utils.a timer.a)
 elseif(APPLE)

@@ -114,6 +114,11 @@ gsf::IEvent::IEvent()
 {
 }
 
+gsf::IEvent::~IEvent()
+{
+
+}
+
 void gsf::IEvent::listen(Module *target, uint32_t event, EventFunc func)
 {
 	EventModule::get_ref().bind_event(target->get_module_id(), event, func);
