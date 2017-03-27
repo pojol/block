@@ -17,6 +17,7 @@ namespace gsf
 {
 	namespace modules
 	{
+
 		class LuaScriptModule
 			: public gsf::Module
 			, public gsf::IEvent

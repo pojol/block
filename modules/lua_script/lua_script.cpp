@@ -86,6 +86,7 @@ void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string path)
 	luaL_openlibs(_L);
 
 	int _err = luaL_dofile(_L, path.c_str());
+
 	if (_err != 0) {
 		dispatch(log_module_, eid::log::error, gsf::Args(std::string(lua_tostring(_L, -1))));
 	}
@@ -143,4 +144,3 @@ void gsf::modules::LuaScriptModule::reload_event(gsf::Args args, gsf::EventHandl
 
 	create(_module_id, _path);
 }
-

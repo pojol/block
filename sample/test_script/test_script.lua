@@ -1,9 +1,11 @@
+package.path = "E:/github/gsf/sample/test_script/?.lua"
+
 local _utils = require "utils"
 
 module = {}
 
 function module:init()
-	shut(1)
+	print("init")
 end
 
 function module:execute()
@@ -11,6 +13,6 @@ function module:execute()
 end
 
 function module:shut()
-	print(2)
+	print("shut")
 end
 
