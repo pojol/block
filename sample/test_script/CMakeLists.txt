@@ -7,6 +7,7 @@ if(WIN32)
 		${GSF_SOURCE_DIR}/modules
 		${GSF_SOURCE_DIR}/common
 		${GSF_SOURCE_DIR}/3rd/lua-5.3.4/src
+		${GSF_SOURCE_DIR}/3rd/sol2-2.16
 	)
 endif()
 if(UNIX)
