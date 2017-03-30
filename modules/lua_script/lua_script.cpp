@@ -3,27 +3,6 @@
 
 #include <algorithm>
 
-int gsf::modules::LuaScriptModule::pcall(lua_State *L, const char * func)
-{
-	int _ret = lua_getglobal(L, "module");
-	if (lua_isnil(L, -1))
-	{
-		return 0;
-	}
-
-	_ret = lua_getfield(L, -1, func);
-	if (lua_isnil(L, -1))
-	{
-		return 0;
-	}
-
-	if (lua_pcall(L, 0, 0, 0) != 0) {
-		dispatch(log_module_, eid::log::error, gsf::Args(std::string(lua_tostring(L, -1))));
-	}
-
-	return 0;
-}
-
 
 void gsf::modules::LuaScriptModule::init()
 {
@@ -52,10 +31,15 @@ void gsf::modules::LuaScriptModule::execute()
 	//!
 	for (auto itr : lua_map_)
 	{
-		lua_State *_L = std::get<1>(itr);
+		LuaState *_lua = std::get<1>(itr);
 
-		pcall(_L, "execute");
-		lua_settop(_L, 0);
+		try {
+			sol::table _module = _lua->state_.get<sol::table>("module");
+			_module.get<std::function<void()>>("execute")();
+		}
+		catch (sol::error e) {
+			dispatch(log_module_, eid::log::error, gsf::Args(std::string(e.what())));
+		}
 	}
 }
 
@@ -73,28 +57,46 @@ void gsf::modules::LuaScriptModule::shut()
 void gsf::modules::LuaScriptModule::create_event(gsf::Args args, gsf::EventHandlerPtr callback)
 {
 	//ÏÈÑéÖ¤Âß¼­
-
 	uint32_t _module_id = args.pop_uint32(0);
 	std::string _path = args.pop_string(1);
 
 	create(_module_id, _path);
 }
 
+void gsf::modules::LuaScriptModule::ldispatch(sol::variadic_args args)
+{	
+	std::cout << args.stack_index() << " " << args.get<uint32_t>(0) << " " << args.get<std::string>(1) << std::endl;
+}
+
 void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string path)
 {
-	lua_State *_L = luaL_newstate();
-	luaL_openlibs(_L);
+	LuaState *_lua = new LuaState();
+	_lua->state_.open_libraries(
+		sol::lib::os
+		, sol::lib::base
+		, sol::lib::package
+		, sol::lib::math
+		, sol::lib::io
+		, sol::lib::table
+		, sol::lib::string
+		, sol::lib::debug);
 
-	int _err = luaL_dofile(_L, path.c_str());
+	_lua->state_.do_file(path.c_str());
 
-	if (_err != 0) {
-		dispatch(log_module_, eid::log::error, gsf::Args(std::string(lua_tostring(_L, -1))));
+	_lua->state_.new_usertype<LuaScriptModule>("LuaScriptModule", "ldispatch", &LuaScriptModule::ldispatch);
+	_lua->state_.set("event", this);
+
+	try {
+
+		sol::table _module = _lua->state_.get<sol::table>("module");
+
+		_module.get<std::function<void(int)>>("init")(module_id);
+
+		lua_map_.push_back(std::make_tuple(module_id, _lua, path));
 	}
-
-	pcall(_L, "init");
-	lua_settop(_L, 0);
-
-	lua_map_.push_back(std::make_tuple(module_id, _L, path));
+	catch (sol::error e) {
+		dispatch(log_module_, eid::log::error, gsf::Args(std::string(e.what())));
+	}
 }
 
 void gsf::modules::LuaScriptModule::destroy_event(gsf::Args args, gsf::EventHandlerPtr callback)
@@ -113,12 +115,19 @@ int gsf::modules::LuaScriptModule::destroy(uint32_t module_id)
 		return -1;
 	}
 
-	lua_State *_L = std::get<1>(*itr);
+	LuaState *_lua = std::get<1>(*itr);
 
-	pcall(_L, "shut");
-	lua_settop(_L, 0);
+	try {
+		sol::table _module = _lua->state_.get<sol::table>("module");
 
-	lua_close(_L);
+		_module.get<std::function<void()>>("shut")();
+	}
+	catch (sol::error e) {
+		dispatch(log_module_, eid::log::error, gsf::Args(std::string(e.what())));
+	}
+
+	delete _lua;
+	_lua = nullptr;
 	lua_map_.erase(itr);
 
 	return 0;

@@ -78,7 +78,7 @@ public:
 		//test
 		dispatch(Face.get_module_id<gsf::modules::LuaScriptModule>(), eid::lua_proxy::create
 			, gsf::Args(get_module_id()
-			, std::string("F:/github/gsf/sample/test_script/test_script.lua")));
+			, std::string("E:/github/gsf/sample/test_script/test_script.lua")));
 	}
 
 	void shut()
