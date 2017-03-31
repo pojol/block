@@ -217,6 +217,7 @@ int main()
 	appptr->regist_module(new EntityMgr());
 
 	Face.init(appptr);
+	appptr->init();
 	appptr->run();
 
 	return 0;

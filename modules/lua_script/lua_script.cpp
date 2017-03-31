@@ -46,11 +46,10 @@ void gsf::modules::LuaScriptModule::init()
 			, std::placeholders::_1
 			, std::placeholders::_2));
 
-	/*
-	listen(this, eid::get_log_module, [&](gsf::Args args, gsf::EventHandlerPtr) {
+	dispatch(eid::app_id, eid::get_module, gsf::Args(std::string("LogModule")), [=](gsf::Args args)
+	{
 		log_module_ = args.pop_uint32(0);
 	});
-	*/
 }
 
 void gsf::modules::LuaScriptModule::execute()
@@ -90,11 +89,13 @@ void gsf::modules::LuaScriptModule::create_event(gsf::Args args, gsf::CallbackFu
 	create(_module_id, _path);
 }
 
-void gsf::modules::LuaScriptModule::ldispatch(uint32_t target, uint32_t event, gsf::Args args)
+void gsf::modules::LuaScriptModule::ldispatch(uint32_t target, uint32_t event, gsf::Args args, sol::function callback)
 {	
 	//std::cout << args.stack_index() << " " << args.get<uint32_t>(0) << " " << args.get<std::string>(1) << std::endl;
 
-	std::cout << target << event <<args.get_count() << std::endl;
+	std::cout << target << event << args.get_count() << std::endl;
+	
+	callback(gsf::Args(std::string("hello, callback")));
 }
 
 void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string path)
@@ -114,7 +115,8 @@ void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string path)
 
 	_lua->state_.new_usertype<Args>("Args"
 		, "push_uint32", &Args::push_uint32
-		, "push_string", &Args::push_string);
+		, "push_string", &Args::push_string
+		, "pop_string", &Args::pop_string);
 
 	_lua->state_.new_usertype<LuaScriptModule>("LuaScriptModule", "ldispatch", &LuaScriptModule::ldispatch);
 	_lua->state_.set("event", this);
@@ -127,8 +129,8 @@ void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string path)
 		lua_map_.push_back(std::make_tuple(module_id, _lua, path));
 	}
 	catch (sol::error e) {
-		std::cout << Traceback(_lua->state_.lua_state()).data() << std::endl;
-		dispatch(log_module_, eid::log::error, gsf::Args(std::string(e.what())));
+		std::string _err = Traceback(_lua->state_.lua_state()) + "\n" + e.what();
+		dispatch(log_module_, eid::log::error, gsf::Args(_err));
 	}
 }
 

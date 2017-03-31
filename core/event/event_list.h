@@ -7,10 +7,9 @@
 
 namespace eid
 {
-	const uint32_t get_log_module = 101;
-	const uint32_t get_network_module = 102;
-	const uint32_t get_timer_module = 103;
-	const uint32_t get_lua_module = 104;
+	const uint32_t app_id = 1;
+
+	const uint32_t get_module = 101;
 
 	namespace log
 	{

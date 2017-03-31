@@ -47,6 +47,7 @@ namespace gsf
 
 		std::list<Module *> module_list_;
 		std::unordered_map<uint32_t, uint32_t> module_id_map_;
+		std::unordered_map<std::string, uint32_t> module_name_map_;
 
 		bool shutdown_;
 
@@ -80,6 +81,7 @@ namespace gsf
 		module->set_id(make_module_id());
 
 		module_id_map_.insert(std::make_pair(_type_id, module->get_module_id()));
+		module_name_map_.insert(std::make_pair(module->get_module_name(), module->get_module_id()));
 	}
 
 	template <typename T>

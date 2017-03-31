@@ -37,7 +37,7 @@ namespace gsf
 		private:
 			//! 待实现，需要一个有效的方式包装或者让脚本直接调用dispatch
 			//sol::variadic_args args
-			void ldispatch(uint32_t target, uint32_t event, gsf::Args args);
+			void ldispatch(uint32_t target, uint32_t event, gsf::Args args, sol::function callback = nullptr);
 
 			//! 创建一个新的lua module
 			void create_event(gsf::Args args, gsf::CallbackFunc callback);

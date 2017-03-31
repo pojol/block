@@ -1,4 +1,4 @@
-package.path = "F:/github/gsf/sample/test_script/?.lua"
+package.path = "E:/github/gsf/sample/test_script/?.lua"
 
 local _utils = require "utils"
 
@@ -16,7 +16,8 @@ module = {
 
 event = nil
 
-function test_timer(des)
+function test_timer(args)
+	print(args:pop_string(0))
 end
 
 module.init = function(module_id)
@@ -24,8 +25,7 @@ module.init = function(module_id)
 	local _args = Args.new()
 	_args:push_uint32(1)
 	_args:push_string("hello")
-	event:ldispatch(0, 101, _args)
-	
+	event:ldispatch(0, 101, _args, test_timer)
 	
 end
 

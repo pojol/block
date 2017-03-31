@@ -13,12 +13,21 @@ gsf::Application::Application()
 	, delay_(20)
 	, module_idx_(2)
 {
-	module_id_ = 1;
+	module_id_ = eid::app_id;
 }
 
 void gsf::Application::init()
 {
+	listen(this, eid::get_module, [=](gsf::Args args, CallbackFunc callback) {
+		
+		std::string _name = args.pop_string(0);
 	
+		auto itr = module_name_map_.find(_name);
+		if (itr != module_name_map_.end()) {
+			callback(gsf::Args(itr->second));
+		}
+
+	});
 }
 
 void gsf::Application::run()

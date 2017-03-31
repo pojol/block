@@ -144,6 +144,7 @@ int main()
 	appptr->regist_module(new TestClickModule());
 
 	Face.init(appptr);
+	appptr->init();
 	appptr->run();
 
 	return 0;

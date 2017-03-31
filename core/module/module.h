@@ -14,6 +14,7 @@ namespace gsf
 		virtual ~Module();
 
 		uint32_t get_module_id() { return module_id_; }
+		std::string & get_module_name() { return name_; }
 
 	protected:
 		virtual void before_init();

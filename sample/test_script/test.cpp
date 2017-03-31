@@ -75,14 +75,10 @@ public:
 
 	void init()
 	{
-		dispatch(Face.get_module_id<gsf::modules::LuaScriptModule>()
-			, eid::get_log_module
-			, gsf::Args(Face.get_module_id<gsf::modules::LogModule>()));
-
 		//test
 		dispatch(Face.get_module_id<gsf::modules::LuaScriptModule>(), eid::lua_proxy::create
 			, gsf::Args(get_module_id()
-			, std::string("F:/github/gsf/sample/test_script/test_script.lua")));
+			, std::string("E:/github/gsf/sample/test_script/test_script.lua")));
 	}
 
 	void shut()
@@ -104,6 +100,7 @@ int main()
 	appptr->regist_module(new TestLuaProxy());
 
 	Face.init(appptr);
+	appptr->init();
 	appptr->run();
 
 	return 0;
