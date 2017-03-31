@@ -112,6 +112,9 @@ class Client2LoginServer
 	: public gsf::network::AcceptorModule
 {
 public:
+	Client2LoginServer()
+		: AcceptorModule("Client2LoginServer")
+	{}
 
 private:
 
@@ -122,6 +125,10 @@ class EntityMgr
 	, public gsf::IEvent
 {
 public:
+
+	EntityMgr()
+		: Module("EntityMgr")
+	{}
 
 	void init()
 	{
@@ -138,9 +145,7 @@ public:
 		for (auto nod : arr)
 		{
 			//! 向协议绑定器申请，module 和 协议的绑定.
-			gsf::Args args;
-			args << get_module_id() << nod.first << nod.second;
-			dispatch(_em_id, eid::network::bind_remote_callback, args);
+			dispatch(_em_id, eid::network::bind_remote_callback, gsf::Args(get_module_id(), nod.first, nod.second));
 		}
 	}
 
@@ -161,17 +166,21 @@ class Client2LoginProxy
 	, public gsf::IEvent
 {
 public:
+	Client2LoginProxy()
+		: Module("Client2LoginProxy")
+	{}
+
 	void init()
 	{
 		uint32_t _c2l_id = Face.get_module_id<Client2LoginServer>();
 
 		listen(this, eid::network::new_connect
-			, [=](gsf::Args args, gsf::EventHandlerPtr callback) {
+			, [=](gsf::Args args, gsf::CallbackFunc callback) {
 			std::cout << "new connect fd = " << args.pop_uint32(0) << std::endl;
 		});
 
 		listen(this, eid::network::dis_connect
-			, [=](gsf::Args args, gsf::EventHandlerPtr callback){
+			, [=](gsf::Args args, gsf::CallbackFunc callback){
 			std::cout << "dis connect fd = " << args.pop_uint32(0) << std::endl;
 		});
 
@@ -199,13 +208,13 @@ int main()
 	gsf::Application *appptr = new gsf::Application();
 	
 	new AppFace;
-	new gsf::EventModule;
+	new gsf::EventModule();
 	
 	appptr->regist_module(gsf::EventModule::get_ptr());
-	appptr->regist_module(new gsf::modules::LogModule);
-	appptr->regist_module(new Client2LoginServer);
-	appptr->regist_module(new Client2LoginProxy);
-	appptr->regist_module(new EntityMgr);
+	appptr->regist_module(new gsf::modules::LogModule());
+	appptr->regist_module(new Client2LoginServer());
+	appptr->regist_module(new Client2LoginProxy());
+	appptr->regist_module(new EntityMgr());
 
 	Face.init(appptr);
 	appptr->run();

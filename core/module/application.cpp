@@ -8,11 +8,17 @@
 #endif // WIN32
 
 gsf::Application::Application()
-	: shutdown_(false)
+	: Module("Application")
+	, shutdown_(false)
 	, delay_(20)
-	, module_id_(1)
+	, module_idx_(2)
 {
+	module_id_ = 1;
+}
 
+void gsf::Application::init()
+{
+	
 }
 
 void gsf::Application::run()
@@ -82,9 +88,9 @@ void gsf::Application::run()
 
 uint32_t gsf::Application::make_module_id()
 {
-	if (module_id_ == UINT32_MAX) {
-		module_id_ = 1;
+	if (module_idx_ == UINT32_MAX) {
+		module_idx_ = 2;
 	}
 
-	return module_id_++;
+	return module_idx_++;
 }

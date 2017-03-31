@@ -23,7 +23,7 @@ namespace gsf
 			, public gsf::IEvent
 		{
 		public:
-			AcceptorModule();
+			AcceptorModule(const std::string &name);
 			~AcceptorModule();
 
 			virtual void before_init();
@@ -36,7 +36,7 @@ namespace gsf
 
 		private:
 
-			void make_acceptor(gsf::Args args, gsf::EventHandlerPtr callback);
+			void make_acceptor(gsf::Args args, gsf::CallbackFunc callback);
 			void accept_bind(const std::string &ip, int port);
 			static void accept_listen_cb(::evconnlistener *listener
 				, evutil_socket_t fd

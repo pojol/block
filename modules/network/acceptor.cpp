@@ -7,7 +7,8 @@
 #include <event2/listener.h>
 #include <event2/bufferevent.h>
 
-gsf::network::AcceptorModule::AcceptorModule()
+gsf::network::AcceptorModule::AcceptorModule(const std::string &name)
+	: Module(name)
 {
 
 }
@@ -60,7 +61,7 @@ void gsf::network::AcceptorModule::after_shut()
 
 }
 
-void gsf::network::AcceptorModule::make_acceptor(gsf::Args args, gsf::EventHandlerPtr callback)
+void gsf::network::AcceptorModule::make_acceptor(gsf::Args args, gsf::CallbackFunc callback)
 {
 	uint32_t _module_id = args.pop_uint32(0);
 	std::string _ip = args.pop_string(1);

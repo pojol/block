@@ -14,6 +14,10 @@ namespace gsf
 			: public gsf::Module
 			, public gsf::IEvent
 		{
+		public:
+			LogModule();
+			~LogModule() {}
+
 			void init();
 
 			void execute();
@@ -22,11 +26,11 @@ namespace gsf
 
 		private:
 
-			void init_impl(gsf::Args args, gsf::EventHandlerPtr callback);
+			void init_impl(gsf::Args args, gsf::CallbackFunc callback);
 
-			void log_info(gsf::Args args, gsf::EventHandlerPtr callback);
-			void log_warning(gsf::Args args, gsf::EventHandlerPtr callback);
-			void log_error(gsf::Args args, gsf::EventHandlerPtr callback);
+			void log_info(gsf::Args args, gsf::CallbackFunc callback);
+			void log_warning(gsf::Args args, gsf::CallbackFunc callback);
+			void log_error(gsf::Args args, gsf::CallbackFunc callback);
 
 		private:
 			std::list <std::pair<uint32_t, gsf::Args>> log_;

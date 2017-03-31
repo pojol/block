@@ -324,6 +324,16 @@ namespace gsf
 			return *this;
 		}
 
+		void push_uint32(const uint32_t value)
+		{
+			add(value);
+		}
+
+		void push_string(const std::string &value)
+		{
+			add(value);
+		}
+
 		int get_count() const
 		{
 			return size_;

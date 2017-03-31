@@ -5,6 +5,12 @@
 #define GOOGLE_GLOG_DLL_DECL
 #include <glog/logging.h>
 
+gsf::modules::LogModule::LogModule()
+	: Module("LogModule")
+{
+
+}
+
 
 void gsf::modules::LogModule::init()
 {
@@ -91,7 +97,7 @@ void gsf::modules::LogModule::shut()
 	google::ShutdownGoogleLogging();
 }
 
-void gsf::modules::LogModule::init_impl(gsf::Args args, gsf::EventHandlerPtr callback)
+void gsf::modules::LogModule::init_impl(gsf::Args args, gsf::CallbackFunc callback)
 {
 	std::string _path = args.pop_string(0);
 
@@ -103,18 +109,19 @@ void gsf::modules::LogModule::init_impl(gsf::Args args, gsf::EventHandlerPtr cal
 	google::InitGoogleLogging("log");
 }
 
-void gsf::modules::LogModule::log_info(gsf::Args args, gsf::EventHandlerPtr callback)
+void gsf::modules::LogModule::log_info(gsf::Args args, gsf::CallbackFunc callback)
 {
 	log_.push_back(std::make_pair(eid::log::info, args));
 }
 
-void gsf::modules::LogModule::log_warning(gsf::Args args, gsf::EventHandlerPtr callback)
+void gsf::modules::LogModule::log_warning(gsf::Args args, gsf::CallbackFunc callback)
 {
 	log_.push_back(std::make_pair(eid::log::warning, args));
 }
 
-void gsf::modules::LogModule::log_error(gsf::Args args, gsf::EventHandlerPtr callback)
+void gsf::modules::LogModule::log_error(gsf::Args args, gsf::CallbackFunc callback)
 {
 	log_.push_back(std::make_pair(eid::log::error, args));
 }
+
 

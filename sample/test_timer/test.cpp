@@ -54,6 +54,10 @@ class TestClickModule
         , public gsf::IEvent
 {
 public:
+	TestClickModule()
+		: Module("TestClickModule")
+	{}
+
 	void init()
 	{
 		tick_ = 0;
@@ -61,12 +65,12 @@ public:
 
 		// test1
 		listen(this, eid::timer::make_timer_success
-			, [=](gsf::Args args, gsf::EventHandlerPtr callback) {
+			, [=](gsf::Args args, gsf::CallbackFunc callback) {
 			std::cout << "success by event id : " << args.pop_uint32(0) << std::endl;
 		});
 
 		listen(this, eid::timer::make_timer_fail
-			, [=](gsf::Args args, gsf::EventHandlerPtr callback) {
+			, [=](gsf::Args args, gsf::CallbackFunc callback) {
 			std::cout << "fail by error id : " << args.pop_uint32(0) << std::endl;
 		});
 
@@ -75,7 +79,7 @@ public:
 
 		dispatch(_timer_module_id, eid::timer::delay_milliseconds
 			, args
-			, make_callback(&TestClickModule::test_1, this, std::string("hello,timer!")));
+			, std::bind(&TestClickModule::test_1, this, std::placeholders::_1));
 		
 
 		// test2
@@ -114,9 +118,9 @@ public:
 		*/
 	}
 
-	void test_1(std::string str)
+	void test_1(gsf::Args args)
 	{
-		std::cout << str.c_str() << std::endl;
+		std::cout << "timer" << std::endl;
 	}
 
 	void test_2(int i)
@@ -131,13 +135,13 @@ private:
 
 int main()
 {
-	auto appptr = new gsf::Application;
-	new gsf::EventModule;
+	auto appptr = new gsf::Application();
+	new gsf::EventModule();
 	new AppFace;
 
 	appptr->regist_module(gsf::EventModule::get_ptr());
-	appptr->regist_module(new gsf::modules::TimerModule);
-	appptr->regist_module(new TestClickModule);
+	appptr->regist_module(new gsf::modules::TimerModule());
+	appptr->regist_module(new TestClickModule());
 
 	Face.init(appptr);
 	appptr->run();

@@ -11,12 +11,16 @@
 namespace gsf
 {
 	class Application
+		: public Module
+		, public IEvent
 	{
 
 	public:
 		Application();
 
 		void init_args();
+
+		void init() override;
 
 		template <typename T>
 		void regist_module(T *module);
@@ -46,7 +50,7 @@ namespace gsf
 
 		bool shutdown_;
 
-		uint32_t module_id_;
+		uint32_t module_idx_;
 	};
 
 	template <typename M, typename T>

@@ -23,6 +23,11 @@ namespace gsf
 			: public gsf::Module
 			, public gsf::IEvent
 		{
+		public:
+			LuaScriptModule()
+				: Module("LuaScriptModule")
+			{}
+
 			void init();
 
 			void execute();
@@ -31,18 +36,19 @@ namespace gsf
 
 		private:
 			//! 待实现，需要一个有效的方式包装或者让脚本直接调用dispatch
-			void ldispatch(sol::variadic_args args);
+			//sol::variadic_args args
+			void ldispatch(uint32_t target, uint32_t event, gsf::Args args);
 
 			//! 创建一个新的lua module
-			void create_event(gsf::Args args, gsf::EventHandlerPtr callback);
+			void create_event(gsf::Args args, gsf::CallbackFunc callback);
 			void create(uint32_t module_id, std::string path);
 
 			//! 销毁一个现有的lua module
-			void destroy_event(gsf::Args args, gsf::EventHandlerPtr callback);
+			void destroy_event(gsf::Args args, gsf::CallbackFunc callback);
 			int destroy(uint32_t module_id);
 
 			//! 重载一个现有的lua module
-			void reload_event(gsf::Args args, gsf::EventHandlerPtr callback);
+			void reload_event(gsf::Args args, gsf::CallbackFunc callback);
 
 		private:
 			uint32_t log_module_;

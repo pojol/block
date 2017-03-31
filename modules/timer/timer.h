@@ -20,7 +20,7 @@ namespace gsf
 		{
 			TimerEvent(uint32_t id);
 
-            gsf::EventHandlerPtr timer_handler_ptr_;
+            gsf::CallbackFunc timer_handler_ptr_;
 			std::chrono::system_clock::time_point tp_;
 			uint32_t timerid_;
 
@@ -51,12 +51,12 @@ namespace gsf
 
 		private:
 
-			void delay_milliseconds(gsf::Args args, gsf::EventHandlerPtr callback);
-			void delay_day(gsf::Args args, gsf::EventHandlerPtr callback);
+			void delay_milliseconds(gsf::Args args, gsf::CallbackFunc callback);
+			void delay_day(gsf::Args args, gsf::CallbackFunc callback);
 			//void delay_week(std::tuple<gsf::utils::Any> args, gsf::EventHandlerPtr callback);
 			//void delay_month(std::tuple<gsf::utils::Any> args, gsf::EventHandlerPtr callback);
 
-            void remove_timer(gsf::Args args, gsf::EventHandlerPtr callback);
+            void remove_timer(gsf::Args args, gsf::CallbackFunc callback);
 
 			uint32_t make_timer_id();
 

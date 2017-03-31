@@ -25,7 +25,8 @@
 namespace gsf
 {
 	typedef std::pair<uint32_t, uint32_t> EventPair;
-	typedef std::function<void(gsf::Args, EventHandlerPtr)> EventFunc;
+	typedef std::function<void(gsf::Args)> CallbackFunc;
+	typedef std::function<void(gsf::Args, CallbackFunc)> EventFunc;
 	typedef std::function<void(std::vector<uint32_t>, uint32_t, BlockPtr)> RemoteEventFunc;
 
 	class Module;
@@ -45,7 +46,7 @@ namespace gsf
 		/**!
 			用于将事件发往不同模块
 		*/
-		virtual void dispatch(uint32_t target, uint32_t event, gsf::Args args, EventHandlerPtr callback = nullptr);
+		virtual void dispatch(uint32_t target, uint32_t event, gsf::Args args, CallbackFunc callback = nullptr);
 
 
 		// --remote--
@@ -128,7 +129,7 @@ namespace gsf
 
 		void bind_remote_event(uint32_t type_id, RemoteEventFunc func);
 
-		void add_cmd(uint32_t type_id, uint32_t event, gsf::Args args, EventHandlerPtr callback = nullptr);
+		void add_cmd(uint32_t type_id, uint32_t event, gsf::Args args, CallbackFunc callback = nullptr);
 
 		void add_remote_cmd(uint32_t type_id, std::vector<uint32_t> fd_list, uint32_t msg_id, BlockPtr blockptr);
 
@@ -138,7 +139,7 @@ namespace gsf
 		typedef std::unordered_map<uint32_t, EventFunc> InnerMap;
 		typedef std::unordered_map<uint32_t, InnerMap> TypeMap;
 
-		typedef std::list<std::tuple<uint32_t, uint32_t, gsf::Args, EventHandlerPtr>> CmdList;
+		typedef std::list<std::tuple<uint32_t, uint32_t, gsf::Args, CallbackFunc>> CmdList;
 
 		typedef std::list<std::tuple<uint32_t, uint32_t, BlockPtr>> RemoteCallbackList;
 

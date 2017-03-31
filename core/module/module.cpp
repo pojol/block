@@ -25,7 +25,8 @@ void gsf::Module::after_shut()
 
 }
 
-gsf::Module::Module()
+gsf::Module::Module(const std::string &name)
+	: name_(name)
 {
 
 }

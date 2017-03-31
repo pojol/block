@@ -19,9 +19,9 @@
 #include <errno.h>
 #endif // WIN32
 
-gsf::network::ConnectorModule::ConnectorModule()
+gsf::network::ConnectorModule::ConnectorModule(const std::string &name)
+	: Module(name)
 {
-
 }
 
 gsf::network::ConnectorModule::~ConnectorModule()
@@ -64,7 +64,7 @@ void gsf::network::ConnectorModule::after_shut()
 
 }
 
-void gsf::network::ConnectorModule::make_connector(gsf::Args args, gsf::EventHandlerPtr callback)
+void gsf::network::ConnectorModule::make_connector(gsf::Args args, gsf::CallbackFunc callback)
 {
 	uint32_t _module_id = args.pop_uint32(0);
 	std::string _ip = args.pop_string(1);

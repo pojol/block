@@ -44,6 +44,7 @@ void gsf::EventModule::execute()
 }
 
 gsf::EventModule::EventModule()
+	: Module("EventModule")
 {
 
 }
@@ -84,7 +85,7 @@ void gsf::EventModule::bind_remote_event(uint32_t type_id, RemoteEventFunc func)
 	remote_event_map_.insert(std::make_pair(type_id, func));
 }
 
-void gsf::EventModule::add_cmd(uint32_t type_id, uint32_t event, gsf::Args args, EventHandlerPtr callback /*= nullptr*/)
+void gsf::EventModule::add_cmd(uint32_t type_id, uint32_t event, gsf::Args args, CallbackFunc callback /* = nullptr */)
 {
 	if (event == eid::network::bind_remote_callback) {
 
@@ -124,7 +125,7 @@ void gsf::IEvent::listen(Module *target, uint32_t event, EventFunc func)
 	EventModule::get_ref().bind_event(target->get_module_id(), event, func);
 }
 
-void gsf::IEvent::dispatch(uint32_t target, uint32_t event, gsf::Args args, EventHandlerPtr callback /* = nullptr */)
+void gsf::IEvent::dispatch(uint32_t target, uint32_t event, gsf::Args args, CallbackFunc callback /* = nullptr */)
 {
 	EventModule::get_ref().add_cmd(target, event, args, callback);
 }

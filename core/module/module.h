@@ -10,7 +10,7 @@ namespace gsf
 	{
 		friend class Application;
 	public:
-		Module();
+		Module(const std::string &name);
 		virtual ~Module();
 
 		uint32_t get_module_id() { return module_id_; }
@@ -27,6 +27,7 @@ namespace gsf
 	protected:
 		void set_id(uint32_t id) { module_id_ = id; }
 		uint32_t module_id_;
+		std::string name_;
 	};
 }
 

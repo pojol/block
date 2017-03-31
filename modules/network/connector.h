@@ -24,7 +24,7 @@ namespace gsf
 			, public gsf::IEvent
 		{
 		public:
-			ConnectorModule();
+			ConnectorModule(const std::string &name);
 			~ConnectorModule();
 
 			virtual void before_init();
@@ -36,7 +36,7 @@ namespace gsf
 			virtual void after_shut();
 
 		private:
-			void make_connector(gsf::Args args, gsf::EventHandlerPtr callback);
+			void make_connector(gsf::Args args, gsf::CallbackFunc callback);
 			
 			void need_close_session(int fd);
 
