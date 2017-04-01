@@ -89,13 +89,21 @@ void gsf::modules::LuaScriptModule::create_event(gsf::Args args, gsf::CallbackFu
 	create(_module_id, _path);
 }
 
-void gsf::modules::LuaScriptModule::ldispatch(uint32_t target, uint32_t event, gsf::Args args, sol::function callback)
+void gsf::modules::LuaScriptModule::ldispatch(uint32_t target, uint32_t event, gsf::Args args, gsf::CallbackFunc callback)
 {	
 	//std::cout << args.stack_index() << " " << args.get<uint32_t>(0) << " " << args.get<std::string>(1) << std::endl;
+	//std::cout << target << event << args.get_count() << std::endl;
+	//callback(gsf::Args(std::string("hello, callback")));
 
-	std::cout << target << event << args.get_count() << std::endl;
-	
-	callback(gsf::Args(std::string("hello, callback")));
+	dispatch(target, event, args, [=](gsf::Args _args) {
+		try {
+			callback(_args);
+		}
+		catch (sol::error e) {
+			std::cout << e.what() << std::endl;
+		}
+	});
+
 }
 
 void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string path)
@@ -116,7 +124,8 @@ void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string path)
 	_lua->state_.new_usertype<Args>("Args"
 		, "push_uint32", &Args::push_uint32
 		, "push_string", &Args::push_string
-		, "pop_string", &Args::pop_string);
+		, "pop_string", &Args::pop_string
+		, "pop_uint32", &Args::pop_uint32);
 
 	_lua->state_.new_usertype<LuaScriptModule>("LuaScriptModule", "ldispatch", &LuaScriptModule::ldispatch);
 	_lua->state_.set("event", this);

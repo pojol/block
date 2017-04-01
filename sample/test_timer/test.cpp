@@ -60,9 +60,6 @@ public:
 
 	void init()
 	{
-		tick_ = 0;
-		uint32_t _timer_module_id = Face.get_module_id<gsf::modules::TimerModule>();
-
 		// test1
 		listen(this, eid::timer::make_timer_success
 			, [=](gsf::Args args, gsf::CallbackFunc callback) {
@@ -74,48 +71,54 @@ public:
 			std::cout << "fail by error id : " << args.pop_uint32(0) << std::endl;
 		});
 
-		gsf::Args args;
-		args << get_module_id() << uint32_t(1000);
-
-		dispatch(_timer_module_id, eid::timer::delay_milliseconds
-			, args
-			, std::bind(&TestClickModule::test_1, this, std::placeholders::_1));
-		
+		tick_ = 0;
 
 		// test2
-		/*		
+		/*
 		listen_callback(eid::timer::make_timer_success, [&](gsf::Args os) {
-			tick_++;
-			uint32_t _timer_id = os.pop_uint32(10);
+		tick_++;
+		uint32_t _timer_id = os.pop_uint32(10);
 
-			if (tick_ == 4) {
-				gsf::Args args;
-				args << get_door_id() << _timer_id;
-				dispatch(eid::timer::remove_timer, args);
-			}
+		if (tick_ == 4) {
+		gsf::Args args;
+		args << get_door_id() << _timer_id;
+		dispatch(eid::timer::remove_timer, args);
+		}
 		});
 
 		for (int i = 0; i < 10; ++i)
 		{
-			gsf::Args args;
-			args << get_door_id() << uint32_t(i * 1000);
+		gsf::Args args;
+		args << get_door_id() << uint32_t(i * 1000);
 
-			dispatch(eid::timer::delay_milliseconds
-				, args
-				, make_callback(&TestClickModule::test_2, this, i));
+		dispatch(eid::timer::delay_milliseconds
+		, args
+		, make_callback(&TestClickModule::test_2, this, i));
 		}
 		*/
 		/* test3
 		for (int i = 0; i < 10 * 10000; ++i)
 		{
-			gsf::Args args;
-			args << get_door_id() << uint32_t(i * 10);
+		gsf::Args args;
+		args << get_door_id() << uint32_t(i * 10);
 
-			dispatch(eid::timer::delay_milliseconds
-				, args
-				, make_callback(&TestClickModule::test_2, this, i));
+		dispatch(eid::timer::delay_milliseconds
+		, args
+		, make_callback(&TestClickModule::test_2, this, i));
 		}
 		*/
+
+		uint32_t _timer_module_id = 0;
+
+		dispatch(eid::app_id, eid::get_module, gsf::Args(std::string("TimerModule")), [&](gsf::Args args) {
+			
+			_timer_module_id = args.pop_uint32(0);
+		
+		});
+
+		dispatch(_timer_module_id, eid::timer::delay_milliseconds, gsf::Args(get_module_id(), uint32_t(1000)), [=](gsf::Args args) {
+			std::cout << "timer!" << std::endl;
+		});
 	}
 
 	void test_1(gsf::Args args)

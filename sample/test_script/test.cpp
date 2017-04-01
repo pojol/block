@@ -8,6 +8,7 @@
 
 #include <lua_script/lua_script.h>
 #include <log/log.h>
+#include <timer/timer.h>
 
 class AppFace
 	: public gsf::utils::Singleton<AppFace>
@@ -78,7 +79,7 @@ public:
 		//test
 		dispatch(Face.get_module_id<gsf::modules::LuaScriptModule>(), eid::lua_proxy::create
 			, gsf::Args(get_module_id()
-			, std::string("E:/github/gsf/sample/test_script/test_script.lua")));
+			, std::string("F:/github/gsf/sample/test_script/test_script.lua")));
 	}
 
 	void shut()
@@ -96,6 +97,7 @@ int main()
 
 	appptr->regist_module(gsf::EventModule::get_ptr());
 	appptr->regist_module(new gsf::modules::LogModule());
+	appptr->regist_module(new gsf::modules::TimerModule());
 	appptr->regist_module(new gsf::modules::LuaScriptModule());
 	appptr->regist_module(new TestLuaProxy());
 
