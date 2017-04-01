@@ -36,4 +36,33 @@ Architecture
     * lua 5.3
     * redis
 --------
-    
+
+timer c++ & lua
+--------
+```c++
+uint32_t _timer_module_id = 0;
+
+dispatch(eid::app_id, eid::get_module, gsf::Args(std::string("TimerModule")), [&](gsf::Args args) {
+   _timer_module_id = args.pop_uint32(0);
+});
+
+dispatch(_timer_module_id, eid::timer::delay_milliseconds, gsf::Args(get_module_id(), uint32_t(1000)), [=](gsf::Args args) {
+   std::cout << "timer!" << std::endl;
+});
+```
+```lua
+module.init = function(module_id)
+
+	local function delay_1000(args)
+		print("timer!")
+	end
+
+	local function _callback(args)
+		timer_module_id = args:pop_uint32(0)
+		dispatch(timer_module_id, delay_milliseconds, module_id, 1000, delay_1000)
+	end
+
+	dispatch(app_id, get_module, "TimerModule", _callback)
+end
+
+```
