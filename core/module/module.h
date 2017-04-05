@@ -2,6 +2,7 @@
 #define _GSF_MODULE_HEADER_
 
 #include <stdint.h>
+#include <istream>
 #include <vector>
 
 namespace gsf

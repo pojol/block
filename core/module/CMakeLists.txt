@@ -1,11 +1,13 @@
 
 PROJECT(module)
 
+INCLUDE_DIRECTORIES(
+        ${GSF_SOURCE_DIR}/core
+)
+
 #引用头文件目录
 if(WIN32)
-        INCLUDE_DIRECTORIES(
-			${GSF_SOURCE_DIR}/core
-        )
+
 endif()
 if(UNIX)
         INCLUDE_DIRECTORIES(
@@ -45,4 +47,5 @@ if(MSVC)
 elseif(UNIX)
         SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/linux)
 elseif(APPLE)
+        SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/apple)
 endif()

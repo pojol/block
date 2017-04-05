@@ -30,6 +30,7 @@ if(MSVC)
 elseif(UNIX)
 	SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/linux)
 elseif(APPLE)
+    SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/apple)
 endif()
 
 
