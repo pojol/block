@@ -1,6 +1,7 @@
 #include "log.h"
 
 #include <string>
+#include <sstream>
 
 #define GOOGLE_GLOG_DLL_DECL
 #include <glog/logging.h>

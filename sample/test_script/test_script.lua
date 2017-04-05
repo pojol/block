@@ -3,7 +3,9 @@ package.path = "F:/github/gsf/sample/test_script/?.lua"
 local _utils = require "utils"
 
 -- 获取到其他module的id
--- 发送，侦听消息
+-- listen
+-- dispatch
+
 
 module = {
 	init = function(module_id) end,
@@ -11,8 +13,6 @@ module = {
 	shut = function() end,
 }
 
--- 把对象传递进来
--- 把值传递进来
 
 event = nil
 
@@ -45,6 +45,7 @@ end
 
 
 module.init = function(module_id)
+	print("init")
 
 	local function delay_1000(args)
 		print("timer!")
