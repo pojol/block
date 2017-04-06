@@ -103,6 +103,19 @@ void gsf::modules::LuaScriptModule::ldispatch(uint32_t target, uint32_t event, g
 			std::cout << e.what() << std::endl;
 		}
 	});
+}
+
+void gsf::modules::LuaScriptModule::llisten(uint32_t self, uint32_t event, sol::function func)
+{
+
+	listen(self, event, [=](gsf::Args args, gsf::CallbackFunc callback) {
+		try {
+			func(args, callback);
+		}
+		catch (sol::error e) {
+			std::cout << e.what() << std::endl;
+		}
+	});
 
 }
 
@@ -128,6 +141,7 @@ void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string path)
 		, "pop_uint32", &Args::pop_uint32);
 
 	_lua->state_.new_usertype<LuaScriptModule>("LuaScriptModule", "ldispatch", &LuaScriptModule::ldispatch);
+	_lua->state_.new_usertype<LuaScriptModule>("LuaScriptModule", "llisten", &LuaScriptModule::llisten);
 	_lua->state_.set("event", this);
 
 	try {

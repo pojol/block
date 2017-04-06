@@ -38,6 +38,7 @@ namespace gsf
 			//! 待实现，需要一个有效的方式包装或者让脚本直接调用dispatch
 			//sol::variadic_args args
 			void ldispatch(uint32_t target, uint32_t event, gsf::Args args, gsf::CallbackFunc callback = nullptr);
+			void llisten(uint32_t self, uint32_t event, sol::function func);
 
 			//! 创建一个新的lua module
 			void create_event(gsf::Args args, gsf::CallbackFunc callback);

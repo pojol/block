@@ -125,6 +125,11 @@ void gsf::IEvent::listen(Module *target, uint32_t event, EventFunc func)
 	EventModule::get_ref().bind_event(target->get_module_id(), event, func);
 }
 
+void gsf::IEvent::listen(uint32_t self, uint32_t event, EventFunc func)
+{
+	EventModule::get_ref().bind_event(self, event, func);
+}
+
 void gsf::IEvent::dispatch(uint32_t target, uint32_t event, gsf::Args args, CallbackFunc callback /* = nullptr */)
 {
 	EventModule::get_ref().add_cmd(target, event, args, callback);

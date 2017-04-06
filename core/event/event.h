@@ -42,6 +42,7 @@ namespace gsf
 			用于侦听模块之间的消息
 		*/
 		virtual void listen(Module *target, uint32_t event, EventFunc func);
+		virtual void listen(uint32_t self, uint32_t event, EventFunc func);
 
 		/**!
 			用于将事件发往不同模块

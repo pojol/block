@@ -80,6 +80,8 @@ public:
 		dispatch(Face.get_module_id<gsf::modules::LuaScriptModule>(), eid::lua_proxy::create
 			, gsf::Args(get_module_id()
 			, std::string("F:/github/gsf/sample/test_script/test_script.lua")));
+
+		dispatch(get_module_id(), 10001, gsf::Args(uint32_t(10)));
 	}
 
 	void shut()

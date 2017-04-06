@@ -43,6 +43,10 @@ function dispatch(...)
 	event:ldispatch(arg[1], arg[2], _args, arg[_len])
 end
 
+function math_fact(args, callback)
+	local _v = args:pop_uint32(0)
+	_utils.test(_v)
+end
 
 module.init = function(module_id)
 	print("init")
@@ -57,6 +61,8 @@ module.init = function(module_id)
 	end
 
 	dispatch(app_id, get_module, "TimerModule", _callback)
+	
+	event:llisten(module_id, 10001, math_fact)
 end
 
 module.execute = function()
