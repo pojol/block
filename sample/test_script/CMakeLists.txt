@@ -14,6 +14,9 @@ if(UNIX)
 	INCLUDE_DIRECTORIES(
 		${GSF_SOURCE_DIR}/core
 		${GSF_SOURCE_DIR}/common
+		${GSF_SOURCE_DIR}/modules
+		${GSF_SOURCE_DIR}/3rd/lua-5.3.4/src
+		${GSF_SOURCE_DIR}/3rd/sol2-2.16.0
 	)
 endif()
 if(APPLE)
@@ -32,6 +35,8 @@ if(WIN32)
 	)
 endif()
 if(UNIX)
+	set(CMAKE_EXE_LINKER_FLAGS "-llua -ldl")
+
 	LINK_DIRECTORIES(
 	${GSF_SOURCE_DIR}/lib/linux
 	)
@@ -57,6 +62,6 @@ if(MSVC)
 
         TARGET_LINK_LIBRARIES(test_script ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib module.lib event.lib lua_script.lib lua53.lib glog.lib log.lib timer.lib)
 elseif(UNIX)
-        TARGET_LINK_LIBRARIES(test_script utils.a timer.a)
+	TARGET_LINK_LIBRARIES(test_script liblog.a libglog.a libmodule.a libevent.a libtimer.a liblua_script.a liblua.a)
 elseif(APPLE)
 endif()

@@ -60,7 +60,7 @@ if(MSVC)
         TARGET_LINK_LIBRARIES(test_network libevent.lib libevent_core.lib libevent_extras.lib network.lib module.lib event.lib ws2_32.lib libprotocd.lib libprotobufd.lib glog.lib log.lib)
 endif()
 if(UNIX)
-        TARGET_LINK_LIBRARIES(test_network libstream.a libnetwork.a libevent.a libevent_core.a libevent_extra.a libutils.a libtimer.a)
+        TARGET_LINK_LIBRARIES(test_network  libnetwork.a libevent.a libevent_core.a libevent_extra.a libtimer.a libprotobuf.a libmodule.a liblog.a libglog.a)
 endif()
 if(APPLE)
 

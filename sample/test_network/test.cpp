@@ -10,8 +10,10 @@
 
 
 #ifdef WIN32
-#include <winsock2.h>
-#include <windows.h>
+	#include <winsock2.h>
+	#include <windows.h>
+#else
+	#include <unistd.h>
 #endif // WIN32
 
 #include <module/application.h>
@@ -39,8 +41,8 @@ public:
 	void init(gsf::Application *app)
 	{
 		app_ = app;
-
 		char _path[512];
+#ifdef WIN32
 		GetModuleFileName(NULL, _path, 512);
 		//取出文件路径
 		for (int i = strlen(_path); i >= 0; i--)
@@ -51,6 +53,20 @@ public:
 				break;
 			}
 		}
+#else
+		int cnt = readlink("/proc/self/exe", _path, 512);
+		if (cnt < 0 || cnt >= 512){
+			std::cout << "read path err" << std::endl;
+			return;
+		}
+		for (int i = cnt; i >=0; --i)
+		{
+			if (_path[i] == '/'){
+				_path[i+1] = '\0';
+				break;
+			}
+		}
+#endif // WIN32
 
 		//test
 		dispatch2<gsf::modules::LogModule>(eid::log::init, gsf::Args(std::string(_path)));

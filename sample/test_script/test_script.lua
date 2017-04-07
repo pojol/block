@@ -1,4 +1,4 @@
-package.path = "F:/github/gsf/sample/test_script/?.lua"
+package.path = "/home/huangtao/github/gsf/sample/test_script/?.lua"
 
 local _utils = require "utils"
 

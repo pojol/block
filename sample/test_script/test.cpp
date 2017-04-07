@@ -2,8 +2,10 @@
 #include <event/event.h>
 
 #ifdef WIN32
-#include <winsock2.h>
-#include <windows.h>
+	#include <winsock2.h>
+	#include <windows.h>
+#else
+	#include <unistd.h>
 #endif // WIN32
 
 #include <lua_script/lua_script.h>
@@ -21,8 +23,8 @@ public:
 	void init(gsf::Application *app)
 	{
 		app_ = app;
-
 		char _path[512];
+#ifdef WIN32
 		GetModuleFileName(NULL, _path, 512);
 		//取出文件路径
 		for (int i = strlen(_path); i >= 0; i--)
@@ -35,6 +37,21 @@ public:
 		}
 
 		//test
+#else
+		int cnt = readlink("/proc/self/exe", _path, 512);
+		if (cnt < 0 || cnt >= 512){
+			std::cout << "read path err" << std::endl;
+			return;
+		}
+		for (int i = cnt; i >=0; --i)
+		{
+			if (_path[i] == '/'){
+				_path[i+1] = '\0';
+				break;
+			}
+		}
+#endif
+
 		dispatch2<gsf::modules::LogModule>(eid::log::init, gsf::Args(std::string(_path)));
 	}
 
@@ -79,7 +96,7 @@ public:
 		//test
 		dispatch(Face.get_module_id<gsf::modules::LuaScriptModule>(), eid::lua_proxy::create
 			, gsf::Args(get_module_id()
-			, std::string("F:/github/gsf/sample/test_script/test_script.lua")));
+			, std::string("/home/huangtao/github/gsf/sample/test_script/test_script.lua")));
 
 		dispatch(get_module_id(), 10001, gsf::Args(uint32_t(10)));
 	}

@@ -3,6 +3,19 @@
 #include "session_mgr.h"
 #include "session.h"
 
+#ifdef WIN32
+	#include <winsock2.h>
+	#include <windows.h>
+#else
+	#include <string.h>
+	#include <netinet/in.h>
+	#include <arpa/inet.h>
+	#include <sys/types.h>
+	#include <sys/socket.h>
+	#include <errno.h>
+#endif // WIN32
+
+
 #include <event2/buffer.h>
 #include <event2/listener.h>
 #include <event2/bufferevent.h>

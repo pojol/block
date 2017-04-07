@@ -11,6 +11,7 @@ endif()
 if(UNIX)
 	INCLUDE_DIRECTORIES(
 		${GSF_SOURCE_DIR}/core
+		${GSF_SOURCE_DIR}/modules
 		${GSF_SOURCE_DIR}/common
 	)
 endif()
@@ -55,6 +56,6 @@ if(MSVC)
 
         TARGET_LINK_LIBRARIES(test_timer ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib module.lib event.lib timer.lib)
 elseif(UNIX)
-        TARGET_LINK_LIBRARIES(test_timer utils.a timer.a)
+        TARGET_LINK_LIBRARIES(test_timer liblog.a libglog.a libmodule.a libevent.a libtimer.a)
 elseif(APPLE)
 endif()
