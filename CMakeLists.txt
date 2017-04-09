@@ -9,7 +9,7 @@ if(UNIX)
     set(CMAKE_EXE_LINKER_FLAGS "-lrt")
 endif()
 if(APPLE)
-    set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "-std=c++14 ${CMAKE_CXX_FLAGS}")
     message(STATUS "optional:-std=c++11")
 endif()
 
