@@ -334,6 +334,11 @@ namespace gsf
 			add(value);
 		}
 
+		void push_remote_callback(RemoteFunc value)
+		{
+			add(value);
+		}
+
 		int get_count() const
 		{
 			return size_;

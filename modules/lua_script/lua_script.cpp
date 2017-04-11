@@ -138,7 +138,9 @@ void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string path)
 		, "push_uint32", &Args::push_uint32
 		, "push_string", &Args::push_string
 		, "pop_string", &Args::pop_string
-		, "pop_uint32", &Args::pop_uint32);
+		, "pop_uint32", &Args::pop_uint32
+		, "push_remote_callback", &Args::push_remote_callback
+		, "pop_remote_callback", &Args::pop_remote_callback);
 
 	_lua->state_.new_usertype<LuaScriptModule>("LuaScriptModule", "ldispatch", &LuaScriptModule::ldispatch);
 	_lua->state_.new_usertype<LuaScriptModule>("LuaScriptModule", "llisten", &LuaScriptModule::llisten);

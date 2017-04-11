@@ -1,4 +1,4 @@
-
+ADD_SUBDIRECTORY(test_dbproxy)
 ADD_SUBDIRECTORY(test_network)
 ADD_SUBDIRECTORY(test_timer)
 ADD_SUBDIRECTORY(test_script)

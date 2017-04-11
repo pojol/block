@@ -1,4 +1,4 @@
-package.path = "/home/huangtao/github/gsf/sample/test_script/?.lua"
+package.path = "F:/github/gsf/sample/test_script/?.lua"
 
 local _utils = require "utils"
 
@@ -19,6 +19,7 @@ event = nil
 local app_id = 1
 local get_module = 101
 local delay_milliseconds = 3001
+local bind_remote_callback = 2003
 
 local timer_module_id = nil
 
@@ -36,6 +37,9 @@ function dispatch(...)
 			if type(v) == "string" then
 				_args:push_string(v)
 			end
+			if type(v) == "function" then
+				_args:push_remote_callback(v)
+			end
 		end
 		
 	end
@@ -52,6 +56,10 @@ function test_f(args, callback)
 	print(_v)
 end
 
+function msg_func(fd, block)
+	print("recv : " .. tostring(fd))
+end
+
 module.init = function(module_id)
 	print("init")
 
@@ -64,6 +72,12 @@ module.init = function(module_id)
 		dispatch(timer_module_id, delay_milliseconds, module_id, 1000, delay_1000)
 	end
 
+	local function __cb(args)
+	end
+	
+	local msg_id = 1001
+	dispatch(0, bind_remote_callback, module_id, msg_id, msg_func, __cb)
+	
 	dispatch(app_id, get_module, "TimerModule", _callback)
 	
 	listen(module_id, 10001, test_f)

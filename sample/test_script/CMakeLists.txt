@@ -3,6 +3,8 @@
 #引用头文件目录
 if(WIN32)
 	INCLUDE_DIRECTORIES(
+		${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
+		${GSF_SOURCE_DIR}/3rd/protobuf-3.2.0/src
 		${GSF_SOURCE_DIR}/core
 		${GSF_SOURCE_DIR}/modules
 		${GSF_SOURCE_DIR}/common
@@ -60,7 +62,7 @@ if(MSVC)
       endif()
     endforeach()
 
-        TARGET_LINK_LIBRARIES(test_script ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib module.lib event.lib lua_script.lib lua53.lib glog.lib log.lib timer.lib)
+        TARGET_LINK_LIBRARIES(test_script ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib module.lib event.lib lua_script.lib lua53.lib glog.lib log.lib timer.lib libprotocd.lib libprotobufd.lib network.lib)
 elseif(UNIX)
 	TARGET_LINK_LIBRARIES(test_script liblog.a libglog.a libmodule.a libevent.a libtimer.a liblua_script.a liblua.a)
 elseif(APPLE)
