@@ -68,6 +68,13 @@ namespace eid
 
 		const uint32_t destroy = 4003;
 	}
+
+	namespace db_proxy
+	{
+		const uint32_t update = 5001;
+		const uint32_t remove = 5002;
+		const uint32_t load = 5003;
+	}
 }
 
 #endif
