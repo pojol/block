@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+message ItemInfo {
+	int64 id 		= 1;
+	uint32 dictId 	= 2;
+	string name 	= 3;
+}
+
+message BagGrid {
+	ItemInfo info 	= 1;
+	uint32 pos 		= 2;
+}
+
+message Avatar {
+	enum State{
+		LOGIN_READY 	= 0;
+		LOGIN_ING		= 1;
+		LOGIN_SUCCESS 	= 2;
+		
+		GAMING			= 3;
+		
+		JUMP_READY		= 4;
+		JUMP_ING		= 5;
+		JUMP_SUCCESS	= 6;
+		
+		LOGOUT_READY	= 7;
+		LOGOUT_ING		= 8;
+		LOGOUT_SUCCESS	= 9;
+	}
+
+	int64 id 		= 1;
+	string name 	= 2;
+	
+	State state 	= 3;
+	
+	uint32 hp 		= 4;
+	uint32 mp		= 5;
+	uint32 gold		= 6;
+	
+	repeated BagGrid grids = 7;
+}
