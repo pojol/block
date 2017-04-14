@@ -33,7 +33,33 @@ void db_avatar::shut()
 
 void db_avatar::event_update(gsf::Args args, gsf::CallbackFunc callback)
 {
+	google::protobuf::Message *msg;
+	Avatar _avatar;
 
+	auto descriptor = google::protobuf::DescriptorPool::generated_pool()->FindMessageTypeByName("Avatar");
+	if (!descriptor) {
+		assert(descriptor != nullptr);
+		return;
+	}
+	
+	auto reflection = _avatar.GetReflection();
+	if (!reflection) {
+		assert(reflection != nullptr);
+		return;
+	}
+
+	for (int i = 0; i < descriptor->field_count(); ++i)
+	{
+		auto field = descriptor->field(i);
+		if (!field) {
+			assert(field != nullptr);
+			continue;
+		}
+
+
+		field->name();
+
+	}
 }
 
 void db_avatar::event_remove(gsf::Args args, gsf::CallbackFunc callback)

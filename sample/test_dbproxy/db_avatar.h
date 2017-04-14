@@ -4,6 +4,8 @@
 #include <module/module.h>
 #include <event/event.h>
 
+#include "Avatar.pb.h"
+
 class db_avatar
 	: public gsf::Module
 	, public gsf::IEvent
