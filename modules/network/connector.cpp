@@ -43,6 +43,12 @@ void gsf::network::ConnectorModule::init()
 		, std::bind(&ConnectorModule::make_connector, this
 		, std::placeholders::_1
 		, std::placeholders::_2));
+
+	listen_remote(this
+		, std::bind(&ConnectorModule::send_msg, this
+			, std::placeholders::_1
+			, std::placeholders::_2
+			, std::placeholders::_3));
 }
 
 void gsf::network::ConnectorModule::execute()
@@ -89,12 +95,15 @@ void gsf::network::ConnectorModule::make_connector(gsf::Args args, gsf::Callback
 		_sin.sin_port = htons(_port);
 		_sin.sin_addr.s_addr = inet_addr(_ip.c_str());
 
-		_fd = bufferevent_socket_connect(_bev_ptr, (sockaddr*)&_sin, sizeof(sockaddr_in));
-		if (_fd < 0) {
+		if (bufferevent_socket_connect(_bev_ptr, (sockaddr*)&_sin, sizeof(sockaddr_in)) < 0) {
 			_ret = eid::network::err_socket_connect;
 			break;
 		}
+		else {
+			_fd = bufferevent_getfd(_bev_ptr);
+		}
 	} while (0);
+
 
 	if (_ret == 0) {
 		session_ptr_ = std::make_shared<Session>(_fd, _module_id, std::bind(&ConnectorModule::need_close_session, this, std::placeholders::_1));
@@ -111,4 +120,9 @@ void gsf::network::ConnectorModule::need_close_session(int fd)
 {
 	// 
 	disconnect_vec_.push_back(fd);
+}
+
+void gsf::network::ConnectorModule::send_msg(std::vector<uint32_t> fd_vec, uint32_t msg_id, BlockPtr blockptr)
+{
+	session_ptr_->write(msg_id, blockptr);
 }
