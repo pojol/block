@@ -61,10 +61,9 @@ void gsf::network::Session::err_cb(::bufferevent *bev, short what, void *ctx)
 
 int gsf::network::Session::write(uint32_t msg_id, BlockPtr blockptr)
 {
-	::evbuffer * buf = evbuffer_new();
-	evbuffer_add(buf, blockptr->buf_, blockptr->size_);
+	int _ret = evbuffer_add(out_buf_, blockptr->buf_, blockptr->size_);
+	evbuffer_write(out_buf_, fd_);
 
-	evbuffer_write(buf, fd_);
 	return 0;
 }
 
