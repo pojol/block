@@ -5,11 +5,18 @@
 #ifndef GSF_EVENT_LIST_H_H
 #define GSF_EVENT_LIST_H_H
 
+//! 用于描述框架中用到的事件，和用户事件 （暂时用.h 后面会扩展到通用一点的方案
+
 namespace eid
 {
+	//! 每个进程中application module 的id ，因为application的作用范围只在自身进程所以 id 可以是固定的。
 	const uint32_t app_id = 1;
 
+	//! 通过字符串获得module的id， 只能获取静态显示声明的module。
 	const uint32_t get_module = 101;
+
+	//! 通过已经定义的module，创建多份实例。
+	const uint32_t create_dynamic_module = 102;
 
 	namespace log
 	{
