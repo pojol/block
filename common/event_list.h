@@ -5,6 +5,7 @@
 #ifndef GSF_EVENT_LIST_H_H
 #define GSF_EVENT_LIST_H_H
 
+// 后面用工具自动生成
 //! 用于描述框架中用到的事件，和用户事件 （暂时用.h 后面会扩展到通用一点的方案
 
 namespace eid

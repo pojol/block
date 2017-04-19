@@ -9,7 +9,7 @@
 
 #include "../module/module.h"
 #include "event_handler.h"
-#include "event_list.h"
+#include "../../common/event_list.h"
 
 #include <functional>
 #include <tuple>
