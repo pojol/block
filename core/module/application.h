@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <list>
 #include <unordered_map>
+#include <map>
 
 namespace gsf
 {
@@ -23,7 +24,7 @@ namespace gsf
 		void init() override;
 
 		template <typename T>
-		void regist_module(T *module);
+		void regist_module(T *module, bool dynamic = false);
 
 		template <typename T>
 		uint32_t find_module_id();
@@ -68,7 +69,7 @@ namespace gsf
 	}
 
 	template <typename T>
-	void gsf::Application::regist_module(T *module)
+	void gsf::Application::regist_module(T *module, bool dynamic /* = false */)
 	{
 		auto _type_id = typeid(T).hash_code();
 		auto _id_itr = module_id_map_.find(_type_id);
@@ -81,7 +82,9 @@ namespace gsf
 		module->set_id(make_module_id());
 
 		module_id_map_.insert(std::make_pair(_type_id, module->get_module_id()));
-		module_name_map_.insert(std::make_pair(module->get_module_name(), module->get_module_id()));
+		if (!dynamic) {
+			module_name_map_.insert(std::make_pair(module->get_module_name(), module->get_module_id()));
+		}
 	}
 
 	template <typename T>

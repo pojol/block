@@ -7,6 +7,8 @@
 #include <windows.h>
 #endif // WIN32
 
+#include <module/dynamic_module_factory.h>
+
 gsf::Application::Application()
 	: Module("Application")
 	, shutdown_(false)
@@ -27,6 +29,19 @@ void gsf::Application::init()
 			callback(gsf::Args(itr->second));
 		}
 
+	});
+
+	listen(this, eid::create_dynamic_module, [=](gsf::Args args, CallbackFunc callback) {
+
+		std::string _name = args.pop_string(0);
+
+		gsf::Module *_module_ptr = static_cast<gsf::Module*>(DynamicModuleFactory::create(_name));
+		regist_module(_module_ptr, true);
+		
+		_module_ptr->before_init();
+		_module_ptr->init();
+
+		callback(gsf::Args(_module_ptr->get_module_id()));
 	});
 }
 
