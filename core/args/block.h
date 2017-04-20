@@ -23,11 +23,11 @@ namespace gsf
 			//! 暂不考虑大小端
 			buf_ = (char*)malloc(size_);
 
-			push_uint32(len, buf_ + pos_);
-			pos_ += sizeof(len);
+			push_uint32(size_, buf_ + pos_);
+			pos_ += sizeof(uint32_t);
 
 			push_uint32(msg_id, buf_ + pos_);
-			pos_ += sizeof(msg_id);
+			pos_ += sizeof(uint32_t);
 		}
 
 		void push_uint32(uint32_t val, char *buf)
