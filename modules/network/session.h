@@ -35,7 +35,7 @@ namespace gsf
 			int write(uint32_t msg_id, BlockPtr blockptr);
 			void read(::bufferevent *bev);
 
-			void dis_connect();
+			void dis_connect(int32_t err);
 
 			int32_t get_id() const { return fd_; }
 

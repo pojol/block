@@ -37,26 +37,32 @@ void gsf::network::Session::read_cb(::bufferevent *bev, void *ctx)
 
 void gsf::network::Session::err_cb(::bufferevent *bev, short what, void *ctx)
 {
-	if (what & BEV_EVENT_EOF)
-	{
-		/* connection has been closed, do any clean up here */
-		//printf("connection closed\n");
+	int32_t _result = 0;
 
+	do {
+		if (what & BEV_EVENT_EOF) {
+			_result = eid::network::err_event_eof;
+			break;
+		}
+
+		if (what & BEV_EVENT_ERROR) {
+			_result = eid::network::err_event_error;
+			break;
+		}
+
+		if (what & BEV_EVENT_TIMEOUT) {
+			_result = eid::network::err_event_timeout;
+			break;
+		}
+
+	} while (0);
+
+	if (0 != _result) {
 		Session * _session_ptr = static_cast<Session *>(ctx);
-		_session_ptr->dis_connect();
+		_session_ptr->dis_connect(_result);
+
+		bufferevent_free(bev);
 	}
-	else if (what & BEV_EVENT_ERROR)
-	{
-		/* check errno to see what error occurred */
-		Session * _session_ptr = static_cast<Session *>(ctx);
-		_session_ptr->dis_connect();
-	}
-	else if (what & BEV_EVENT_TIMEOUT)
-	{
-		/* must be a timeout event handle, handle it */
-		printf("Timed out\n");
-	}
-	bufferevent_free(bev);
 }
 
 int gsf::network::Session::write(uint32_t msg_id, BlockPtr blockptr)
@@ -109,11 +115,11 @@ void gsf::network::Session::read(::bufferevent *bev)
 	}
 }
 
-void gsf::network::Session::dis_connect()
+void gsf::network::Session::dis_connect(int32_t err)
 {
 	disconnect_callback_(fd_);
 
 	gsf::Args args;
-	args << uint32_t(fd_);
+	args << uint32_t(fd_) << int32_t(err);
 	dispatch(module_id_, eid::network::dis_connect, args);
 }

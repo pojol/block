@@ -43,6 +43,9 @@ namespace eid
 		const int32_t err_upper_limit_session = -2002;		// upper limit session!
 		const int32_t err_socket_new = -2003;				// bufferevent_socket_new err!
 		const int32_t err_socket_connect = -2004;			// bufferevent_socket_connect err!
+		const int32_t err_event_eof = -2005;
+		const int32_t err_event_error = -2006;
+		const int32_t err_event_timeout = -2007;
 	}
 
 	namespace timer
