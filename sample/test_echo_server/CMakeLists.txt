@@ -1,4 +1,4 @@
-PROJECT(test_network)
+PROJECT(test_echo_server)
 
 #引用头文件目录
 if(WIN32)
@@ -42,7 +42,7 @@ if(APPLE)
 endif()
 
 FILE(GLOB_RECURSE SRC "*.cpp" "*.h" "*.cc")
-ADD_EXECUTABLE(test_network ${SRC})
+ADD_EXECUTABLE(test_echo_server ${SRC})
 
 if(MSVC)
     # Use the static C library for all build types
@@ -57,10 +57,10 @@ if(MSVC)
       endif()
     endforeach()
 
-        TARGET_LINK_LIBRARIES(test_network libevent.lib libevent_core.lib libevent_extras.lib network.lib module.lib event.lib ws2_32.lib libprotocd.lib libprotobufd.lib glog.lib log.lib)
+        TARGET_LINK_LIBRARIES(test_echo_server libevent.lib libevent_core.lib libevent_extras.lib network.lib module.lib event.lib ws2_32.lib libprotocd.lib libprotobufd.lib glog.lib log.lib)
 endif()
 if(UNIX)
-        TARGET_LINK_LIBRARIES(test_network  libnetwork.a libevent.a libevent_core.a libevent_extra.a libtimer.a libprotobuf.a libmodule.a liblog.a libglog.a)
+        TARGET_LINK_LIBRARIES(test_echo_server  libnetwork.a libevent.a libevent_core.a libevent_extra.a libtimer.a libprotobuf.a libmodule.a liblog.a libglog.a)
 endif()
 if(APPLE)
 

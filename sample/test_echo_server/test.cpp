@@ -28,8 +28,6 @@
 
 #include <random>
 
-#include "test.pb.h"
-
 #include "../../common/single.h"
 
 class AppFace
@@ -148,14 +146,10 @@ public:
 
 	void init()
 	{
-		Face.log_info(gsf::Args(uint32_t(111), std::string(" info, log!")));
-		Face.log_warning(gsf::Args(uint32_t(111), std::string(" warning, log!")));
-		Face.log_err(gsf::Args(uint32_t(111), std::string(" err, log!")));
-
 		uint32_t _em_id = Face.get_module_id<gsf::EventModule>();
 
 		auto arr = {
-			std::make_pair(uint32_t(1001), std::bind(&EntityMgr::test_remote, this, std::placeholders::_1, std::placeholders::_2)),
+			std::make_pair(uint32_t(1001), std::bind(&EntityMgr::test_remote, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)),
 		};
 
 		for (auto nod : arr)
@@ -165,14 +159,13 @@ public:
 		}
 	}
 
-	void test_remote(uint32_t fd, gsf::BlockPtr blockptr)
+	void test_remote(uint32_t fd, uint32_t msg_id, std::string str)
 	{
-		test_network::Info _info;
-		_info.ParseFromArray(blockptr->buf_, blockptr->size_);
-		Face.log_info(gsf::Args(_info.id(), std::string(" "), _info.name()));
+		Face.log_info(gsf::Args(str));
 
-		_info.set_name("world");
-		Face.send_msg<Client2LoginServer>(this, fd, 1002, _info);
+		//_info.set_name("world");
+		//Face.send_msg<Client2LoginServer>(this, fd, 1002, _info);
+		dispatch_remote(Face.get_module_id<Client2LoginServer>(), fd, 1002, "gsf");
 	}
 
 };
@@ -219,7 +212,6 @@ int main()
 	}
 #endif // WIN32
 
-	GOOGLE_PROTOBUF_VERIFY_VERSION;
 
 	gsf::Application *appptr = new gsf::Application();
 	
