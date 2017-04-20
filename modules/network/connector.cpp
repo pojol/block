@@ -24,6 +24,12 @@ gsf::network::ConnectorModule::ConnectorModule(const std::string &name)
 {
 }
 
+gsf::network::ConnectorModule::ConnectorModule()
+	: Module("")
+{
+
+}
+
 gsf::network::ConnectorModule::~ConnectorModule()
 {
 

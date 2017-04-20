@@ -105,6 +105,11 @@ void gsf::modules::LuaScriptModule::ldispatch(uint32_t target, uint32_t event, g
 	});
 }
 
+void gsf::modules::LuaScriptModule::ldispatch_remote(uint32_t target, uint32_t fd, uint32_t msg_id, const std::string &str)
+{
+	dispatch_remote(target, fd, msg_id, str);
+}
+
 void gsf::modules::LuaScriptModule::llisten(uint32_t self, uint32_t event, sol::function func)
 {
 
@@ -142,13 +147,16 @@ void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string path)
 		, "push_remote_callback", &Args::push_remote_callback
 		, "pop_remote_callback", &Args::pop_remote_callback);
 
-	_lua->state_.new_usertype<LuaScriptModule>("LuaScriptModule", "ldispatch", &LuaScriptModule::ldispatch);
-	_lua->state_.new_usertype<LuaScriptModule>("LuaScriptModule", "llisten", &LuaScriptModule::llisten);
+	_lua->state_.new_usertype<LuaScriptModule>("LuaScriptModule"
+		, "ldispatch", &LuaScriptModule::ldispatch
+		, "llisten", &LuaScriptModule::llisten
+		, "ldispatch_remote", &LuaScriptModule::ldispatch_remote);
 	_lua->state_.set("event", this);
 
 	try {
 		sol::table _module = _lua->state_.get<sol::table>("module");
 
+		_module.get<std::function<void()>>("before_init")();
 		_module.get<std::function<void(uint32_t)>>("init")(module_id);
 
 		lua_map_.push_back(std::make_tuple(module_id, _lua, path));

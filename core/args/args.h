@@ -10,7 +10,7 @@
 
 namespace gsf
 {
-	typedef std::function<void(uint32_t, BlockPtr)> RemoteFunc;
+	typedef std::function<void(uint32_t, uint32_t, std::string)> RemoteFunc;
 
 	class Arg
 	{

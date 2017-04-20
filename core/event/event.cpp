@@ -23,7 +23,10 @@ void gsf::EventModule::execute()
 
 		auto fItr = remote_map_.find(std::get<0>(*itr));
 		if (fItr != remote_map_.end()) {
-			fItr->second(std::get<1>(*itr), std::get<2>(*itr));
+
+			//temp 
+			BlockPtr block = std::get<2>(*itr);
+			fItr->second(std::get<1>(*itr), std::get<0>(*itr), std::string(block->buf_));
 		}
 
 		remote_callback_list_.pop_front();
@@ -150,4 +153,15 @@ void gsf::IEvent::dispatch_remote(uint32_t target, uint32_t fd, uint32_t msg_id,
 	std::vector<uint32_t> fd_list;
 	fd_list.push_back(fd);
 	EventModule::get_ref().add_remote_cmd(target, fd_list, msg_id, blockptr);
+}
+
+void gsf::IEvent::dispatch_remote(uint32_t target, uint32_t fd, uint32_t msg_id, const std::string &str)
+{
+	std::vector<uint32_t> fd_list;
+	fd_list.push_back(fd);
+
+	auto _msg = std::make_shared<gsf::Block>(fd, msg_id, str.length());
+	memcpy(_msg->buf_ + _msg->pos_, str.c_str(), str.length());
+
+	EventModule::get_ref().add_remote_cmd(target, fd_list, msg_id, _msg);
 }

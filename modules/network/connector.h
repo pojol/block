@@ -25,6 +25,7 @@ namespace gsf
 		{
 		public:
 			ConnectorModule(const std::string &name);
+			ConnectorModule();
 			~ConnectorModule();
 
 			virtual void before_init();

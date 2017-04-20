@@ -61,6 +61,8 @@ namespace gsf
 		*/
 		virtual void dispatch_remote(uint32_t target, uint32_t fd, uint32_t msg_id, BlockPtr blockptr);
 
+		virtual void dispatch_remote(uint32_t target, uint32_t fd, uint32_t msg_id, const std::string &str);
+
 		/**!
 			远程消息订阅的callback
 		*/
