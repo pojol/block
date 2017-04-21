@@ -11,6 +11,7 @@
 #include <event/event.h>
 #include <event2/util.h>
 #include <event2/listener.h>
+#include <event2/bufferevent.h>
 
 namespace gsf
 {
@@ -50,6 +51,8 @@ namespace gsf
 			event_base *event_base_ptr_;
 
 			SessionPtr session_ptr_;
+
+			::bufferevent *buffer_event_ptr_;
 
 			std::vector<int> disconnect_vec_;
 		};

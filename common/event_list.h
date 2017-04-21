@@ -5,19 +5,20 @@
 #ifndef GSF_EVENT_LIST_H_H
 #define GSF_EVENT_LIST_H_H
 
-// ºóÃæÓÃ¹¤¾ß×Ô¶¯Éú³É
-//! ÓÃÓÚÃèÊö¿ò¼ÜÖĞÓÃµ½µÄÊÂ¼ş£¬ºÍÓÃ»§ÊÂ¼ş £¨ÔİÊ±ÓÃ.h ºóÃæ»áÀ©Õ¹µ½Í¨ÓÃÒ»µãµÄ·½°¸
+// åé¢ç”¨å·¥å…·è‡ªåŠ¨ç”Ÿæˆ
+//! ç”¨äºæè¿°æ¡†æ¶ä¸­ç”¨åˆ°çš„äº‹ä»¶ï¼Œå’Œç”¨æˆ·äº‹ä»¶ ï¼ˆæš‚æ—¶ç”¨.h åé¢ä¼šæ‰©å±•åˆ°é€šç”¨ä¸€ç‚¹çš„æ–¹æ¡ˆ
 
 namespace eid
 {
-	//! Ã¿¸ö½ø³ÌÖĞapplication module µÄid £¬ÒòÎªapplicationµÄ×÷ÓÃ·¶Î§Ö»ÔÚ×ÔÉí½ø³ÌËùÒÔ id ¿ÉÒÔÊÇ¹Ì¶¨µÄ¡£
+	//! æ¯ä¸ªè¿›ç¨‹ä¸­application module çš„id ï¼Œå› ä¸ºapplicationçš„ä½œç”¨èŒƒå›´åªåœ¨è‡ªèº«è¿›ç¨‹æ‰€ä»¥ id å¯ä»¥æ˜¯å›ºå®šçš„ã€‚
 	const uint32_t app_id = 1;
 
-	//! Í¨¹ı×Ö·û´®»ñµÃmoduleµÄid£¬ Ö»ÄÜ»ñÈ¡¾²Ì¬ÏÔÊ¾ÉùÃ÷µÄmodule¡£
+	//! é€šè¿‡å­—ç¬¦ä¸²è·å¾—moduleçš„idï¼Œ åªèƒ½è·å–é™æ€æ˜¾ç¤ºå£°æ˜çš„moduleã€‚
 	const uint32_t get_module = 101;
 
-	//! Í¨¹ıÒÑ¾­¶¨ÒåµÄmodule£¬´´½¨¶à·İÊµÀı¡£
-	const uint32_t create_dynamic_module = 102;
+	//! Í¨é€šè¿‡å·²ç»å®šä¹‰çš„moduleï¼Œåˆ›å»ºå¤šä»½å®ä¾‹ã€‚
+	const uint32_t new_dynamic_module = 102;
+	const uint32_t delete_dynamic_module = 103;
 
 	namespace log
 	{
@@ -33,6 +34,7 @@ namespace eid
 		const uint32_t make_acceptor = 2001;
 		const uint32_t make_connector = 2002;
 		const uint32_t bind_remote_callback = 2003;
+		const uint32_t kick_connect = 2004;
 
 		//! result code
 		const uint32_t new_connect = 2004;
@@ -50,7 +52,7 @@ namespace eid
 
 	namespace timer
 	{
-		//! args {"uint32_t":module_id£¬"uint32_t":milliseconds}
+		//! args {"uint32_t":module_idï¼Œ"uint32_t":milliseconds}
 		const uint32_t delay_milliseconds = 3001;
 
 		//! args {"uint32_t":module_id, "uint32_t":hour, "uint32_t":minute}

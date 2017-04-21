@@ -2,7 +2,8 @@
 eid = {
 	app_id = 1,
 	get_module = 101,
-	create_dynamic_module = 102,
+	new_dynamic_module = 102,
+	delete_dynamic_module = 103,
 	
 	log = {
 		init = 1001,

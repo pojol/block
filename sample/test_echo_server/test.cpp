@@ -149,13 +149,17 @@ public:
 		uint32_t _em_id = Face.get_module_id<gsf::EventModule>();
 
 		auto arr = {
-			std::make_pair(uint32_t(1001), std::bind(&EntityMgr::test_remote, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)),
+			std::make_pair(uint32_t(1001), std::bind(&EntityMgr::test_remote, this
+				, std::placeholders::_1
+				, std::placeholders::_2
+				, std::placeholders::_3)),
 		};
 
 		for (auto nod : arr)
 		{
 			//! 向协议绑定器申请，module 和 协议的绑定.
-			dispatch(_em_id, eid::network::bind_remote_callback, gsf::Args(get_module_id(), nod.first, nod.second));
+			dispatch(_em_id, eid::network::bind_remote_callback
+				, gsf::Args(get_module_id(), nod.first, nod.second));
 		}
 	}
 

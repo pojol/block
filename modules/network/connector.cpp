@@ -5,7 +5,7 @@
 
 #include <event2/buffer.h>
 #include <event2/listener.h>
-#include <event2/bufferevent.h>
+
 
 #ifdef WIN32
 #include <winsock2.h>
@@ -68,7 +68,8 @@ void gsf::network::ConnectorModule::execute()
 
 void gsf::network::ConnectorModule::shut()
 {
-
+	bufferevent_free(buffer_event_ptr_);
+	event_base_free(event_base_ptr_);
 }
 
 void gsf::network::ConnectorModule::after_shut()
@@ -86,11 +87,10 @@ void gsf::network::ConnectorModule::make_connector(gsf::Args args, gsf::Callback
 
 	int32_t _ret = 0;
 	int _fd = 0;
-	::bufferevent *_bev_ptr;
 
 	do {
-		_bev_ptr = bufferevent_socket_new(event_base_ptr_, -1, BEV_OPT_CLOSE_ON_FREE);
-		if (!_bev_ptr) {
+		buffer_event_ptr_ = bufferevent_socket_new(event_base_ptr_, -1, BEV_OPT_CLOSE_ON_FREE);
+		if (!buffer_event_ptr_) {
 			_ret = eid::network::err_socket_new;
 			break;
 		}
@@ -101,26 +101,27 @@ void gsf::network::ConnectorModule::make_connector(gsf::Args args, gsf::Callback
 		_sin.sin_port = htons(_port);
 		_sin.sin_addr.s_addr = inet_addr(_ip.c_str());
 
-		if (bufferevent_socket_connect(_bev_ptr, (sockaddr*)&_sin, sizeof(sockaddr_in)) < 0) {
+		if (bufferevent_socket_connect(buffer_event_ptr_, (sockaddr*)&_sin, sizeof(sockaddr_in)) < 0) {
 			_ret = eid::network::err_socket_connect;
 			break;
 		}
 		else {
-			_fd = bufferevent_getfd(_bev_ptr);
+			_fd = bufferevent_getfd(buffer_event_ptr_);
 		}
 	} while (0);
 
 
 	if (_ret == 0) {
 		session_ptr_ = std::make_shared<Session>(_fd, _module_id, std::bind(&ConnectorModule::need_close_session, this, std::placeholders::_1));
-		bufferevent_setcb(_bev_ptr, Session::read_cb, NULL, Session::err_cb, session_ptr_.get());
-		bufferevent_enable(_bev_ptr, EV_READ | EV_WRITE);
+		bufferevent_setcb(buffer_event_ptr_, Session::read_cb, NULL, Session::err_cb, session_ptr_.get());
+		bufferevent_enable(buffer_event_ptr_, EV_READ | EV_WRITE);
 
 		gsf::Args res;
 		res << uint32_t(_fd);
 		dispatch(_module_id, eid::network::new_connect, res);
 	}
 }
+
 
 void gsf::network::ConnectorModule::need_close_session(int fd)
 {

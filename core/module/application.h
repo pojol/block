@@ -44,6 +44,8 @@ namespace gsf
 		//！ 临时先写在这里，未来如果支持分布式可能要放在其他地方生成，保证服务器集群唯一。
 		uint32_t make_module_id();
 
+		void unregist_dynamic_module(uint32_t module_id);
+
 	private:
 
 		std::list<Module *> module_list_;
@@ -71,18 +73,18 @@ namespace gsf
 	template <typename T>
 	void gsf::Application::regist_module(T *module, bool dynamic /* = false */)
 	{
-		auto _type_id = typeid(T).hash_code();
-		auto _id_itr = module_id_map_.find(_type_id);
-		if (_id_itr != module_id_map_.end()){
-			printf("regist repeated module!\n");
-			return;
-		}
-
 		module_list_.push_back(module);
 		module->set_id(make_module_id());
 
-		module_id_map_.insert(std::make_pair(_type_id, module->get_module_id()));
 		if (!dynamic) {
+			auto _type_id = typeid(T).hash_code();
+			auto _id_itr = module_id_map_.find(_type_id);
+			if (_id_itr != module_id_map_.end()) {
+				printf("regist repeated module!\n");
+				return;
+			}
+
+			module_id_map_.insert(std::make_pair(_type_id, module->get_module_id()));
 			module_name_map_.insert(std::make_pair(module->get_module_name(), module->get_module_id()));
 		}
 	}

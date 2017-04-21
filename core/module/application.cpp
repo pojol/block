@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <ctime>
+#include <algorithm>
 
 #ifdef WIN32
 #include <windows.h>
@@ -31,7 +32,7 @@ void gsf::Application::init()
 
 	});
 
-	listen(this, eid::create_dynamic_module, [=](gsf::Args args, CallbackFunc callback) {
+	listen(this, eid::new_dynamic_module, [=](gsf::Args args, CallbackFunc callback) {
 
 		std::string _name = args.pop_string(0);
 
@@ -42,6 +43,13 @@ void gsf::Application::init()
 		_module_ptr->init();
 
 		callback(gsf::Args(_module_ptr->get_module_id()));
+	});
+
+	listen(this, eid::delete_dynamic_module, [=](gsf::Args args, CallbackFunc callback) {
+
+		uint32_t _module_id = args.pop_uint32(0);
+		unregist_dynamic_module(_module_id);
+
 	});
 }
 
@@ -117,4 +125,21 @@ uint32_t gsf::Application::make_module_id()
 	}
 
 	return module_idx_++;
+}
+
+void gsf::Application::unregist_dynamic_module(uint32_t module_id)
+{
+	auto itr = std::find_if(module_list_.begin(), module_list_.end(), [&](std::list<Module *>::value_type it){
+		return (it->get_module_id() == module_id);
+	});	
+
+	if (itr != module_list_.end()){
+
+		(*itr)->shut();
+		(*itr)->after_shut();
+
+		//! 
+
+		module_list_.erase(itr);
+	}
 }
