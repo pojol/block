@@ -1,4 +1,5 @@
 #include "event.h"
+#include <sol.hpp>
 
 void gsf::EventModule::execute()
 {
@@ -8,7 +9,8 @@ void gsf::EventModule::execute()
 
 		auto tItr = type_map_.find(std::get<0>(*itr));
 		if (tItr != type_map_.end()) {
-			auto iItr = tItr->second.find(std::get<1>(*itr));
+			auto _cmd_id = std::get<1>(*itr);
+			auto iItr = tItr->second.find(_cmd_id);
 			if (iItr != tItr->second.end()) {
 				iItr->second(std::get<2>(*itr), std::get<3>(*itr));
 			}
@@ -21,12 +23,18 @@ void gsf::EventModule::execute()
 	{
 		auto itr = remote_callback_list_.begin();
 
-		auto fItr = remote_map_.find(std::get<0>(*itr));
+		auto _cmd_id = std::get<0>(*itr);
+		auto fItr = remote_map_.find(_cmd_id);
 		if (fItr != remote_map_.end()) {
+			BlockPtr _blockptr = std::get<2>(*itr);
+			std::string _str(_blockptr->buf_, _blockptr->size_);
+			try {
+				fItr->second(std::get<1>(*itr), std::get<0>(*itr), _str);
+			}
+			catch (sol::error e) {
+				std::cout << e.what() << std::endl;
 
-			//temp 
-			BlockPtr block = std::get<2>(*itr);
-			fItr->second(std::get<1>(*itr), std::get<0>(*itr), std::string(block->buf_));
+			}
 		}
 
 		remote_callback_list_.pop_front();

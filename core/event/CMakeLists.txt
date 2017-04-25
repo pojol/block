@@ -1,9 +1,11 @@
-PROJECT(event)
+﻿PROJECT(event)
 
 #引用头文件目录
 INCLUDE_DIRECTORIES(
 	${GSF_SOURCE_DIR}/core
 	${GSF_SOURCE_DIR}/modules
+	${GSF_SOURCE_DIR}/3rd/lua-5.3.4/src
+	${GSF_SOURCE_DIR}/3rd/sol2-2.16.0
 )
 
 #引用库目录
