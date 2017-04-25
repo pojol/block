@@ -102,10 +102,11 @@ void gsf::modules::LogModule::init_impl(gsf::Args args, gsf::CallbackFunc callba
 {
 	std::string _path = args.pop_string(0);
 
-	FLAGS_log_dir			= _path;	//�������·��
-	FLAGS_alsologtostderr	= true;		//������־��Ϣ������־�ļ�֮���Ƿ�ȥ��׼���
-	FLAGS_colorlogtostderr	= true;		//���ü�¼����׼�������ɫ��Ϣ������ն�֧�֣�
-	FLAGS_max_log_size		= 10;		//���������־�ļ���С����MBΪ��λ��
+	FLAGS_log_dir			= _path;	//设置输出路径
+	FLAGS_alsologtostderr	= true;		//设置日志消息除了日志文件之外是否去标准输出
+	FLAGS_colorlogtostderr	= true;		//设置记录到标准输出的颜色消息（如果终端支持）
+	FLAGS_max_log_size		= 10;		//设置最大日志文件大小（以MB为单位）
+	FLAGS_logbufsecs		= 0;		//立即写入到日志
 
 	google::InitGoogleLogging("log");
 }
