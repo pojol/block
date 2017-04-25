@@ -8,9 +8,19 @@
 #include <list>
 #include <unordered_map>
 #include <map>
+#include <array>
 
 namespace gsf
 {
+	enum AppState
+	{
+		BEFORE_INIT = 0,
+		INIT,
+		EXECUTE,
+		SHUT,
+		AFTER_SHUT,
+	};
+
 	class Application
 		: public Module
 		, public IEvent
@@ -47,6 +57,8 @@ namespace gsf
 		void unregist_dynamic_module(uint32_t module_id);
 
 	private:
+		AppState state_;
+		std::array<std::list<std::function<void()>>, 5> call_list_;
 
 		std::list<Module *> module_list_;
 		std::unordered_map<uint32_t, uint32_t> module_id_map_;

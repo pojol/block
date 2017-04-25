@@ -57,11 +57,30 @@ void gsf::modules::LuaScriptModule::execute()
 	//!
 	for (auto itr : lua_map_)
 	{
-		LuaState *_lua = std::get<1>(itr);
+		LuaProxy *_lua = itr.second;
 
 		try {
 			sol::table _module = _lua->state_.get<sol::table>("module");
-			_module.get<std::function<void()>>("execute")();
+
+			if (_lua->app_state_ == LuaAppState::BEFORE_INIT) {
+				_lua->call_list_[LuaAppState::BEFORE_INIT](_module);
+				_lua->app_state_ = LuaAppState::INIT;
+			}
+			else if (_lua->app_state_ == LuaAppState::INIT) {
+				_lua->call_list_[LuaAppState::INIT](_module);
+				_lua->app_state_ = LuaAppState::EXECUTE;
+			}
+			else if (_lua->app_state_ == LuaAppState::EXECUTE) {
+				_lua->call_list_[LuaAppState::EXECUTE](_module);
+			}
+			else if (_lua->app_state_ == LuaAppState::SHUT) {
+				_lua->call_list_[LuaAppState::SHUT](_module);
+				_lua->app_state_ = LuaAppState::AFTER_SHUT;
+			}
+			else if (_lua->app_state_ = LuaAppState::AFTER_SHUT) {
+				_lua->call_list_[LuaAppState::AFTER_SHUT](_module);
+				destroy(_lua->lua_id_);
+			}
 		}
 		catch (sol::error e) {
 			dispatch(log_module_, eid::log::error, gsf::Args(std::string(e.what())));
@@ -126,7 +145,7 @@ void gsf::modules::LuaScriptModule::llisten(uint32_t self, uint32_t event, sol::
 
 void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string path)
 {
-	LuaState *_lua = new LuaState();
+	LuaProxy *_lua = new LuaProxy(module_id);
 	_lua->state_.open_libraries(
 		sol::lib::os
 		, sol::lib::base
@@ -136,8 +155,25 @@ void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string path)
 		, sol::lib::table
 		, sol::lib::string
 		, sol::lib::debug);
-
-	_lua->state_.do_file(path.c_str());
+	_lua->path_ = path;
+	
+	try
+	{
+		auto _ret = _lua->state_.do_file(path.c_str());
+		if (_ret) {
+			std::string _err = Traceback(_lua->state_.lua_state()) + " build err " 
+				+ path + '\t' + lua_tostring(_lua->state_.lua_state(), _ret.stack_index()) + "\n";
+			dispatch(log_module_, eid::log::error, gsf::Args(_err));
+			return;
+		}
+	}
+	catch (sol::error e)
+	{
+		std::string _err = Traceback(_lua->state_.lua_state()) + " init err " 
+			+ path + "\t\n" + e.what();
+		dispatch(log_module_, eid::log::error, gsf::Args(_err));
+	}
+	
 
 	_lua->state_.new_usertype<Args>("Args"
 		, "push_uint32", &Args::push_uint32
@@ -152,47 +188,57 @@ void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string path)
 		, "llisten", &LuaScriptModule::llisten
 		, "ldispatch_remote", &LuaScriptModule::ldispatch_remote);
 	_lua->state_.set("event", this);
+	_lua->state_.set("module_id", module_id);
 
-	try {
-		sol::table _module = _lua->state_.get<sol::table>("module");
+	_lua->call_list_[LuaAppState::BEFORE_INIT] = [&](sol::table t) {
+		t.get<std::function<void()>>("before_init")();
+		t.get<std::function<void()>>("execute")();
+	};
+	_lua->call_list_[LuaAppState::INIT] = [&](sol::table t) {
+		t.get<std::function<void()>>("init")();
+		t.get<std::function<void()>>("execute")();
+	};
+	_lua->call_list_[LuaAppState::EXECUTE] = [&](sol::table t) {
+		t.get<std::function<void()>>("execute")();
+	};
+	_lua->call_list_[LuaAppState::SHUT] = [&](sol::table t) {
+		t.get<std::function<void()>>("shut")();
+		t.get<std::function<void()>>("execute")();
+	};
+	_lua->call_list_[LuaAppState::AFTER_SHUT] = [&](sol::table t) {
+		t.get<std::function<void()>>("after_shut")();
+		t.get<std::function<void()>>("execute")();
+	};
 
-		_module.get<std::function<void()>>("before_init")();
-		_module.get<std::function<void(uint32_t)>>("init")(module_id);
-
-		lua_map_.push_back(std::make_tuple(module_id, _lua, path));
-	}
-	catch (sol::error e) {
-		std::string _err = Traceback(_lua->state_.lua_state()) + "\n" + e.what();
-		dispatch(log_module_, eid::log::error, gsf::Args(_err));
-	}
+	lua_map_.push_back(std::make_pair(module_id, _lua));
 }
 
 void gsf::modules::LuaScriptModule::destroy_event(gsf::Args args, gsf::CallbackFunc callback)
 {
 	uint32_t _module_id = args.pop_uint32(0);
-	destroy(_module_id);
+	auto itr = std::find_if(lua_map_.begin(), lua_map_.end(), [&](StateMap::value_type t) {
+		return (t.first == _module_id);
+	});
+
+	if (itr == lua_map_.end()) {
+		return;
+	}
+
+	LuaProxy *_lua = itr->second;
+	_lua->app_state_ = LuaAppState::AFTER_SHUT;
 }
 
 int gsf::modules::LuaScriptModule::destroy(uint32_t module_id)
 {
 	auto itr = std::find_if(lua_map_.begin(), lua_map_.end(), [&](StateMap::value_type t) {
-		return (std::get<0>(t) == module_id);
+		return (t.first == module_id);
 	});
 
 	if (itr == lua_map_.end()) {
 		return -1;
 	}
 
-	LuaState *_lua = std::get<1>(*itr);
-
-	try {
-		sol::table _module = _lua->state_.get<sol::table>("module");
-
-		_module.get<std::function<void()>>("shut")();
-	}
-	catch (sol::error e) {
-		dispatch(log_module_, eid::log::error, gsf::Args(std::string(e.what())));
-	}
+	LuaProxy *_lua = itr->second;
 
 	delete _lua;
 	_lua = nullptr;
@@ -206,14 +252,14 @@ void gsf::modules::LuaScriptModule::reload_event(gsf::Args args, gsf::CallbackFu
 	uint32_t _module_id = args.pop_uint32(0);
 
 	auto itr = std::find_if(lua_map_.begin(), lua_map_.end(), [&](StateMap::value_type t) {
-		return (std::get<0>(t) == _module_id);
+		return (t.first == _module_id);
 	});
 
 	if (itr == lua_map_.end()) {
 		return;
 	}
 
-	std::string _path = std::get<2>(*itr);
+	std::string _path = itr->second->path_;
 
 	if (destroy(_module_id) != 0) {
 		return;

@@ -14,9 +14,28 @@ namespace gsf
 	namespace modules
 	{
 		// sol 的state是个unique_ptr， 在这里有点尴尬先这样写实现功能。
-		struct LuaState
+		enum LuaAppState
 		{
+			BEFORE_INIT = 0,
+			INIT,
+			EXECUTE,
+			SHUT,
+			AFTER_SHUT,
+		};
+
+		struct LuaProxy
+		{
+			LuaProxy(uint32_t lua_id)
+				: lua_id_(lua_id)
+				, app_state_(LuaAppState::BEFORE_INIT)
+			{}
+
 			sol::state state_;
+			std::string path_;
+			LuaAppState app_state_;
+			uint32_t lua_id_;
+
+			std::array<std::function<void(sol::table)>, 5> call_list_;
 		};
 
 		class LuaScriptModule
@@ -55,7 +74,7 @@ namespace gsf
 		private:
 			uint32_t log_module_;
 
-			typedef std::vector<std::tuple<uint32_t, LuaState*, std::string>> StateMap;
+			typedef std::vector<std::pair<uint32_t, LuaProxy*>> StateMap;
 			StateMap lua_map_;
 		};
 	}

@@ -15,8 +15,58 @@ gsf::Application::Application()
 	, shutdown_(false)
 	, delay_(20)
 	, module_idx_(2)
+	, state_(AppState::BEFORE_INIT)
 {
 	module_id_ = eid::app_id;
+
+	std::list<std::function<void()>> before_init_list;
+	before_init_list.push_back([&]() {
+		auto _itr = module_list_.begin();
+		while (_itr != module_list_.end())
+		{
+			(*_itr)->before_init();
+			++_itr;
+		}
+	});
+	before_init_list.push_back([&]() {
+		auto _itr = module_list_.begin();
+		while (_itr != module_list_.end())
+		{
+			(*_itr)->execute();
+			++_itr;
+		}
+	});
+	call_list_[AppState::BEFORE_INIT] = before_init_list;
+
+	std::list<std::function<void()>> init_list;
+	init_list.push_back([&]() {
+		auto _itr = module_list_.begin();
+		while (_itr != module_list_.end())
+		{
+			(*_itr)->init();
+			++_itr;
+		}
+	});
+	init_list.push_back([&]() {
+		auto _itr = module_list_.begin();
+		while (_itr != module_list_.end())
+		{
+			(*_itr)->execute();
+			++_itr;
+		}
+	});
+	call_list_[AppState::INIT] = init_list;
+
+	std::list<std::function<void()>> execute_list;
+	execute_list.push_back([&]() {
+		auto _itr = module_list_.begin();
+		while (_itr != module_list_.end())
+		{
+			(*_itr)->execute();
+			++_itr;
+		}
+	});
+	call_list_[AppState::EXECUTE] = execute_list;
 }
 
 void gsf::Application::init()
@@ -55,22 +105,6 @@ void gsf::Application::init()
 
 void gsf::Application::run()
 {
-	//! before init
-	auto _itr = module_list_.begin();
-	while (_itr != module_list_.end())
-	{
-		(*_itr)->before_init();
-		++_itr;
-	}
-
-	//! init
-	_itr = module_list_.begin();
-	while (_itr != module_list_.end())
-	{
-		(*_itr)->init();
-		++_itr;
-	}
-
 	//! run
 	while (!shutdown_)
 	{
@@ -78,11 +112,32 @@ void gsf::Application::run()
 
 		auto _before = time_point_cast<milliseconds>(system_clock::now());
 
-		auto _itr = module_list_.begin();
-		while (_itr != module_list_.end())
-		{
-			(*_itr)->execute();
-			++_itr;
+		auto _callback = [&](std::list<std::function<void()>> calls) {
+			for (auto call : calls)
+			{
+				call();
+			}
+		};
+
+		std::list<std::function<void()>> list_;
+		if (state_ == AppState::BEFORE_INIT) {
+			_callback(call_list_[AppState::BEFORE_INIT]);
+			state_ = AppState::INIT;
+		}
+		else if (state_ == AppState::INIT) {
+			_callback(call_list_[AppState::INIT]);
+			state_ = AppState::EXECUTE;
+		}
+		else if (state_ == AppState::EXECUTE) {
+			_callback(call_list_[AppState::EXECUTE]);
+		}
+		else if (state_ = AppState::SHUT) {
+			_callback(call_list_[AppState::SHUT]);
+			state_ = AppState::AFTER_SHUT;
+		}
+		else if (state_ = AppState::AFTER_SHUT) {
+			_callback(call_list_[AppState::AFTER_SHUT]);
+			//exit();
 		}
 
 		tick();
@@ -98,22 +153,6 @@ void gsf::Application::run()
 		else {
 
 		}
-	}
-
-	//! 
-	_itr = module_list_.begin();
-	while (_itr != module_list_.end())
-	{
-		(*_itr)->shut();
-		++_itr;
-	}
-
-	//!
-	_itr = module_list_.begin();
-	while (_itr != module_list_.end())
-	{
-		(*_itr)->after_shut();
-		++_itr;
 	}
 
 }
