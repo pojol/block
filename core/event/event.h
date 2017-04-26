@@ -68,7 +68,11 @@ namespace gsf
 		*/
 		virtual void remote_callback(uint32_t fd, uint32_t msg_id, BlockPtr blockptr);
 
-	private:
+
+		/**!
+			移除module在event层上的绑定.
+		*/
+		virtual void bind_clear(uint32_t module_id);
 	};
 
 	// 如果需要监听多个同步事件,辅助类
@@ -138,6 +142,10 @@ namespace gsf
 
 		void add_remote_callback(uint32_t msg_id, uint32_t fd, BlockPtr blockptr);
 
+		///
+
+		void rmv_event(uint32_t module_id);
+
     private:
 		typedef std::unordered_map<uint32_t, EventFunc> InnerMap;
 		typedef std::unordered_map<uint32_t, InnerMap> TypeMap;
@@ -147,12 +155,14 @@ namespace gsf
 		typedef std::list<std::tuple<uint32_t, uint32_t, BlockPtr>> RemoteCallbackList;
 
 		typedef std::unordered_map<uint32_t, RemoteFunc> RemoteMap;
+		typedef std::unordered_map<uint32_t, uint32_t> RomoteMapIdx;
 
 		TypeMap type_map_;
 		CmdList cmd_list_;
 
 		RemoteCallbackList remote_callback_list_;
 		RemoteMap remote_map_;
+		RomoteMapIdx remote_map_idx_;
 
 		//! 绑定发送socket消息函数
 		std::unordered_map<uint32_t, RemoteEventFunc> remote_event_map_;

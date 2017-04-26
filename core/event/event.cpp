@@ -105,7 +105,7 @@ void gsf::EventModule::add_cmd(uint32_t type_id, uint32_t event, gsf::Args args,
 		auto _func = args.pop_remote_callback(2);
 
 		remote_map_.insert(std::make_pair(_msg_id, _func));
-
+		remote_map_idx_.insert(std::make_pair(module_id_, _msg_id));
 		return;
 	}
 
@@ -115,6 +115,27 @@ void gsf::EventModule::add_cmd(uint32_t type_id, uint32_t event, gsf::Args args,
 void gsf::EventModule::add_remote_callback(uint32_t msg_id, uint32_t fd, BlockPtr blockptr)
 {
 	remote_callback_list_.push_back(std::make_tuple(msg_id, fd, blockptr));
+}
+
+void gsf::EventModule::rmv_event(uint32_t module_id)
+{
+	//! 清理消息协议事件相关的绑定
+	auto itr = remote_map_idx_.find(module_id);
+	if (itr != remote_map_idx_.end()) {
+
+		auto rmItr = remote_map_.find(itr->second);
+		if (rmItr != remote_map_.end()) {
+			remote_map_.erase(rmItr);
+		}
+
+		remote_map_idx_.erase(itr);
+	}
+
+	//! 清理listen相关的事件绑定
+	auto tItr = type_map_.find(module_id);
+	if (tItr != type_map_.end()) {
+		type_map_.erase(tItr);
+	}
 }
 
 void gsf::EventModule::add_remote_cmd(uint32_t type_id, std::vector<uint32_t> fd_list, uint32_t msg_id, BlockPtr blockptr)
@@ -149,6 +170,11 @@ void gsf::IEvent::dispatch(uint32_t target, uint32_t event, gsf::Args args, Call
 void gsf::IEvent::remote_callback(uint32_t fd, uint32_t msg_id, BlockPtr blockptr)
 {
 	EventModule::get_ref().add_remote_callback(msg_id, fd, blockptr);
+}
+
+void gsf::IEvent::bind_clear(uint32_t module_id)
+{
+	EventModule::get_ref().rmv_event(module_id);
 }
 
 void gsf::IEvent::listen_remote(Module *target, RemoteEventFunc func)
