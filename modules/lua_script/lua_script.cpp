@@ -200,22 +200,18 @@ void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string path)
 
 	_lua->call_list_[LuaAppState::BEFORE_INIT] = [&](sol::table t) {
 		t.get<std::function<void()>>("before_init")();
-		t.get<std::function<void()>>("execute")();
 	};
 	_lua->call_list_[LuaAppState::INIT] = [&](sol::table t) {
 		t.get<std::function<void()>>("init")();
-		t.get<std::function<void()>>("execute")();
 	};
 	_lua->call_list_[LuaAppState::EXECUTE] = [&](sol::table t) {
 		t.get<std::function<void()>>("execute")();
 	};
 	_lua->call_list_[LuaAppState::SHUT] = [&](sol::table t) {
 		t.get<std::function<void()>>("shut")();
-		t.get<std::function<void()>>("execute")();
 	};
 	_lua->call_list_[LuaAppState::AFTER_SHUT] = [&](sol::table t) {
 		t.get<std::function<void()>>("after_shut")();
-		t.get<std::function<void()>>("execute")();
 	};
 
 	try {

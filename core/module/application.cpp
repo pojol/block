@@ -29,12 +29,7 @@ gsf::Application::Application()
 		}
 	});
 	before_init_list.push_back([&]() {
-		auto _itr = module_list_.begin();
-		while (_itr != module_list_.end())
-		{
-			(*_itr)->execute();
-			++_itr;
-		}
+		static_cast<Module*>(gsf::EventModule::get_ptr())->execute();
 	});
 	call_list_[AppState::BEFORE_INIT] = before_init_list;
 
@@ -48,12 +43,7 @@ gsf::Application::Application()
 		}
 	});
 	init_list.push_back([&]() {
-		auto _itr = module_list_.begin();
-		while (_itr != module_list_.end())
-		{
-			(*_itr)->execute();
-			++_itr;
-		}
+		static_cast<Module*>(gsf::EventModule::get_ptr())->execute();
 	});
 	call_list_[AppState::INIT] = init_list;
 
@@ -65,12 +55,15 @@ gsf::Application::Application()
 			(*_itr)->execute();
 			++_itr;
 		}
+		static_cast<Module*>(gsf::EventModule::get_ptr())->execute();
 	});
 	call_list_[AppState::EXECUTE] = execute_list;
 }
 
 void gsf::Application::init()
 {
+	new gsf::EventModule();
+
 	listen(this, eid::get_module, [=](gsf::Args args, CallbackFunc callback) {
 		
 		std::string _name = args.pop_string(0);
