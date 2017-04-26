@@ -34,98 +34,6 @@
 #include "../../common/single.h"
 
 
-class AppFace
-	: public gsf::utils::Singleton<AppFace>
-	, public gsf::IEvent
-{
-public:
-
-	void init(gsf::Application *app)
-	{
-		app_ = app;
-		char _path[512];
-#ifdef WIN32
-		GetModuleFileName(NULL, _path, 512);
-		//取出文件路径
-		for (int i = strlen(_path); i >= 0; i--)
-		{
-			if (_path[i] == '\\')
-			{
-				_path[i] = '\0';
-				break;
-			}
-		}
-#else
-		int cnt = readlink("/proc/self/exe", _path, 512);
-		if (cnt < 0 || cnt >= 512){
-			std::cout << "read path err" << std::endl;
-			return;
-		}
-		for (int i = cnt; i >=0; --i)
-		{
-			if (_path[i] == '/'){
-				_path[i+1] = '\0';
-				break;
-			}
-		}
-#endif // WIN32
-
-		//test
-		dispatch2<gsf::modules::LogModule>(eid::log::init, gsf::Args(std::string(_path)
-			, std::string("echo_client")));
-	}
-
-	void log_info(gsf::Args args);
-	void log_warning(gsf::Args args);
-	void log_err(gsf::Args args);
-
-	template <typename M, typename T>
-	void send_msg(IEvent *event_ptr, uint32_t fd, uint32_t msg_id, T msg);
-
-	template <typename M>
-	uint32_t get_module_id();
-
-	template <typename M>
-	void dispatch2(uint32_t eid, gsf::Args args);
-
-private:
-	gsf::Application *app_;
-};
-
-template <typename M>
-void AppFace::dispatch2(uint32_t eid, gsf::Args args)
-{
-	dispatch(app_->find_module_id<M>(), eid, args);
-}
-
-template <typename M>
-uint32_t AppFace::get_module_id()
-{
-	return app_->find_module_id<M>();
-}
-
-template <typename M, typename T>
-void AppFace::send_msg(IEvent *event_ptr, uint32_t fd, uint32_t msg_id, T msg)
-{
-	app_->sendmsg<M>(event_ptr, fd, msg_id, msg);
-}
-
-void AppFace::log_info(gsf::Args args)
-{
-	dispatch(app_->find_module_id<gsf::modules::LogModule>(), eid::log::info, args);
-}
-
-void AppFace::log_warning(gsf::Args args)
-{
-	dispatch(app_->find_module_id<gsf::modules::LogModule>(), eid::log::warning, args);
-}
-
-void AppFace::log_err(gsf::Args args)
-{
-	dispatch(app_->find_module_id<gsf::modules::LogModule>(), eid::log::error, args);
-}
-
-#define Face AppFace::get_ref()
 
 namespace gsf
 {
@@ -146,18 +54,64 @@ public:
 
 	~Login_LuaProxy() {}
 
+	void before_init() override
+	{
+		dispatch(eid::app_id, eid::get_module, gsf::Args(std::string("LogModule")), [&](gsf::Args args) {
+			log_ = args.pop_uint32(0);
+		});
+
+		dispatch(eid::app_id, eid::get_module, gsf::Args(std::string("LuaScriptModule")), [&](gsf::Args args) {
+			lua_ = args.pop_uint32(0);
+		});
+	}
+
 	void init()
 	{
+		char _path[512];
+#ifdef WIN32
+		GetModuleFileName(NULL, _path, 512);
+		//取出文件路径
+		for (int i = strlen(_path); i >= 0; i--)
+		{
+			if (_path[i] == '\\')
+			{
+				_path[i] = '\0';
+				break;
+			}
+		}
+#else
+		int cnt = readlink("/proc/self/exe", _path, 512);
+		if (cnt < 0 || cnt >= 512) {
+			std::cout << "read path err" << std::endl;
+			return;
+		}
+		for (int i = cnt; i >= 0; --i)
+		{
+			if (_path[i] == '/') {
+				_path[i + 1] = '\0';
+				break;
+			}
+		}
+#endif // WIN32
+
 		//test
-		dispatch(Face.get_module_id<gsf::modules::LuaScriptModule>(), eid::lua_proxy::create
+		dispatch(log_, eid::log::init, gsf::Args(std::string(_path)
+			, std::string("echo_client")));
+
+		//test
+		dispatch(lua_, eid::lua_proxy::create
 			, gsf::Args(get_module_id(), std::string("F:/github/gsf/sample/test_echo_client/client.lua")));
 	}
 
 	void shut()
 	{
-		dispatch(Face.get_module_id<gsf::modules::LuaScriptModule>(), eid::lua_proxy::destroy
+		dispatch(lua_, eid::lua_proxy::destroy
 			, gsf::Args(get_module_id()));
 	}
+
+private:
+	uint32_t log_;
+	uint32_t lua_;
 };
 
 int main()
@@ -173,19 +127,14 @@ int main()
 	}
 #endif // WIN32
 
-	gsf::Application *appptr = new gsf::Application();
-	
-	new AppFace;
-	new gsf::EventModule();
-	
-	appptr->regist_module(gsf::EventModule::get_ptr());
-	appptr->regist_module(new gsf::modules::LogModule());
-	appptr->regist_module(new gsf::modules::LuaScriptModule());
-	appptr->regist_module(new Login_LuaProxy());
+	gsf::Application app;
 
-	Face.init(appptr);
-	appptr->init();
-	appptr->run();
+	app.regist_module(new gsf::modules::LogModule());
+	app.regist_module(new gsf::modules::LuaScriptModule());
+	app.regist_module(new Login_LuaProxy());
+
+	app.init();
+	app.run();
 
 	return 0;
 }

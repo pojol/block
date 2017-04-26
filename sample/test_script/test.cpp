@@ -179,12 +179,10 @@ int main()
 #endif // WIN32
 
 	auto appptr = new gsf::Application();
-	new gsf::EventModule();
 	new AppFace;
 
 	GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-	appptr->regist_module(gsf::EventModule::get_ptr());
 	appptr->regist_module(new gsf::modules::LogModule());
 	appptr->regist_module(new gsf::modules::TimerModule());
 
