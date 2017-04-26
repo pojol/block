@@ -71,7 +71,8 @@ public:
 #endif // WIN32
 
 		//test
-		dispatch2<gsf::modules::LogModule>(eid::log::init, gsf::Args(std::string(_path)));
+		dispatch2<gsf::modules::LogModule>(eid::log::init, gsf::Args(std::string(_path)
+			, std::string("echo_client")));
 	}
 
 	void log_info(gsf::Args args);

@@ -79,13 +79,13 @@ void gsf::modules::LogModule::execute()
 		switch (itr->first)
 		{
 		case eid::log::info:
-			LOG(INFO) << oss.str();
+			LOG(INFO) << "[INFO] " << oss.str();
 			break;
 		case eid::log::warning:
-			LOG(WARNING) << oss.str();
+			LOG(WARNING) << "[WARNING] " << oss.str();
 			break;
 		case eid::log::error:
-			LOG(ERROR) << oss.str();
+			LOG(ERROR) << "[ERROR] " << oss.str();
 			break;
 		}
 
@@ -101,6 +101,7 @@ void gsf::modules::LogModule::shut()
 void gsf::modules::LogModule::init_impl(gsf::Args args, gsf::CallbackFunc callback)
 {
 	std::string _path = args.pop_string(0);
+	std::string _exe_name = args.pop_string(1);
 
 	FLAGS_log_dir			= _path;	//设置输出路径
 	FLAGS_alsologtostderr	= true;		//设置日志消息除了日志文件之外是否去标准输出
@@ -108,7 +109,11 @@ void gsf::modules::LogModule::init_impl(gsf::Args args, gsf::CallbackFunc callba
 	FLAGS_max_log_size		= 10;		//设置最大日志文件大小（以MB为单位）
 	FLAGS_logbufsecs		= 0;		//立即写入到日志
 
-	google::InitGoogleLogging("log");
+	google::SetLogDestination(google::INFO, (_path + "/" + _exe_name + ".info_").c_str());
+	google::SetLogDestination(google::WARNING, (_path + "/" + _exe_name + ".warning_").c_str());
+	google::SetLogDestination(google::ERROR, (_path + "/" + _exe_name + ".error_").c_str());
+
+	google::InitGoogleLogging(_exe_name.c_str());
 }
 
 void gsf::modules::LogModule::log_info(gsf::Args args, gsf::CallbackFunc callback)

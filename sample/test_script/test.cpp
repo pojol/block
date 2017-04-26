@@ -67,7 +67,8 @@ public:
 		}
 #endif
 
-		dispatch2<gsf::modules::LogModule>(eid::log::init, gsf::Args(std::string(_path)));
+		dispatch2<gsf::modules::LogModule>(eid::log::init, gsf::Args(std::string(_path)
+			, std::string("test_script")));
 	}
 
 	template <typename M>
