@@ -55,18 +55,14 @@ void gsf::modules::LuaScriptModule::init()
 void gsf::modules::LuaScriptModule::execute()
 {
 	//!
-	for (auto itr : lua_map_)
+	for (auto itr = lua_map_.begin(); itr != lua_map_.end();)
 	{
-		LuaProxy *_lua = itr.second;
+		LuaProxy *_lua = itr->second;
 
 		try {
 			sol::table _module = _lua->state_.get<sol::table>("module");
 
-			if (_lua->app_state_ == LuaAppState::BEFORE_INIT) {
-				_lua->call_list_[LuaAppState::BEFORE_INIT](_module);
-				_lua->app_state_ = LuaAppState::INIT;
-			}
-			else if (_lua->app_state_ == LuaAppState::INIT) {
+			if (_lua->app_state_ == LuaAppState::INIT) {
 				_lua->call_list_[LuaAppState::INIT](_module);
 				_lua->app_state_ = LuaAppState::EXECUTE;
 			}
@@ -79,11 +75,23 @@ void gsf::modules::LuaScriptModule::execute()
 			}
 			else if (_lua->app_state_ = LuaAppState::AFTER_SHUT) {
 				_lua->call_list_[LuaAppState::AFTER_SHUT](_module);
-				destroy(_lua->lua_id_);
 			}
 		}
 		catch (sol::error e) {
 			dispatch(log_module_, eid::log::error, gsf::Args(std::string(e.what())));
+		}
+
+		if (_lua->app_state_ == LuaAppState::AFTER_SHUT) {
+
+			//lua_close(_lua->state_.lua_state());  sol 会在析构的时候释放 lua_state
+
+			//delete _lua;		//bug
+			//_lua = nullptr;
+
+			itr = lua_map_.erase(itr);
+		}
+		else {
+			++itr;
 		}
 	}
 }
@@ -101,7 +109,7 @@ void gsf::modules::LuaScriptModule::shut()
 
 void gsf::modules::LuaScriptModule::create_event(gsf::Args args, gsf::CallbackFunc callback)
 {
-	//����֤�߼�
+	//ÏÈÑéÖ¤Âß¼­
 	uint32_t _module_id = args.pop_uint32(0);
 	std::string _path = args.pop_string(1);
 
@@ -209,6 +217,15 @@ void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string path)
 		t.get<std::function<void()>>("after_shut")();
 		t.get<std::function<void()>>("execute")();
 	};
+
+	try {
+		sol::table _module = _lua->state_.get<sol::table>("module");
+		_lua->call_list_[LuaAppState::BEFORE_INIT](_module);
+		_lua->app_state_ = LuaAppState::INIT;
+	}
+	catch (sol::error e) {
+		dispatch(log_module_, eid::log::error, gsf::Args(std::string(e.what())));
+	}
 
 	lua_map_.push_back(std::make_pair(module_id, _lua));
 }

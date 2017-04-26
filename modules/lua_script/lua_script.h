@@ -2,6 +2,7 @@
 #define _GSF_LUA_SCRIPT_HEADER_
 
 #include <sol.hpp>
+#include <array>
 
 #include <module/module.h>
 #include <event/event.h>
