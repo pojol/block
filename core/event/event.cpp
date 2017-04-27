@@ -23,17 +23,22 @@ void gsf::EventModule::execute()
 	{
 		auto itr = remote_callback_list_.begin();
 
-		auto _cmd_id = std::get<0>(*itr);
-		auto fItr = remote_map_.find(_cmd_id);
+		auto _module_id = std::get<0>(*itr);
+		auto _msg_id = std::get<1>(*itr);
+		auto fItr = remote_map_.find(_module_id);
 		if (fItr != remote_map_.end()) {
-			BlockPtr _blockptr = std::get<2>(*itr);
-			std::string _str(_blockptr->buf_, _blockptr->size_);
-			try {
-				fItr->second(std::get<1>(*itr), std::get<0>(*itr), _str);
-			}
-			catch (sol::error e) {
-				std::cout << e.what() << std::endl;
 
+			BlockPtr _blockptr = std::get<3>(*itr);
+			std::string _str(_blockptr->buf_, _blockptr->size_);
+
+			auto lbItr = find_msg(fItr->second.begin(), fItr->second.end(), _msg_id);
+			if (lbItr != fItr->second.end()) {
+				try {
+					lbItr->second(std::get<2>(*itr), _msg_id, _str);
+				}
+				catch (sol::error e) {
+					std::cout << e.what() << std::endl;
+				}
 			}
 		}
 
@@ -104,31 +109,38 @@ void gsf::EventModule::add_cmd(uint32_t type_id, uint32_t event, gsf::Args args,
 		uint32_t _msg_id = args.pop_uint32(1);
 		auto _func = args.pop_remote_callback(2);
 
-		remote_map_.insert(std::make_pair(_msg_id, _func));
-		remote_map_idx_.insert(std::make_pair(module_id_, _msg_id));
+		auto itr = remote_map_.find(_module_id);
+		if (itr != remote_map_.end()) {
+			itr->second.push_back(std::make_pair(_msg_id, _func));
+
+			typedef std::vector<std::pair<uint32_t, RemoteFunc>> RNode;
+			std::sort(itr->second.begin(), itr->second.end(), [&](RNode::value_type l, RNode::value_type r) {
+				return (l.first < r.first);
+			});
+		}
+		else {
+			std::vector<std::pair<uint32_t, RemoteFunc>> vec;
+			vec.push_back(std::make_pair(_msg_id, _func));
+			remote_map_.insert(std::make_pair(_module_id, vec));
+		}
+
 		return;
 	}
 
 	cmd_list_.push_back(std::make_tuple(type_id, event, args, callback));
 }
 
-void gsf::EventModule::add_remote_callback(uint32_t msg_id, uint32_t fd, BlockPtr blockptr)
+void gsf::EventModule::add_remote_callback(uint32_t module_id, uint32_t msg_id, uint32_t fd, BlockPtr blockptr)
 {
-	remote_callback_list_.push_back(std::make_tuple(msg_id, fd, blockptr));
+	remote_callback_list_.push_back(std::make_tuple(module_id, msg_id, fd, blockptr));
 }
 
 void gsf::EventModule::rmv_event(uint32_t module_id)
 {
 	//! 清理消息协议事件相关的绑定
-	auto itr = remote_map_idx_.find(module_id);
-	if (itr != remote_map_idx_.end()) {
-
-		auto rmItr = remote_map_.find(itr->second);
-		if (rmItr != remote_map_.end()) {
-			remote_map_.erase(rmItr);
-		}
-
-		remote_map_idx_.erase(itr);
+	auto itr = remote_map_.find(module_id);
+	if (itr != remote_map_.end()) {
+		remote_map_.erase(itr);
 	}
 
 	//! 清理listen相关的事件绑定
@@ -136,6 +148,23 @@ void gsf::EventModule::rmv_event(uint32_t module_id)
 	if (tItr != type_map_.end()) {
 		type_map_.erase(tItr);
 	}
+}
+
+gsf::EventModule::RNode::iterator gsf::EventModule::find_msg(RNode::iterator beg, RNode::iterator end, uint32_t msg)
+{
+	RNode::iterator it;
+	std::iterator_traits<RNode::iterator>::difference_type count, step;
+	count = std::distance(beg, end);
+	while (count > 0)
+	{
+		it = beg; step = count / 2; std::advance(it, step);
+		if (it->first < msg) {                 // or: if (comp(*it,val)), for version (2)
+			beg = ++it;
+			count -= step + 1;
+		}
+		else count = step;
+	}
+	return beg;
 }
 
 void gsf::EventModule::add_remote_cmd(uint32_t type_id, std::vector<uint32_t> fd_list, uint32_t msg_id, BlockPtr blockptr)
@@ -167,9 +196,9 @@ void gsf::IEvent::dispatch(uint32_t target, uint32_t event, gsf::Args args, Call
 	EventModule::get_ref().add_cmd(target, event, args, callback);
 }
 
-void gsf::IEvent::remote_callback(uint32_t fd, uint32_t msg_id, BlockPtr blockptr)
+void gsf::IEvent::remote_callback(uint32_t module_id, uint32_t fd, uint32_t msg_id, BlockPtr blockptr)
 {
-	EventModule::get_ref().add_remote_callback(msg_id, fd, blockptr);
+	EventModule::get_ref().add_remote_callback(module_id, msg_id, fd, blockptr);
 }
 
 void gsf::IEvent::bind_clear(uint32_t module_id)

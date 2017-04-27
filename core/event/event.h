@@ -66,7 +66,7 @@ namespace gsf
 		/**!
 			远程消息订阅的callback
 		*/
-		virtual void remote_callback(uint32_t fd, uint32_t msg_id, BlockPtr blockptr);
+		virtual void remote_callback(uint32_t module_id, uint32_t fd, uint32_t msg_id, BlockPtr blockptr);
 
 
 		/**!
@@ -74,51 +74,6 @@ namespace gsf
 		*/
 		virtual void bind_clear(uint32_t module_id);
 	};
-
-	// 如果需要监听多个同步事件,辅助类
-	/*
-	struct AllSuccess
-	{
-		void listen(gsf::IEvent *IEvent, std::vector<uint32_t> vec, std::function<void()> func)
-		{
-			count_ = vec.size();
-
-			for (auto itr = vec.begin(); itr != vec.end(); ++itr)
-			{
-				IEvent->listen_callback(*itr, [&](gsf::Args args) {
-					count_--;
-
-					if (count_ == 0) {
-						func();
-					}
-				});
-			}
-
-		}
-
-	private:
-		uint32_t count_;
-	};
-
-	//AllSuccess as;
-	//as.listen(this, {eid::timer::make_timer_success}, [&](){
-	//	std::cout << "success !" << std::endl;
-	//});
-
-	struct AnyoneFail
-	{
-		void listen(gsf::IEvent * eid, std::vector<uint32_t> vec, std::function<void()> func)
-		{
-			for (auto itr = vec.begin(); itr != vec.end(); ++itr)
-			{
-				eid->listen_callback(*itr, [&](gsf::Args args) {
-					func();
-					return;
-				});
-			}
-		}
-	};
-	*/
 
 	class EventModule
 			: public gsf::utils::Singleton<EventModule>
@@ -140,7 +95,7 @@ namespace gsf
 
 		void add_remote_cmd(uint32_t type_id, std::vector<uint32_t> fd_list, uint32_t msg_id, BlockPtr blockptr);
 
-		void add_remote_callback(uint32_t msg_id, uint32_t fd, BlockPtr blockptr);
+		void add_remote_callback(uint32_t module_id, uint32_t msg_id, uint32_t fd, BlockPtr blockptr);
 
 		///
 
@@ -152,9 +107,10 @@ namespace gsf
 
 		typedef std::list<std::tuple<uint32_t, uint32_t, gsf::Args, CallbackFunc>> CmdList;
 
-		typedef std::list<std::tuple<uint32_t, uint32_t, BlockPtr>> RemoteCallbackList;
+		typedef std::list<std::tuple<uint32_t, uint32_t, uint32_t, BlockPtr>> RemoteCallbackList;
 
-		typedef std::unordered_map<uint32_t, RemoteFunc> RemoteMap;
+		typedef std::vector<std::pair<uint32_t, RemoteFunc>> RNode;
+		typedef std::unordered_map<uint32_t, std::vector<std::pair<uint32_t, RemoteFunc>>> RemoteMap;
 		typedef std::unordered_map<uint32_t, uint32_t> RomoteMapIdx;
 
 		TypeMap type_map_;
@@ -162,11 +118,14 @@ namespace gsf
 
 		RemoteCallbackList remote_callback_list_;
 		RemoteMap remote_map_;
-		RomoteMapIdx remote_map_idx_;
 
 		//! 绑定发送socket消息函数
 		std::unordered_map<uint32_t, RemoteEventFunc> remote_event_map_;
 		std::list<std::tuple<uint32_t, std::vector<uint32_t>, uint32_t, BlockPtr>> remote_event_list_;
+
+	private:
+		
+		RNode::iterator find_msg(RNode::iterator beg, RNode::iterator end, uint32_t msg);
 	};
 }
 
