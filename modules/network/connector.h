@@ -48,6 +48,8 @@ namespace gsf
 
 			uint32_t module_id_;
 
+			uint32_t log_module_;
+
 			event_base *event_base_ptr_;
 
 			SessionPtr session_ptr_;
@@ -56,7 +58,6 @@ namespace gsf
 
 			std::vector<int> disconnect_vec_;
 		};
-
 	}
 }
 

@@ -56,6 +56,10 @@ namespace gsf
 
 		void unregist_dynamic_module(uint32_t module_id);
 
+		typedef std::tuple<uint32_t, std::function<void()>, std::function<void()>, std::function<void(Module*, bool)>, Module*> Frame;
+		void push_frame(uint64_t index, Frame frame);
+		void pop_frame();
+
 	private:
 		AppState state_;
 		std::array<std::list<std::function<void()>>, 5> call_list_;
@@ -64,7 +68,11 @@ namespace gsf
 		std::unordered_map<uint32_t, uint32_t> module_id_map_;
 		std::unordered_map<std::string, uint32_t> module_name_map_;
 
+		std::multimap<uint64_t, Frame> halfway_frame_;
+
 		bool shutdown_;
+
+		uint64_t cur_frame_;
 
 		uint32_t module_idx_;
 	};
@@ -86,9 +94,9 @@ namespace gsf
 	void gsf::Application::regist_module(T *module, bool dynamic /* = false */)
 	{
 		module_list_.push_back(module);
-		module->set_id(make_module_id());
-
+		
 		if (!dynamic) {
+			module->set_id(make_module_id());
 			auto _type_id = typeid(T).hash_code();
 			auto _id_itr = module_id_map_.find(_type_id);
 			if (_id_itr != module_id_map_.end()) {

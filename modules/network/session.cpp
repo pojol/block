@@ -67,6 +67,7 @@ void gsf::network::Session::err_cb(::bufferevent *bev, short what, void *ctx)
 
 int gsf::network::Session::write(uint32_t msg_id, BlockPtr blockptr)
 {
+
 	int _ret = evbuffer_add(out_buf_, blockptr->buf_, blockptr->size_);
 	evbuffer_write(out_buf_, fd_);
 
@@ -102,7 +103,7 @@ void gsf::network::Session::read(::bufferevent *bev)
 		//! 
 		auto _blockptr = std::make_shared<Block>(_msg_len - 8);
 		evbuffer_remove(_buff, _blockptr->buf_, _blockptr->size_);
-		remote_callback(fd_, _msg_id, _blockptr);
+		remote_callback(module_id_, fd_, _msg_id, _blockptr);
 
 		_buf_len = evbuffer_get_length(in_buf_);
 		if (_buf_len > MSG_SIZE_LEN) {

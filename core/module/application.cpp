@@ -16,6 +16,7 @@ gsf::Application::Application()
 	, delay_(20)
 	, module_idx_(2)
 	, state_(AppState::BEFORE_INIT)
+	, cur_frame_(0)
 {
 	module_id_ = eid::app_id;
 
@@ -28,9 +29,6 @@ gsf::Application::Application()
 			++_itr;
 		}
 	});
-	before_init_list.push_back([&]() {
-		static_cast<Module*>(gsf::EventModule::get_ptr())->execute();
-	});
 	call_list_[AppState::BEFORE_INIT] = before_init_list;
 
 	std::list<std::function<void()>> init_list;
@@ -42,9 +40,6 @@ gsf::Application::Application()
 			++_itr;
 		}
 	});
-	init_list.push_back([&]() {
-		static_cast<Module*>(gsf::EventModule::get_ptr())->execute();
-	});
 	call_list_[AppState::INIT] = init_list;
 
 	std::list<std::function<void()>> execute_list;
@@ -55,7 +50,6 @@ gsf::Application::Application()
 			(*_itr)->execute();
 			++_itr;
 		}
-		static_cast<Module*>(gsf::EventModule::get_ptr())->execute();
 	});
 	call_list_[AppState::EXECUTE] = execute_list;
 }
@@ -80,10 +74,12 @@ void gsf::Application::init()
 		std::string _name = args.pop_string(0);
 
 		gsf::Module *_module_ptr = static_cast<gsf::Module*>(DynamicModuleFactory::create(_name));
-		regist_module(_module_ptr, true);
-		
-		_module_ptr->before_init();
-		_module_ptr->init();
+		_module_ptr->set_id(make_module_id());
+
+		push_frame(cur_frame_+1, std::make_tuple(0, std::bind(&Module::before_init, _module_ptr), nullptr, nullptr, _module_ptr));
+		push_frame(cur_frame_+2, std::make_tuple(1, nullptr, std::bind(&Module::init, _module_ptr), nullptr, _module_ptr));
+		push_frame(cur_frame_+3, std::make_tuple(2, nullptr, nullptr
+			, std::bind(&Application::regist_module<Module>, this, std::placeholders::_1, std::placeholders::_2), _module_ptr));
 
 		callback(gsf::Args(_module_ptr->get_module_id()));
 	});
@@ -94,6 +90,37 @@ void gsf::Application::init()
 		unregist_dynamic_module(_module_id);
 
 	});
+}
+
+void gsf::Application::push_frame(uint64_t index, Frame frame)
+{
+	halfway_frame_.insert(std::make_pair(index, frame));
+}
+
+void gsf::Application::pop_frame()
+{
+	if (halfway_frame_.empty()) { return; }
+
+	auto itr = halfway_frame_.find(cur_frame_);
+	for (int i = 0; i < halfway_frame_.count(cur_frame_); ++i, ++itr)
+	{
+		int idx = std::get<0>(itr->second);
+		if (idx == 0) {
+			auto func = std::get<1>(itr->second);
+			func();
+		}
+		else if (idx == 1) {
+			auto func = std::get<2>(itr->second);
+			func();
+		}
+		else if (idx == 2) {
+			auto func = std::get<3>(itr->second);
+			auto point = std::get<4>(itr->second);
+			func(point, true);
+		}
+	}
+
+	halfway_frame_.erase(cur_frame_);
 }
 
 void gsf::Application::run()
@@ -110,6 +137,10 @@ void gsf::Application::run()
 			{
 				call();
 			}
+
+			pop_frame();
+
+			static_cast<Module*>(gsf::EventModule::get_ptr())->execute();
 		};
 
 		std::list<std::function<void()>> list_;
@@ -133,6 +164,7 @@ void gsf::Application::run()
 			//exit();
 		}
 
+		++cur_frame_;
 		tick();
 
 		auto _use = time_point_cast<milliseconds>(system_clock::now()) - _before;

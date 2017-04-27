@@ -39,11 +39,15 @@ namespace gsf
 
 			int32_t get_id() const { return fd_; }
 
+			void set_log_module(uint32_t log_module) { log_module_ = log_module; }
+
 		protected:
 
 		private:
 			int fd_;
 			int module_id_;
+
+			uint32_t log_module_;
 
 			std::function<void(int)> disconnect_callback_;
 

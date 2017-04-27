@@ -25,7 +25,7 @@ gsf::network::ConnectorModule::ConnectorModule(const std::string &name)
 }
 
 gsf::network::ConnectorModule::ConnectorModule()
-	: Module("")
+	: Module("ConnectorModule")
 {
 
 }
@@ -41,20 +41,26 @@ void gsf::network::ConnectorModule::before_init()
 
 	event_base_ptr_ = event_base_new();
 
-}
-
-void gsf::network::ConnectorModule::init()
-{
 	listen(this, eid::network::make_connector
 		, std::bind(&ConnectorModule::make_connector, this
-		, std::placeholders::_1
-		, std::placeholders::_2));
+			, std::placeholders::_1
+			, std::placeholders::_2));
 
 	listen_remote(this
 		, std::bind(&ConnectorModule::send_msg, this
 			, std::placeholders::_1
 			, std::placeholders::_2
 			, std::placeholders::_3));
+
+	dispatch(eid::app_id, eid::get_module, gsf::Args(std::string("LogModule")), [=](gsf::Args args)
+	{
+		log_module_ = args.pop_uint32(0);
+	});
+}
+
+void gsf::network::ConnectorModule::init()
+{
+	dispatch(get_module_id(), eid::network::connector_init, gsf::Args(""));
 }
 
 void gsf::network::ConnectorModule::execute()
@@ -70,6 +76,8 @@ void gsf::network::ConnectorModule::shut()
 {
 	bufferevent_free(buffer_event_ptr_);
 	event_base_free(event_base_ptr_);
+
+	bind_clear(get_module_id());
 }
 
 void gsf::network::ConnectorModule::after_shut()
@@ -115,6 +123,8 @@ void gsf::network::ConnectorModule::make_connector(gsf::Args args, gsf::Callback
 		session_ptr_ = std::make_shared<Session>(_fd, _module_id, std::bind(&ConnectorModule::need_close_session, this, std::placeholders::_1));
 		bufferevent_setcb(buffer_event_ptr_, Session::read_cb, NULL, Session::err_cb, session_ptr_.get());
 		bufferevent_enable(buffer_event_ptr_, EV_READ | EV_WRITE);
+
+		session_ptr_->set_log_module(log_module_);
 
 		gsf::Args res;
 		res << uint32_t(_fd);
