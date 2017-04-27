@@ -161,6 +161,15 @@ namespace gsf
 			arg_list_.push_back(_arg);
 		}
 
+		void add(const char *str)
+		{
+			auto _arg = std::make_shared<Arg>();
+			_arg->set_string(std::string(str));
+			
+			size_++;
+			arg_list_.push_back(_arg);
+		}
+
 		void add(const std::string &value)
 		{
 			auto _arg = std::make_shared<Arg>();
