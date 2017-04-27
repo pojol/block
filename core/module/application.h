@@ -49,8 +49,6 @@ namespace gsf
 		void exit();
 
 	protected:
-		uint32_t delay_;
-
 		//！ 临时先写在这里，未来如果支持分布式可能要放在其他地方生成，保证服务器集群唯一。
 		uint32_t make_module_id();
 
@@ -62,7 +60,6 @@ namespace gsf
 
 	private:
 		AppState state_;
-		std::array<std::list<std::function<void()>>, 5> call_list_;
 
 		std::list<Module *> module_list_;
 		std::unordered_map<uint32_t, uint32_t> module_id_map_;

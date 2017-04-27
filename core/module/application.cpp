@@ -3,6 +3,7 @@
 #include <chrono>
 #include <ctime>
 #include <algorithm>
+#include <string>
 
 #ifdef WIN32
 #include <windows.h>
@@ -10,48 +11,17 @@
 
 #include <module/dynamic_module_factory.h>
 
+#define WATCH_PERF
+static const uint32_t TICK_COUNT = 20;
+
 gsf::Application::Application()
 	: Module("Application")
 	, shutdown_(false)
-	, delay_(20)
 	, module_idx_(2)
 	, state_(AppState::BEFORE_INIT)
 	, cur_frame_(0)
 {
 	module_id_ = eid::app_id;
-
-	std::list<std::function<void()>> before_init_list;
-	before_init_list.push_back([&]() {
-		auto _itr = module_list_.begin();
-		while (_itr != module_list_.end())
-		{
-			(*_itr)->before_init();
-			++_itr;
-		}
-	});
-	call_list_[AppState::BEFORE_INIT] = before_init_list;
-
-	std::list<std::function<void()>> init_list;
-	init_list.push_back([&]() {
-		auto _itr = module_list_.begin();
-		while (_itr != module_list_.end())
-		{
-			(*_itr)->init();
-			++_itr;
-		}
-	});
-	call_list_[AppState::INIT] = init_list;
-
-	std::list<std::function<void()>> execute_list;
-	execute_list.push_back([&]() {
-		auto _itr = module_list_.begin();
-		while (_itr != module_list_.end())
-		{
-			(*_itr)->execute();
-			++_itr;
-		}
-	});
-	call_list_[AppState::EXECUTE] = execute_list;
 }
 
 void gsf::Application::init()
@@ -130,49 +100,88 @@ void gsf::Application::run()
 	{
 		using namespace std::chrono;
 
-		auto _before = time_point_cast<milliseconds>(system_clock::now());
+		auto _before = time_point_cast<microseconds>(system_clock::now());
+		auto _ttime = time_point_cast<microseconds>(system_clock::now());
 
-		auto _callback = [&](std::list<std::function<void()>> calls) {
-			for (auto call : calls)
+#ifdef WATCH_PERF
+		std::string _perf_info = "";
+		double t1 = 0;
+		double ratio = 0;
+#endif // WATCH_PERF
+		
+		auto _callback = [&](AppState state) {
+			for (auto it : module_list_)
 			{
-				call();
+				if (state == AppState::BEFORE_INIT) {
+					it->before_init();
+				}
+				else if (state == AppState::INIT) {
+					it->init();
+				}
+				else if (state == AppState::EXECUTE) {
+					it->execute();
+#ifdef WATCH_PERF
+					t1 = (time_point_cast<microseconds>(system_clock::now()) - _ttime).count();
+					ratio = t1 / (TICK_COUNT * 1000);
+					_perf_info += it->get_module_name() + " use " + std::to_string(ratio) + '\t';
+					_ttime = time_point_cast<microseconds>(system_clock::now());
+#endif // WATCH_PERF
+				}
+				else if (state == AppState::SHUT) {
+					it->shut();
+				}
+				else if (state == AppState::AFTER_SHUT) {
+					it->after_shut();
+				}
+				else {
+					// waht?
+				}
 			}
 
 			pop_frame();
+#ifdef WATCH_PERF
+			t1 = (time_point_cast<microseconds>(system_clock::now()) - _ttime).count();
+			ratio = t1 / (TICK_COUNT * 1000);
+			_perf_info += "pop_frame use " + std::to_string(ratio) + '\t';
+			_ttime = time_point_cast<microseconds>(system_clock::now());
+#endif // WATCH_PERF
 
 			static_cast<Module*>(gsf::EventModule::get_ptr())->execute();
+#ifdef WATCH_PERF
+			t1 = (time_point_cast<microseconds>(system_clock::now()) - _ttime).count();
+			ratio = t1 / (TICK_COUNT * 1000);
+			_perf_info += "event use " + std::to_string(ratio) + '\t';
+			_ttime = time_point_cast<microseconds>(system_clock::now());
+
+			std::cout << _perf_info << std::endl;
+#endif // WATCH_PERF
 		};
 
-		std::list<std::function<void()>> list_;
+		_callback(state_);
 		if (state_ == AppState::BEFORE_INIT) {
-			_callback(call_list_[AppState::BEFORE_INIT]);
 			state_ = AppState::INIT;
 		}
 		else if (state_ == AppState::INIT) {
-			_callback(call_list_[AppState::INIT]);
 			state_ = AppState::EXECUTE;
 		}
 		else if (state_ == AppState::EXECUTE) {
-			_callback(call_list_[AppState::EXECUTE]);
+
 		}
 		else if (state_ = AppState::SHUT) {
-			_callback(call_list_[AppState::SHUT]);
 			state_ = AppState::AFTER_SHUT;
 		}
 		else if (state_ = AppState::AFTER_SHUT) {
-			_callback(call_list_[AppState::AFTER_SHUT]);
 			//exit();
 		}
 
 		++cur_frame_;
 		tick();
 
-		auto _use = time_point_cast<milliseconds>(system_clock::now()) - _before;
-		
-		if (_use.count() < 20) {
+		auto _use = time_point_cast<microseconds>(system_clock::now()) - _before;
+		uint32_t _use_ms = static_cast<uint32_t>(_use.count() / 1000);
+		if (_use_ms < TICK_COUNT) {
 #ifdef WIN32
-			delay_ = static_cast<uint32_t>(20 - _use.count());
-			Sleep(delay_);
+			Sleep(TICK_COUNT - _use_ms);
 #endif // WIN32
 		}
 		else {
