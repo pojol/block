@@ -16,10 +16,12 @@ eid = {
 		make_acceptor = 2001,
 		make_connector = 2002,
 		bind_remote_callback = 2003,
+        kick_connect = 2004,
+        connector_init = 2005,
 		
-		new_connect = 2004,
-		dis_connect = 2005,
-		fail_connect = 2006,
+		new_connect = 2006,
+		dis_connect = 2007,
+		fail_connect = 2008,
 		
 		err_repeated_fd = -2001,
 		err_upper_limit_session = -2002,
