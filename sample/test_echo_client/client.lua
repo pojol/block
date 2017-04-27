@@ -50,19 +50,20 @@ module.before_init = function()
     end
 
     cb_dispatch(eid.app_id, eid.get_module, "LogModule", _get_log)
+
+    local function _get_connector(args)
+        connect_id_ = args:pop_uint32(0)
+        print("connector id : " .. connect_id_)
+    end
+
+    cb_dispatch(eid.app_id, eid.get_module, "ConnectorModule", _get_connector)
 end
 
 module.init = function()
-	print("init case_login module : " .. module_id)
+	print_info("init case_login module : " .. module_id)
 
-    local function _create_connector(args)
-        connect_id_ = args:pop_uint32(0)
-        print_info("connect id : " .. connect_id_)
-        connect("127.0.0.1", 8001)
-    end
-
-    cb_dispatch(eid.app_id, eid.new_dynamic_module, "ConnectorModule", _create_connector)
-
+    connect("127.0.0.1", 8001)
+    
     dispatch(eid.app_id
         , eid.network.bind_remote_callback
         , module_id

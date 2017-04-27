@@ -130,6 +130,7 @@ int main()
 	gsf::Application app;
 
 	app.regist_module(new gsf::modules::LogModule());
+	app.regist_module(new gsf::network::ConnectorModule());
 	app.regist_module(new gsf::modules::LuaScriptModule());
 	app.regist_module(new Login_LuaProxy());
 

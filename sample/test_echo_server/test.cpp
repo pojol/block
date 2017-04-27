@@ -62,10 +62,7 @@ public:
 		dispatch(eid::app_id, eid::get_module, gsf::Args(std::string("Client2LoginServer")), [&](gsf::Args args) {
 			client2login_ = args.pop_uint32(0);
 		});
-	}
 
-	void init()
-	{
 		char _path[512];
 #ifdef WIN32
 		GetModuleFileName(NULL, _path, 512);
@@ -93,11 +90,26 @@ public:
 		}
 #endif // WIN32
 
-		//test
-		
-		dispatch(log_, eid::log::init, gsf::Args(std::string(_path)
-			, std::string("echo_server")));
+		dispatch(log_, eid::log::init, gsf::Args(_path, "echo_server"));
+	}
 
+	void init()
+	{
+		//test
+		listen(this, eid::network::new_connect
+			, [=](gsf::Args args, gsf::CallbackFunc callback) {
+			dispatch(log_, eid::log::info, gsf::Args("new connect fd : ", args.pop_uint32(0)));
+		});
+
+		listen(this, eid::network::dis_connect
+			, [=](gsf::Args args, gsf::CallbackFunc callback) {
+			dispatch(log_, eid::log::info, gsf::Args("dis connect fd : ", args.pop_uint32(0)));
+		});
+
+		gsf::Args args;
+		args << get_module_id() << std::string("127.0.0.1") << uint32_t(8001);
+		dispatch(client2login_, eid::network::make_acceptor, args);
+	
 		auto arr = {
 			std::make_pair(uint32_t(1001), std::bind(&EntityMgr::test_remote, this
 				, std::placeholders::_1
@@ -127,43 +139,6 @@ private :
 	uint32_t client2login_;
 };
 
-class Client2LoginProxy
-	: public gsf::Module
-	, public gsf::IEvent
-{
-public:
-	Client2LoginProxy()
-		: Module("Client2LoginProxy")
-	{}
-
-	void before_init() override
-	{
-		dispatch(eid::app_id, eid::get_module, gsf::Args(std::string("Client2LoginServer")), [&](gsf::Args args) {
-			client2login_ = args.pop_uint32(0);
-		});
-	}
-
-	void init() override
-	{
-		listen(this, eid::network::new_connect
-			, [=](gsf::Args args, gsf::CallbackFunc callback) {
-			std::cout << "new connect fd = " << args.pop_uint32(0) << std::endl;
-		});
-
-		listen(this, eid::network::dis_connect
-			, [=](gsf::Args args, gsf::CallbackFunc callback){
-			std::cout << "dis connect fd = " << args.pop_uint32(0) << std::endl;
-		});
-
-		gsf::Args args;
-		args << get_module_id() << std::string("127.0.0.1") << uint32_t(8001);
-		dispatch(client2login_, eid::network::make_acceptor, args);
-	}
-
-private:
-	uint32_t client2login_;
-};
-
 int main()
 {
 #ifdef WIN32
@@ -181,7 +156,6 @@ int main()
 
 	app.regist_module(new gsf::modules::LogModule());
 	app.regist_module(new Client2LoginServer());
-	app.regist_module(new Client2LoginProxy());
 	app.regist_module(new EntityMgr());
 
 	app.init();
