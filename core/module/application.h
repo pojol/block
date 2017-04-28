@@ -10,6 +10,9 @@
 #include <map>
 #include <array>
 
+
+static const uint32_t TICK_COUNT = 20;
+
 namespace gsf
 {
 	enum AppState
@@ -44,7 +47,7 @@ namespace gsf
 
 		void run();
 
-		virtual void tick() {}
+		virtual void tick();
 
 		void exit();
 

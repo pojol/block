@@ -11,8 +11,7 @@
 
 #include <module/dynamic_module_factory.h>
 
-#define WATCH_PERF
-static const uint32_t TICK_COUNT = 20;
+
 
 gsf::Application::Application()
 	: Module("Application")
@@ -26,7 +25,7 @@ gsf::Application::Application()
 
 void gsf::Application::init()
 {
-	new gsf::EventModule();
+	gsf::EventModule::get_ref();
 
 	listen(this, eid::get_module, [=](gsf::Args args, CallbackFunc callback) {
 		
@@ -104,7 +103,6 @@ void gsf::Application::run()
 		auto _ttime = time_point_cast<microseconds>(system_clock::now());
 
 #ifdef WATCH_PERF
-		std::string _perf_info = "";
 		double t1 = 0;
 		double ratio = 0;
 #endif // WATCH_PERF
@@ -123,7 +121,7 @@ void gsf::Application::run()
 #ifdef WATCH_PERF
 					t1 = (time_point_cast<microseconds>(system_clock::now()) - _ttime).count();
 					ratio = t1 / (TICK_COUNT * 1000);
-					_perf_info += it->get_module_name() + " use " + std::to_string(ratio) + '\t';
+					it->add_tick_consume(ratio);
 					_ttime = time_point_cast<microseconds>(system_clock::now());
 #endif // WATCH_PERF
 				}
@@ -139,21 +137,13 @@ void gsf::Application::run()
 			}
 
 			pop_frame();
-#ifdef WATCH_PERF
-			t1 = (time_point_cast<microseconds>(system_clock::now()) - _ttime).count();
-			ratio = t1 / (TICK_COUNT * 1000);
-			_perf_info += "pop_frame use " + std::to_string(ratio) + '\t';
-			_ttime = time_point_cast<microseconds>(system_clock::now());
-#endif // WATCH_PERF
 
 			static_cast<Module*>(gsf::EventModule::get_ptr())->execute();
 #ifdef WATCH_PERF
 			t1 = (time_point_cast<microseconds>(system_clock::now()) - _ttime).count();
 			ratio = t1 / (TICK_COUNT * 1000);
-			_perf_info += "event use " + std::to_string(ratio) + '\t';
+			static_cast<Module*>(gsf::EventModule::get_ptr())->add_tick_consume(ratio);
 			_ttime = time_point_cast<microseconds>(system_clock::now());
-
-			std::cout << _perf_info << std::endl;
 #endif // WATCH_PERF
 		};
 
@@ -215,4 +205,25 @@ void gsf::Application::unregist_dynamic_module(uint32_t module_id)
 
 		module_list_.erase(itr);
 	}
+}
+
+static int last_tick = -1;
+static int tick_len = 200;
+
+void gsf::Application::tick()
+{
+	int _t = (last_tick + 1) % tick_len;
+	if (_t == 0) {
+
+		std::string _pref = "------------------- pref -------------------\n";
+		for (auto it : module_list_)
+		{
+			_pref += it->get_tick_info(tick_len);
+		}
+
+		_pref += static_cast<Module*>(gsf::EventModule::get_ptr())->get_tick_info(tick_len) + "\n";
+		std::cout << _pref << std::endl;
+	}
+
+	last_tick = _t;
 }

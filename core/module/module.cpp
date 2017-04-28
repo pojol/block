@@ -27,6 +27,10 @@ void gsf::Module::after_shut()
 
 gsf::Module::Module(const std::string &name)
 	: name_(name)
+#ifdef WATCH_PERF
+	, tick_consume_(0)
+#endif // WATCH_PERF
+
 {
 
 }

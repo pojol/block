@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include <istream>
 #include <vector>
+#include <string>
+
+// ºóÃæ·Åµ½Í³Ò»µÄµØ·½
+#define WATCH_PERF
 
 namespace gsf
 {
@@ -30,6 +34,18 @@ namespace gsf
 		void set_id(uint32_t id) { module_id_ = id; }
 		uint32_t module_id_;
 		std::string name_;
+
+#ifdef WATCH_PERF
+		double tick_consume_;
+		void add_tick_consume(double c) { tick_consume_ += c; }
+		std::string get_tick_info(uint32_t count) 
+		{
+			std::string _info = get_module_name() + ":" + std::to_string(tick_consume_ / count) + '\t';
+			tick_consume_ = 0;
+			return _info;
+		}
+#endif // WATCH_PERF
+
 	};
 }
 
