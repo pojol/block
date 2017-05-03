@@ -66,8 +66,8 @@ dispatch(_timer_module_id                           |
     });                                             |
                                                     | -- 通过get_module命令获取timer的module id
                                                     | dispatch(eid.app_id
-                                                    |           , eid.get_module
-                                                    |           , "TimerModule", _get_timer_module)
+                                                    |       , eid.get_module
+                                                    |       , "TimerModule", _get_timer_module)
 more events :                                       |
 eid.timer.delay_day                                 |
 eid.timer.delay_week                                |
