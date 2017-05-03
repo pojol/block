@@ -26,7 +26,7 @@ c++                                                 +   lua
 dispatch(eid::app_id, eid::get_module               | local function _delay_1000ms(args)
     , gsf::Args("TimerModule")                      |       print("hello,timer!")
     , [&](gsf::Args args){                          | end
-			_timer_module_id = args.pop_uint32(0);  |
+			_timer_module_id = args.pop_uint32(0);              |
     });                                             | local function _get_timer_module(args)
                                                     |       _timer_module_id = args:pop_uint32(0)
 dispatch(_timer_module_id                           |
