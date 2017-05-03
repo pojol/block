@@ -25,8 +25,8 @@ public:                                             |   shut = function() end,
 		: Module("EntityMgr")               | }
 	{}                                          |
 	~EntityMgr(){}                              |//lua module 需要lua_binder在c++层辅助绑定  .cpp
-	// 按需声明实现函数                           | class EntityMgrLua
-	void before_init() override {}              |       : public gsf::module
+	// 按需声明实现函数                           | class EntityMgrLuaProxy //代理lua module，主要用于创建，重载，销毁lua module
+	void before_init() override {}              |       : public gsf::module
 	void init() override {}                     |       , public gsf::ievent
 	void execute() override {}                  | {
 	void shut() override {}                     |       void before_init() override
@@ -37,13 +37,13 @@ int main() {                                        |              , [&](gsf::ar
     gsf::application app; //构建一个进程管理器        |                  _binder = args.pop_uint32(0);
     app.init(); //初始化进程管理器                    |               });
                                                     |       }
-    //绑定module到进程，frame中的调用会按判定次序      |       void init() override
+    //绑定module到进程，frame中的调用按注册的次序      |       void init() override
     app.regist_module( new EntityMgr );             |       { //只需向lua_binder module 发送绑定命令就完成了c++/lua的绑定 创建了一个独立的lua_state
                                                     |            dispatch(_binder, eid::lua_proxy::create
     app.run();                                      |               , gsf::args(module_id, lua_path));
     return 0; //退出逻辑由每个module的shut实现。      |       }
 }                                                   | };
-                                                    | //将EntityMgrLua Module 注册到app就完成了绑定。
+                                                    | //EntityMgrLuaProxy Module 注册到app就完成了绑定。
 '''
 ```
 
