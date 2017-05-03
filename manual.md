@@ -13,15 +13,43 @@ Features
 ```python
 '''
                                                     |
- c++                                                +   lua
-                                                    |
+ c++                                               -+-   lua
+//创建一个类继承module，ievent                       | -- 创建一个table，按需声明好对应的status func .lua
+class EntityMgr                                     | module = {
+    : public gsf::Module                            |   before_init = function() end,
+	, public gsf::IEvent                        |   init = function() end,
+{                                                   |   execute = function() end,
+public:                                             |   shut = function() end,
+	EntityMgr()                                 |   after_shut = function() end,
+		: Module("EntityMgr")               | }
+	{}                                          |
+	~EntityMgr(){}                              |//lua module 需要lua_binder在c++层辅助绑定  .cpp
+	// 按需声明实现函数                           | class EntityMgrLua
+	void before_init() override {}              |       : public gsf::module
+	void init() override {}                     |       , public gsf::ievent
+	void execute() override {}                  | {
+	void shut() override {}                     |       void before_init() override
+	void after_shut() override {}               |       {
+};                                                  |           dispatch(eid::app_id, eid::get_module
+                                                    |              , gsf::args("LuaScriptBinder") 
+int main() {                                        |              , [&](gsf::args args){
+    gsf::application app; //构建一个进程管理器        |                  _binder = args.pop_uint32(0);
+    app.init(); //初始化进程管理器                    |               });
+                                                    |       }
+    //绑定module到进程，frame中的调用会按判定次序      |       void init() override
+    app.regist_module( new EntityMgr );             |       { //只需向lua_binder module 发送绑定命令就完成了c++/lua的绑定 创建了一个独立的lua_state
+                                                    |            dispatch(_binder, eid::lua_proxy::create
+    app.run();                                      |               , gsf::args(module_id, lua_path));
+    return 0; //退出逻辑由每个module的shut实现。      |       }
+}                                                   | };
+                                                    | //将EntityMgrLua Module 注册到app就完成了绑定。
 '''
 ```
 
 ###内置模块的使用
 ```c++
 -- timer --                                         |
-c++                                                 +   lua
+c++                                                -+-  lua
                                                     |
 dispatch(eid::app_id, eid::get_module               | local function _delay_1000ms(args)
     , gsf::Args("TimerModule")                      |       print("hello,timer!")
@@ -43,10 +71,11 @@ more events :                                       |
 eid.timer.delay_day                                 |
 eid.timer.delay_week                                |
 eid.timer.remove_timer                              |
-----                                                +
+----                                            ----+----
                                                     |
--- acceptor --                                      |
-----
+-- acceptor --                                      +
+                                                    |
+----                                                |
 
 -- connector --
 ----
@@ -60,13 +89,20 @@ eid.timer.remove_timer                              |
 
 ### 程序的运行时
 ```python
-# frame (每一帧的处理逻辑
-#       ->1. 驱动当前App状态下对应的Module执行函数
-#       ->2. 检查是否有动态创建的Module
-#       ->3. 将事件队列中的元素依次弹出处理
+'''
++--------->----------->--------------+
+↑                                    ↓  one frame
++--------<------------<--------------+
+while(1) 
+    1. modules call status function
+    2. proc dynamic module list
+    3. proc active event list
+    frame++;  
+    sleep(fixed_frame_time - cosume);
+'''
 ```
 ```python
-# app:init state = BEFORE_INIT
+# app:init status = BEFORE_INIT
 # app:regist ，static module 的绑定阶段
 # app:run   |
 #           |frame 1 -> modules:before_init
