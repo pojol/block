@@ -14,7 +14,7 @@ Features
 ```python
 '''
                                                     |
- c++                                               -+-   lua
+ c++ module                                        -+-   lua module
 //创建一个类继承module，ievent                       | -- 创建一个table，按需声明好对应的status func .lua
 class EntityMgr                                     | module = {
     : public gsf::Module                            |   before_init = function() end,
