@@ -1,6 +1,8 @@
 #ifndef _SINGLE_HEADER_
 #define _SINGLE_HEADER_
 
+#include <assert.h>
+
 namespace gsf
 {
 	namespace utils
@@ -9,23 +11,23 @@ namespace gsf
 		class Singleton
 		{
 		public:
-			virtual ~Singleton(){}
-
-			static T * instance()
-			{
-				if (intance_ptr_){
-					return intance_ptr_;
-				}
-				else {
-					return intance_ptr_ = new T();
-				}
+			virtual ~Singleton(){
+				assert(intance_ptr_);
+				intance_ptr_ = nullptr;
 			}
-			//warning.  a single instance must new by user. 
-			static T & get_ref() { return *instance(); }
-			static T * get_ptr() { return instance(); }
+ 
+			static T & get_ref() {
+				assert(intance_ptr_); return (*intance_ptr_);
+			}
+			static T * get_ptr() { 
+				assert(intance_ptr_); return intance_ptr_;
+			}
 
 		public:
-			Singleton() = default;
+			Singleton()
+			{
+				intance_ptr_ = static_cast<T*>(this);
+			}
 
 		private:
 			static T * intance_ptr_;
