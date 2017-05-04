@@ -24,6 +24,12 @@ namespace gsf
 		AFTER_SHUT,
 	};
 
+	struct AppConfig
+	{
+		uint32_t tick_count = 20;
+		bool is_watch_pref = false;
+	};
+
 	class Application
 		: public Module
 		, public IEvent
@@ -32,9 +38,7 @@ namespace gsf
 	public:
 		Application();
 
-		void init_args();
-
-		void init() override;
+		void init_cfg(const gsf::AppConfig &cfg);
 
 		template <typename T>
 		void regist_module(T *module, bool dynamic = false);
@@ -75,6 +79,8 @@ namespace gsf
 		uint64_t cur_frame_;
 
 		uint32_t module_idx_;
+
+		gsf::AppConfig cfg_;
 
 #ifdef WATCH_PERF
 		uint32_t tick_len_;

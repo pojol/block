@@ -174,12 +174,15 @@ int main()
 #endif // WIN32
 
 	gsf::Application app;
+	gsf::AppConfig cfg;
+	cfg.is_watch_pref = true;
+
+	app.init_cfg(cfg);
 
 	app.regist_module(new gsf::modules::LogModule());
 	app.regist_module(new Client2LoginServer());
 	app.regist_module(new EntityMgr());
 
-	app.init();
 	app.run();
 
 	return 0;

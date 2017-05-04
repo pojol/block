@@ -28,14 +28,16 @@ gsf::Application::Application()
 #endif
 }
 
-void gsf::Application::init()
+void gsf::Application::init_cfg(const gsf::AppConfig &cfg)
 {
+	cfg_ = cfg;
+
 	new gsf::EventModule;
 
 	listen(this, eid::get_module, [=](gsf::Args args, CallbackFunc callback) {
-		
+
 		std::string _name = args.pop_string(0);
-	
+
 		auto itr = module_name_map_.find(_name);
 		if (itr != module_name_map_.end()) {
 			callback(gsf::Args(itr->second));
@@ -50,9 +52,9 @@ void gsf::Application::init()
 		gsf::Module *_module_ptr = static_cast<gsf::Module*>(DynamicModuleFactory::create(_name));
 		_module_ptr->set_id(make_module_id());
 
-		push_frame(cur_frame_+1, std::make_tuple(0, std::bind(&Module::before_init, _module_ptr), nullptr, nullptr, _module_ptr));
-		push_frame(cur_frame_+2, std::make_tuple(1, nullptr, std::bind(&Module::init, _module_ptr), nullptr, _module_ptr));
-		push_frame(cur_frame_+3, std::make_tuple(2, nullptr, nullptr
+		push_frame(cur_frame_ + 1, std::make_tuple(0, std::bind(&Module::before_init, _module_ptr), nullptr, nullptr, _module_ptr));
+		push_frame(cur_frame_ + 2, std::make_tuple(1, nullptr, std::bind(&Module::init, _module_ptr), nullptr, _module_ptr));
+		push_frame(cur_frame_ + 3, std::make_tuple(2, nullptr, nullptr
 			, std::bind(&Application::regist_module<Module>, this, std::placeholders::_1, std::placeholders::_2), _module_ptr));
 
 		callback(gsf::Args(_module_ptr->get_module_id()));
@@ -214,24 +216,26 @@ void gsf::Application::unregist_dynamic_module(uint32_t module_id)
 
 void gsf::Application::tick()
 {
-	int _t = (last_tick_ + 1) % tick_len_;
-	if (_t == 0) {
-#ifdef WATCH_PERF
-		std::string _pref = "------------------- pref -------------------\n";
-		for (auto it : module_list_)
-		{
-			_pref += it->get_tick_info(tick_len_);
+	if (cfg_.is_watch_pref){
+		int _t = (last_tick_ + 1) % tick_len_;
+
+		if (_t == 0) {
+			std::string _pref = "------------------- pref -------------------\n";
+			for (auto it : module_list_)
+			{
+				_pref += it->get_tick_info(tick_len_);
+			}
+
+			_pref += static_cast<Module*>(gsf::EventModule::get_ptr())->get_tick_info(tick_len_) + "\n";
+			auto _ft = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now()) - cur_tick_time_;
+			_pref += "frame comsume : " + std::to_string(static_cast<uint32_t>(_ft.count() / 1000 / (tick_len_ * TICK_COUNT))) + " ms\n";
+			std::cout << _pref << std::endl;
+
+			cur_tick_time_ = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
+			
 		}
 
-		_pref += static_cast<Module*>(gsf::EventModule::get_ptr())->get_tick_info(tick_len_) + "\n";
-		auto _t = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now()) - cur_tick_time_;
-		_pref += "frame comsume : " + std::to_string(static_cast<uint32_t>(_t.count() / 1000 / (tick_len_ * TICK_COUNT))) + " ms\n";
-		std::cout << _pref << std::endl;
-
-		cur_tick_time_ = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
-#endif // WATCH_PERF
-
+		last_tick_ = _t;
 	}
 
-	last_tick_ = _t;
 }

@@ -23,31 +23,7 @@
 	#include <unistd.h>
 #endif
 
-class AppFace
-	: public gsf::utils::Singleton<AppFace>
-	, public gsf::IEvent
-{
-public:
 
-	void init(gsf::Application *app)
-	{
-		app_ = app;
-	}
-
-	template <typename M>
-	uint32_t get_module_id();
-
-private:
-	gsf::Application *app_;
-};
-
-template <typename M>
-uint32_t AppFace::get_module_id()
-{
-	return app_->find_module_id<M>();
-}
-
-#define Face AppFace::get_ref()
 
 class TestClickModule
         : public gsf::Module
@@ -57,6 +33,13 @@ public:
 	TestClickModule()
 		: Module("TestClickModule")
 	{}
+
+	void before_init()
+	{
+		dispatch(eid::app_id, eid::get_module, gsf::Args(std::string("TimerModule")), [&](gsf::Args args) {
+			timer_module_ = args.pop_uint32(0);
+		});
+	}
 
 	void init()
 	{
@@ -108,15 +91,7 @@ public:
 		}
 		*/
 
-		uint32_t _timer_module_id = 0;
-
-		dispatch(eid::app_id, eid::get_module, gsf::Args(std::string("TimerModule")), [&](gsf::Args args) {
-			
-			_timer_module_id = args.pop_uint32(0);
-		
-		});
-
-		dispatch(_timer_module_id, eid::timer::delay_milliseconds, gsf::Args(get_module_id(), uint32_t(1000)), [=](gsf::Args args) {
+		dispatch(timer_module_, eid::timer::delay_milliseconds, gsf::Args(get_module_id(), uint32_t(1000)), [=](gsf::Args args) {
 			std::cout << "timer!" << std::endl;
 		});
 	}
@@ -133,22 +108,21 @@ public:
 
 private:
 	uint32_t tick_;
+	uint32_t timer_module_;
 };
 
 
 int main()
 {
-	auto appptr = new gsf::Application();
-	new gsf::EventModule();
-	new AppFace;
+	gsf::Application app;
+	gsf::AppConfig cfg;
+	app.init_cfg(cfg);
 
-	appptr->regist_module(gsf::EventModule::get_ptr());
-	appptr->regist_module(new gsf::modules::TimerModule());
-	appptr->regist_module(new TestClickModule());
+	app.regist_module(gsf::EventModule::get_ptr());
+	app.regist_module(new gsf::modules::TimerModule());
+	app.regist_module(new TestClickModule());
 
-	Face.init(appptr);
-	appptr->init();
-	appptr->run();
+	app.run();
 
 	return 0;
 }

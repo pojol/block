@@ -177,6 +177,8 @@ int main()
 #endif // WIN32
 
 	gsf::Application app;
+	gsf::AppConfig cfg;
+	app.init_cfg(cfg);
 
 	app.regist_module(new gsf::modules::LogModule());
 	app.regist_module(new gsf::network::ConnectorModule());
@@ -187,8 +189,7 @@ int main()
 	{
 		app.regist_module(new Client);
 	}
-
-	app.init();
+	
 	app.run();
 
 	return 0;
