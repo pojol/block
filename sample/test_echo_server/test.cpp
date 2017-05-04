@@ -51,7 +51,11 @@ public:
 
 	EntityMgr()
 		: Module("EntityMgr")
-	{}
+	{
+		tick_len_ = 50;	// one second
+		last_tick_ = -1;
+		second_pack_num_ = 0;
+	}
 
 	void before_init() override
 	{
@@ -125,18 +129,35 @@ public:
 		}
 	}
 
+	void execute() override
+	{
+		int _t = (last_tick_ + 1) % tick_len_;
+		if (_t == 0) {
+			std::cout << "package num : " << second_pack_num_ << std::endl;
+			second_pack_num_ = 0;
+		}
+		last_tick_ = _t;
+	}
+
 	void test_remote(uint32_t fd, uint32_t msg_id, std::string str)
 	{
-		dispatch(log_, eid::log::info, gsf::Args(str));
-
+		//dispatch(log_, eid::log::info, gsf::Args(str));
+		second_pack_num_++;
 		//_info.set_name("world");
 		//Face.send_msg<Client2LoginServer>(this, fd, 1002, _info);
 		dispatch_remote(client2login_, fd, 1002, "gsf");
 	}
 
 private :
+	uint32_t tick_len_;
+	int32_t last_tick_;
+
+	uint32_t second_pack_num_;
+
 	uint32_t log_;
 	uint32_t client2login_;
+
+
 };
 
 int main()

@@ -1,6 +1,5 @@
 #include "application.h"
 
-#include <chrono>
 #include <ctime>
 #include <algorithm>
 #include <string>
@@ -21,11 +20,17 @@ gsf::Application::Application()
 	, cur_frame_(0)
 {
 	module_id_ = eid::app_id;
+
+#ifdef WATCH_PERF
+	tick_len_ = 200;
+	last_tick_ = -1;
+	cur_tick_time_ = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
+#endif
 }
 
 void gsf::Application::init()
 {
-	gsf::EventModule::get_ref();
+	new gsf::EventModule;
 
 	listen(this, eid::get_module, [=](gsf::Args args, CallbackFunc callback) {
 		
@@ -207,23 +212,26 @@ void gsf::Application::unregist_dynamic_module(uint32_t module_id)
 	}
 }
 
-static int last_tick = -1;
-static int tick_len = 200;
-
 void gsf::Application::tick()
 {
-	int _t = (last_tick + 1) % tick_len;
+	int _t = (last_tick_ + 1) % tick_len_;
 	if (_t == 0) {
-
+#ifdef WATCH_PERF
 		std::string _pref = "------------------- pref -------------------\n";
 		for (auto it : module_list_)
 		{
-			_pref += it->get_tick_info(tick_len);
+			_pref += it->get_tick_info(tick_len_);
 		}
 
-		_pref += static_cast<Module*>(gsf::EventModule::get_ptr())->get_tick_info(tick_len) + "\n";
+		_pref += static_cast<Module*>(gsf::EventModule::get_ptr())->get_tick_info(tick_len_) + "\n";
+		auto _t = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now()) - cur_tick_time_;
+		_pref += "frame comsume : " + std::to_string(static_cast<uint32_t>(_t.count() / 1000 / (tick_len_ * TICK_COUNT))) + " ms\n";
 		std::cout << _pref << std::endl;
+
+		cur_tick_time_ = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
+#endif // WATCH_PERF
+
 	}
 
-	last_tick = _t;
+	last_tick_ = _t;
 }

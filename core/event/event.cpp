@@ -6,8 +6,9 @@ void gsf::EventModule::execute()
 	while (!cmd_list_.empty())
 	{
 		auto itr = cmd_list_.begin();
+		auto type_id = std::get<0>(*itr);
 
-		auto tItr = type_map_.find(std::get<0>(*itr));
+		auto tItr = type_map_.find(type_id);
 		if (tItr != type_map_.end()) {
 			auto _cmd_id = std::get<1>(*itr);
 			auto iItr = tItr->second.find(_cmd_id);

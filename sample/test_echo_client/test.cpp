@@ -34,15 +34,6 @@
 #include "../../common/single.h"
 
 
-
-namespace gsf
-{
-	namespace network
-	{
-		REGISTER_CLASS(ConnectorModule)
-	}
-}
-
 class Login_LuaProxy
 	: public gsf::Module
 	, public gsf::IEvent
@@ -114,6 +105,64 @@ private:
 	uint32_t lua_;
 };
 
+namespace gsf
+{
+	namespace network
+	{
+		REGISTER_CLASS(ConnectorModule)
+	}
+}
+
+class Client
+	: public gsf::Module
+	, public gsf::IEvent
+{
+public:
+	Client()
+		: Module("Client")
+	{}
+
+	void before_init() override
+	{
+		dispatch(eid::app_id, eid::new_dynamic_module, "ConnectorModule", [&](gsf::Args args){
+			connector_id_ = args.pop_uint32(0);
+
+			listen(connector_id_, eid::network::connector_init, std::bind(&Client::create_connector_succ, this, std::placeholders::_1));
+		});
+	}
+
+	void create_connector_succ(gsf::Args args)
+	{
+		listen(this, eid::network::new_connect, [&](gsf::Args args, gsf::CallbackFunc callback) {
+			fd_ = args.pop_uint32(0);
+
+			dispatch_remote(connector_id_, fd_, 1001, "hello");
+		});
+
+		dispatch(eid::app_id, eid::network::bind_remote_callback, gsf::Args(
+			  get_module_id()
+			, uint32_t(1002)
+			, std::bind(&Client::msg_handler, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)));
+
+		dispatch(connector_id_, eid::network::make_connector
+			, gsf::Args(get_module_id(), "127.0.0.1", uint32_t(8001)));
+	}
+
+	void init() override 
+	{
+		
+	}
+
+	void msg_handler(uint32_t fd, uint32_t msg_id, std::string str)
+	{
+		dispatch_remote(connector_id_, fd_, 1001, "hello");
+	}
+
+private:
+	uint32_t connector_id_;
+	uint32_t fd_;
+};
+
 int main()
 {
 #ifdef WIN32
@@ -131,8 +180,13 @@ int main()
 
 	app.regist_module(new gsf::modules::LogModule());
 	app.regist_module(new gsf::network::ConnectorModule());
-	app.regist_module(new gsf::modules::LuaScriptModule());
-	app.regist_module(new Login_LuaProxy());
+	//app.regist_module(new gsf::modules::LuaScriptModule());
+	//app.regist_module(new Login_LuaProxy());
+
+	for (int i = 0; i < 1000; ++i)
+	{
+		app.regist_module(new Client);
+	}
 
 	app.init();
 	app.run();

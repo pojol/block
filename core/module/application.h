@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <map>
 #include <array>
-
+#include <chrono>
 
 static const uint32_t TICK_COUNT = 20;
 
@@ -47,7 +47,7 @@ namespace gsf
 
 		void run();
 
-		virtual void tick();
+		void tick();
 
 		void exit();
 
@@ -75,6 +75,12 @@ namespace gsf
 		uint64_t cur_frame_;
 
 		uint32_t module_idx_;
+
+#ifdef WATCH_PERF
+		uint32_t tick_len_;
+		int32_t last_tick_;
+		std::chrono::time_point<std::chrono::system_clock, std::chrono::microseconds> cur_tick_time_;
+#endif // WATCH_PERF
 	};
 
 	template <typename M, typename T>
