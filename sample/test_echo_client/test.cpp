@@ -185,7 +185,7 @@ int main()
 	//app.regist_module(new gsf::modules::LuaScriptModule());
 	//app.regist_module(new Login_LuaProxy());
 
-	for (int i = 0; i < 1000; ++i)
+	for (int i = 0; i < 500; ++i)
 	{
 		app.regist_module(new Client);
 	}

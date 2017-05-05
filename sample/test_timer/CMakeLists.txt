@@ -1,4 +1,4 @@
-PROJECT(test_timer)
+﻿PROJECT(test_timer)
 
 #引用头文件目录
 if(WIN32)
@@ -54,7 +54,7 @@ if(MSVC)
       endif()
     endforeach()
 
-        TARGET_LINK_LIBRARIES(test_timer ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib module.lib event.lib timer.lib)
+        TARGET_LINK_LIBRARIES(test_timer ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib module.lib event.lib timer.lib glog.lib log.lib)
 elseif(UNIX)
         TARGET_LINK_LIBRARIES(test_timer liblog.a libglog.a libmodule.a libevent.a libtimer.a)
 elseif(APPLE)

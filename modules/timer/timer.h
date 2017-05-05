@@ -18,18 +18,13 @@ namespace gsf
 	{
 		struct TimerEvent
 		{
-			TimerEvent(uint32_t id);
+			TimerEvent()
+				: target_(0)
+				, timerid_(0)
+			{}
 
-            gsf::CallbackFunc timer_handler_ptr_;
-			std::chrono::system_clock::time_point tp_;
-			uint32_t timerid_;
-
-			uint32_t get_id() const { return timerid_; }
-
-			bool operator > (const TimerEvent & t)
-			{
-				return tp_ > t.tp_;
-			}
+			uint32_t target_;
+			uint64_t timerid_;
 		};
 
 		typedef std::shared_ptr<TimerEvent> TimerEventPtr;
@@ -45,11 +40,15 @@ namespace gsf
 
 		protected:
 
+			void before_init();
+
             void init();
 
             void execute();
 
 		private:
+
+			uint64_t get_system_tick();
 
 			void delay_milliseconds(gsf::Args args, gsf::CallbackFunc callback);
 			void delay_day(gsf::Args args, gsf::CallbackFunc callback);
@@ -57,13 +56,13 @@ namespace gsf
 			//void delay_month(std::tuple<gsf::utils::Any> args, gsf::EventHandlerPtr callback);
 
             void remove_timer(gsf::Args args, gsf::CallbackFunc callback);
-
-			uint32_t make_timer_id();
-
 		private:
 
-			std::map<uint32_t, TimerEventPtr> map_;
-			uint32_t timer_id_;
+			uint32_t log_m_;
+
+			typedef std::map<uint64_t, std::list<TimerEventPtr>> TimerMap;
+
+			TimerMap map_;
 		};
 
 
