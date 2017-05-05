@@ -11,7 +11,6 @@
 #include <module/dynamic_module_factory.h>
 
 
-
 gsf::Application::Application()
 	: Module("Application")
 	, shutdown_(false)
@@ -24,7 +23,6 @@ gsf::Application::Application()
 #ifdef WATCH_PERF
 	tick_len_ = 200;
 	last_tick_ = -1;
-	cur_tick_time_ = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
 #endif
 }
 
@@ -111,7 +109,6 @@ void gsf::Application::run()
 
 #ifdef WATCH_PERF
 		double t1 = 0;
-		double ratio = 0;
 #endif // WATCH_PERF
 		
 		auto _callback = [&](AppState state) {
@@ -127,8 +124,7 @@ void gsf::Application::run()
 					it->execute();
 #ifdef WATCH_PERF
 					t1 = (time_point_cast<microseconds>(system_clock::now()) - _ttime).count();
-					ratio = t1 / (TICK_COUNT * 1000);
-					it->add_tick_consume(ratio);
+					it->add_tick_consume(t1);
 					_ttime = time_point_cast<microseconds>(system_clock::now());
 #endif // WATCH_PERF
 				}
@@ -148,8 +144,7 @@ void gsf::Application::run()
 			static_cast<Module*>(gsf::EventModule::get_ptr())->execute();
 #ifdef WATCH_PERF
 			t1 = (time_point_cast<microseconds>(system_clock::now()) - _ttime).count();
-			ratio = t1 / (TICK_COUNT * 1000);
-			static_cast<Module*>(gsf::EventModule::get_ptr())->add_tick_consume(ratio);
+			static_cast<Module*>(gsf::EventModule::get_ptr())->add_tick_consume(t1);
 			_ttime = time_point_cast<microseconds>(system_clock::now());
 #endif // WATCH_PERF
 		};
@@ -176,9 +171,9 @@ void gsf::Application::run()
 
 		auto _use = time_point_cast<microseconds>(system_clock::now()) - _before;
 		uint32_t _use_ms = static_cast<uint32_t>(_use.count() / 1000);
-		if (_use_ms < TICK_COUNT) {
+		if (_use_ms < cfg_.tick_count) {
 #ifdef WIN32
-			Sleep(TICK_COUNT - _use_ms);
+			Sleep(cfg_.tick_count - _use_ms);
 #endif // WIN32
 		}
 		else {
@@ -223,16 +218,11 @@ void gsf::Application::tick()
 			std::string _pref = "------------------- pref -------------------\n";
 			for (auto it : module_list_)
 			{
-				_pref += it->get_tick_info(tick_len_);
+				_pref += it->get_tick_info(tick_len_, cfg_.tick_count);
 			}
 
-			_pref += static_cast<Module*>(gsf::EventModule::get_ptr())->get_tick_info(tick_len_) + "\n";
-			auto _ft = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now()) - cur_tick_time_;
-			_pref += "frame comsume : " + std::to_string(static_cast<uint32_t>(_ft.count() / 1000 / (tick_len_ * TICK_COUNT))) + " ms\n";
+			_pref += static_cast<Module*>(gsf::EventModule::get_ptr())->get_tick_info(tick_len_, cfg_.tick_count) + "\n";
 			std::cout << _pref << std::endl;
-
-			cur_tick_time_ = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
-			
 		}
 
 		last_tick_ = _t;

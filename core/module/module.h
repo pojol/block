@@ -38,9 +38,15 @@ namespace gsf
 #ifdef WATCH_PERF
 		double tick_consume_;
 		void add_tick_consume(double c) { tick_consume_ += c; }
-		std::string get_tick_info(uint32_t count) 
+
+		std::string get_tick_info(uint32_t count, uint32_t tick_count) 
 		{
-			std::string _info = get_module_name() + ":" + std::to_string(tick_consume_ / count) + '\t';
+			auto c = tick_consume_ / 1000 / count;
+			char buf[20];
+			sprintf(buf, "%.3f", c);
+			sscanf(buf, "%f", &c);
+
+			std::string _info = get_module_name() + ":" + (buf) + " ms\t";
 			tick_consume_ = 0;
 			return _info;
 		}

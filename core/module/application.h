@@ -11,8 +11,6 @@
 #include <array>
 #include <chrono>
 
-static const uint32_t TICK_COUNT = 20;
-
 namespace gsf
 {
 	enum AppState
@@ -85,7 +83,6 @@ namespace gsf
 #ifdef WATCH_PERF
 		uint32_t tick_len_;
 		int32_t last_tick_;
-		std::chrono::time_point<std::chrono::system_clock, std::chrono::microseconds> cur_tick_time_;
 #endif // WATCH_PERF
 	};
 
