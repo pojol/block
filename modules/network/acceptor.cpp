@@ -144,14 +144,12 @@ void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, 
 	}
 }
 
-void gsf::network::AcceptorModule::send_msg(std::vector<uint32_t> fd_vec, uint32_t msg_id, BlockPtr blockptr)
+void gsf::network::AcceptorModule::send_msg(uint32_t fd, uint32_t msg_id, BlockPtr blockptr)
 {
-	for (auto fd : fd_vec)
-	{
-		auto _session_ptr = session_mgr_->find(fd);
-		if (_session_ptr){
-			_session_ptr->write(msg_id, blockptr);
-		}
+	//! 这个find的消耗有点多
+	auto _session_ptr = session_mgr_->find(fd);
+	if (_session_ptr) {
+		_session_ptr->write(msg_id, blockptr);
 	}
 }
 

@@ -50,10 +50,16 @@ void gsf::EventModule::execute()
 	{
 		auto itr = remote_event_list_.begin();
 
+		//std::make_tuple(type_id, fd_list, msg_id, blockptr)
+
 		uint32_t _eid = std::get<0>(*itr);
+		uint32_t _fd = std::get<1>(*itr);
+		uint32_t _msg = std::get<2>(*itr);
+		BlockPtr _block = std::ref(std::get<3>(*itr));
+
 		auto fitr = remote_event_map_.find(_eid);
 		if (fitr != remote_event_map_.end()){
-			fitr->second(std::get<1>(*itr), std::get<2>(*itr), std::get<3>(*itr));
+			fitr->second(_fd, _msg, _block);
 		}
 
 		remote_event_list_.pop_front();
@@ -168,7 +174,7 @@ gsf::EventModule::RNode::iterator gsf::EventModule::find_msg(RNode::iterator beg
 	return beg;
 }
 
-void gsf::EventModule::add_remote_cmd(uint32_t type_id, std::vector<uint32_t> fd_list, uint32_t msg_id, BlockPtr blockptr)
+void gsf::EventModule::add_remote_cmd(uint32_t type_id, uint32_t fd_list, uint32_t msg_id, BlockPtr blockptr)
 {
 	remote_event_list_.push_back(std::make_tuple(type_id, fd_list, msg_id, blockptr));
 }
@@ -214,18 +220,13 @@ void gsf::IEvent::listen_remote(Module *target, RemoteEventFunc func)
 
 void gsf::IEvent::dispatch_remote(uint32_t target, uint32_t fd, uint32_t msg_id, BlockPtr blockptr)
 {
-	std::vector<uint32_t> fd_list;
-	fd_list.push_back(fd);
-	EventModule::get_ref().add_remote_cmd(target, fd_list, msg_id, blockptr);
+	EventModule::get_ref().add_remote_cmd(target, fd, msg_id, blockptr);
 }
 
 void gsf::IEvent::dispatch_remote(uint32_t target, uint32_t fd, uint32_t msg_id, const std::string &str)
 {
-	std::vector<uint32_t> fd_list;
-	fd_list.push_back(fd);
-
 	auto _msg = std::make_shared<gsf::Block>(fd, msg_id, str.length());
 	memcpy(_msg->buf_ + _msg->pos_, str.c_str(), str.length());
 
-	EventModule::get_ref().add_remote_cmd(target, fd_list, msg_id, _msg);
+	EventModule::get_ref().add_remote_cmd(target, fd, msg_id, _msg);
 }

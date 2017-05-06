@@ -109,6 +109,7 @@ void gsf::network::ConnectorModule::make_connector(gsf::Args args, gsf::Callback
 		_sin.sin_port = htons(_port);
 		_sin.sin_addr.s_addr = inet_addr(_ip.c_str());
 
+		//! 这里目标服务器没有开启建立连接也会成功？ 虽然后面会发送连接失败的事件
 		if (bufferevent_socket_connect(buffer_event_ptr_, (sockaddr*)&_sin, sizeof(sockaddr_in)) < 0) {
 			_ret = eid::network::err_socket_connect;
 			break;
@@ -139,7 +140,7 @@ void gsf::network::ConnectorModule::need_close_session(int fd)
 	disconnect_vec_.push_back(fd);
 }
 
-void gsf::network::ConnectorModule::send_msg(std::vector<uint32_t> fd_vec, uint32_t msg_id, BlockPtr blockptr)
+void gsf::network::ConnectorModule::send_msg(uint32_t fd, uint32_t msg_id, BlockPtr blockptr)
 {
 	session_ptr_->write(msg_id, blockptr);
 }

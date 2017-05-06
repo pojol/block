@@ -52,7 +52,7 @@ public:
 	EntityMgr()
 		: Module("EntityMgr")
 	{
-		tick_len_ = 50;	// one second
+		tick_len_ = 20;	// one second
 		last_tick_ = -1;
 		second_pack_num_ = 0;
 	}
@@ -176,6 +176,7 @@ int main()
 	gsf::Application app;
 	gsf::AppConfig cfg;
 	cfg.is_watch_pref = true;
+	cfg.tick_count = 50;
 
 	app.init_cfg(cfg);
 

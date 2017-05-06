@@ -42,7 +42,7 @@ namespace gsf
 			
 			void need_close_session(int fd);
 
-			void send_msg(std::vector<uint32_t> fd_vec, uint32_t msg_id, BlockPtr blockptr);
+			void send_msg(uint32_t fd, uint32_t msg_id, BlockPtr blockptr);
 
 		private:
 

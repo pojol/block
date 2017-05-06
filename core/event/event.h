@@ -27,7 +27,7 @@ namespace gsf
 	typedef std::pair<uint32_t, uint32_t> EventPair;
 	typedef std::function<void(gsf::Args)> CallbackFunc;
 	typedef std::function<void(gsf::Args, CallbackFunc)> EventFunc;
-	typedef std::function<void(std::vector<uint32_t>, uint32_t, BlockPtr)> RemoteEventFunc;
+	typedef std::function<void(uint32_t, uint32_t, BlockPtr)> RemoteEventFunc;
 
 	class Module;
 
@@ -93,7 +93,7 @@ namespace gsf
 
 		void add_cmd(uint32_t type_id, uint32_t event, gsf::Args args, CallbackFunc callback = nullptr);
 
-		void add_remote_cmd(uint32_t type_id, std::vector<uint32_t> fd_list, uint32_t msg_id, BlockPtr blockptr);
+		void add_remote_cmd(uint32_t type_id, uint32_t fd_list, uint32_t msg_id, BlockPtr blockptr);
 
 		void add_remote_callback(uint32_t module_id, uint32_t msg_id, uint32_t fd, BlockPtr blockptr);
 
@@ -121,7 +121,7 @@ namespace gsf
 
 		//! 绑定发送socket消息函数
 		std::unordered_map<uint32_t, RemoteEventFunc> remote_event_map_;
-		std::list<std::tuple<uint32_t, std::vector<uint32_t>, uint32_t, BlockPtr>> remote_event_list_;
+		std::list<std::tuple<uint32_t, uint32_t, uint32_t, BlockPtr>> remote_event_list_;
 
 	private:
 		
