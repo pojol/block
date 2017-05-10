@@ -32,7 +32,10 @@ void gsf::EventModule::execute()
 			BlockPtr _blockptr = std::get<3>(*itr);
 			std::string _str(_blockptr->buf_, _blockptr->size_);
 
-			auto lbItr = find_msg(fItr->second.begin(), fItr->second.end(), _msg_id);
+			auto lbItr = std::find_if(fItr->second.begin(), fItr->second.end(), [&](RNode::value_type it) {
+				return (it.first == _msg_id);
+			});
+
 			if (lbItr != fItr->second.end()) {
 				try {
 					lbItr->second(std::get<2>(*itr), _msg_id, _str);
@@ -119,11 +122,6 @@ void gsf::EventModule::add_cmd(uint32_t type_id, uint32_t event, gsf::Args args,
 		auto itr = remote_map_.find(_module_id);
 		if (itr != remote_map_.end()) {
 			itr->second.push_back(std::make_pair(_msg_id, _func));
-
-			typedef std::vector<std::pair<uint32_t, RemoteFunc>> RNode;
-			std::sort(itr->second.begin(), itr->second.end(), [&](RNode::value_type l, RNode::value_type r) {
-				return (l.first < r.first);
-			});
 		}
 		else {
 			std::vector<std::pair<uint32_t, RemoteFunc>> vec;
@@ -155,23 +153,6 @@ void gsf::EventModule::rmv_event(uint32_t module_id)
 	if (tItr != type_map_.end()) {
 		type_map_.erase(tItr);
 	}
-}
-
-gsf::EventModule::RNode::iterator gsf::EventModule::find_msg(RNode::iterator beg, RNode::iterator end, uint32_t msg)
-{
-	RNode::iterator it;
-	std::iterator_traits<RNode::iterator>::difference_type count, step;
-	count = std::distance(beg, end);
-	while (count > 0)
-	{
-		it = beg; step = count / 2; std::advance(it, step);
-		if (it->first < msg) {                 // or: if (comp(*it,val)), for version (2)
-			beg = ++it;
-			count -= step + 1;
-		}
-		else count = step;
-	}
-	return beg;
 }
 
 void gsf::EventModule::add_remote_cmd(uint32_t type_id, uint32_t fd_list, uint32_t msg_id, BlockPtr blockptr)
