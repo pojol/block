@@ -26,7 +26,7 @@ function dispatch(...)
 	event:ldispatch(arg[1], arg[2], _args, __cb)
 end
 
--- ��Ҫcallback
+-- 带callbakc的dispatch
 function cb_dispatch(...)
 	arg = { ... }
 	
@@ -108,6 +108,9 @@ function print_error( ... )
 		    _args:push_string(v)
 	    end
     end
+
+	-- 产生错误的时候顺便打印下堆栈
+	_args:push_string("\n" .. debug.traceback())
 
     event:ldispatch(g_log_id_, eid.log.error, _args)
 end
