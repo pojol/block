@@ -27,7 +27,6 @@ namespace gsf
 	typedef std::pair<uint32_t, uint32_t> EventPair;
 	typedef std::function<void(gsf::Args)> CallbackFunc;
 	typedef std::function<void(gsf::Args, CallbackFunc)> EventFunc;
-	typedef std::function<void(uint32_t, uint32_t, BlockPtr)> RemoteEventFunc;
 
 	class Module;
 
@@ -70,12 +69,7 @@ namespace gsf
 
 		void bind_event(uint32_t type_id, uint32_t event, EventFunc func);
 
-		void bind_remote_event(uint32_t type_id, RemoteEventFunc func);
-
 		void add_cmd(uint32_t type_id, uint32_t event, gsf::Args args, CallbackFunc callback = nullptr);
-
-		void add_remote_cmd(uint32_t type_id, uint32_t fd_list, uint32_t msg_id, BlockPtr blockptr);
-
 		///
 
 		void rmv_event(uint32_t module_id);
@@ -85,8 +79,6 @@ namespace gsf
 		typedef std::unordered_map<uint32_t, InnerMap> TypeMap;
 
 		typedef std::list<std::tuple<uint32_t, uint32_t, gsf::Args, CallbackFunc>> CmdList;
-
-		typedef std::list<std::tuple<uint32_t, uint32_t, uint32_t, BlockPtr>> RemoteCallbackList;
 
 		TypeMap type_map_;
 		CmdList cmd_list_;
