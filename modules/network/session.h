@@ -7,6 +7,7 @@
 #include <event/event.h>
 
 #include <stdint.h>
+#include <map>
 #include <memory>
 #include <string>
 
@@ -16,6 +17,7 @@ namespace gsf
 	{
 		class OBuffer;
 		class IBuffer;
+		class MsgBinder;
 
 		static const uint32_t SESSION_MAX_CONNECT = 100000;
 
@@ -26,7 +28,7 @@ namespace gsf
 			: public gsf::IEvent
 		{
 		public:
-			Session(int fd, int eid, std::function<void (int)> disconnect_callback);
+			Session(int fd, int eid, MsgBinder *binder, std::function<void (int)> disconnect_callback);
 			~Session();
 
 			static void read_cb(::bufferevent *bev, void *ctx);
@@ -38,6 +40,7 @@ namespace gsf
 			void dis_connect(int32_t err);
 
 			int32_t get_id() const { return fd_; }
+			uint32_t get_module_id() const { return module_id_; }
 
 			void set_log_module(uint32_t log_module) { log_module_ = log_module; }
 
@@ -48,6 +51,7 @@ namespace gsf
 			int module_id_;
 
 			uint32_t log_module_;
+			MsgBinder *binder_;
 
 			std::function<void(int)> disconnect_callback_;
 

@@ -15,13 +15,14 @@ eid = {
 	network = {
 		make_acceptor = 2001,
 		make_connector = 2002,
-		bind_remote_callback = 2003,
-        kick_connect = 2004,
-        connector_init = 2005,
+		recv_remote_callback = 2003,
+		send_remote_callback = 2004,
+        kick_connect = 2005,
+        connector_init = 2006,
 		
-		new_connect = 2006,
-		dis_connect = 2007,
-		fail_connect = 2008,
+		new_connect = 2007,
+		dis_connect = 2008,
+		fail_connect = 2009,
 		
 		err_repeated_fd = -2001,
 		err_upper_limit_session = -2002,

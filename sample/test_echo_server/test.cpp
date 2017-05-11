@@ -94,7 +94,7 @@ public:
 		}
 #endif // WIN32
 
-		dispatch(log_, eid::log::init, gsf::Args(_path, "echo_server"));
+		dispatch(log_, eid::log::init, gsf::Args(std::string(_path) +"/log", "echo_server"));
 	}
 
 	void init()
@@ -108,6 +108,10 @@ public:
 		listen(this, eid::network::dis_connect
 			, [=](gsf::Args args, gsf::CallbackFunc callback) {
 			dispatch(log_, eid::log::info, gsf::Args("dis connect fd : ", args.pop_uint32(0)));
+		});
+
+		dispatch(client2login_, eid::network::send_remote_callback, gsf::Args(), [&](gsf::Args args) {
+			send_ = args.pop_remote_callback(0);
 		});
 
 		gsf::Args args;
@@ -124,7 +128,7 @@ public:
 		for (auto nod : arr)
 		{
 			//! 向协议绑定器申请，module 和 协议的绑定.
-			dispatch(eid::app_id, eid::network::bind_remote_callback
+			dispatch(client2login_, eid::network::recv_remote_callback
 				, gsf::Args(get_module_id(), nod.first, nod.second));
 		}
 	}
@@ -145,7 +149,7 @@ public:
 		second_pack_num_++;
 		//_info.set_name("world");
 		//Face.send_msg<Client2LoginServer>(this, fd, 1002, _info);
-		dispatch_remote(client2login_, fd, 1002, "gsf");
+		send_(fd, 1002, "gsf");
 	}
 
 private :
@@ -157,7 +161,7 @@ private :
 	uint32_t log_;
 	uint32_t client2login_;
 
-
+	gsf::RemoteFunc send_;
 };
 
 int main()

@@ -8,6 +8,7 @@
 
 #include <module/module.h>
 
+
 #include <event/event.h>
 #include <event2/util.h>
 #include <event2/listener.h>
@@ -17,6 +18,7 @@ namespace gsf
 	namespace network
 	{
 		class SessionMgr;
+		class MsgBinder;
 
 		class AcceptorModule
 			: public gsf::Module
@@ -37,6 +39,8 @@ namespace gsf
 		private:
 
 			void make_acceptor(gsf::Args args, gsf::CallbackFunc callback);
+			void bind_remote(gsf::Args args, gsf::CallbackFunc callback);
+
 			void accept_bind(const std::string &ip, int port);
 			static void accept_listen_cb(::evconnlistener *listener
 				, evutil_socket_t fd
@@ -44,13 +48,14 @@ namespace gsf
 				, int socklen
 				, void *arg);
 
-			void send_msg(uint32_t fd, uint32_t msg_id, BlockPtr blockptr);
+			void send_msg(uint32_t fd, uint32_t msg_id, std::string block);
 
 		private:
 
 			uint32_t module_id_;
 
 			SessionMgr *session_mgr_;
+			MsgBinder *binder_;
 
 			event_base *event_base_ptr_;
 

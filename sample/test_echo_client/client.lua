@@ -11,16 +11,23 @@ local session_id_ = 0
 function msg_function(fd, msg_id, block)
     print_info("msg_function " .. tostring(msg_id) .. " " .. block)
 
-    event:ldispatch_remote(connect_id_, session_id_, 1001, "hello")
+    module.send(session_id_, 1001, "hello")
+    --event:ldispatch_remote(connect_id_, session_id_, 1001, "hello")
 end
 
 function connect(ip, port)
+
+    local function _send_callback(args)
+        module.send = args:pop_remote_callback(0)
+    end
+    cb_dispatch(connect_id_, eid.network.send_remote_callback, 1, _send_callback)  
 
     local function _new_connect(args, callback)
         session_id_ = args:pop_uint32(0)
         print_info("new connect fd : ", session_id_)
 
-        event:ldispatch_remote(connect_id_, session_id_, 1001, "hello")
+        module.send(session_id_, 1001, "hello")
+        --event:ldispatch_remote(connect_id_, session_id_, 1001, "hello")
     end
 
     local function _dis_connect(args, callback)
@@ -63,9 +70,9 @@ module.init = function()
 	print_info("init case_login module : " .. module_id)
 
     connect("127.0.0.1", 8001)
-    
-    dispatch(eid.app_id
-        , eid.network.bind_remote_callback
+
+    dispatch(connect_id_
+        , eid.network.recv_remote_callback
         , module_id
         , 1002
         , msg_function)

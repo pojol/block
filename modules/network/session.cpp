@@ -1,13 +1,15 @@
 #include "session.h"
 #include "session_mgr.h"
+#include "msg_binder.h"
 
 #include <args/args.h>
 
 #include <iostream>
 
-gsf::network::Session::Session(int fd, int module_id, std::function<void (int)> disconnect_callback)
+gsf::network::Session::Session(int fd, int module_id, MsgBinder *binder, std::function<void (int)> disconnect_callback)
     : fd_(fd)
 	, module_id_(module_id)
+	, binder_(binder)
 {
 	disconnect_callback_ = disconnect_callback;
 
@@ -103,7 +105,12 @@ void gsf::network::Session::read(::bufferevent *bev)
 		//! 
 		auto _blockptr = std::make_shared<Block>(_msg_len - 8);
 		evbuffer_remove(_buff, _blockptr->buf_, _blockptr->size_);
-		remote_callback(module_id_, fd_, _msg_id, _blockptr);
+
+		auto _func = binder_->get_func(_msg_id);
+		if (_func) {
+			std::string _str(_blockptr->buf_, _blockptr->size_);	//tmp
+			_func(fd_, _msg_id, _str);
+		}
 
 		_buf_len = evbuffer_get_length(in_buf_);
 		if (_buf_len > MSG_SIZE_LEN) {

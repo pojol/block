@@ -18,6 +18,7 @@ namespace gsf
 	namespace network
 	{
 		class Session;
+		class MsgBinder;
 		typedef std::shared_ptr<Session> SessionPtr;
 
 		class ConnectorModule
@@ -39,10 +40,11 @@ namespace gsf
 
 		private:
 			void make_connector(gsf::Args args, gsf::CallbackFunc callback);
+			void bind_remote(gsf::Args args, gsf::CallbackFunc callback);
 			
 			void need_close_session(int fd);
 
-			void send_msg(uint32_t fd, uint32_t msg_id, BlockPtr blockptr);
+			void send_msg(uint32_t fd, uint32_t msg_id, std::string block);
 
 		private:
 
@@ -53,6 +55,7 @@ namespace gsf
 			event_base *event_base_ptr_;
 
 			SessionPtr session_ptr_;
+			MsgBinder *binder_;
 
 			::bufferevent *buffer_event_ptr_;
 

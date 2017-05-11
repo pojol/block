@@ -2,6 +2,7 @@
 
 #include "session_mgr.h"
 #include "session.h"
+#include "msg_binder.h"
 
 #ifdef WIN32
 	#include <winsock2.h>
@@ -34,6 +35,7 @@ gsf::network::AcceptorModule::~AcceptorModule()
 void gsf::network::AcceptorModule::before_init()
 {
 	session_mgr_ = new SessionMgr();
+	binder_ = new MsgBinder();
 
 	event_base_ptr_ = event_base_new();
 
@@ -46,11 +48,20 @@ void gsf::network::AcceptorModule::init()
 		, std::placeholders::_1
 		, std::placeholders::_2));
 
-	listen_remote(this
-		, std::bind(&AcceptorModule::send_msg, this
+	listen(this, eid::network::recv_remote_callback
+		, std::bind(&AcceptorModule::bind_remote, this
 		, std::placeholders::_1
-		, std::placeholders::_2
-		, std::placeholders::_3));
+		, std::placeholders::_2));
+
+	listen(this, eid::network::send_remote_callback
+		, [&](gsf::Args args, gsf::CallbackFunc callback) {
+
+		auto _args = gsf::Args();
+		_args.push_remote_callback(std::bind(&AcceptorModule::send_msg, this
+			, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+
+		callback(_args);
+	});
 }
 
 void gsf::network::AcceptorModule::execute()
@@ -71,7 +82,15 @@ void gsf::network::AcceptorModule::shut()
 
 void gsf::network::AcceptorModule::after_shut()
 {
+	if (session_mgr_) {
+		delete session_mgr_;
+		session_mgr_ = nullptr;
+	}
 
+	if (binder_) {
+		delete binder_;
+		binder_ = nullptr;
+	}
 }
 
 void gsf::network::AcceptorModule::make_acceptor(gsf::Args args, gsf::CallbackFunc callback)
@@ -82,6 +101,16 @@ void gsf::network::AcceptorModule::make_acceptor(gsf::Args args, gsf::CallbackFu
 
 	module_id_ = _module_id;	//! 绑定代理Module的id
 	accept_bind(_ip, _port);
+}
+
+void gsf::network::AcceptorModule::bind_remote(gsf::Args args, gsf::CallbackFunc callback)
+{
+	uint32_t _module_id = args.pop_uint32(0);
+	uint32_t _msg_id = args.pop_uint32(1);
+	auto _func = args.pop_remote_callback(2);
+
+	auto _info_ptr = std::make_shared<RemoteInfo>(_module_id, _msg_id, _func);
+	binder_->regist(_info_ptr);
 }
 
 void gsf::network::AcceptorModule::accept_bind(const std::string &ip, int port)
@@ -133,7 +162,7 @@ void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, 
 	} while (0);
 
 	if (0 == _ret) {
-		auto _session_ptr = network_ptr_->session_mgr_->make_session(fd, network_ptr_->module_id_);
+		auto _session_ptr = network_ptr_->session_mgr_->make_session(fd, network_ptr_->module_id_, network_ptr_->binder_);
 		bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, _session_ptr.get());
 		bufferevent_enable(bev, EV_READ | EV_WRITE);
 
@@ -144,12 +173,15 @@ void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, 
 	}
 }
 
-void gsf::network::AcceptorModule::send_msg(uint32_t fd, uint32_t msg_id, BlockPtr blockptr)
+void gsf::network::AcceptorModule::send_msg(uint32_t fd, uint32_t msg_id, std::string block)
 {
-	//! 这个find的消耗有点多
 	auto _session_ptr = session_mgr_->find(fd);
 	if (_session_ptr) {
-		_session_ptr->write(msg_id, blockptr);
+
+		auto _msg = std::make_shared<gsf::Block>(fd, msg_id, block.length());
+		memcpy(_msg->buf_ + _msg->pos_, block.c_str(), block.length());
+
+		_session_ptr->write(msg_id, _msg);
 	}
 }
 

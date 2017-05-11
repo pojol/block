@@ -86,7 +86,7 @@ public:
 #endif // WIN32
 
 		//test
-		dispatch(log_, eid::log::init, gsf::Args(std::string(_path)
+		dispatch(log_, eid::log::init, gsf::Args(std::string(_path) + "/log"
 			, std::string("echo_client")));
 
 		//test
@@ -124,7 +124,7 @@ public:
 
 	void before_init() override
 	{
-		dispatch(eid::app_id, eid::new_dynamic_module, "ConnectorModule", [&](gsf::Args args){
+		dispatch(eid::app_id, eid::new_dynamic_module, gsf::Args("ConnectorModule"), [&](gsf::Args args){
 			connector_id_ = args.pop_uint32(0);
 
 			listen(connector_id_, eid::network::connector_init, std::bind(&Client::create_connector_succ, this, std::placeholders::_1));
@@ -133,13 +133,17 @@ public:
 
 	void create_connector_succ(gsf::Args args)
 	{
+		dispatch(connector_id_, eid::network::send_remote_callback, gsf::Args(), [&](gsf::Args args) {
+			send_ = args.pop_remote_callback(0);
+		});
+
 		listen(this, eid::network::new_connect, [&](gsf::Args args, gsf::CallbackFunc callback) {
 			fd_ = args.pop_uint32(0);
 
-			dispatch_remote(connector_id_, fd_, 1001, "hello");
+			send_(fd_, 1001, "hello");
 		});
 
-		dispatch(eid::app_id, eid::network::bind_remote_callback, gsf::Args(
+		dispatch(connector_id_, eid::network::recv_remote_callback, gsf::Args(
 			  get_module_id()
 			, uint32_t(1002)
 			, std::bind(&Client::msg_handler, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)));
@@ -155,12 +159,14 @@ public:
 
 	void msg_handler(uint32_t fd, uint32_t msg_id, std::string str)
 	{
-		dispatch_remote(connector_id_, fd_, 1001, "hello");
+		send_(fd_, 1001, "hello");
 	}
 
 private:
 	uint32_t connector_id_;
 	uint32_t fd_;
+
+	gsf::RemoteFunc send_;
 };
 
 int main()
@@ -182,12 +188,12 @@ int main()
 
 	app.regist_module(new gsf::modules::LogModule());
 	app.regist_module(new gsf::network::ConnectorModule());
-	//app.regist_module(new gsf::modules::LuaScriptModule());
-	//app.regist_module(new Login_LuaProxy());
+	app.regist_module(new gsf::modules::LuaScriptModule());
+	app.regist_module(new Login_LuaProxy());
 
-	for (int i = 0; i < 5000; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
-		app.regist_module(new Client);
+		//app.regist_module(new Client);
 	}
 	
 	app.run();

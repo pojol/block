@@ -33,14 +33,15 @@ namespace eid
 	{
 		const uint32_t make_acceptor = 2001;
 		const uint32_t make_connector = 2002;
-		const uint32_t bind_remote_callback = 2003;
-		const uint32_t kick_connect = 2004;
-		const uint32_t connector_init = 2005;
+		const uint32_t recv_remote_callback = 2003;
+		const uint32_t send_remote_callback = 2004;
+		const uint32_t kick_connect = 2005;
+		const uint32_t connector_init = 2006;
 
 		//! result code
-		const uint32_t new_connect = 2006;
-		const uint32_t dis_connect = 2007;
-		const uint32_t fail_connect = 2008;
+		const uint32_t new_connect = 2007;
+		const uint32_t dis_connect = 2008;
+		const uint32_t fail_connect = 2009;
 
 		const int32_t err_repeated_fd = -2001;				// repeated fd
 		const int32_t err_upper_limit_session = -2002;		// upper limit session!

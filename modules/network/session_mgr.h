@@ -21,6 +21,7 @@ namespace gsf
 
 		class OBuffer;
 		class IBuffer;
+		class MsgBinder;
 
 		typedef std::shared_ptr<Session> SessionPtr;
 
@@ -35,8 +36,9 @@ namespace gsf
 			void close();
 
 			SessionPtr find(int fd);
+			SessionPtr find_byModule(uint32_t module_id);
 
-			SessionPtr make_session(int fd, int module_id);
+			SessionPtr make_session(int fd, int module_id, MsgBinder *binder);
 
 			int cur_max_connet() const;
 
@@ -44,6 +46,7 @@ namespace gsf
 
 			typedef std::unordered_map<int32_t, SessionPtr> SessionQueue;
 			SessionQueue session_queue_;
+			SessionQueue session_queue_bymodule_;
 
 			std::vector<int> disconnect_vec_;
 

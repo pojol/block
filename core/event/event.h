@@ -50,25 +50,6 @@ namespace gsf
 		virtual void dispatch(uint32_t target, uint32_t event, gsf::Args args, CallbackFunc callback = nullptr);
 
 
-		// --remote--
-		/**!
-			侦听向远程发送的事件
-		*/
-		virtual void listen_remote(Module *target, RemoteEventFunc func);
-
-		/**!
-			向远程发送, 内部RPC调用的时候记得要有超时，防止产生故障时数据丢失。
-		*/
-		virtual void dispatch_remote(uint32_t target, uint32_t fd, uint32_t msg_id, BlockPtr blockptr);
-
-		virtual void dispatch_remote(uint32_t target, uint32_t fd, uint32_t msg_id, const std::string &str);
-
-		/**!
-			远程消息订阅的callback
-		*/
-		virtual void remote_callback(uint32_t module_id, uint32_t fd, uint32_t msg_id, BlockPtr blockptr);
-
-
 		/**!
 			移除module在event层上的绑定.
 		*/
@@ -95,8 +76,6 @@ namespace gsf
 
 		void add_remote_cmd(uint32_t type_id, uint32_t fd_list, uint32_t msg_id, BlockPtr blockptr);
 
-		void add_remote_callback(uint32_t module_id, uint32_t msg_id, uint32_t fd, BlockPtr blockptr);
-
 		///
 
 		void rmv_event(uint32_t module_id);
@@ -109,23 +88,8 @@ namespace gsf
 
 		typedef std::list<std::tuple<uint32_t, uint32_t, uint32_t, BlockPtr>> RemoteCallbackList;
 
-		typedef std::vector<std::pair<uint32_t, RemoteFunc>> RNode;
-		typedef std::unordered_map<uint32_t, std::vector<std::pair<uint32_t, RemoteFunc>>> RemoteMap;
-		typedef std::unordered_map<uint32_t, uint32_t> RomoteMapIdx;
-
 		TypeMap type_map_;
 		CmdList cmd_list_;
-
-		RemoteCallbackList remote_callback_list_;
-		RemoteMap remote_map_;
-
-		//! 绑定发送socket消息函数
-		std::unordered_map<uint32_t, RemoteEventFunc> remote_event_map_;
-		std::list<std::tuple<uint32_t, uint32_t, uint32_t, BlockPtr>> remote_event_list_;
-
-	private:
-		
-		RNode::iterator find_msg(RNode::iterator beg, RNode::iterator end, uint32_t msg);
 	};
 }
 

@@ -132,11 +132,6 @@ void gsf::modules::LuaScriptModule::ldispatch(uint32_t target, uint32_t event, g
 	});
 }
 
-void gsf::modules::LuaScriptModule::ldispatch_remote(uint32_t target, uint32_t fd, uint32_t msg_id, const std::string &str)
-{
-	dispatch_remote(target, fd, msg_id, str);
-}
-
 void gsf::modules::LuaScriptModule::llisten(uint32_t self, uint32_t event, sol::function func)
 {
 
@@ -193,8 +188,7 @@ void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string path)
 
 	_lua->state_.new_usertype<LuaScriptModule>("LuaScriptModule"
 		, "ldispatch", &LuaScriptModule::ldispatch
-		, "llisten", &LuaScriptModule::llisten
-		, "ldispatch_remote", &LuaScriptModule::ldispatch_remote);
+		, "llisten", &LuaScriptModule::llisten);
 	_lua->state_.set("event", this);
 	_lua->state_.set("module_id", module_id);
 

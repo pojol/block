@@ -2,6 +2,7 @@
 
 #include "session_mgr.h"
 #include "session.h"
+#include "msg_binder.h"
 
 #include <event2/buffer.h>
 #include <event2/listener.h>
@@ -37,7 +38,7 @@ gsf::network::ConnectorModule::~ConnectorModule()
 
 void gsf::network::ConnectorModule::before_init()
 {
-	new SessionMgr();
+	binder_ = new MsgBinder();
 
 	event_base_ptr_ = event_base_new();
 
@@ -46,11 +47,20 @@ void gsf::network::ConnectorModule::before_init()
 			, std::placeholders::_1
 			, std::placeholders::_2));
 
-	listen_remote(this
-		, std::bind(&ConnectorModule::send_msg, this
+	listen(this, eid::network::recv_remote_callback
+		, std::bind(&ConnectorModule::bind_remote, this
 			, std::placeholders::_1
-			, std::placeholders::_2
-			, std::placeholders::_3));
+			, std::placeholders::_2));
+
+	listen(this, eid::network::send_remote_callback
+		, [&](gsf::Args args, gsf::CallbackFunc callback) {
+
+		auto _args = gsf::Args();
+		_args.push_remote_callback(std::bind(&ConnectorModule::send_msg, this
+			, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+
+		callback(_args);
+	});
 
 	dispatch(eid::app_id, eid::get_module, gsf::Args(std::string("LogModule")), [=](gsf::Args args)
 	{
@@ -82,7 +92,10 @@ void gsf::network::ConnectorModule::shut()
 
 void gsf::network::ConnectorModule::after_shut()
 {
-
+	if (binder_) {
+		delete binder_;
+		binder_ = nullptr;
+	}
 }
 
 void gsf::network::ConnectorModule::make_connector(gsf::Args args, gsf::CallbackFunc callback)
@@ -121,7 +134,7 @@ void gsf::network::ConnectorModule::make_connector(gsf::Args args, gsf::Callback
 
 
 	if (_ret == 0) {
-		session_ptr_ = std::make_shared<Session>(_fd, _module_id, std::bind(&ConnectorModule::need_close_session, this, std::placeholders::_1));
+		session_ptr_ = std::make_shared<Session>(_fd, _module_id, binder_, std::bind(&ConnectorModule::need_close_session, this, std::placeholders::_1));
 		bufferevent_setcb(buffer_event_ptr_, Session::read_cb, NULL, Session::err_cb, session_ptr_.get());
 		bufferevent_enable(buffer_event_ptr_, EV_READ | EV_WRITE);
 
@@ -134,13 +147,25 @@ void gsf::network::ConnectorModule::make_connector(gsf::Args args, gsf::Callback
 }
 
 
+void gsf::network::ConnectorModule::bind_remote(gsf::Args args, gsf::CallbackFunc callback)
+{
+	uint32_t _module_id = args.pop_uint32(0);
+	uint32_t _msg_id = args.pop_uint32(1);
+	auto _func = args.pop_remote_callback(2);
+
+	auto _info_ptr = std::make_shared<RemoteInfo>(_module_id, _msg_id, _func);
+	binder_->regist(_info_ptr);
+}
+
 void gsf::network::ConnectorModule::need_close_session(int fd)
 {
 	// 
 	disconnect_vec_.push_back(fd);
 }
 
-void gsf::network::ConnectorModule::send_msg(uint32_t fd, uint32_t msg_id, BlockPtr blockptr)
+void gsf::network::ConnectorModule::send_msg(uint32_t fd, uint32_t msg_id, std::string block)
 {
-	session_ptr_->write(msg_id, blockptr);
+	auto _msg = std::make_shared<gsf::Block>(fd, msg_id, block.length());
+	memcpy(_msg->buf_ + _msg->pos_, block.c_str(), block.length());
+	session_ptr_->write(msg_id, _msg);
 }
