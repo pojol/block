@@ -78,7 +78,10 @@ void gsf::modules::LuaScriptModule::execute()
 			}
 		}
 		catch (sol::error e) {
-			dispatch(log_module_, eid::log::error, gsf::Args(std::string(e.what())));
+			std::string _err = e.what() + '\n';
+			_err += Traceback(_lua->state_.lua_state());
+
+			dispatch(log_module_, eid::log::error, gsf::Args(_err));
 		}
 
 		if (_lua->app_state_ == LuaAppState::AFTER_SHUT) {
@@ -117,34 +120,43 @@ void gsf::modules::LuaScriptModule::create_event(gsf::Args args, gsf::CallbackFu
 	create(_module_id, _dir_name, _file_name);
 }
 
-void gsf::modules::LuaScriptModule::ldispatch(uint32_t target, uint32_t event, gsf::Args args, gsf::CallbackFunc callback)
+void gsf::modules::LuaScriptModule::ldispatch(uint32_t lua_id, uint32_t target, uint32_t event, gsf::Args args, gsf::CallbackFunc callback)
 {	
-	//std::cout << args.stack_index() << " " << args.get<uint32_t>(0) << " " << args.get<std::string>(1) << std::endl;
-	//std::cout << target << event << args.get_count() << std::endl;
-	//callback(gsf::Args(std::string("hello, callback")));
-
 	dispatch(target, event, args, [=](gsf::Args _args) {
 		try {
 			callback(_args);
 		}
 		catch (sol::error e) {
-			std::cout << e.what() << std::endl;
+	
+			std::string _err = e.what() + '\n';
+				
+			auto lua = find_lua(lua_id);
+			if (lua) {
+				_err += Traceback(lua->state_.lua_state());
+			}
+
+			dispatch(log_module_, eid::log::error, gsf::Args(_err));
 		}
 	});
 }
 
-void gsf::modules::LuaScriptModule::llisten(uint32_t self, uint32_t event, sol::function func)
+void gsf::modules::LuaScriptModule::llisten(uint32_t lua_id, uint32_t self, uint32_t event, sol::function func)
 {
-
 	listen(self, event, [=](gsf::Args args, gsf::CallbackFunc callback) {
 		try {
 			func(args, callback);
 		}
 		catch (sol::error e) {
-			std::cout << e.what() << std::endl;
+			std::string _err = e.what() + '\n';
+
+			auto lua = find_lua(lua_id);
+			if (lua) {
+				_err += Traceback(lua->state_.lua_state());
+			}
+
+			dispatch(log_module_, eid::log::error, gsf::Args(_err));
 		}
 	});
-
 }
 
 void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string dir_name, std::string file_name)
@@ -176,8 +188,9 @@ void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string dir_n
 	}
 	catch (sol::error e)
 	{
-		std::string _err = Traceback(_lua->state_.lua_state()) + " init err " 
-			+ _path + "\t\n" + e.what();
+		std::string _err = e.what() + '\n';
+		_err += Traceback(_lua->state_.lua_state());
+
 		dispatch(log_module_, eid::log::error, gsf::Args(_err));
 	}
 	
@@ -187,6 +200,7 @@ void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string dir_n
 		, "push_string", &Args::push_string
 		, "pop_string", &Args::pop_string
 		, "pop_uint32", &Args::pop_uint32
+		, "pop_uint64", &Args::pop_uint64
 		, "push_remote_callback", &Args::push_remote_callback
 		, "pop_remote_callback", &Args::pop_remote_callback);
 
@@ -218,7 +232,10 @@ void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string dir_n
 		_lua->app_state_ = LuaAppState::INIT;
 	}
 	catch (sol::error e) {
-		dispatch(log_module_, eid::log::error, gsf::Args(std::string(e.what())));
+		std::string _err = e.what() + '\n';
+		_err += Traceback(_lua->state_.lua_state());
+
+		dispatch(log_module_, eid::log::error, gsf::Args(_err));
 	}
 
 	lua_map_.push_back(std::make_pair(module_id, _lua));
@@ -262,20 +279,28 @@ void gsf::modules::LuaScriptModule::reload_event(gsf::Args args, gsf::CallbackFu
 {
 	uint32_t _module_id = args.pop_uint32(0);
 
-	auto itr = std::find_if(lua_map_.begin(), lua_map_.end(), [&](StateMap::value_type t) {
-		return (t.first == _module_id);
-	});
+	LuaProxy *lua = find_lua(_module_id);
 
-	if (itr == lua_map_.end()) {
-		return;
-	}
-
-	std::string _dir_name = itr->second->dir_name_;
-	std::string _file_name = itr->second->file_name_;
+	std::string _dir_name = lua->dir_name_;
+	std::string _file_name = lua->file_name_;
 
 	if (destroy(_module_id) != 0) {
 		return;
 	}
 
 	create(_module_id, _dir_name, _file_name);
+}
+
+gsf::modules::LuaProxy * gsf::modules::LuaScriptModule::find_lua(uint32_t id)
+{
+	auto itr = std::find_if(lua_map_.begin(), lua_map_.end(), [&](StateMap::value_type t) {
+		return (t.first == id);
+	});
+
+	if (itr == lua_map_.end()) {
+		return nullptr;
+	}
+	else {
+		return itr->second;
+	}
 }

@@ -9,7 +9,7 @@ namespace gsf
 	{
 		struct RemoteInfo
 		{
-			RemoteInfo(uint32_t module_id, uint32_t msg_id, RemoteFunc func)
+			RemoteInfo(uint32_t module_id, uint32_t msg_id, gsf::CallbackFunc func)
 				: module_id_(module_id)
 				, msg_id_(msg_id)
 				, func_(func)
@@ -17,7 +17,7 @@ namespace gsf
 
 			uint32_t module_id_;
 			uint32_t msg_id_;
-			RemoteFunc func_;
+			gsf::CallbackFunc func_;
 		};
 
 		typedef std::shared_ptr<RemoteInfo> RemoteInfoPtr;
@@ -30,7 +30,7 @@ namespace gsf
 			void regist(RemoteInfoPtr info_ptr);
 			void unregist(uint32_t msg_id);
 			
-			RemoteFunc get_func(uint32_t msg_id);
+			gsf::CallbackFunc get_func(uint32_t msg_id);
 
 		private:
 			std::unordered_map<uint32_t, RemoteInfoPtr> remote_map_;

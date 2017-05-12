@@ -109,7 +109,7 @@ void gsf::network::Session::read(::bufferevent *bev)
 		auto _func = binder_->get_func(_msg_id);
 		if (_func) {
 			std::string _str(_blockptr->buf_, _blockptr->size_);	//tmp
-			_func(fd_, _msg_id, _str);
+			_func(gsf::Args(uint32_t(fd_), uint32_t(_msg_id), _str));
 		}
 
 		_buf_len = evbuffer_get_length(in_buf_);

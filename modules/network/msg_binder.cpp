@@ -19,7 +19,7 @@ void gsf::network::MsgBinder::unregist(uint32_t msg_id)
 	}
 }
 
-gsf::RemoteFunc gsf::network::MsgBinder::get_func(uint32_t msg_id)
+gsf::CallbackFunc gsf::network::MsgBinder::get_func(uint32_t msg_id)
 {
 	auto _itr = remote_map_.find(msg_id);
 

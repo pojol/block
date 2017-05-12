@@ -14,7 +14,6 @@ namespace gsf
 {
 	namespace modules
 	{
-		// sol 的state是个unique_ptr， 在这里有点尴尬先这样写实现功能。
 		enum LuaAppState
 		{
 			BEFORE_INIT = 0,
@@ -56,21 +55,20 @@ namespace gsf
 			void shut();
 
 		private:
-			//! 待实现，需要一个有效的方式包装或者让脚本直接调用dispatch
 			//sol::variadic_args args
-			void ldispatch(uint32_t target, uint32_t event, gsf::Args args, gsf::CallbackFunc callback = nullptr);
-			void llisten(uint32_t self, uint32_t event, sol::function func);
+			void ldispatch(uint32_t lua_id, uint32_t target, uint32_t event, gsf::Args args, gsf::CallbackFunc callback = nullptr);
+			void llisten(uint32_t lua_id, uint32_t self, uint32_t event, sol::function func);
 
-			//! 创建一个新的lua module
 			void create_event(gsf::Args args, gsf::CallbackFunc callback);
 			void create(uint32_t module_id, std::string dar_name, std::string file_name);
 
-			//! 销毁一个现有的lua module
 			void destroy_event(gsf::Args args, gsf::CallbackFunc callback);
 			int destroy(uint32_t module_id);
 
-			//! 重载一个现有的lua module
 			void reload_event(gsf::Args args, gsf::CallbackFunc callback);
+
+		private:
+			LuaProxy * find_lua(uint32_t id);
 
 		private:
 			uint32_t log_module_;

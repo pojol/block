@@ -120,16 +120,14 @@ public:
 	
 		auto arr = {
 			std::make_pair(uint32_t(1001), std::bind(&EntityMgr::test_remote, this
-				, std::placeholders::_1
-				, std::placeholders::_2
-				, std::placeholders::_3)),
+				, std::placeholders::_1)),
 		};
 
 		for (auto nod : arr)
 		{
 			//! 向协议绑定器申请，module 和 协议的绑定.
 			dispatch(client2login_, eid::network::recv_remote_callback
-				, gsf::Args(get_module_id(), nod.first, nod.second));
+				, gsf::Args(get_module_id(), uint32_t(1001)), std::bind(&EntityMgr::test_remote, this, std::placeholders::_1));
 		}
 	}
 
@@ -143,8 +141,10 @@ public:
 		last_tick_ = _t;
 	}
 
-	void test_remote(uint32_t fd, uint32_t msg_id, std::string str)
+	void test_remote(gsf::Args args)
 	{
+		auto fd = args.pop_uint32(0);
+
 		//dispatch(log_, eid::log::info, gsf::Args(str));
 		second_pack_num_++;
 		//_info.set_name("world");

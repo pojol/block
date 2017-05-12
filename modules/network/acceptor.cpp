@@ -107,9 +107,8 @@ void gsf::network::AcceptorModule::bind_remote(gsf::Args args, gsf::CallbackFunc
 {
 	uint32_t _module_id = args.pop_uint32(0);
 	uint32_t _msg_id = args.pop_uint32(1);
-	auto _func = args.pop_remote_callback(2);
 
-	auto _info_ptr = std::make_shared<RemoteInfo>(_module_id, _msg_id, _func);
+	auto _info_ptr = std::make_shared<RemoteInfo>(_module_id, _msg_id, callback);
 	binder_->regist(_info_ptr);
 }
 

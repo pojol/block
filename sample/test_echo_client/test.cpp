@@ -145,8 +145,7 @@ public:
 
 		dispatch(connector_id_, eid::network::recv_remote_callback, gsf::Args(
 			  get_module_id()
-			, uint32_t(1002)
-			, std::bind(&Client::msg_handler, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)));
+			, uint32_t(1002)), std::bind(&Client::msg_handler, this, std::placeholders::_1));
 
 		dispatch(connector_id_, eid::network::make_connector
 			, gsf::Args(get_module_id(), "127.0.0.1", uint32_t(8001)));
@@ -157,7 +156,7 @@ public:
 		
 	}
 
-	void msg_handler(uint32_t fd, uint32_t msg_id, std::string str)
+	void msg_handler(gsf::Args args)
 	{
 		send_(fd_, 1001, "hello");
 	}
