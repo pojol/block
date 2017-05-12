@@ -32,7 +32,8 @@ namespace gsf
 			{}
 
 			sol::state state_;
-			std::string path_;
+			std::string dir_name_;
+			std::string file_name_;
 			LuaAppState app_state_;
 			uint32_t lua_id_;
 
@@ -62,7 +63,7 @@ namespace gsf
 
 			//! 创建一个新的lua module
 			void create_event(gsf::Args args, gsf::CallbackFunc callback);
-			void create(uint32_t module_id, std::string path);
+			void create(uint32_t module_id, std::string dar_name, std::string file_name);
 
 			//! 销毁一个现有的lua module
 			void destroy_event(gsf::Args args, gsf::CallbackFunc callback);

@@ -33,6 +33,7 @@
 
 #include "../../common/single.h"
 
+static char _path[512];
 
 class Login_LuaProxy
 	: public gsf::Module
@@ -58,7 +59,6 @@ public:
 
 	void init()
 	{
-		char _path[512];
 #ifdef WIN32
 		GetModuleFileName(NULL, _path, 512);
 		//取出文件路径
@@ -91,7 +91,7 @@ public:
 
 		//test
 		dispatch(lua_, eid::lua_proxy::create
-			, gsf::Args(get_module_id(), std::string("F:/github/gsf/sample/test_echo_client/client.lua")));
+			, gsf::Args(get_module_id(), _path, std::string("client.lua")));
 	}
 
 	void shut()
@@ -188,12 +188,12 @@ int main()
 
 	app.regist_module(new gsf::modules::LogModule());
 	app.regist_module(new gsf::network::ConnectorModule());
-	app.regist_module(new gsf::modules::LuaScriptModule());
-	app.regist_module(new Login_LuaProxy());
+	//app.regist_module(new gsf::modules::LuaScriptModule());
+	//app.regist_module(new Login_LuaProxy());
 
 	for (int i = 0; i < 1; ++i)
 	{
-		//app.regist_module(new Client);
+		app.regist_module(new Client);
 	}
 	
 	app.run();

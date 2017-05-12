@@ -111,9 +111,10 @@ void gsf::modules::LuaScriptModule::create_event(gsf::Args args, gsf::CallbackFu
 {
 	//ÏÈÑéÖ¤Âß¼­
 	uint32_t _module_id = args.pop_uint32(0);
-	std::string _path = args.pop_string(1);
+	std::string _dir_name = args.pop_string(1);
+	std::string _file_name = args.pop_string(2);
 
-	create(_module_id, _path);
+	create(_module_id, _dir_name, _file_name);
 }
 
 void gsf::modules::LuaScriptModule::ldispatch(uint32_t target, uint32_t event, gsf::Args args, gsf::CallbackFunc callback)
@@ -146,7 +147,7 @@ void gsf::modules::LuaScriptModule::llisten(uint32_t self, uint32_t event, sol::
 
 }
 
-void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string path)
+void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string dir_name, std::string file_name)
 {
 	LuaProxy *_lua = new LuaProxy(module_id);
 	_lua->state_.open_libraries(
@@ -158,14 +159,17 @@ void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string path)
 		, sol::lib::table
 		, sol::lib::string
 		, sol::lib::debug);
-	_lua->path_ = path;
-	
+	_lua->dir_name_ = dir_name;
+	_lua->file_name_ = file_name;
+
+	auto _path = dir_name + "/script/" + file_name;
+
 	try
 	{
-		auto _ret = _lua->state_.do_file(path.c_str());
+		auto _ret = _lua->state_.do_file(_path.c_str());
 		if (_ret) {
 			std::string _err = Traceback(_lua->state_.lua_state()) + " build err " 
-				+ path + '\t' + lua_tostring(_lua->state_.lua_state(), _ret.stack_index()) + "\n";
+				+ _path + '\t' + lua_tostring(_lua->state_.lua_state(), _ret.stack_index()) + "\n";
 			dispatch(log_module_, eid::log::error, gsf::Args(_err));
 			return;
 		}
@@ -173,7 +177,7 @@ void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string path)
 	catch (sol::error e)
 	{
 		std::string _err = Traceback(_lua->state_.lua_state()) + " init err " 
-			+ path + "\t\n" + e.what();
+			+ _path + "\t\n" + e.what();
 		dispatch(log_module_, eid::log::error, gsf::Args(_err));
 	}
 	
@@ -193,7 +197,7 @@ void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string path)
 	_lua->state_.set("module_id", module_id);
 
 	_lua->call_list_[LuaAppState::BEFORE_INIT] = [&](sol::table t) {
-		t.get<std::function<void()>>("before_init")();
+		t.get<std::function<void(std::string)>>("before_init")(dir_name + "/script/");
 	};
 	_lua->call_list_[LuaAppState::INIT] = [&](sol::table t) {
 		t.get<std::function<void()>>("init")();
@@ -266,11 +270,12 @@ void gsf::modules::LuaScriptModule::reload_event(gsf::Args args, gsf::CallbackFu
 		return;
 	}
 
-	std::string _path = itr->second->path_;
+	std::string _dir_name = itr->second->dir_name_;
+	std::string _file_name = itr->second->file_name_;
 
 	if (destroy(_module_id) != 0) {
 		return;
 	}
 
-	create(_module_id, _path);
+	create(_module_id, _dir_name, _file_name);
 }

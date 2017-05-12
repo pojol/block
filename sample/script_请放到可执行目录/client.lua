@@ -1,5 +1,5 @@
 module = {
-    before_init = function() end,
+    before_init = function(dir) end,
 	init = function() end,
 	execute = function() end,
 	shut = function() end,
@@ -41,11 +41,11 @@ function connect(ip, port)
 
 end
 
-module.before_init = function()
+module.before_init = function(dir)
     print("before_init")
 
     local package_path = {}
-    table.insert(package_path, "F:/github/gsf/common/?.lua")
+    table.insert(package_path, dir .. "/common/?.lua")
     package.path = table.concat(package_path, ';')
 
     require "event"

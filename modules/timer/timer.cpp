@@ -78,7 +78,7 @@ void gsf::modules::TimerModule::delay_milliseconds(gsf::Args args, gsf::Callback
 	_event->target_ = _sender;
 	_event->timerid_ = _tid;
 
-	//! 这里的处理逻辑上有点浪费，不过先保证正确吧~ 后面再优化
+	
 	auto itr = map_.find(_tid);
 	if (itr != map_.end()) {
 		itr->second.push_back(_event);
