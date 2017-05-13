@@ -18,7 +18,7 @@
 	#include <unistd.h>
 #endif // WIN32
 
-#include <lua_script/lua_script.h>
+#include <lua_proxy/lua_proxy.h>
 #include <log/log.h>
 #include <timer/timer.h>
 
@@ -40,7 +40,7 @@ public:
 
 	void before_init()
 	{
-		dispatch(eid::app_id, eid::get_module, gsf::Args("LuaScriptModule"), [&](gsf::Args args) {
+		dispatch(eid::app_id, eid::get_module, gsf::Args("LuaProxyModule"), [&](gsf::Args args) {
 			lua_binder_ = args.pop_uint32(0);
 		});
 	}
@@ -138,7 +138,7 @@ int main()
 	app.regist_module(new Client2LoginServer());
 	app.regist_module(new Client2LoginProxy());
 
-	app.regist_module(new gsf::modules::LuaScriptModule());
+	app.regist_module(new gsf::modules::LuaProxyModule());
 	app.regist_module(new TestLuaProxy());
 
 	app.run();

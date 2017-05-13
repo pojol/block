@@ -1,5 +1,5 @@
-#ifndef _GSF_LUA_SCRIPT_HEADER_
-#define _GSF_LUA_SCRIPT_HEADER_
+#ifndef _GSF_LUA_PROXY_HEADER_
+#define _GSF_LUA_PROXY_HEADER_
 
 #include <sol.hpp>
 #include <array>
@@ -39,13 +39,13 @@ namespace gsf
 			std::array<std::function<void(sol::table)>, 5> call_list_;
 		};
 
-		class LuaScriptModule
+		class LuaProxyModule
 			: public gsf::Module
 			, public gsf::IEvent
 		{
 		public:
-			LuaScriptModule()
-				: Module("LuaScriptModule")
+			LuaProxyModule()
+				: Module("LuaProxyModule")
 			{}
 
 			void init();

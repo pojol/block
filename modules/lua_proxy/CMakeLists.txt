@@ -1,4 +1,4 @@
-PROJECT(lua_script)
+PROJECT(lua_proxy)
 
 #引用头文件目录
 INCLUDE_DIRECTORIES(
@@ -14,7 +14,7 @@ LINK_DIRECTORIES(
 )
 
 FILE(GLOB_RECURSE SRC "*.cpp" "*.h")
-ADD_LIBRARY(lua_script STATIC ${SRC})
+ADD_LIBRARY(lua_proxy STATIC ${SRC})
 
 if(MSVC)     
     # Use the static C library for all build types

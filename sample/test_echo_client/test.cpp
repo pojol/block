@@ -29,7 +29,7 @@
 #include <iostream>
 
 #include <random>
-#include <lua_script/lua_script.h>
+#include <lua_proxy/lua_proxy.h>
 
 #include "../../common/single.h"
 
@@ -52,7 +52,7 @@ public:
 			log_ = args.pop_uint32(0);
 		});
 
-		dispatch(eid::app_id, eid::get_module, gsf::Args(std::string("LuaScriptModule")), [&](gsf::Args args) {
+		dispatch(eid::app_id, eid::get_module, gsf::Args(std::string("LuaProxyModule")), [&](gsf::Args args) {
 			lua_ = args.pop_uint32(0);
 		});
 	}
@@ -187,7 +187,7 @@ int main()
 
 	app.regist_module(new gsf::modules::LogModule());
 	app.regist_module(new gsf::network::ConnectorModule());
-	//app.regist_module(new gsf::modules::LuaScriptModule());
+	//app.regist_module(new gsf::modules::LuaProxyModule());
 	//app.regist_module(new Login_LuaProxy());
 
 	for (int i = 0; i < 1; ++i)

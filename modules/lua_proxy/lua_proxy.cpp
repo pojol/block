@@ -1,5 +1,5 @@
 
-#include "lua_script.h"
+#include "lua_proxy.h"
 
 #include <algorithm>
 
@@ -29,20 +29,20 @@ std::string Traceback(lua_State * _state)
 	return outputTraceback;
 }
 
-void gsf::modules::LuaScriptModule::init()
+void gsf::modules::LuaProxyModule::init()
 {
 	listen(this, eid::lua_proxy::create
-		, std::bind(&LuaScriptModule::create_event, this
+		, std::bind(&LuaProxyModule::create_event, this
 			, std::placeholders::_1
 			, std::placeholders::_2));
 
 	listen(this, eid::lua_proxy::destroy
-		, std::bind(&LuaScriptModule::destroy_event, this
+		, std::bind(&LuaProxyModule::destroy_event, this
 			, std::placeholders::_1
 			, std::placeholders::_2));
 
 	listen(this, eid::lua_proxy::reload
-		, std::bind(&LuaScriptModule::reload_event, this
+		, std::bind(&LuaProxyModule::reload_event, this
 			, std::placeholders::_1
 			, std::placeholders::_2));
 
@@ -52,7 +52,7 @@ void gsf::modules::LuaScriptModule::init()
 	});
 }
 
-void gsf::modules::LuaScriptModule::execute()
+void gsf::modules::LuaProxyModule::execute()
 {
 	//!
 	for (auto itr = lua_map_.begin(); itr != lua_map_.end();)
@@ -99,7 +99,7 @@ void gsf::modules::LuaScriptModule::execute()
 	}
 }
 
-void gsf::modules::LuaScriptModule::shut()
+void gsf::modules::LuaProxyModule::shut()
 {
 	for (auto itr : lua_map_)
 	{
@@ -110,7 +110,7 @@ void gsf::modules::LuaScriptModule::shut()
 	lua_map_.clear();
 }
 
-void gsf::modules::LuaScriptModule::create_event(gsf::Args args, gsf::CallbackFunc callback)
+void gsf::modules::LuaProxyModule::create_event(gsf::Args args, gsf::CallbackFunc callback)
 {
 	//ÏÈÑéÖ¤Âß¼­
 	uint32_t _module_id = args.pop_uint32(0);
@@ -120,7 +120,7 @@ void gsf::modules::LuaScriptModule::create_event(gsf::Args args, gsf::CallbackFu
 	create(_module_id, _dir_name, _file_name);
 }
 
-void gsf::modules::LuaScriptModule::ldispatch(uint32_t lua_id, uint32_t target, uint32_t event, gsf::Args args, gsf::CallbackFunc callback)
+void gsf::modules::LuaProxyModule::ldispatch(uint32_t lua_id, uint32_t target, uint32_t event, gsf::Args args, gsf::CallbackFunc callback)
 {	
 	dispatch(target, event, args, [=](gsf::Args _args) {
 		try {
@@ -140,7 +140,7 @@ void gsf::modules::LuaScriptModule::ldispatch(uint32_t lua_id, uint32_t target, 
 	});
 }
 
-void gsf::modules::LuaScriptModule::llisten(uint32_t lua_id, uint32_t self, uint32_t event, sol::function func)
+void gsf::modules::LuaProxyModule::llisten(uint32_t lua_id, uint32_t self, uint32_t event, sol::function func)
 {
 	listen(self, event, [=](gsf::Args args, gsf::CallbackFunc callback) {
 		try {
@@ -159,7 +159,7 @@ void gsf::modules::LuaScriptModule::llisten(uint32_t lua_id, uint32_t self, uint
 	});
 }
 
-void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string dir_name, std::string file_name)
+void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_name, std::string file_name)
 {
 	LuaProxy *_lua = new LuaProxy(module_id);
 	_lua->state_.open_libraries(
@@ -204,9 +204,9 @@ void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string dir_n
 		, "push_remote_callback", &Args::push_remote_callback
 		, "pop_remote_callback", &Args::pop_remote_callback);
 
-	_lua->state_.new_usertype<LuaScriptModule>("LuaScriptModule"
-		, "ldispatch", &LuaScriptModule::ldispatch
-		, "llisten", &LuaScriptModule::llisten);
+	_lua->state_.new_usertype<LuaProxyModule>("LuaProxyModule"
+		, "ldispatch", &LuaProxyModule::ldispatch
+		, "llisten", &LuaProxyModule::llisten);
 	_lua->state_.set("event", this);
 	_lua->state_.set("module_id", module_id);
 
@@ -241,7 +241,7 @@ void gsf::modules::LuaScriptModule::create(uint32_t module_id, std::string dir_n
 	lua_map_.push_back(std::make_pair(module_id, _lua));
 }
 
-void gsf::modules::LuaScriptModule::destroy_event(gsf::Args args, gsf::CallbackFunc callback)
+void gsf::modules::LuaProxyModule::destroy_event(gsf::Args args, gsf::CallbackFunc callback)
 {
 	uint32_t _module_id = args.pop_uint32(0);
 	auto itr = std::find_if(lua_map_.begin(), lua_map_.end(), [&](StateMap::value_type t) {
@@ -256,7 +256,7 @@ void gsf::modules::LuaScriptModule::destroy_event(gsf::Args args, gsf::CallbackF
 	_lua->app_state_ = LuaAppState::AFTER_SHUT;
 }
 
-int gsf::modules::LuaScriptModule::destroy(uint32_t module_id)
+int gsf::modules::LuaProxyModule::destroy(uint32_t module_id)
 {
 	auto itr = std::find_if(lua_map_.begin(), lua_map_.end(), [&](StateMap::value_type t) {
 		return (t.first == module_id);
@@ -275,7 +275,7 @@ int gsf::modules::LuaScriptModule::destroy(uint32_t module_id)
 	return 0;
 }
 
-void gsf::modules::LuaScriptModule::reload_event(gsf::Args args, gsf::CallbackFunc callback)
+void gsf::modules::LuaProxyModule::reload_event(gsf::Args args, gsf::CallbackFunc callback)
 {
 	uint32_t _module_id = args.pop_uint32(0);
 
@@ -291,7 +291,7 @@ void gsf::modules::LuaScriptModule::reload_event(gsf::Args args, gsf::CallbackFu
 	create(_module_id, _dir_name, _file_name);
 }
 
-gsf::modules::LuaProxy * gsf::modules::LuaScriptModule::find_lua(uint32_t id)
+gsf::modules::LuaProxy * gsf::modules::LuaProxyModule::find_lua(uint32_t id)
 {
 	auto itr = std::find_if(lua_map_.begin(), lua_map_.end(), [&](StateMap::value_type t) {
 		return (t.first == id);
