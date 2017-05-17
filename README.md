@@ -33,7 +33,17 @@
 
 	app.init_cfg			进程的初始化
 	app.regist_module		管理module
-	app.run					进程的运行时
+	app.run	
+	
+	进程的运行时
+			     execute
+	            init     +---------------------------------> +          shut
+	  app run   +        |                                   |          +       exit
+	  ++-+-+-------------+                                   +------------------->
+	   ^ ^ ^    +        |                                   |          +
+	   | | |             + <---------------------------------+
+	   + + +                                                          unregist
+	regist module
 
 	
 	SampleModule
