@@ -1,8 +1,6 @@
 #ifndef _SESSION_MANAGER_HEADER_
 #define _SESSION_MANAGER_HEADER_
 
-#include <stdint.h>
-
 #include <memory>
 #include <vector>
 #include <unordered_map>

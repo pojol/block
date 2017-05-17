@@ -104,9 +104,7 @@ public:
 			std::cout << "dis connect fd = " << args.pop_uint32(0) << std::endl;
 		});
 
-		gsf::Args args;
-		args << get_module_id() << std::string("127.0.0.1") << uint32_t(8001);
-		dispatch(client2login_, eid::network::make_acceptor, args);
+		dispatch(client2login_, eid::network::make_acceptor, gsf::Args(get_module_id(), "127.0.0.1", uint32_t(8001)));
 	}
 
 private :

@@ -1,7 +1,6 @@
 #ifndef _TIMER_HEADER_
 #define _TIMER_HEADER_
 
-#include <stdint.h>
 #include <memory>
 #include <map>
 

@@ -147,7 +147,7 @@ void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, 
 		}
 
 		// check max connect
-		if (network_ptr_->session_mgr_->cur_max_connet() >= SESSION_MAX_CONNECT) {
+		if (network_ptr_->session_mgr_->cur_max_connet() >= NETWORK_CONNECT_MAX) {
 			_ret = eid::network::err_upper_limit_session;
 			break;
 		}

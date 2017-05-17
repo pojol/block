@@ -35,6 +35,8 @@
 
 static char _path[512];
 
+using namespace gsf;
+
 class Login_LuaProxy
 	: public gsf::Module
 	, public gsf::IEvent
@@ -48,11 +50,11 @@ public:
 
 	void before_init() override
 	{
-		dispatch(eid::app_id, eid::get_module, gsf::Args(std::string("LogModule")), [&](gsf::Args args) {
+		dispatch(eid::app_id, eid::get_module, gsf::Args("LogModule"), [&](gsf::Args args) {
 			log_ = args.pop_uint32(0);
 		});
 
-		dispatch(eid::app_id, eid::get_module, gsf::Args(std::string("LuaProxyModule")), [&](gsf::Args args) {
+		dispatch(eid::app_id, eid::get_module, gsf::Args("LuaProxyModule"), [&](gsf::Args args) {
 			lua_ = args.pop_uint32(0);
 		});
 	}
@@ -87,11 +89,11 @@ public:
 
 		//test
 		dispatch(log_, eid::log::init, gsf::Args(std::string(_path) + "/log"
-			, std::string("echo_client")));
+			, "echo_client"));
 
 		//test
 		dispatch(lua_, eid::lua_proxy::create
-			, gsf::Args(get_module_id(), _path, std::string("client.lua")));
+			, gsf::Args(get_module_id(), _path, "client.lua"));
 	}
 
 	void shut()
@@ -101,8 +103,8 @@ public:
 	}
 
 private:
-	uint32_t log_;
-	uint32_t lua_;
+	ModuleID log_ = ModuleNil;
+	ModuleID lua_ = ModuleNil;
 };
 
 namespace gsf
@@ -112,6 +114,7 @@ namespace gsf
 		REGISTER_CLASS(ConnectorModule)
 	}
 }
+
 
 class Client
 	: public gsf::Module
@@ -162,8 +165,8 @@ public:
 	}
 
 private:
-	uint32_t connector_id_;
-	uint32_t fd_;
+	ModuleID connector_id_ = ModuleNil;
+	SessionID fd_ = SessionNil;
 
 	gsf::RemoteFunc send_;
 };

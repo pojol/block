@@ -14,7 +14,14 @@ gsf::network::Session::Session(int fd, int module_id, MsgBinder *binder, std::fu
 	disconnect_callback_ = disconnect_callback;
 
 	in_buf_ = evbuffer_new();
+	if (0 != gsf::SESSION_READ_BUFFER_SIZE) {
+		evbuffer_expand(in_buf_, gsf::SESSION_READ_BUFFER_SIZE);
+	}
+
 	out_buf_ = evbuffer_new();
+	if (0 != gsf::SESSION_WRITE_BUFFER_SIZE) {
+		evbuffer_expand(out_buf_, gsf::SESSION_WRITE_BUFFER_SIZE);
+	}
 }
 
 gsf::network::Session::~Session()
@@ -82,8 +89,8 @@ void gsf::network::Session::read(::bufferevent *bev)
 
 	uint32_t _buf_len = evbuffer_get_length(in_buf_);
 
-	char * _head = (char*)malloc(MSG_SIZE_LEN);
-	evbuffer_copyout(in_buf_, _head, MSG_SIZE_LEN);
+	char * _head = (char*)malloc(gsf::MSGLEN_PACKAGESIZE);
+	evbuffer_copyout(in_buf_, _head, gsf::MSGLEN_PACKAGESIZE);
 
 	uint32_t *_msg_size = reinterpret_cast<uint32_t*>(_head);
 
@@ -96,14 +103,14 @@ void gsf::network::Session::read(::bufferevent *bev)
 	{
 		evbuffer_remove_buffer(in_buf_, _buff, *_msg_size);
 
-		//! 取出消息id
-		evbuffer_remove(_buff, _head, MSG_SIZE_LEN);
+		evbuffer_remove(_buff, _head, gsf::MSGLEN_PACKAGESIZE);
 		uint32_t _msg_len = *reinterpret_cast<uint32_t*>(_head);
-		evbuffer_remove(_buff, _head, MSG_SIZE_LEN);
-		uint32_t _msg_id = *reinterpret_cast<uint32_t*>(_head);
+
+		evbuffer_remove(_buff, _head, gsf::MSGLEN_MSGID);
+		uint32_t _msg_id = *reinterpret_cast<MsgID*>(_head);
 
 		//! 
-		auto _blockptr = std::make_shared<Block>(_msg_len - 8);
+		auto _blockptr = std::make_shared<Block>(_msg_len - (gsf::MSGLEN_PACKAGESIZE + gsf::MSGLEN_MSGID));
 		evbuffer_remove(_buff, _blockptr->buf_, _blockptr->size_);
 
 		auto _func = binder_->get_func(_msg_id);
@@ -113,8 +120,8 @@ void gsf::network::Session::read(::bufferevent *bev)
 		}
 
 		_buf_len = evbuffer_get_length(in_buf_);
-		if (_buf_len > MSG_SIZE_LEN) {
-			evbuffer_copyout(in_buf_, _head, MSG_SIZE_LEN);
+		if (_buf_len > gsf::MSGLEN_PACKAGESIZE) {
+			evbuffer_copyout(in_buf_, _head, gsf::MSGLEN_PACKAGESIZE);
 			_msg_size = reinterpret_cast<uint32_t*>(_head);
 		}
 		else {

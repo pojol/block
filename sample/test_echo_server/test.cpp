@@ -30,6 +30,7 @@
 
 #include "../../common/single.h"
 
+using namespace gsf;
 
 class Client2LoginServer
 	: public gsf::network::AcceptorModule
@@ -59,14 +60,17 @@ public:
 
 	void before_init() override
 	{
-		dispatch(eid::app_id, eid::get_module, gsf::Args(std::string("LogModule")), [&](gsf::Args args) {
+		dispatch(eid::app_id, eid::get_module, gsf::Args("LogModule"), [&](gsf::Args args) {
 			log_ = args.pop_uint32(0);
 		});
 
-		dispatch(eid::app_id, eid::get_module, gsf::Args(std::string("Client2LoginServer")), [&](gsf::Args args) {
+		dispatch(eid::app_id, eid::get_module, gsf::Args("Client2LoginServer"), [&](gsf::Args args) {
 			client2login_ = args.pop_uint32(0);
 		});
+	}
 
+	void init()
+	{
 		char _path[512];
 #ifdef WIN32
 		GetModuleFileName(NULL, _path, 512);
@@ -94,11 +98,8 @@ public:
 		}
 #endif // WIN32
 
-		dispatch(log_, eid::log::init, gsf::Args(std::string(_path) +"/log", "echo_server"));
-	}
+		dispatch(log_, eid::log::init, gsf::Args(std::string(_path) + "/log", "echo_server"));
 
-	void init()
-	{
 		//test
 		listen(this, eid::network::new_connect
 			, [=](gsf::Args args, gsf::CallbackFunc callback) {
@@ -114,9 +115,7 @@ public:
 			send_ = args.pop_remote_callback(0);
 		});
 
-		gsf::Args args;
-		args << get_module_id() << std::string("127.0.0.1") << uint32_t(8001);
-		dispatch(client2login_, eid::network::make_acceptor, args);
+		dispatch(client2login_, eid::network::make_acceptor, gsf::Args(get_module_id(), "127.0.0.1", uint32_t(8001)));
 	
 		auto arr = {
 			std::make_pair(uint32_t(1001), std::bind(&EntityMgr::test_remote, this
@@ -158,8 +157,8 @@ private :
 
 	uint32_t second_pack_num_;
 
-	uint32_t log_;
-	uint32_t client2login_;
+	ModuleID log_ = ModuleNil;
+	ModuleID client2login_ = ModuleNil;
 
 	gsf::RemoteFunc send_;
 };

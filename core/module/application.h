@@ -4,7 +4,6 @@
 #include <event/event.h>
 #include "module.h"
 
-#include <stdint.h>
 #include <list>
 #include <unordered_map>
 #include <map>

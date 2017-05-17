@@ -6,7 +6,6 @@
 
 #include <event/event.h>
 
-#include <stdint.h>
 #include <map>
 #include <memory>
 #include <string>
@@ -18,11 +17,6 @@ namespace gsf
 		class OBuffer;
 		class IBuffer;
 		class MsgBinder;
-
-		static const uint32_t SESSION_MAX_CONNECT = 100000;
-
-		static const uint32_t MSG_SIZE_LEN = 4;
-		static const uint32_t MSG_ID_LEN = 4;
 
 		class Session
 			: public gsf::IEvent

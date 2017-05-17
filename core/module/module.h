@@ -6,7 +6,7 @@
 #include <vector>
 #include <string>
 
-// ºóÃæ·Åµ½Í³Ò»µÄµØ·½
+
 #define WATCH_PERF
 
 namespace gsf

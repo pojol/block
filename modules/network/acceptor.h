@@ -1,7 +1,6 @@
 ﻿#ifndef _GSF_ACCEPTOR_HEADER_
 #define _GSF_ACCEPTOR_HEADER_
 
-#include <stdint.h>
 #include <vector>
 #include <memory>
 #include <functional>
