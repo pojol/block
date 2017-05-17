@@ -5,17 +5,15 @@ if(WIN32)
 	INCLUDE_DIRECTORIES(
 		${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
 		${GSF_SOURCE_DIR}/3rd/protobuf-3.2.0/src
-		${GSF_SOURCE_DIR}/core
+		${GSF_SOURCE_DIR}/
 		${GSF_SOURCE_DIR}/modules
-		${GSF_SOURCE_DIR}/common
 		${GSF_SOURCE_DIR}/3rd/lua-5.3.4/src
 		${GSF_SOURCE_DIR}/3rd/sol2-2.16.0
 	)
 endif()
 if(UNIX)
 	INCLUDE_DIRECTORIES(
-		${GSF_SOURCE_DIR}/core
-		${GSF_SOURCE_DIR}/common
+		${GSF_SOURCE_DIR}/
 		${GSF_SOURCE_DIR}/modules
 		${GSF_SOURCE_DIR}/3rd/lua-5.3.4/src
 		${GSF_SOURCE_DIR}/3rd/sol2-2.16.0
@@ -24,9 +22,8 @@ endif()
 if(APPLE)
     INCLUDE_DIRECTORIES(
             ${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
-            ${GSF_SOURCE_DIR}/core
+            ${GSF_SOURCE_DIR}/
 			${GSF_SOURCE_DIR}/modules
-    		${GSF_SOURCE_DIR}/common
 	)
 endif()
 
@@ -60,7 +57,7 @@ if(MSVC)
       endif()
     endforeach()
 
-        TARGET_LINK_LIBRARIES(test_echo_client libevent.lib libevent_core.lib libevent_extras.lib network.lib module.lib event.lib ws2_32.lib glog.lib log.lib lua_script.lib lua53.lib)
+        TARGET_LINK_LIBRARIES(test_echo_client libevent.lib libevent_core.lib libevent_extras.lib network.lib gsf_core.lib ws2_32.lib glog.lib log.lib lua_script.lib lua53.lib)
 endif()
 if(UNIX)
         TARGET_LINK_LIBRARIES(test_echo_client  libnetwork.a libevent.a libevent_core.a libevent_extra.a libtimer.a libmodule.a liblog.a libglog.a)

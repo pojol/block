@@ -8,7 +8,7 @@
 #include <windows.h>
 #endif // WIN32
 
-#include <module/dynamic_module_factory.h>
+#include "dynamic_module_factory.h"
 
 
 gsf::Application::Application()

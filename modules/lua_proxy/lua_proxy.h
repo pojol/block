@@ -4,8 +4,8 @@
 #include <sol.hpp>
 #include <array>
 
-#include <module/module.h>
-#include <event/event.h>
+#include <core/module.h>
+#include <core/event.h>
 
 #include <vector>
 #include <string>

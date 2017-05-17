@@ -16,8 +16,8 @@
 #include <unistd.h>
 #endif // WIN32
 
-#include <module/application.h>
-#include <event/event.h>
+#include <core/application.h>
+#include <core/event.h>
 
 #include <network/acceptor.h>
 #include <network/connector.h>
@@ -28,7 +28,6 @@
 
 #include "db_avatar.h"
 
-#include "../../common/single.h"
 
 
 class TestModule

@@ -4,7 +4,7 @@
 #include <event2/bufferevent.h>
 #include <event2/buffer.h>
 
-#include <event/event.h>
+#include <core/event.h>
 
 #include <map>
 #include <memory>

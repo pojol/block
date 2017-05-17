@@ -16,8 +16,8 @@
 	#include <unistd.h>
 #endif // WIN32
 
-#include <module/application.h>
-#include <event/event.h>
+#include <core/application.h>
+#include <core/event.h>
 
 #include <network/acceptor.h>
 #include <network/connector.h>
@@ -27,8 +27,6 @@
 #include <iostream>
 
 #include <random>
-
-#include "../../common/single.h"
 
 using namespace gsf;
 

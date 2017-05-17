@@ -1,7 +1,7 @@
 #ifndef _GSF_APPLICATION_HEADER_
 #define _GSF_APPLICATION_HEADER_
 
-#include <event/event.h>
+#include "event.h"
 #include "module.h"
 
 #include <list>

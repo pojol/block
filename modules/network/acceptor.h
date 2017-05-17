@@ -5,10 +5,9 @@
 #include <memory>
 #include <functional>
 
-#include <module/module.h>
+#include <core/module.h>
+#include <core/event.h>
 
-
-#include <event/event.h>
 #include <event2/util.h>
 #include <event2/listener.h>
 

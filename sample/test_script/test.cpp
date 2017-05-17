@@ -1,5 +1,5 @@
-#include <module/application.h>
-#include <event/event.h>
+#include <core/application.h>
+#include <core/event.h>
 
 #include <signal.h>
 #include <fcntl.h>

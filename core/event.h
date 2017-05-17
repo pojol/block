@@ -7,10 +7,10 @@
 
 #pragma warning(disable:4819)
 
-#include "../module/module.h"
+#include "module.h"
 #include "event_handler.h"
-#include "../../common/event_list.h"
-#include "../../common/types.h"
+#include "event_list.h"
+#include "types.h"
 
 #include <functional>
 #include <tuple>
@@ -18,9 +18,9 @@
 #include <vector>
 #include <unordered_map>
 
-#include <args/args.h>
+#include "args.h"
 
-#include "../../common/single.h"
+#include "single.h"
 
 /*
 	/

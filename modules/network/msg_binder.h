@@ -1,7 +1,7 @@
 #ifndef _GSF_MSG_BINDER_HEADER_
 
 #include <map>
-#include <event/event.h>
+#include <core/event.h>
 
 
 namespace gsf

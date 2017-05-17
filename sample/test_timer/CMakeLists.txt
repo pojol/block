@@ -3,24 +3,21 @@
 #引用头文件目录
 if(WIN32)
 	INCLUDE_DIRECTORIES(
-		${GSF_SOURCE_DIR}/core
+		${GSF_SOURCE_DIR}/
 		${GSF_SOURCE_DIR}/modules
-		${GSF_SOURCE_DIR}/common
 	)
 endif()
 if(UNIX)
 	INCLUDE_DIRECTORIES(
-		${GSF_SOURCE_DIR}/core
+		${GSF_SOURCE_DIR}/
 		${GSF_SOURCE_DIR}/modules
-		${GSF_SOURCE_DIR}/common
 	)
 endif()
 if(APPLE)
 	INCLUDE_DIRECTORIES(
-                ${GSF_SOURCE_DIR}/core
-                ${GSF_SOURCE_DIR}/modules
-                ${GSF_SOURCE_DIR}/common
-        )
+		${GSF_SOURCE_DIR}/
+		${GSF_SOURCE_DIR}/modules
+    )
 endif()
 
 
@@ -54,7 +51,7 @@ if(MSVC)
       endif()
     endforeach()
 
-        TARGET_LINK_LIBRARIES(test_timer ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib module.lib event.lib timer.lib glog.lib log.lib)
+        TARGET_LINK_LIBRARIES(test_timer ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib gsf_core.lib timer.lib glog.lib log.lib)
 elseif(UNIX)
         TARGET_LINK_LIBRARIES(test_timer liblog.a libglog.a libmodule.a libevent.a libtimer.a)
 elseif(APPLE)

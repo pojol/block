@@ -5,25 +5,22 @@ if(WIN32)
 	INCLUDE_DIRECTORIES(
 			${GSF_SOURCE_DIR}/3rd/protobuf-3.2.0/src
 			${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
-			${GSF_SOURCE_DIR}/core
+			${GSF_SOURCE_DIR}/
 			${GSF_SOURCE_DIR}/modules
-			${GSF_SOURCE_DIR}/common
 	)
 endif()
 if(UNIX)
 	INCLUDE_DIRECTORIES(
 			${GSF_SOURCE_DIR}/3rd/libevent/include
-			${GSF_SOURCE_DIR}/core
+			${GSF_SOURCE_DIR}/
 			${GSF_SOURCE_DIR}/modules
-			${GSF_SOURCE_DIR}/common
 		)
 endif()
 if(APPLE)
     INCLUDE_DIRECTORIES(
             ${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
-            ${GSF_SOURCE_DIR}/core
+            ${GSF_SOURCE_DIR}/
 			${GSF_SOURCE_DIR}/modules
-    		${GSF_SOURCE_DIR}/common
 	)
 endif()
 
@@ -57,7 +54,7 @@ if(MSVC)
       endif()
     endforeach()
 
-        TARGET_LINK_LIBRARIES(test_echo_server libevent.lib libevent_core.lib libevent_extras.lib network.lib module.lib event.lib ws2_32.lib libprotocd.lib libprotobufd.lib glog.lib log.lib)
+        TARGET_LINK_LIBRARIES(test_echo_server libevent.lib libevent_core.lib libevent_extras.lib network.lib gsf_core.lib ws2_32.lib libprotocd.lib libprotobufd.lib glog.lib log.lib)
 endif()
 if(UNIX)
         TARGET_LINK_LIBRARIES(test_echo_server  libnetwork.a libevent.a libevent_core.a libevent_extra.a libtimer.a libprotobuf.a libmodule.a liblog.a libglog.a)

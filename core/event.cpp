@@ -1,10 +1,5 @@
 #include "event.h"
 
-#include <sol.hpp>
-#include <args/args.h>
-
-#include "../module/module.h"
-#include "../../common/event_list.h"
 
 void gsf::EventModule::execute()
 {

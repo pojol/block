@@ -2,8 +2,7 @@ PROJECT(lua_proxy)
 
 #引用头文件目录
 INCLUDE_DIRECTORIES(
-	${GSF_SOURCE_DIR}/core
-	${GSF_SOURCE_DIR}/common
+	${GSF_SOURCE_DIR}/
 	${GSF_SOURCE_DIR}/3rd/glog-0.3.4/src
 	${GSF_SOURCE_DIR}/3rd/lua-5.3.4/src
 	${GSF_SOURCE_DIR}/3rd/sol2-2.16.0

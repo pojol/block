@@ -16,13 +16,12 @@
 	#include <unistd.h>
 #endif // WIN32
 
-#include <module/application.h>
-#include <event/event.h>
+#include <core/application.h>
+#include <core/event.h>
+#include <core/dynamic_module_factory.h>
 
 #include <network/acceptor.h>
 #include <network/connector.h>
-
-#include <module/dynamic_module_factory.h>
 
 #include <log/log.h>
 
@@ -31,7 +30,6 @@
 #include <random>
 #include <lua_proxy/lua_proxy.h>
 
-#include "../../common/single.h"
 
 static char _path[512];
 

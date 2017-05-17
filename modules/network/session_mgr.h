@@ -5,7 +5,7 @@
 #include <vector>
 #include <unordered_map>
 
-#include "../../common/single.h"
+#include <core/single.h>
 
 #include <event2/bufferevent.h>
 

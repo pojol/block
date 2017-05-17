@@ -2,8 +2,7 @@ PROJECT(log)
 
 #引用头文件目录
 INCLUDE_DIRECTORIES(
-	${GSF_SOURCE_DIR}/core
-	${GSF_SOURCE_DIR}/common
+	${GSF_SOURCE_DIR}/
 	${GSF_SOURCE_DIR}/3rd/glog-master/src
 )
 

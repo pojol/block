@@ -1,8 +1,8 @@
 #ifndef _DB_AVATAR_HEADER_
 #define _DB_AVATAR_HEADER_
 
-#include <module/module.h>
-#include <event/event.h>
+#include <core/module.h>
+#include <core/event.h>
 
 #include "Avatar.pb.h"
 

@@ -12,8 +12,8 @@
 #include <random>
 #include <tuple>
 
-#include <module/application.h>
-#include <event/event.h>
+#include <core/application.h>
+#include <core/event.h>
 
 #include <timer/timer.h>
 #include <log/log.h>
