@@ -4,14 +4,15 @@
 
 ```c++
 /*
-	特性
+/
+特性
 	1. 模块隔离
 	2. 事件通知
 	3. 支持脚本编程 (lua
 	4. 轻量的分布式集群 (后续支持
 
-
-	框架结构概览
+/
+框架结构概览
 
 	app                                 module             interface
 	+-----------------------------+     +------------+     X
@@ -28,8 +29,8 @@
 	|  +----------+ +----------+  |
 	+-----------------------------+
 
-
-	核心接口概览
+/
+核心接口概览
 
 	app.init_cfg			进程的初始化
 	app.regist_module		管理module
@@ -45,7 +46,8 @@
 	   + + +                                                          unregist
 	regist module
 
-	
+
+/
 	SampleModule
 		: public gsf::IModule			
 		, public gsf::IEvent			
@@ -56,6 +58,7 @@
 	}
 
 
+/
 	module.before_init  // 模块创建
 	module.init
 	module.execute      // 服务器每帧调用
@@ -63,6 +66,7 @@
 	module.after_shut		
 
 
+/
 	event.listen        // 侦听消息
 	event.dispatch      // 发送消息
 	event.broadcast     // 广播消息
