@@ -70,20 +70,24 @@
 	event.listen        // 侦听消息
 	event.dispatch      // 发送消息
 	event.broadcast     // 广播消息
+	
+	
+/
+依赖
+	core                depend c++11, cmake 2.8+
+	
+	network module      depend libevent 2.0.22+, protobuf3
+	lua_proxy module    depend lua5.3+, sol2 2.16+
+	timer module        depend c++11
+	log module          depeng glog
+	mysql_cache module  depend redis 3.0+
+	mongo_cache module  
+	
+License
+	MIT
+	Copyright (c) 2016 pojol
+	
+	pojol@outlook.com
 */
 ```
- 
-depend
---------
-* c++11
-* cmake 2.8+
-* google protobuf 3.2.0
-* google glog 0.3.4
-* libevent 2.0.22
-* lua 5.3
-* redis
 
-
-MIT License
-
-Copyright (c) 2016 pojol
