@@ -43,9 +43,6 @@ namespace gsf
 		template <typename T>
 		uint32_t find_module_id();
 
-		template <typename M, typename T>
-		void sendmsg(IEvent *event_ptr, uint32_t fd, uint32_t msg_id, T msg);
-
 		void run();
 
 		void tick();
@@ -84,19 +81,6 @@ namespace gsf
 		int32_t last_tick_;
 #endif // WATCH_PERF
 	};
-
-	template <typename M, typename T>
-	void gsf::Application::sendmsg(IEvent *event_ptr, uint32_t fd, uint32_t msg_id, T msg)
-	{
-		uint32_t _nid = find_module_id<M>();
-
-		int _len = msg.ByteSize();
-		auto _msg = std::make_shared<gsf::Block>(fd, msg_id, _len);
-
-		msg.SerializeToArray(_msg->buf_ + _msg->pos_, _len);
-
-		event_ptr->dispatch_remote(_nid, fd, msg_id, _msg);
-	}
 
 	template <typename T>
 	void gsf::Application::regist_module(T *module, bool dynamic /* = false */)

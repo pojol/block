@@ -9,13 +9,13 @@ if(WIN32)
 endif()
 if(UNIX)
     INCLUDE_DIRECTORIES(
-            ${GSF_SOURCE_DIR}/3rd/libevent/include
+            ${GSF_SOURCE_DIR}/lib/linux/libevent/include
             ${GSF_SOURCE_DIR}/
 			)
 endif()
 if(APPLE)
     INCLUDE_DIRECTORIES(
-            ${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
+            ${GSF_SOURCE_DIR}/lib/linux/libevent/include
             ${GSF_SOURCE_DIR}/
 			)
 endif()
@@ -27,6 +27,10 @@ if(WIN32)
             ${GSF_SOURCE_DIR}/lib/linux
     )
 elseif(UNIX)
+    LINK_DIRECTORIES(
+            ${GSF_SOURCE_DIR}/lib/linux/libevent/lib
+            ${GSF_SOURCE_DIR}/lib/linux
+    )
 elseif(APPLE)
 	LINK_DIRECTORIES(
 		${GSF_SOURCE_DIR}/lib/apple/lib

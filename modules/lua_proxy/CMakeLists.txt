@@ -1,16 +1,34 @@
 PROJECT(lua_proxy)
 
-#引用头文件目录
-INCLUDE_DIRECTORIES(
-	${GSF_SOURCE_DIR}/
-	${GSF_SOURCE_DIR}/3rd/glog-0.3.4/src
-	${GSF_SOURCE_DIR}/3rd/lua-5.3.4/src
-	${GSF_SOURCE_DIR}/3rd/sol2-2.16.0
-)
+if(WIN32)
+    #引用头文件目录
+    INCLUDE_DIRECTORIES(
+            ${GSF_SOURCE_DIR}/
+            ${GSF_SOURCE_DIR}/3rd/glog-0.3.4/src
+            ${GSF_SOURCE_DIR}/3rd/lua-5.3.4/src
+            ${GSF_SOURCE_DIR}/3rd/sol2-2.16.0
+    )
 
-#引用库目录
-LINK_DIRECTORIES(
-)
+    #引用库目录
+    LINK_DIRECTORIES(
+    )
+
+endif()
+if(UNIX)
+    #引用头文件目录
+    INCLUDE_DIRECTORIES(
+            ${GSF_SOURCE_DIR}/
+            ${GSF_SOURCE_DIR}/lib/linux/glog/include
+            ${GSF_SOURCE_DIR}/3rd/lua53/lua-5.3.4/src
+            ${GSF_SOURCE_DIR}/3rd/sol2
+    )
+
+    #引用库目录
+    LINK_DIRECTORIES(
+            ${GSF_SOURCE_DIR}/lib/
+    )
+endif()
+
 
 FILE(GLOB_RECURSE SRC "*.cpp" "*.h")
 ADD_LIBRARY(lua_proxy STATIC ${SRC})

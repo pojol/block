@@ -1,14 +1,31 @@
 PROJECT(log)
 
-#引用头文件目录
-INCLUDE_DIRECTORIES(
-	${GSF_SOURCE_DIR}/
-	${GSF_SOURCE_DIR}/3rd/glog-master/src
-)
 
-#引用库目录
-LINK_DIRECTORIES(
-)
+
+if(WIN32)
+    #引用头文件目录
+    INCLUDE_DIRECTORIES(
+            ${GSF_SOURCE_DIR}/
+            ${GSF_SOURCE_DIR}/3rd/glog-master/src
+    )
+
+    #引用库目录
+    LINK_DIRECTORIES(
+    )
+endif()
+if(UNIX)
+    #引用头文件目录
+    INCLUDE_DIRECTORIES(
+            ${GSF_SOURCE_DIR}/
+            ${GSF_SOURCE_DIR}/lib/linux/glog/include
+    )
+
+    #引用库目录
+    LINK_DIRECTORIES(
+            ${GSF_SOURCE_DIR}/lib/linux/glog/lib
+            ${GSF_SOURCE_DIR}/lib/linux
+    )
+endif()
 
 FILE(GLOB_RECURSE SRC "*.cpp" "*.h")
 ADD_LIBRARY(log STATIC ${SRC})
