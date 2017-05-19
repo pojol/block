@@ -23,9 +23,12 @@ namespace gsf
 	typedef int32_t ErrorID;
 	static const uint32_t ErrNil = 0;
 
-	static const uint32_t LogInfo = 1;
-	static const uint32_t LogWarning = 2;
-	static const uint32_t LogError = 3;
+	enum TLog
+	{
+		LogInfo = 1,
+		LogWarning = 2,
+		LogError = 3,
+	};
 
 	static const uint32_t NETWORK_CONNECT_MAX = 65534;		//
 	static const uint32_t SESSION_READ_BUFFER_SIZE = 0;		//

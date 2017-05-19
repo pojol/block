@@ -10,11 +10,14 @@
 
 namespace gsf
 {
+	class Args;
+
 	typedef std::function<void(uint32_t, uint32_t, std::string)> RemoteFunc;
+	typedef std::function<void(uint32_t, const char*, Args)> LogFunc;
 
 	class Arg
 	{
-		typedef Variant<bool, uint32_t, int32_t, uint64_t, int64_t, std::string, RemoteFunc> av;
+		typedef Variant<bool, uint32_t, int32_t, uint64_t, int64_t, std::string, RemoteFunc, LogFunc> av;
 	public:
 		void set_bool(const bool var)
 		{
@@ -56,6 +59,12 @@ namespace gsf
 		{
 			v_ = var;
 			idx_ = 6;
+		}
+
+		void set_log_callback(LogFunc var)
+		{
+			v_ = var;
+			idx_ = 7;
 		}
 
 		av v_;
@@ -188,6 +197,15 @@ namespace gsf
 			arg_list_.push_back(_arg);
 		}
 
+		void add(LogFunc func)
+		{
+			auto _arg = std::make_shared<Arg>();
+			_arg->set_log_callback(func);
+
+			size_++;
+			arg_list_.push_back(_arg);
+		}
+
 		const bool pop_bool(const int index)
 		{
 			#ifdef _DEBUG
@@ -285,6 +303,19 @@ namespace gsf
 			return var->v_.Get<RemoteFunc>();
 		}
 
+		const LogFunc pop_log_callback(const int index)
+		{
+#ifdef _DEBUG
+			assert(index >= 0 && index < size_);
+#else
+			if (index < 0 || index >= size_) {
+				return nullptr;
+			}
+#endif
+			auto var = arg_list_[index];
+			return var->v_.Get<LogFunc>();
+		}
+
 		uint32_t get_typeid(const int index)
 		{
 			auto var = arg_list_[index];
@@ -344,6 +375,11 @@ namespace gsf
 		}
 
 		void push_remote_callback(RemoteFunc value)
+		{
+			add(value);
+		}
+
+		void push_log_callback(LogFunc value)
 		{
 			add(value);
 		}

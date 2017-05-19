@@ -5,6 +5,7 @@
 #include <string.h>
 #include <errno.h>
 #include <stdint.h>
+#include <sstream>
 
 
 #ifdef WIN32
@@ -126,6 +127,7 @@ public:
 
 			listen(connector_id_, eid::network::connector_init, std::bind(&Client::create_connector_succ, this, std::placeholders::_1));
 		});
+
 	}
 
 	void create_connector_succ(gsf::Args args)

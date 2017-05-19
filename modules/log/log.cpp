@@ -13,6 +13,18 @@ gsf::modules::LogModule::LogModule()
 }
 
 
+void gsf::modules::LogModule::before_init()
+{
+	listen(this, eid::log::log_callback, [&](gsf::Args args, gsf::CallbackFunc callback) {
+		auto _args = gsf::Args();
+		_args.push_log_callback(std::bind(&LogModule::log_print, this
+			, std::placeholders::_1
+			, std::placeholders::_2
+			, std::placeholders::_3));
+		callback(_args);
+	});
+}
+
 void gsf::modules::LogModule::init()
 {
 	listen(this, eid::log::init
@@ -131,4 +143,9 @@ void gsf::modules::LogModule::log_error(gsf::Args args, gsf::CallbackFunc callba
 	log_.push_back(std::make_pair(eid::log::error, args));
 }
 
+void gsf::modules::LogModule::log_print(uint32_t type, const char * title, gsf::Args args)
+{
+	//t
+	log_.push_back(std::make_pair(eid::log::info, args));
+}
 

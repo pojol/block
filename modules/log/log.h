@@ -18,6 +18,8 @@ namespace gsf
 			LogModule();
 			~LogModule() {}
 
+			void before_init();
+
 			void init();
 
 			void execute();
@@ -32,8 +34,8 @@ namespace gsf
 			void log_warning(gsf::Args args, gsf::CallbackFunc callback);
 			void log_error(gsf::Args args, gsf::CallbackFunc callback);
 
-
-
+			void log_print(uint32_t type, const char * title, gsf::Args args);
+	
 		private:
 			std::list <std::pair<uint32_t, gsf::Args>> log_;
 		};

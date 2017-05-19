@@ -27,6 +27,7 @@ namespace eid
 		const uint32_t info = 1002;
 		const uint32_t warning = 1003;
 		const uint32_t error = 1004;
+		const uint32_t log_callback = 1005;
 	}
 
 	namespace network
