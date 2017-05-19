@@ -32,6 +32,8 @@ namespace gsf
 			void log_warning(gsf::Args args, gsf::CallbackFunc callback);
 			void log_error(gsf::Args args, gsf::CallbackFunc callback);
 
+
+
 		private:
 			std::list <std::pair<uint32_t, gsf::Args>> log_;
 		};

@@ -28,8 +28,10 @@ if(WIN32)
 	)
 endif()
 if(UNIX)
+	find_package(Threads)
 	LINK_DIRECTORIES(
-	${GSF_SOURCE_DIR}/lib/linux
+		${GSF_SOURCE_DIR}/lib/linux
+		${GSF_SOURCE_DIR}/lib/linux/glog/lib
 	)
 endif()
 if(APPLE)
@@ -53,6 +55,6 @@ if(MSVC)
 
         TARGET_LINK_LIBRARIES(test_timer ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib gsf_core.lib timer.lib glog.lib log.lib)
 elseif(UNIX)
-        TARGET_LINK_LIBRARIES(test_timer liblog.a libglog.a libmodule.a libevent.a libtimer.a)
+        TARGET_LINK_LIBRARIES(test_timer ${CMAKE_THREAD_LIBS_INIT} liblog.a libglog.a libgsf_core.a libtimer.a)
 elseif(APPLE)
 endif()

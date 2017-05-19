@@ -72,6 +72,7 @@ void gsf::modules::TimerModule::delay_milliseconds(gsf::Args args, gsf::Callback
 	uint32_t _sender = args.pop_uint32(0);
 	uint32_t _milliseconds = args.pop_uint32(1);
 
+	// 不采用snowflake算法等方式生成唯一ID， 后续会通过module id构造
 	auto _tid = get_system_tick() + _milliseconds;
 
 	auto _event = std::make_shared<TimerEvent>();

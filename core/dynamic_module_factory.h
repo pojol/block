@@ -33,9 +33,11 @@ private:
 	static std::map<std::string, create_ins> class_map_;
 };
 
+// 避免对静态成员的重复定义
 #ifdef WIN32
 __declspec(selectany) std::map<std::string, create_ins> DynamicModuleFactory::class_map_;
 #else
+__attribute((weak)) std::map<std::string, create_ins> DynamicModuleFactory::class_map_;
 #endif
 
 struct DynamicRegister

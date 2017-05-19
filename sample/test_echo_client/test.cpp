@@ -6,8 +6,6 @@
 #include <errno.h>
 #include <stdint.h>
 
-#include <sys/types.h>
-
 
 #ifdef WIN32
 	#include <winsock2.h>
@@ -24,8 +22,6 @@
 #include <network/connector.h>
 
 #include <log/log.h>
-
-#include <iostream>
 
 #include <random>
 #include <lua_proxy/lua_proxy.h>

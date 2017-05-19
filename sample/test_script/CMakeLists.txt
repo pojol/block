@@ -15,28 +15,27 @@ if(UNIX)
 	INCLUDE_DIRECTORIES(
 		${GSF_SOURCE_DIR}/
 		${GSF_SOURCE_DIR}/modules
-		${GSF_SOURCE_DIR}/3rd/lua-5.3.4/src
-		${GSF_SOURCE_DIR}/3rd/sol2-2.16.0
+		${GSF_SOURCE_DIR}/3rd/lua53/lua-5.3.4/src
+		${GSF_SOURCE_DIR}/3rd/sol2
 	)
 endif()
 if(APPLE)
 	INCLUDE_DIRECTORIES(
-                ${GSF_SOURCE_DIR}/
-        )
+		${GSF_SOURCE_DIR}/
+	)
 endif()
 
 
 #引用库目录
 if(WIN32)
 	LINK_DIRECTORIES(
-	${GSF_SOURCE_DIR}/lib/win/Debug
+		${GSF_SOURCE_DIR}/lib/win/Debug
 	)
 endif()
 if(UNIX)
-	set(CMAKE_EXE_LINKER_FLAGS "-llua -ldl")
-
 	LINK_DIRECTORIES(
-	${GSF_SOURCE_DIR}/lib/linux
+		${GSF_SOURCE_DIR}/lib/linux
+		${GSF_SOURCE_DIR}/lib/linux/glog/lib
 	)
 endif()
 if(APPLE)
@@ -60,6 +59,6 @@ if(MSVC)
 
         TARGET_LINK_LIBRARIES(test_script ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib gsf_core.lib lua_proxy.lib lua53.lib glog.lib log.lib timer.lib libprotocd.lib libprotobufd.lib network.lib)
 elseif(UNIX)
-	TARGET_LINK_LIBRARIES(test_script liblog.a libglog.a libmodule.a libevent.a libtimer.a liblua_proxy.a liblua.a)
+	TARGET_LINK_LIBRARIES(test_script ${CMAKE_THREAD_LIBS_INIT} liblog.a libglog.a libgsf_core.a libtimer.a liblua_proxy.a liblua.a)
 elseif(APPLE)
 endif()

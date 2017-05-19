@@ -6,6 +6,8 @@
 
 #ifdef WIN32
 #include <windows.h>
+#else
+#include <unistd.h>
 #endif // WIN32
 
 #include "dynamic_module_factory.h"
@@ -174,6 +176,8 @@ void gsf::Application::run()
 		if (_use_ms < cfg_.tick_count) {
 #ifdef WIN32
 			Sleep(cfg_.tick_count - _use_ms);
+#else
+			usleep(1000 * (cfg_.tick_count - _use_ms));
 #endif // WIN32
 		}
 		else {
