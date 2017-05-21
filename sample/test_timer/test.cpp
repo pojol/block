@@ -68,7 +68,7 @@ public:
 		}
 
 		listen(this, eid::timer::timer_arrive, [&](gsf::Args args, gsf::CallbackFunc callback) {
-			log_f_(gsf::TLog::LogInfo, "TestClickModule", gsf::Args("arrive time ", args.pop_uint64(0)));
+			log_f_(eid::log::info, "TestClickModule", gsf::Args("arrive time ", args.pop_uint64(0)));
 		});
 	}
 
