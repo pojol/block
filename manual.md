@@ -10,6 +10,43 @@ Features
 - [ ] 支持轻量的分布式架构
 
 
+###编译
+```c++
+linux 
+	gsf_core module 依赖 c++11, cmake
+		cd build 
+		cmake ..
+	
+	timer module 依赖 c++11, cmake
+		cd build
+		cmake ..
+	
+	lua_proxy module 依赖 sol, lua5.3
+		git clone https://github.com/ThePhD/sol2.git
+		git checkout v2.16.0
+	
+		wget -P /home/xx/gsf/3rd/lua53 http://www.lua.org/ftp/lua-5.3.4.tar.gz
+		tar -xzvf ./lua-5.3.4.tar.gz
+		make linux
+		cp liblua.a /home/xx/gsf/lib/linux/
+	
+	network module 依赖 libevent
+		unzip libevent
+		chmod 777 configure
+		./configure --prefix=/xx/gsf/lib/linux/libevent
+		make && make install
+		
+	log module
+		git clone https://github.com/google/glog.git
+		// 暂时先用master版本和windows同步
+		./autogen.sh 
+		./configure --prefix=/xx/gsf/lib/linux/glog
+		make && make install
+	
+	sample 在构建完成其他基础库之后
+		cd build
+		cmake ..
+```
 ### 模块的初始化
 ```python
 '''
