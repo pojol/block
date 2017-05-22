@@ -145,6 +145,6 @@ void gsf::modules::LogModule::log_error(gsf::Args args, gsf::CallbackFunc callba
 
 void gsf::modules::LogModule::log_print(uint32_t type, const char * title, gsf::Args args)
 {
-	log_.push_back(std::make_pair(type args));
+	log_.push_back(std::make_pair(type, args));
 }
 
