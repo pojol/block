@@ -56,7 +56,7 @@ public:
 		{
 			dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::Args(get_module_id(), uint32_t(i * 1000)), [&](gsf::Args args) {
 				uint64_t _time_id = args.pop_uint64(0);
-				log_f_(gsf::TLog::LogInfo, "TestClickModule", gsf::Args("regist time ", args.pop_uint64(0)));
+				log_f_(eid::log::info, "TestClickModule", gsf::Args("regist time ", args.pop_uint64(0)));
 
 				if (idx_ > 3 && idx_ < 7) {
 					dispatch(timer_m_, eid::timer::remove_timer, gsf::Args(get_module_id(), _time_id), [&](gsf::Args args) {
