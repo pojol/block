@@ -28,16 +28,14 @@ namespace gsf
 
 		private:
 
-			void init_impl(gsf::Args args, gsf::CallbackFunc callback);
+			void init_impl(const std::string &exe_name);
 
-			void log_info(gsf::Args args, gsf::CallbackFunc callback);
-			void log_warning(gsf::Args args, gsf::CallbackFunc callback);
-			void log_error(gsf::Args args, gsf::CallbackFunc callback);
 
-			void log_print(uint32_t type, const char * title, gsf::Args args);
+			void log_print(uint32_t type, const char * title, const gsf::Args &args);
 	
 		private:
-			std::list <std::pair<uint32_t, gsf::Args>> log_;
+			
+			char path_[512];
 		};
 	}
 }

@@ -13,7 +13,7 @@ namespace gsf
 	class Args;
 
 	typedef std::function<void(uint32_t, uint32_t, std::string)> RemoteFunc;
-	typedef std::function<void(uint32_t, const char*, Args)> LogFunc;
+	typedef std::function<void(uint32_t, const char*, const gsf::Args&)> LogFunc;
 
 	class Arg
 	{
@@ -206,7 +206,7 @@ namespace gsf
 			arg_list_.push_back(_arg);
 		}
 
-		const bool pop_bool(const int index)
+		const bool pop_bool(const int index) const
 		{
 			#ifdef _DEBUG
 				assert(index >= 0 && index < size_);
@@ -220,7 +220,7 @@ namespace gsf
 			return var->v_.Get<bool>();
 		}
 
-		const int32_t pop_int32(const int index)
+		const int32_t pop_int32(const int index) const
 		{
 			#ifdef _DEBUG
 				assert(index >= 0 && index < size_);
@@ -234,7 +234,7 @@ namespace gsf
 			return var->v_.Get<int32_t>();
 		}
 
-		const uint32_t pop_uint32(const int index)
+		const uint32_t pop_uint32(const int index) const
 		{
 			#ifdef _DEBUG
 				assert(index >= 0 && index < size_);
@@ -248,7 +248,7 @@ namespace gsf
 			return var->v_.Get<uint32_t>();
 		}
 
-		const uint64_t pop_uint64(const int index)
+		const uint64_t pop_uint64(const int index) const
 		{
 			#ifdef _DEBUG
 				assert(index >= 0 && index < size_);
@@ -262,7 +262,7 @@ namespace gsf
 			return var->v_.Get<uint64_t>(); 
 		}
 
-		const uint64_t pop_int64(const int index)
+		const uint64_t pop_int64(const int index) const
 		{
 			#ifdef _DEBUG
 				assert(index >= 0 && index < size_);
@@ -276,7 +276,7 @@ namespace gsf
 			return var->v_.Get<int64_t>(); 
 		}
 
-		const std::string & pop_string(const int index)
+		const std::string & pop_string(const int index) const
 		{
 			#ifdef _DEBUG
 				assert(index >= 0 && index < size_);
@@ -290,7 +290,7 @@ namespace gsf
 			return var->v_.Get<std::string>();
 		}
 
-		const RemoteFunc pop_remote_callback(const int index)
+		const RemoteFunc pop_remote_callback(const int index) const
 		{
 #ifdef _DEBUG
 			assert(index >= 0 && index < size_);
@@ -303,7 +303,7 @@ namespace gsf
 			return var->v_.Get<RemoteFunc>();
 		}
 
-		const LogFunc pop_log_callback(const int index)
+		const LogFunc pop_log_callback(const int index) const
 		{
 #ifdef _DEBUG
 			assert(index >= 0 && index < size_);
@@ -316,7 +316,7 @@ namespace gsf
 			return var->v_.Get<LogFunc>();
 		}
 
-		uint32_t get_typeid(const int index)
+		uint32_t get_typeid(const int index) const
 		{
 			auto var = arg_list_[index];
 			return var->idx_;

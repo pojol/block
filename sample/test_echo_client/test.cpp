@@ -29,6 +29,34 @@
 
 
 static char _path[512];
+void get_bin_path()
+{
+#ifdef WIN32
+	GetModuleFileName(NULL, _path, 512);
+	//取出文件路径
+	for (int i = strlen(_path); i >= 0; i--)
+	{
+		if (_path[i] == '\\')
+		{
+			_path[i] = '\0';
+			break;
+		}
+	}
+#else
+	int cnt = readlink("/proc/self/exe", _path, 512);
+	if (cnt < 0 || cnt >= 512) {
+		std::cout << "read path err" << std::endl;
+		return;
+	}
+	for (int i = cnt; i >= 0; --i)
+	{
+		if (_path[i] == '/') {
+			_path[i + 1] = '\0';
+			break;
+		}
+	}
+#endif // WIN32
+}
 
 using namespace gsf;
 
@@ -45,46 +73,17 @@ public:
 
 	void before_init() override
 	{
-		dispatch(eid::app_id, eid::get_module, gsf::Args("LogModule"), [&](gsf::Args args) {
+		dispatch(eid::app_id, eid::get_module, gsf::Args("LogModule"), [&](const gsf::Args &args) {
 			log_ = args.pop_uint32(0);
 		});
 
-		dispatch(eid::app_id, eid::get_module, gsf::Args("LuaProxyModule"), [&](gsf::Args args) {
+		dispatch(eid::app_id, eid::get_module, gsf::Args("LuaProxyModule"), [&](const gsf::Args &args) {
 			lua_ = args.pop_uint32(0);
 		});
 	}
 
 	void init()
 	{
-#ifdef WIN32
-		GetModuleFileName(NULL, _path, 512);
-		//取出文件路径
-		for (int i = strlen(_path); i >= 0; i--)
-		{
-			if (_path[i] == '\\')
-			{
-				_path[i] = '\0';
-				break;
-			}
-		}
-#else
-		int cnt = readlink("/proc/self/exe", _path, 512);
-		if (cnt < 0 || cnt >= 512) {
-			std::cout << "read path err" << std::endl;
-			return;
-		}
-		for (int i = cnt; i >= 0; --i)
-		{
-			if (_path[i] == '/') {
-				_path[i + 1] = '\0';
-				break;
-			}
-		}
-#endif // WIN32
-
-		//test
-		dispatch(log_, eid::log::init, gsf::Args(std::string(_path) + "/log"
-			, "echo_client"));
 
 		//test
 		dispatch(lua_, eid::lua_proxy::create
@@ -93,8 +92,7 @@ public:
 
 	void shut()
 	{
-		dispatch(lua_, eid::lua_proxy::destroy
-			, gsf::Args(get_module_id()));
+		dispatch(lua_, eid::lua_proxy::destroy, gsf::Args(get_module_id()));
 	}
 
 private:
@@ -122,7 +120,7 @@ public:
 
 	void before_init() override
 	{
-		dispatch(eid::app_id, eid::new_dynamic_module, gsf::Args("ConnectorModule"), [&](gsf::Args args){
+		dispatch(eid::app_id, eid::new_dynamic_module, gsf::Args("ConnectorModule"), [&](const gsf::Args &args){
 			connector_id_ = args.pop_uint32(0);
 
 			listen(connector_id_, eid::network::connector_init, std::bind(&Client::create_connector_succ, this, std::placeholders::_1));
@@ -130,13 +128,13 @@ public:
 
 	}
 
-	void create_connector_succ(gsf::Args args)
+	void create_connector_succ(const gsf::Args &args)
 	{
-		dispatch(connector_id_, eid::network::send_remote_callback, gsf::Args(), [&](gsf::Args args) {
+		dispatch(connector_id_, eid::network::send_remote_callback, gsf::Args(), [&](const gsf::Args &args) {
 			send_ = args.pop_remote_callback(0);
 		});
 
-		listen(this, eid::network::new_connect, [&](gsf::Args args, gsf::CallbackFunc callback) {
+		listen(this, eid::network::new_connect, [&](const gsf::Args &args, gsf::CallbackFunc callback) {
 			fd_ = args.pop_uint32(0);
 
 			send_(fd_, 1001, "hello");
@@ -155,7 +153,7 @@ public:
 		
 	}
 
-	void msg_handler(gsf::Args args)
+	void msg_handler(const gsf::Args &args)
 	{
 		send_(fd_, 1001, "hello");
 	}
@@ -167,21 +165,19 @@ private:
 	gsf::RemoteFunc send_;
 };
 
+
 int main()
 {
 #ifdef WIN32
-	WORD wVersionRequested;
-	WSADATA wsaData;
+    WSADATA wsa_data;
+    WSAStartup(0x0201, &wsa_data);
+#endif
 
-	wVersionRequested = MAKEWORD(1, 1);
-	int result = WSAStartup(wVersionRequested, &wsaData);
-	if (result != 0){
-		exit(1);
-	}
-#endif // WIN32
+	get_bin_path();
 
 	gsf::Application app;
 	gsf::AppConfig cfg;
+	cfg.name = "test_echo_client";
 	app.init_cfg(cfg);
 
 	app.regist_module(new gsf::modules::LogModule());

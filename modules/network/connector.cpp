@@ -53,7 +53,7 @@ void gsf::network::ConnectorModule::before_init()
 			, std::placeholders::_2));
 
 	listen(this, eid::network::send_remote_callback
-		, [&](gsf::Args args, gsf::CallbackFunc callback) {
+		, [&](const gsf::Args &args, gsf::CallbackFunc callback) {
 
 		auto _args = gsf::Args();
 		_args.push_remote_callback(std::bind(&ConnectorModule::send_msg, this
@@ -62,7 +62,7 @@ void gsf::network::ConnectorModule::before_init()
 		callback(_args);
 	});
 
-	dispatch(eid::app_id, eid::get_module, gsf::Args(std::string("LogModule")), [=](gsf::Args args)
+	dispatch(eid::app_id, eid::get_module, gsf::Args(std::string("LogModule")), [=](const gsf::Args &args)
 	{
 		log_module_ = args.pop_uint32(0);
 	});
@@ -70,7 +70,7 @@ void gsf::network::ConnectorModule::before_init()
 
 void gsf::network::ConnectorModule::init()
 {
-	dispatch(get_module_id(), eid::network::connector_init, gsf::Args(""));
+	dispatch(get_module_id(), eid::network::connector_init, gsf::Args());
 }
 
 void gsf::network::ConnectorModule::execute()
@@ -98,7 +98,7 @@ void gsf::network::ConnectorModule::after_shut()
 	}
 }
 
-void gsf::network::ConnectorModule::make_connector(gsf::Args args, gsf::CallbackFunc callback)
+void gsf::network::ConnectorModule::make_connector(const gsf::Args &args, gsf::CallbackFunc callback)
 {
 	uint32_t _module_id = args.pop_uint32(0);
 	std::string _ip = args.pop_string(1);
@@ -117,13 +117,19 @@ void gsf::network::ConnectorModule::make_connector(gsf::Args args, gsf::Callback
 		}
 
 		struct sockaddr_in _sin;
+
 		memset(&_sin, 0, sizeof(_sin));
 		_sin.sin_family = AF_INET;
 		_sin.sin_port = htons(_port);
-		_sin.sin_addr.s_addr = inet_addr(_ip.c_str());
 
-		//! 这里目标服务器没有开启建立连接也会成功？ 虽然后面会发送连接失败的事件
-		if (bufferevent_socket_connect(buffer_event_ptr_, (sockaddr*)&_sin, sizeof(sockaddr_in)) < 0) {
+		if (evutil_inet_pton(AF_INET, _ip.c_str(), &_sin.sin_addr) <= 0)
+		{
+			_ret = eid::network::err_inet_pton;
+			break;
+		}
+
+		int _ret = bufferevent_socket_connect(buffer_event_ptr_, (sockaddr*)&_sin, sizeof(sockaddr_in));
+		if (_ret != 0) {
 			_ret = eid::network::err_socket_connect;
 			break;
 		}
@@ -140,14 +146,12 @@ void gsf::network::ConnectorModule::make_connector(gsf::Args args, gsf::Callback
 
 		session_ptr_->set_log_module(log_module_);
 
-		gsf::Args res;
-		res << uint32_t(_fd);
-		dispatch(_module_id, eid::network::new_connect, res);
+		dispatch(_module_id, eid::network::new_connect, gsf::Args(uint32_t(_fd)));
 	}
 }
 
 
-void gsf::network::ConnectorModule::bind_remote(gsf::Args args, gsf::CallbackFunc callback)
+void gsf::network::ConnectorModule::bind_remote(const gsf::Args &args, gsf::CallbackFunc callback)
 {
 	uint32_t _module_id = args.pop_uint32(0);
 	uint32_t _msg_id = args.pop_uint32(1);

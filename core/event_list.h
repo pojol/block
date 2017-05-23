@@ -12,6 +12,7 @@ namespace eid
 {
 	//! 每个进程中application module 的id ，因为application的作用范围只在自身进程所以 id 可以是固定的。
 	const uint32_t app_id = 1;
+	const uint32_t get_app_name = 2;
 
 	//! 通过字符串获得module的id， 只能获取静态显示声明的module。
 	const uint32_t get_module = 101;
@@ -22,7 +23,7 @@ namespace eid
 
 	namespace log
 	{
-		const uint32_t init = 1001;
+		//const uint32_t init = 1001;	初始化改为在自己模块中实现，regist即初始化
 
 		const uint32_t info = 1002;
 		const uint32_t warning = 1003;
@@ -51,6 +52,7 @@ namespace eid
 		const int32_t err_event_eof = -2005;
 		const int32_t err_event_error = -2006;
 		const int32_t err_event_timeout = -2007;
+		const int32_t err_inet_pton = -2008;
 	}
 
 	namespace timer

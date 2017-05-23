@@ -54,7 +54,7 @@ void gsf::network::AcceptorModule::init()
 		, std::placeholders::_2));
 
 	listen(this, eid::network::send_remote_callback
-		, [&](gsf::Args args, gsf::CallbackFunc callback) {
+		, [&](const gsf::Args &args, gsf::CallbackFunc callback) {
 
 		auto _args = gsf::Args();
 		_args.push_remote_callback(std::bind(&AcceptorModule::send_msg, this
@@ -93,7 +93,7 @@ void gsf::network::AcceptorModule::after_shut()
 	}
 }
 
-void gsf::network::AcceptorModule::make_acceptor(gsf::Args args, gsf::CallbackFunc callback)
+void gsf::network::AcceptorModule::make_acceptor(const gsf::Args &args, gsf::CallbackFunc callback)
 {
 	uint32_t _module_id = args.pop_uint32(0);
 	std::string _ip = args.pop_string(1);
@@ -103,7 +103,7 @@ void gsf::network::AcceptorModule::make_acceptor(gsf::Args args, gsf::CallbackFu
 	accept_bind(_ip, _port);
 }
 
-void gsf::network::AcceptorModule::bind_remote(gsf::Args args, gsf::CallbackFunc callback)
+void gsf::network::AcceptorModule::bind_remote(const gsf::Args &args, gsf::CallbackFunc callback)
 {
 	uint32_t _module_id = args.pop_uint32(0);
 	uint32_t _msg_id = args.pop_uint32(1);
@@ -166,9 +166,7 @@ void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, 
 		bufferevent_enable(bev, EV_READ | EV_WRITE);
 
 		// dispatch event connect
-		gsf::Args args;
-		args << uint32_t(fd);
-		network_ptr_->dispatch(network_ptr_->module_id_, eid::network::new_connect, args);
+		network_ptr_->dispatch(network_ptr_->module_id_, eid::network::new_connect, gsf::Args(uint32_t(fd)));
 	}
 }
 

@@ -3,22 +3,7 @@
 
 void gsf::EventModule::execute()
 {
-	while (!cmd_list_.empty())
-	{
-		auto itr = cmd_list_.begin();
-		auto type_id = std::get<0>(*itr);
 
-		auto tItr = type_map_.find(type_id);
-		if (tItr != type_map_.end()) {
-			auto _cmd_id = std::get<1>(*itr);
-			auto iItr = tItr->second.find(_cmd_id);
-			if (iItr != tItr->second.end()) {
-				iItr->second(std::get<2>(*itr), std::get<3>(*itr));
-			}
-		}
-
-		cmd_list_.pop_front();
-	}
 }
 
 gsf::EventModule::EventModule()
@@ -53,29 +38,16 @@ void gsf::EventModule::bind_event(uint32_t type_id, uint32_t event, EventFunc fu
 	}
 }
 
-void gsf::EventModule::add_cmd(uint32_t type_id, uint32_t event, gsf::Args args, CallbackFunc callback /* = nullptr */)
+void gsf::EventModule::add_cmd(uint32_t type_id, uint32_t event, const gsf::Args &args, CallbackFunc callback /* = nullptr */)
 {
-	/*
-	if (event == eid::network::recv_remote_callback) {
+	auto tItr = type_map_.find(type_id);
+	if (tItr != type_map_.end()) {
 
-		uint32_t _module_id = args.pop_uint32(0);	//预留在这里，如果是分布式则需要将这次注册同步到协调Server
-		uint32_t _msg_id = args.pop_uint32(1);
-		auto _func = args.pop_remote_callback(2);
-
-		auto itr = remote_map_.find(_module_id);
-		if (itr != remote_map_.end()) {
-			itr->second.push_back(std::make_pair(_msg_id, _func));
+		auto iItr = tItr->second.find(event);
+		if (iItr != tItr->second.end()) {
+			iItr->second(args, callback);
 		}
-		else {
-			std::vector<std::pair<uint32_t, RemoteFunc>> vec;
-			vec.push_back(std::make_pair(_msg_id, _func));
-			remote_map_.insert(std::make_pair(_module_id, vec));
-		}
-
-		return;
 	}
-	*/
-	cmd_list_.push_back(std::make_tuple(type_id, event, args, callback));
 }
 
 void gsf::EventModule::rmv_event(uint32_t module_id)
@@ -112,7 +84,7 @@ void gsf::IEvent::listen(uint32_t self, uint32_t event, EventFunc func)
 	EventModule::get_ref().bind_event(self, event, func);
 }
 
-void gsf::IEvent::dispatch(uint32_t target, uint32_t event, gsf::Args args, CallbackFunc callback /* = nullptr */)
+void gsf::IEvent::dispatch(uint32_t target, uint32_t event, const Args &args, CallbackFunc callback /* = nullptr */)
 {
 	EventModule::get_ref().add_cmd(target, event, args, callback);
 }

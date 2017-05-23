@@ -36,8 +36,8 @@ namespace gsf
 
 		private:
 
-			void make_acceptor(gsf::Args args, gsf::CallbackFunc callback);
-			void bind_remote(gsf::Args args, gsf::CallbackFunc callback);
+			void make_acceptor(const gsf::Args &args, gsf::CallbackFunc callback);
+			void bind_remote(const gsf::Args &args, gsf::CallbackFunc callback);
 
 			void accept_bind(const std::string &ip, int port);
 			static void accept_listen_cb(::evconnlistener *listener

@@ -38,8 +38,8 @@ namespace gsf
 			virtual void after_shut();
 
 		private:
-			void make_connector(gsf::Args args, gsf::CallbackFunc callback);
-			void bind_remote(gsf::Args args, gsf::CallbackFunc callback);
+			void make_connector(const gsf::Args &args, gsf::CallbackFunc callback);
+			void bind_remote(const gsf::Args &args, gsf::CallbackFunc callback);
 			
 			void need_close_session(int fd);
 

@@ -14,7 +14,7 @@ gsf::modules::TimerModule::TimerModule()
 
 void gsf::modules::TimerModule::before_init()
 {
-	dispatch(eid::app_id, eid::get_module, gsf::Args("LogModule"), [&](gsf::Args args) {
+	dispatch(eid::app_id, eid::get_module, gsf::Args("LogModule"), [&](const gsf::Args &args) {
 		log_m_ = args.pop_uint32(0);
 	});
 }
@@ -67,7 +67,7 @@ uint64_t gsf::modules::TimerModule::get_system_tick()
 }
 
 
-void gsf::modules::TimerModule::delay_milliseconds(gsf::Args args, gsf::CallbackFunc callback)
+void gsf::modules::TimerModule::delay_milliseconds(const gsf::Args &args, gsf::CallbackFunc callback)
 {
 	uint32_t _sender = args.pop_uint32(0);
 	uint32_t _milliseconds = args.pop_uint32(1);
@@ -94,7 +94,7 @@ void gsf::modules::TimerModule::delay_milliseconds(gsf::Args args, gsf::Callback
 }
 
 
-void gsf::modules::TimerModule::delay_day(gsf::Args args, gsf::CallbackFunc callback)
+void gsf::modules::TimerModule::delay_day(const gsf::Args &args, gsf::CallbackFunc callback)
 {
 	using namespace std::chrono;
 
@@ -137,7 +137,7 @@ void gsf::modules::TimerModule::delay_day(gsf::Args args, gsf::CallbackFunc call
 }
 
 
-void gsf::modules::TimerModule::remove_timer(gsf::Args args, gsf::CallbackFunc callback)
+void gsf::modules::TimerModule::remove_timer(const gsf::Args &args, gsf::CallbackFunc callback)
 {
 	uint32_t _sender = args.pop_uint32(0);
 	uint64_t _timer_id = args.pop_uint64(1);

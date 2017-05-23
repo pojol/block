@@ -34,7 +34,7 @@ void gsf::Application::init_cfg(const gsf::AppConfig &cfg)
 
 	new gsf::EventModule;
 
-	listen(this, eid::get_module, [=](gsf::Args args, CallbackFunc callback) {
+	listen(this, eid::get_module, [=](const gsf::Args &args, CallbackFunc callback) {
 
 		std::string _name = args.pop_string(0);
 
@@ -45,7 +45,11 @@ void gsf::Application::init_cfg(const gsf::AppConfig &cfg)
 
 	});
 
-	listen(this, eid::new_dynamic_module, [=](gsf::Args args, CallbackFunc callback) {
+	listen(this, eid::get_app_name, [=](const gsf::Args &args, CallbackFunc callback){
+		callback(gsf::Args(cfg_.name));
+	});
+
+	listen(this, eid::new_dynamic_module, [=](const gsf::Args &args, CallbackFunc callback) {
 
 		std::string _name = args.pop_string(0);
 
@@ -60,7 +64,7 @@ void gsf::Application::init_cfg(const gsf::AppConfig &cfg)
 		callback(gsf::Args(_module_ptr->get_module_id()));
 	});
 
-	listen(this, eid::delete_dynamic_module, [=](gsf::Args args, CallbackFunc callback) {
+	listen(this, eid::delete_dynamic_module, [=](const gsf::Args &args, CallbackFunc callback) {
 
 		uint32_t _module_id = args.pop_uint32(0);
 		unregist_dynamic_module(_module_id);

@@ -23,7 +23,7 @@ function dispatch(...)
 
 	local function __cb() end
 	
-	event:ldispatch(arg[1], arg[2], _args, __cb)
+	event:ldispatch(module_id, arg[1], arg[2], _args, __cb)
 end
 
 -- 带callbakc的dispatch
@@ -49,11 +49,11 @@ function cb_dispatch(...)
 
 	end
 
-	event:ldispatch(arg[1], arg[2], _args, arg[_len])
+	event:ldispatch(module_id, arg[1], arg[2], _args, arg[_len])
 end 
 
-function listen(module_id, event_id, func)
-	event:llisten(module_id, event_id, func)
+function listen(self_id, event_id, func)
+	event:llisten(module_id, self_id, event_id, func)
 end
 
 g_log_id_ = 0
@@ -63,17 +63,22 @@ function print_info( ... )
 
     local _len = #arg
 	local _args = Args.new()
+	local _title = ""
 
     for k, v in pairs(arg) do
-        if type(v) == "number" then
-            _args:push_uint32(v)
-        end
-        if type(v) == "string" then
-		    _args:push_string(v)
-	    end
+		if k == 1 then
+			_title = v
+		else 
+			if type(v) == "number" then
+				_args:push_uint32(v)
+			end
+			if type(v) == "string" then
+				_args:push_string(v)
+			end
+		end
     end
 
-    event:ldispatch(g_log_id_, eid.log.info, _args)
+    log_f_(eid.log.info, _title, _args)
 end
 
 function print_warning( ... )
@@ -91,7 +96,7 @@ function print_warning( ... )
 	    end
     end
 
-    event:ldispatch(g_log_id_, eid.log.warning, _args)
+    event:ldispatch(module_id, g_log_id_, eid.log.warning, _args)
 end
 
 function print_error( ... )
@@ -109,9 +114,8 @@ function print_error( ... )
 	    end
     end
 
-	-- 产生错误的时候顺便打印下堆栈
-	_args:push_string("\n" .. debug.traceback())
-
-    event:ldispatch(g_log_id_, eid.log.error, _args)
+    event:ldispatch(module_id, g_log_id_, eid.log.error, _args)
 end
+
+
 

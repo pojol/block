@@ -187,3 +187,19 @@ while(1)
            因此可预料的每帧最少会消耗 len(list) * (O(1) + O(1))
        框架虽然提供了动态创建module的功能，但并不推荐使用除非无法避免。
 ```
+
+
+###简单定义个表格用于后续的性能测试
+1. 单位时间内connector的I/O吞吐
+linux.c++	linux.lua
+
+2. 单位时间内acceptor的I/O吞吐
+1000个连接， 			10000个连接， 			50000个连接
+linux.c++/ linux.lua	linux.c++/ linux.lua	linux.c++/ linux.lua
+
+3. 单位时间内的日志数量
+linux.c++/ linux.lua
+
+4. 单位时间内的事件数量
+10个订阅者， 			100个订阅者， 			1000个订阅者
+linux.c++/ linux.lua	linux.c++/ linux.lua	linux.c++/ linux.lua

@@ -58,63 +58,41 @@ public:
 
 	void before_init() override
 	{
-		dispatch(eid::app_id, eid::get_module, gsf::Args("LogModule"), [&](gsf::Args args) {
-			log_ = args.pop_uint32(0);
+		dispatch(eid::app_id, eid::get_module, gsf::Args("LogModule"), [&](const gsf::Args &args) {
+			log_m_ = args.pop_uint32(0);
 		});
 
-		dispatch(eid::app_id, eid::get_module, gsf::Args("Client2LoginServer"), [&](gsf::Args args) {
+		dispatch(eid::app_id, eid::get_module, gsf::Args("Client2LoginServer"), [&](const gsf::Args &args) {
 			client2login_ = args.pop_uint32(0);
 		});
 	}
 
 	void init()
 	{
-		char _path[512];
-#ifdef WIN32
-		GetModuleFileName(NULL, _path, 512);
-		//取出文件路径
-		for (int i = strlen(_path); i >= 0; i--)
-		{
-			if (_path[i] == '\\')
-			{
-				_path[i] = '\0';
-				break;
-			}
-		}
-#else
-		int cnt = readlink("/proc/self/exe", _path, 512);
-		if (cnt < 0 || cnt >= 512) {
-			std::cout << "read path err" << std::endl;
-			return;
-		}
-		for (int i = cnt; i >= 0; --i)
-		{
-			if (_path[i] == '/') {
-				_path[i + 1] = '\0';
-				break;
-			}
-		}
-#endif // WIN32
+		dispatch(log_m_, eid::log::log_callback, gsf::Args(), [&](const gsf::Args &args) {
+			log_f_ = args.pop_log_callback(0);
+		});
 
-		dispatch(log_, eid::log::init, gsf::Args(std::string(_path) + "/log", "echo_server"));
 
 		//test
 		listen(this, eid::network::new_connect
-			, [=](gsf::Args args, gsf::CallbackFunc callback) {
-			dispatch(log_, eid::log::info, gsf::Args("new connect fd : ", args.pop_uint32(0)));
+			, [=](const gsf::Args &args, gsf::CallbackFunc callback) {
+			log_f_(eid::log::info, "EntityMgr", gsf::Args("new connect fd : ", args.pop_uint32(0)));
 		});
 
 		listen(this, eid::network::dis_connect
-			, [=](gsf::Args args, gsf::CallbackFunc callback) {
-			dispatch(log_, eid::log::info, gsf::Args("dis connect fd : ", args.pop_uint32(0)));
+			, [=](const gsf::Args &args, gsf::CallbackFunc callback) {
+			log_f_(eid::log::info, "EntityMgr", gsf::Args("dis connect fd : ", args.pop_uint32(0)));
 		});
 
-		dispatch(client2login_, eid::network::send_remote_callback, gsf::Args(), [&](gsf::Args args) {
+		dispatch(client2login_, eid::network::send_remote_callback, gsf::Args(), [&](const gsf::Args &args) {
 			send_ = args.pop_remote_callback(0);
 		});
 
 		dispatch(client2login_, eid::network::make_acceptor, gsf::Args(get_module_id(), "127.0.0.1", uint32_t(8001)));
 	
+
+		// bind msg
 		auto arr = {
 			std::make_pair(uint32_t(1001), std::bind(&EntityMgr::test_remote, this
 				, std::placeholders::_1)),
@@ -124,7 +102,8 @@ public:
 		{
 			//! 向协议绑定器申请，module 和 协议的绑定.
 			dispatch(client2login_, eid::network::recv_remote_callback
-				, gsf::Args(get_module_id(), uint32_t(1001)), std::bind(&EntityMgr::test_remote, this, std::placeholders::_1));
+				, gsf::Args(get_module_id(), uint32_t(1001))
+				, std::bind(&EntityMgr::test_remote, this, std::placeholders::_1));
 		}
 	}
 
@@ -138,7 +117,7 @@ public:
 		last_tick_ = _t;
 	}
 
-	void test_remote(gsf::Args args)
+	void test_remote(const gsf::Args &args)
 	{
 		auto fd = args.pop_uint32(0);
 
@@ -155,7 +134,9 @@ private :
 
 	uint32_t second_pack_num_;
 
-	ModuleID log_ = ModuleNil;
+	ModuleID log_m_ = ModuleNil;
+	gsf::LogFunc log_f_ = nullptr;
+
 	ModuleID client2login_ = ModuleNil;
 
 	gsf::RemoteFunc send_;
@@ -178,6 +159,7 @@ int main()
 	gsf::AppConfig cfg;
 	cfg.is_watch_pref = true;
 	cfg.tick_count = 50;
+	cfg.name = "test_echo_server";
 
 	app.init_cfg(cfg);
 

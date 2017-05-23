@@ -10,6 +10,7 @@ eid = {
 		info = 1002,
 		warning = 1003,
 		error = 1004,
+		log_callback = 1005,
 	},
 	
 	network = {
@@ -35,5 +36,6 @@ eid = {
 		delay_day = 3002,
 		delay_week = 3003,
 		remove_timer = 3005,
+		timer_arrive = 3006,
 	},
 }

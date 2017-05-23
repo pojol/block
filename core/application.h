@@ -25,6 +25,7 @@ namespace gsf
 	{
 		uint32_t tick_count = 20;
 		bool is_watch_pref = false;
+		std::string name = "default";
 	};
 
 	class Application

@@ -6,6 +6,12 @@
 #define GOOGLE_GLOG_DLL_DECL
 #include <glog/logging.h>
 
+#ifdef WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif // WIN32
+
 gsf::modules::LogModule::LogModule()
 	: Module("LogModule")
 {
@@ -15,7 +21,7 @@ gsf::modules::LogModule::LogModule()
 
 void gsf::modules::LogModule::before_init()
 {
-	listen(this, eid::log::log_callback, [&](gsf::Args args, gsf::CallbackFunc callback) {
+	listen(this, eid::log::log_callback, [&](const gsf::Args &args, gsf::CallbackFunc callback) {
 		auto _args = gsf::Args();
 		_args.push_log_callback(std::bind(&LogModule::log_print, this
 			, std::placeholders::_1
@@ -23,86 +29,46 @@ void gsf::modules::LogModule::before_init()
 			, std::placeholders::_3));
 		callback(_args);
 	});
+
+#ifdef WIN32
+	GetModuleFileName(NULL, path_, 512);
+	//取出文件路径
+	for (int i = strlen(path_); i >= 0; i--)
+	{
+		if (path_[i] == '\\')
+		{
+			path_[i] = '\0';
+			break;
+		}
+	}
+#else
+	int cnt = readlink("/proc/self/exe", path_, 512);
+	if (cnt < 0 || cnt >= 512) {
+		std::cout << "read path err" << std::endl;
+		return;
+	}
+	for (int i = cnt; i >= 0; --i)
+	{
+		if (path_[i] == '/') {
+			path_[i + 1] = '\0';
+			break;
+		}
+	}
+#endif // WIN32
+
+	dispatch(eid::app_id, eid::get_app_name, gsf::Args(), [&](const gsf::Args &args){
+		init_impl(args.pop_string(0));	
+	});
 }
 
 void gsf::modules::LogModule::init()
 {
-	listen(this, eid::log::init
-		, std::bind(&LogModule::init_impl, this
-		, std::placeholders::_1
-		, std::placeholders::_2));
 
-	listen(this, eid::log::info
-		, std::bind(&LogModule::log_info, this
-		, std::placeholders::_1
-		, std::placeholders::_2));
-
-	listen(this, eid::log::warning
-		, std::bind(&LogModule::log_warning, this
-		, std::placeholders::_1
-		, std::placeholders::_2));
-
-	listen(this, eid::log::error
-		, std::bind(&LogModule::log_error, this
-		, std::placeholders::_1
-		, std::placeholders::_2));
 }
 
 void gsf::modules::LogModule::execute()
 {
-	while (!log_.empty())
-	{
-		auto itr = log_.begin();
-		gsf::Args args = itr->second;
-		
-		std::ostringstream oss;
 
-		for (int i = 0; i < args.get_count(); ++i)
-		{
-			uint32_t _type = args.get_typeid(i);
-			switch (_type)
-			{
-			case 0:
-				if (args.pop_bool(i)) {
-					oss << "true";
-				}
-				else {
-					oss << "false";
-				}
-				break;
-			case 1:
-				oss << args.pop_uint32(i);
-				break;
-			case 2:
-				oss << args.pop_int32(i);
-				break;
-			case 3:
-				oss << args.pop_uint64(i);
-				break;
-			case 4:
-				oss << args.pop_int64(i);
-				break;
-			case 5:
-				oss << args.pop_string(i);
-				break;
-			}
-		}
-		
-		switch (itr->first)
-		{
-		case eid::log::info:
-			LOG(INFO) << "[INFO] " << oss.str();
-			break;
-		case eid::log::warning:
-			LOG(WARNING) << "[WARNING] " << oss.str();
-			break;
-		case eid::log::error:
-			LOG(ERROR) << "[ERROR] " << oss.str();
-			break;
-		}
-
-		log_.pop_front();
-	}
 }
 
 void gsf::modules::LogModule::shut()
@@ -110,10 +76,9 @@ void gsf::modules::LogModule::shut()
 	google::ShutdownGoogleLogging();
 }
 
-void gsf::modules::LogModule::init_impl(gsf::Args args, gsf::CallbackFunc callback)
+void gsf::modules::LogModule::init_impl(const std::string &exe_name)
 {
-	std::string _path = args.pop_string(0);
-	std::string _exe_name = args.pop_string(1);
+	std::string _path = std::string(path_) + "/log";
 
 	FLAGS_log_dir			= _path;	//设置输出路径
 	FLAGS_alsologtostderr	= true;		//设置日志消息除了日志文件之外是否去标准输出
@@ -121,30 +86,60 @@ void gsf::modules::LogModule::init_impl(gsf::Args args, gsf::CallbackFunc callba
 	FLAGS_max_log_size		= 10;		//设置最大日志文件大小（以MB为单位）
 	FLAGS_logbufsecs		= 0;		//立即写入到日志
 
-	google::SetLogDestination(google::INFO, (_path + "/" + _exe_name + ".info_").c_str());
-	google::SetLogDestination(google::WARNING, (_path + "/" + _exe_name + ".warning_").c_str());
-	google::SetLogDestination(google::ERROR, (_path + "/" + _exe_name + ".error_").c_str());
+	google::SetLogDestination(google::GLOG_INFO, (_path + "/" + exe_name + ".info_").c_str());
+	google::SetLogDestination(google::GLOG_WARNING, (_path + "/" + exe_name + ".warning_").c_str());
+	google::SetLogDestination(google::GLOG_ERROR, (_path + "/" + exe_name + ".error_").c_str());
 
-	google::InitGoogleLogging(_exe_name.c_str());
+	google::InitGoogleLogging(exe_name.c_str());
 }
 
-void gsf::modules::LogModule::log_info(gsf::Args args, gsf::CallbackFunc callback)
-{
-	log_.push_back(std::make_pair(eid::log::info, args));
-}
 
-void gsf::modules::LogModule::log_warning(gsf::Args args, gsf::CallbackFunc callback)
+void gsf::modules::LogModule::log_print(uint32_t type, const char * title, const gsf::Args &args)
 {
-	log_.push_back(std::make_pair(eid::log::warning, args));
-}
+	std::ostringstream oss;
 
-void gsf::modules::LogModule::log_error(gsf::Args args, gsf::CallbackFunc callback)
-{
-	log_.push_back(std::make_pair(eid::log::error, args));
-}
+	for (int i = 0; i < args.get_count(); ++i)
+	{
+		uint32_t _type = args.get_typeid(i);
+		switch (_type)
+		{
+		case 0:
+			if (args.pop_bool(i)) {
+				oss << "true";
+			}
+			else {
+				oss << "false";
+			}
+			break;
+		case 1:
+			oss << args.pop_uint32(i);
+			break;
+		case 2:
+			oss << args.pop_int32(i);
+			break;
+		case 3:
+			oss << args.pop_uint64(i);
+			break;
+		case 4:
+			oss << args.pop_int64(i);
+			break;
+		case 5:
+			oss << args.pop_string(i);
+			break;
+		}
+	}
 
-void gsf::modules::LogModule::log_print(uint32_t type, const char * title, gsf::Args args)
-{
-	log_.push_back(std::make_pair(type, args));
+	switch (type)
+	{
+	case eid::log::info:
+		LOG(INFO) << "[INFO] " << title << " " << oss.str();
+		break;
+	case eid::log::warning:
+		LOG(WARNING) << "[WARNING] " << title << " " << oss.str();
+		break;
+	case eid::log::error:
+		LOG(ERROR) << "[ERROR] " << title << " " << oss.str();
+		break;
+	}
 }
 

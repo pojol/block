@@ -134,7 +134,5 @@ void gsf::network::Session::dis_connect(int32_t err)
 {
 	disconnect_callback_(fd_);
 
-	gsf::Args args;
-	args << uint32_t(fd_) << int32_t(err);
-	dispatch(module_id_, eid::network::dis_connect, args);
+	dispatch(module_id_, eid::network::dis_connect, gsf::Args(uint32_t(fd_), int32_t(err)));
 }

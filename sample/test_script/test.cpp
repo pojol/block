@@ -22,10 +22,35 @@
 #include <log/log.h>
 #include <timer/timer.h>
 
-#include <network/acceptor.h>
-#include <network/connector.h>
-
-#include "test.pb.h"
+static char _path[512];
+void get_bin_path()
+{
+#ifdef WIN32
+	GetModuleFileName(NULL, _path, 512);
+	//取出文件路径
+	for (int i = strlen(_path); i >= 0; i--)
+	{
+		if (_path[i] == '\\')
+		{
+			_path[i] = '\0';
+			break;
+		}
+	}
+#else
+	int cnt = readlink("/proc/self/exe", _path, 512);
+	if (cnt < 0 || cnt >= 512) {
+		std::cout << "read path err" << std::endl;
+		return;
+	}
+	for (int i = cnt; i >= 0; --i)
+	{
+		if (_path[i] == '/') {
+			_path[i + 1] = '\0';
+			break;
+		}
+	}
+#endif // WIN32
+}
 
 class TestLuaProxy
 	: public gsf::Module
@@ -40,75 +65,23 @@ public:
 
 	void before_init()
 	{
-		dispatch(eid::app_id, eid::get_module, gsf::Args("LuaProxyModule"), [&](gsf::Args args) {
-			lua_binder_ = args.pop_uint32(0);
+		dispatch(eid::app_id, eid::get_module, gsf::Args("LuaProxyModule"), [&](const gsf::Args &args) {
+			luaproxy_m_ = args.pop_uint32(0);
 		});
 	}
 
 	void init()
 	{
-		//test
-		dispatch(lua_binder_, eid::lua_proxy::create
-			, gsf::Args(get_module_id()
-			, std::string("F:/github/gsf/sample/test_script/test_script.lua")));
-
-		dispatch(get_module_id(), 10001, gsf::Args(uint32_t(10)));
+		dispatch(luaproxy_m_, eid::lua_proxy::create, gsf::Args(get_module_id(), _path, "test_script.lua"));
 	}
 
 	void shut()
 	{
-		dispatch(lua_binder_, eid::lua_proxy::destroy, gsf::Args(get_module_id()));
+		dispatch(luaproxy_m_, eid::lua_proxy::destroy, gsf::Args(get_module_id()));
 	}
 
 private :
-	uint32_t lua_binder_;
-};
-
-class Client2LoginServer
-	: public gsf::network::AcceptorModule
-{
-public:
-	Client2LoginServer()
-		: AcceptorModule("Client2LoginServer")
-	{}
-
-private:
-
-};
-
-class Client2LoginProxy
-	: public gsf::Module
-	, public gsf::IEvent
-{
-public:
-	Client2LoginProxy()
-		: Module("Client2LoginProxy")
-	{}
-
-	void before_init()
-	{
-		dispatch(eid::app_id, eid::get_module, gsf::Args("Client2LoginServer"), [&](gsf::Args args) {
-			client2login_ = args.pop_uint32(0);
-		});
-	}
-
-	void init()
-	{
-		listen(this, eid::network::new_connect
-			, [=](gsf::Args args, gsf::CallbackFunc callback) {
-			std::cout << "new connect fd = " << args.pop_uint32(0) << std::endl;
-		});
-
-		listen(this, eid::network::dis_connect
-			, [=](gsf::Args args, gsf::CallbackFunc callback) {
-			std::cout << "dis connect fd = " << args.pop_uint32(0) << std::endl;
-		});
-
-		dispatch(client2login_, eid::network::make_acceptor, gsf::Args(get_module_id(), "127.0.0.1", uint32_t(8001)));
-	}
-
-private :
-	uint32_t client2login_;
+	uint32_t luaproxy_m_ = 0;
 };
 
 int main()
@@ -126,15 +99,13 @@ int main()
 
 	gsf::Application app;
 	gsf::AppConfig cfg;
+	cfg.name = "test_script";
 	app.init_cfg(cfg);
 
-	GOOGLE_PROTOBUF_VERIFY_VERSION;
+	get_bin_path();
 
 	app.regist_module(new gsf::modules::LogModule());
 	app.regist_module(new gsf::modules::TimerModule());
-
-	app.regist_module(new Client2LoginServer());
-	app.regist_module(new Client2LoginProxy());
 
 	app.regist_module(new gsf::modules::LuaProxyModule());
 	app.regist_module(new TestLuaProxy());

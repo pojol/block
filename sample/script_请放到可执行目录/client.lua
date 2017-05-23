@@ -8,7 +8,10 @@ module = {
 local connect_id_ = 0
 local session_id_ = 0
 
-function msg_function(fd, msg_id, block)
+function msg_function(args)
+    fd = args:pop_uint32(0)
+    msg_id = args:pop_uint32(1)
+    block = args:pop_string(2)
     print_info("msg_function " .. tostring(msg_id) .. " " .. block)
 
     module.send(session_id_, 1001, "hello")
@@ -71,7 +74,7 @@ module.init = function()
 
     connect("127.0.0.1", 8001)
 
-    dispatch(connect_id_
+    cb_dispatch(connect_id_
         , eid.network.recv_remote_callback
         , module_id
         , 1002
