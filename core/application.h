@@ -64,6 +64,8 @@ namespace gsf
 		AppState state_;
 
 		std::list<Module *> module_list_;
+		std::list<ModuleID> unregist_list_;
+
 		std::unordered_map<uint32_t, uint32_t> module_id_map_;
 		std::unordered_map<std::string, uint32_t> module_name_map_;
 

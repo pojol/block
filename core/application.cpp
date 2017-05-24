@@ -67,7 +67,7 @@ void gsf::Application::init_cfg(const gsf::AppConfig &cfg)
 	listen(this, eid::delete_dynamic_module, [=](const gsf::Args &args, CallbackFunc callback) {
 
 		uint32_t _module_id = args.pop_uint32(0);
-		unregist_dynamic_module(_module_id);
+		unregist_list_.push_back(_module_id);
 
 	});
 }
@@ -146,6 +146,11 @@ void gsf::Application::run()
 			}
 
 			pop_frame();
+			while (!unregist_list_.empty()) {
+				auto itr = unregist_list_.front();
+				unregist_dynamic_module(itr);
+				unregist_list_.pop_front();
+			}
 
 			static_cast<Module*>(gsf::EventModule::get_ptr())->execute();
 #ifdef WATCH_PERF
