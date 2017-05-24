@@ -22,7 +22,12 @@ function dispatch(...)
 	end
 
 	local function __cb() end
-	
+	if not arg[1] then
+		print_warning("warning", "target id = nil")
+	end
+	if not arg[2] then
+		print_warning("warning", "event id = nil")
+	end
 	event:ldispatch(module_id, arg[1], arg[2], _args, __cb)
 end
 
@@ -49,6 +54,12 @@ function cb_dispatch(...)
 
 	end
 
+	if not arg[1] then
+		print_warning("warning", "target id = nil")
+	end
+	if not arg[2] then
+		print_warning("warning", "event id = nil")
+	end
 	event:ldispatch(module_id, arg[1], arg[2], _args, arg[_len])
 end 
 
@@ -86,17 +97,22 @@ function print_warning( ... )
 
     local _len = #arg
 	local _args = Args.new()
+	local _title = ""
 
     for k, v in pairs(arg) do
-        if type(v) == "number" then
-            _args:push_uint32(v)
-        end
-        if type(v) == "string" then
-		    _args:push_string(v)
-	    end
+		if k == 1 then
+			_title = v
+		else 
+			if type(v) == "number" then
+				_args:push_uint32(v)
+			end
+			if type(v) == "string" then
+				_args:push_string(v)
+			end
+		end
     end
 
-    event:ldispatch(module_id, g_log_id_, eid.log.warning, _args)
+    log_f_(eid.log.warning, _title, _args)
 end
 
 function print_error( ... )
@@ -104,17 +120,22 @@ function print_error( ... )
 
     local _len = #arg
 	local _args = Args.new()
+	local _title = ""
 
     for k, v in pairs(arg) do
-        if type(v) == "number" then
-            _args:push_uint32(v)
-        end
-        if type(v) == "string" then
-		    _args:push_string(v)
-	    end
+		if k == 1 then
+			_title = v
+		else 
+			if type(v) == "number" then
+				_args:push_uint32(v)
+			end
+			if type(v) == "string" then
+				_args:push_string(v)
+			end
+		end
     end
 
-    event:ldispatch(module_id, g_log_id_, eid.log.error, _args)
+    log_f_(eid.log.error, _title, _args)
 end
 
 
