@@ -28,7 +28,10 @@
 
 #include "db_avatar.h"
 
-
+uint64_t get_system_tick()
+{
+	return (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+}
 
 class TestModule
 	: public gsf::Module
@@ -52,6 +55,40 @@ public:
 
 	void init()
 	{
+		// 目标数据对象
+		Avatar _avatar_b;
+		_avatar_b.set_hp(11);
+		_avatar_b.set_gold(100);
+
+		char buf[256];
+
+		auto _beg = get_system_tick();
+
+		for (int i = 0; i < 100000; ++i)
+		{
+			// 源数据对象
+			Avatar _avatar_a;
+			_avatar_a.set_hp(10);
+			_avatar_a.set_mp(10);
+
+			// 局部更新
+			_avatar_a.SerializeToArray(buf, 256);
+
+			Avatar _avatar_t;
+			_avatar_t.ParseFromArray(buf, 256);
+
+			// 差异覆盖
+			_avatar_b.MergeFrom(_avatar_t);
+		}
+
+		auto _end = get_system_tick();
+		std::cout << "consume " << _end - _beg << " ms"<< std::endl;
+
+
+		//_avatar_b.MergeFrom(_avatar_a);
+		//std::cout << _avatar_b.hp() << " " << _avatar_b.mp() << " " << _avatar_b.gold() << std::endl;
+
+		/*
 		gsf::Args args(std::string("grids"), std::string("pos"), uint32_t(11));
 
 		std::string _table_name = args.pop_string(0);
@@ -63,7 +100,7 @@ public:
 			return;
 		}
 
-		//! ���redis��û��
+		//! ���redis��û��
 		//auto proto = google::protobuf::MessageFactory::generated_factory()->GetPrototype(descriptor);
 		//auto msg = proto->New();
 
@@ -105,10 +142,9 @@ public:
 		{
 			std::cout << var.pos() << std::endl;
 		}
-	}
 
-	Avatar _avatar;
-	
+		*/
+	}
 };
 
 int main()
