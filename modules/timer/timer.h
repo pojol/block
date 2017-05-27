@@ -47,8 +47,6 @@ namespace gsf
 
 		private:
 
-			uint64_t get_system_tick();
-
 			void delay_milliseconds(const gsf::Args &args, gsf::CallbackFunc callback);
 			void delay_day(const gsf::Args &args, gsf::CallbackFunc callback);
 			//void delay_week(std::tuple<gsf::utils::Any> args, gsf::EventHandlerPtr callback);
@@ -56,11 +54,21 @@ namespace gsf
 
             void remove_timer(const gsf::Args &args, gsf::CallbackFunc callback);
 		private:
+	
+			uint64_t get_system_tick();
+			uint64_t make_timer_id(uint64_t delay);
+
+			uint64_t start_time_ = get_system_tick();
+
+			uint64_t local_idx_ = 0;
+			uint64_t sequence_bit_ = 15;
+			uint16_t sequence_mask_ = (uint64_t)pow(2, sequence_bit_) - 1;
+
+		private:
 
 			uint32_t log_m_;
 
-			typedef std::map<uint64_t, std::list<TimerEventPtr>> TimerMap;
-
+			typedef std::map<uint64_t, TimerEventPtr> TimerMap;
 			TimerMap map_;
 		};
 

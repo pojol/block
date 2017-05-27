@@ -40,18 +40,17 @@ void gsf::modules::TimerModule::execute()
 	if (!map_.empty()) {
 
 		auto itr = map_.begin();
-		uint64_t _tick = get_system_tick();
+		uint64_t _now = get_system_tick() - start_time_;
+		uint64_t _time_id = itr->first;
 
-		while (itr->first < _tick)
+		while ((_time_id >> sequence_bit_) < _now)
 		{
-			for (auto it : itr->second)
-			{
-				dispatch(it->target_, eid::timer::timer_arrive, gsf::Args(it->timerid_));
-			}
+			dispatch(itr->second->target_, eid::timer::timer_arrive, gsf::Args(itr->second->timerid_));
 			map_.erase(itr);
 
 			if (!map_.empty()) {
 				itr = map_.begin();
+				_time_id = itr->first;
 			}
 			else {
 				break;
@@ -66,29 +65,31 @@ uint64_t gsf::modules::TimerModule::get_system_tick()
 	return (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
+uint64_t gsf::modules::TimerModule::make_timer_id(uint64_t delay)
+{
+	uint64_t _tick = 0;
+
+	_tick = get_system_tick() - start_time_ + delay;
+
+	_tick <<= sequence_bit_;
+	_tick |= (++local_idx_ & sequence_mask_);
+
+	return _tick;
+}
 
 void gsf::modules::TimerModule::delay_milliseconds(const gsf::Args &args, gsf::CallbackFunc callback)
 {
 	uint32_t _sender = args.pop_uint32(0);
 	uint32_t _milliseconds = args.pop_uint32(1);
 
-	// 不采用snowflake算法等方式生成唯一ID， 后续会通过module id构造
-	auto _tid = get_system_tick() + _milliseconds;
+	auto _tid = make_timer_id(_milliseconds);
 
 	auto _event = std::make_shared<TimerEvent>();
 	_event->target_ = _sender;
 	_event->timerid_ = _tid;
-
 	
-	auto itr = map_.find(_tid);
-	if (itr != map_.end()) {
-		itr->second.push_back(_event);
-	}
-	else {
-		std::list<TimerEventPtr> _list;
-		_list.push_back(_event);
-		map_.insert(std::make_pair(_tid, _list));
-	}
+	assert(map_.find(_tid) == map_.end());
+	map_.insert(std::make_pair(_tid, _event));
 
 	callback(gsf::Args(_tid));
 }
@@ -111,27 +112,22 @@ void gsf::modules::TimerModule::delay_day(const gsf::Args &args, gsf::CallbackFu
 	uint32_t _space_second = _hour * 60 * 60 + _minute * 60;
 
 	auto _event = std::make_shared<TimerEvent>();
-	uint64_t _tid = 0;
+	uint64_t _delay = 0;
 
 	if (_space_second > _passed_second){
-		_tid = (_second + seconds(_space_second - _passed_second)).time_since_epoch().count();
+		_delay = (_second + seconds(_space_second - _passed_second)).time_since_epoch().count();
 	}
 	else {
-		_tid = (_second + seconds((24 * 60 * 60) - _passed_second - _space_second)).time_since_epoch().count();
+		_delay = (_second + seconds((24 * 60 * 60) - _passed_second - _space_second)).time_since_epoch().count();
 	}
 
+	auto _tid = make_timer_id(_delay);
+
+	assert(map_.find(_tid) == map_.end());
 	_event->target_ = _sender;
 	_event->timerid_ = _tid;
 
-	auto itr = map_.find(_tid);
-	if (itr != map_.end()) {
-		itr->second.push_back(_event);
-	}
-	else {
-		std::list<TimerEventPtr> _list;
-		_list.push_back(_event);
-		map_.insert(std::make_pair(_tid, _list));
-	}
+	map_.insert(std::make_pair(_tid, _event));
 
 	callback(gsf::Args(_tid));
 }

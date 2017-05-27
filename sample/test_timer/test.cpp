@@ -52,14 +52,18 @@ public:
 
 	void init()
 	{
-		for (int i = 0; i < 100000; ++i)
+		auto _create = 100;
+		_surplus = _create;
+
+		for (int i = 0; i < _create; ++i)
 		{
-			dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::Args(get_module_id(), uint32_t(i * 1000)), [&](const gsf::Args &args) {
+			dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::Args(get_module_id(), uint32_t(i * 100)), [&](const gsf::Args &args) {
 				uint64_t _time_id = args.pop_uint64(0);
 				//log_f_(eid::log::info, "TestClickModule", gsf::make_args("regist time ", args->pop_uint64(0)));
 
 				if (idx_ > 3 && idx_ < 7) {
 					dispatch(timer_m_, eid::timer::remove_timer, gsf::Args(get_module_id(), _time_id), [&](const gsf::Args &args) {
+						_surplus--;
 					});
 				}
 
@@ -68,7 +72,8 @@ public:
 		}
 
 		listen(this, eid::timer::timer_arrive, [&](const gsf::Args &args, gsf::CallbackFunc callback) {
-			log_f_(eid::log::info, "TestClickModule", gsf::Args("arrive time ", args.pop_uint64(0)));
+			_surplus--;
+			log_f_(eid::log::info, "TestClickModule", gsf::Args("arrive time ", args.pop_uint64(0), " surplus ", _surplus));
 		});
 	}
 
@@ -79,6 +84,7 @@ private:
 	gsf::LogFunc log_f_;
 
 	uint32_t idx_ = 0;
+	uint32_t _surplus = 0;
 };
 
 
