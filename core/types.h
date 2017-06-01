@@ -5,11 +5,11 @@
 
 namespace gsf
 {
-	typedef uint32_t ModuleID;
-	static const uint32_t ModuleNil = 0;
+	typedef int32_t ModuleID;
+	static const int32_t ModuleNil = 0;
 
-	typedef uint32_t EventID;
-	static const uint32_t EventNil = 0;
+	typedef int32_t EventID;
+	static const int32_t EventNil = 0;
 
 	typedef uint64_t TimerID;
 	static const uint64_t TimerNil = 0;

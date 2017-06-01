@@ -74,11 +74,11 @@ public:
 	void before_init() override
 	{
 		dispatch(eid::app_id, eid::get_module, gsf::Args("LogModule"), [&](const gsf::Args &args) {
-			log_ = args.pop_uint32(0);
+			log_ = args.pop_int32(0);
 		});
 
 		dispatch(eid::app_id, eid::get_module, gsf::Args("LuaProxyModule"), [&](const gsf::Args &args) {
-			lua_ = args.pop_uint32(0);
+			lua_ = args.pop_int32(0);
 		});
 	}
 
@@ -121,7 +121,7 @@ public:
 	void before_init() override
 	{
 		dispatch(eid::app_id, eid::new_dynamic_module, gsf::Args("ConnectorModule"), [&](const gsf::Args &args){
-			connector_id_ = args.pop_uint32(0);
+			connector_id_ = args.pop_int32(0);
 
 			listen(connector_id_, eid::network::connector_init, std::bind(&Client::create_connector_succ, this, std::placeholders::_1));
 		});
@@ -135,17 +135,17 @@ public:
 		});
 
 		listen(this, eid::network::new_connect, [&](const gsf::Args &args, gsf::CallbackFunc callback) {
-			fd_ = args.pop_uint32(0);
+			fd_ = args.pop_int32(0);
 
 			send_(fd_, 1001, "hello");
 		});
 
 		dispatch(connector_id_, eid::network::recv_remote_callback, gsf::Args(
 			  get_module_id()
-			, uint32_t(1002)), std::bind(&Client::msg_handler, this, std::placeholders::_1));
+			, 1002), std::bind(&Client::msg_handler, this, std::placeholders::_1));
 
 		dispatch(connector_id_, eid::network::make_connector
-			, gsf::Args(get_module_id(), "127.0.0.1", uint32_t(8001)));
+			, gsf::Args(get_module_id(), "127.0.0.1", 8001));
 	}
 
 	void init() override 

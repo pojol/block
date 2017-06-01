@@ -33,7 +33,7 @@ void gsf::modules::LuaProxyModule::before_init()
 {
 	dispatch(eid::app_id, eid::get_module, gsf::Args(std::string("LogModule")), [=](const gsf::Args &args)
 	{
-		log_m_ = args.pop_uint32(0);
+		log_m_ = args.pop_int32(0);
 	});
 }
 
@@ -119,7 +119,7 @@ void gsf::modules::LuaProxyModule::shut()
 
 void gsf::modules::LuaProxyModule::create_event(const gsf::Args &args, gsf::CallbackFunc callback)
 {
-	uint32_t _module_id = args.pop_uint32(0);
+	uint32_t _module_id = args.pop_int32(0);
 	std::string _dir_name = args.pop_string(1);
 	std::string _file_name = args.pop_string(2);
 
@@ -249,7 +249,7 @@ void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_na
 
 void gsf::modules::LuaProxyModule::destroy_event(const gsf::Args &args, gsf::CallbackFunc callback)
 {
-	uint32_t _module_id = args.pop_uint32(0);
+	uint32_t _module_id = args.pop_int32(0);
 	auto itr = std::find_if(lua_map_.begin(), lua_map_.end(), [&](StateMap::value_type t) {
 		return (t.first == _module_id);
 	});
@@ -283,7 +283,7 @@ int gsf::modules::LuaProxyModule::destroy(uint32_t module_id)
 
 void gsf::modules::LuaProxyModule::reload_event(const gsf::Args &args, gsf::CallbackFunc callback)
 {
-	uint32_t _module_id = args.pop_uint32(0);
+	uint32_t _module_id = args.pop_int32(0);
 
 	LuaProxy *lua = find_lua(_module_id);
 

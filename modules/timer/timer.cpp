@@ -15,7 +15,7 @@ gsf::modules::TimerModule::TimerModule()
 void gsf::modules::TimerModule::before_init()
 {
 	dispatch(eid::app_id, eid::get_module, gsf::Args("LogModule"), [&](const gsf::Args &args) {
-		log_m_ = args.pop_uint32(0);
+		log_m_ = args.pop_int32(0);
 	});
 }
 
@@ -79,8 +79,8 @@ uint64_t gsf::modules::TimerModule::make_timer_id(uint64_t delay)
 
 void gsf::modules::TimerModule::delay_milliseconds(const gsf::Args &args, gsf::CallbackFunc callback)
 {
-	uint32_t _sender = args.pop_uint32(0);
-	uint32_t _milliseconds = args.pop_uint32(1);
+	uint32_t _sender = args.pop_int32(0);
+	uint32_t _milliseconds = args.pop_int32(1);
 
 	auto _tid = make_timer_id(_milliseconds);
 
@@ -99,9 +99,9 @@ void gsf::modules::TimerModule::delay_day(const gsf::Args &args, gsf::CallbackFu
 {
 	using namespace std::chrono;
 
-	uint32_t _sender = args.pop_uint32(0);
-	uint32_t _hour = args.pop_uint32(1);
-	uint32_t _minute = args.pop_uint32(2);
+	uint32_t _sender = args.pop_int32(0);
+	uint32_t _hour = args.pop_int32(1);
+	uint32_t _minute = args.pop_int32(2);
 
 	typedef duration<int, std::ratio<60 * 60 * 24>> dur_day;
 	time_point<system_clock, dur_day> _today = time_point_cast<dur_day>(system_clock::now());
@@ -135,13 +135,13 @@ void gsf::modules::TimerModule::delay_day(const gsf::Args &args, gsf::CallbackFu
 
 void gsf::modules::TimerModule::remove_timer(const gsf::Args &args, gsf::CallbackFunc callback)
 {
-	uint32_t _sender = args.pop_uint32(0);
+	uint32_t _sender = args.pop_int32(0);
 	uint64_t _timer_id = args.pop_uint64(1);
 
 	auto itr = map_.find(_timer_id);
 	if (itr != map_.end()) {
 		map_.erase(itr);
 
-		callback(gsf::Args(uint32_t(1)));
+		callback(gsf::Args(1));
 	}
 }

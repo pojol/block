@@ -64,7 +64,7 @@ void gsf::network::ConnectorModule::before_init()
 
 	dispatch(eid::app_id, eid::get_module, gsf::Args(std::string("LogModule")), [=](const gsf::Args &args)
 	{
-		log_module_ = args.pop_uint32(0);
+		log_module_ = args.pop_int32(0);
 	});
 }
 
@@ -100,9 +100,9 @@ void gsf::network::ConnectorModule::after_shut()
 
 void gsf::network::ConnectorModule::make_connector(const gsf::Args &args, gsf::CallbackFunc callback)
 {
-	uint32_t _module_id = args.pop_uint32(0);
+	uint32_t _module_id = args.pop_int32(0);
 	std::string _ip = args.pop_string(1);
-	uint32_t _port = args.pop_uint32(2);
+	uint32_t _port = args.pop_int32(2);
 
 	module_id_ = _module_id;
 
@@ -146,15 +146,15 @@ void gsf::network::ConnectorModule::make_connector(const gsf::Args &args, gsf::C
 
 		session_ptr_->set_log_module(log_module_);
 
-		dispatch(_module_id, eid::network::new_connect, gsf::Args(uint32_t(_fd)));
+		dispatch(_module_id, eid::network::new_connect, gsf::Args(int32_t(_fd)));
 	}
 }
 
 
 void gsf::network::ConnectorModule::bind_remote(const gsf::Args &args, gsf::CallbackFunc callback)
 {
-	uint32_t _module_id = args.pop_uint32(0);
-	uint32_t _msg_id = args.pop_uint32(1);
+	uint32_t _module_id = args.pop_int32(0);
+	uint32_t _msg_id = args.pop_int32(1);
 
 	auto _info_ptr = std::make_shared<RemoteInfo>(_module_id, _msg_id, callback);
 	binder_->regist(_info_ptr);

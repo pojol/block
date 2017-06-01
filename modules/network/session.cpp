@@ -116,7 +116,7 @@ void gsf::network::Session::read(::bufferevent *bev)
 		auto _func = binder_->get_func(_msg_id);
 		if (_func) {
 			std::string _str(_blockptr->buf_, _blockptr->size_);	//tmp
-			_func(gsf::Args(uint32_t(fd_), uint32_t(_msg_id), _str));
+			_func(gsf::Args(fd_, _msg_id, _str));
 		}
 
 		_buf_len = evbuffer_get_length(in_buf_);
@@ -134,5 +134,5 @@ void gsf::network::Session::dis_connect(int32_t err)
 {
 	disconnect_callback_(fd_);
 
-	dispatch(module_id_, eid::network::dis_connect, gsf::Args(uint32_t(fd_), int32_t(err)));
+	dispatch(module_id_, eid::network::dis_connect, gsf::Args(fd_, err));
 }

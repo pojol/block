@@ -59,11 +59,11 @@ public:
 	void before_init() override
 	{
 		dispatch(eid::app_id, eid::get_module, gsf::Args("LogModule"), [&](const gsf::Args &args) {
-			log_m_ = args.pop_uint32(0);
+			log_m_ = args.pop_int32(0);
 		});
 
 		dispatch(eid::app_id, eid::get_module, gsf::Args("Client2LoginServer"), [&](const gsf::Args &args) {
-			client2login_ = args.pop_uint32(0);
+			client2login_ = args.pop_int32(0);
 		});
 	}
 
@@ -77,24 +77,24 @@ public:
 		//test
 		listen(this, eid::network::new_connect
 			, [=](const gsf::Args &args, gsf::CallbackFunc callback) {
-			log_f_(eid::log::info, "EntityMgr", gsf::Args("new connect fd : ", args.pop_uint32(0)));
+			log_f_(eid::log::info, "EntityMgr", gsf::Args("new connect fd : ", args.pop_int32(0)));
 		});
 
 		listen(this, eid::network::dis_connect
 			, [=](const gsf::Args &args, gsf::CallbackFunc callback) {
-			log_f_(eid::log::info, "EntityMgr", gsf::Args("dis connect fd : ", args.pop_uint32(0)));
+			log_f_(eid::log::info, "EntityMgr", gsf::Args("dis connect fd : ", args.pop_int32(0)));
 		});
 
 		dispatch(client2login_, eid::network::send_remote_callback, gsf::Args(), [&](const gsf::Args &args) {
 			send_ = args.pop_remote_callback(0);
 		});
 
-		dispatch(client2login_, eid::network::make_acceptor, gsf::Args(get_module_id(), "127.0.0.1", uint32_t(8001)));
+		dispatch(client2login_, eid::network::make_acceptor, gsf::Args(get_module_id(), "127.0.0.1", 8001));
 	
 
 		// bind msg
 		auto arr = {
-			std::make_pair(uint32_t(1001), std::bind(&EntityMgr::test_remote, this
+			std::make_pair(1001, std::bind(&EntityMgr::test_remote, this
 				, std::placeholders::_1)),
 		};
 
@@ -102,7 +102,7 @@ public:
 		{
 			//! 向协议绑定器申请，module 和 协议的绑定.
 			dispatch(client2login_, eid::network::recv_remote_callback
-				, gsf::Args(get_module_id(), uint32_t(1001))
+				, gsf::Args(get_module_id(), 1001)
 				, std::bind(&EntityMgr::test_remote, this, std::placeholders::_1));
 		}
 	}
@@ -119,7 +119,7 @@ public:
 
 	void test_remote(const gsf::Args &args)
 	{
-		auto fd = args.pop_uint32(0);
+		auto fd = args.pop_int32(0);
 
 		//dispatch(log_, eid::log::info, gsf::Args(str));
 		second_pack_num_++;

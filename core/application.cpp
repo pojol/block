@@ -66,7 +66,7 @@ void gsf::Application::init_cfg(const gsf::AppConfig &cfg)
 
 	listen(this, eid::delete_dynamic_module, [=](const gsf::Args &args, CallbackFunc callback) {
 
-		uint32_t _module_id = args.pop_uint32(0);
+		uint32_t _module_id = args.pop_int32(0);
 		unregist_list_.push_back(_module_id);
 
 	});
@@ -196,9 +196,9 @@ void gsf::Application::run()
 
 }
 
-uint32_t gsf::Application::make_module_id()
+int32_t gsf::Application::make_module_id()
 {
-	if (module_idx_ == UINT32_MAX) {
+	if (module_idx_ == INT32_MAX) {
 		module_idx_ = 2;
 	}
 

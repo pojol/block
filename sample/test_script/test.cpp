@@ -66,7 +66,7 @@ public:
 	void before_init()
 	{
 		dispatch(eid::app_id, eid::get_module, gsf::Args("LuaProxyModule"), [&](const gsf::Args &args) {
-			luaproxy_m_ = args.pop_uint32(0);
+			luaproxy_m_ = args.pop_int32(0);
 		});
 	}
 

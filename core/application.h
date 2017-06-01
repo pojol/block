@@ -52,7 +52,7 @@ namespace gsf
 
 	protected:
 		//！ 临时先写在这里，未来如果支持分布式可能要放在其他地方生成，保证服务器集群唯一。
-		uint32_t make_module_id();
+		int32_t make_module_id();
 
 		void unregist_dynamic_module(uint32_t module_id);
 
@@ -66,8 +66,8 @@ namespace gsf
 		std::list<Module *> module_list_;
 		std::list<ModuleID> unregist_list_;
 
-		std::unordered_map<uint32_t, uint32_t> module_id_map_;
-		std::unordered_map<std::string, uint32_t> module_name_map_;
+		std::unordered_map<uint32_t, int32_t> module_id_map_;
+		std::unordered_map<std::string, int32_t> module_name_map_;
 
 		std::multimap<uint64_t, Frame> halfway_frame_;
 
@@ -75,7 +75,7 @@ namespace gsf
 
 		uint64_t cur_frame_;
 
-		uint32_t module_idx_;
+		int32_t module_idx_;
 
 		gsf::AppConfig cfg_;
 

@@ -95,9 +95,9 @@ void gsf::network::AcceptorModule::after_shut()
 
 void gsf::network::AcceptorModule::make_acceptor(const gsf::Args &args, gsf::CallbackFunc callback)
 {
-	uint32_t _module_id = args.pop_uint32(0);
+	uint32_t _module_id = args.pop_int32(0);
 	std::string _ip = args.pop_string(1);
-	uint32_t _port = args.pop_uint32(2);
+	uint32_t _port = args.pop_int32(2);
 
 	module_id_ = _module_id;	//! 绑定代理Module的id
 	accept_bind(_ip, _port);
@@ -105,8 +105,8 @@ void gsf::network::AcceptorModule::make_acceptor(const gsf::Args &args, gsf::Cal
 
 void gsf::network::AcceptorModule::bind_remote(const gsf::Args &args, gsf::CallbackFunc callback)
 {
-	uint32_t _module_id = args.pop_uint32(0);
-	uint32_t _msg_id = args.pop_uint32(1);
+	uint32_t _module_id = args.pop_int32(0);
+	uint32_t _msg_id = args.pop_int32(1);
 
 	auto _info_ptr = std::make_shared<RemoteInfo>(_module_id, _msg_id, callback);
 	binder_->regist(_info_ptr);
@@ -166,7 +166,7 @@ void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, 
 		bufferevent_enable(bev, EV_READ | EV_WRITE);
 
 		// dispatch event connect
-		network_ptr_->dispatch(network_ptr_->module_id_, eid::network::new_connect, gsf::Args(uint32_t(fd)));
+		network_ptr_->dispatch(network_ptr_->module_id_, eid::network::new_connect, gsf::Args(int32_t(fd)));
 	}
 }
 

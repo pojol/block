@@ -24,25 +24,92 @@
 	#include <unistd.h>
 #endif
 
-
-
-class TestClickModule
-        : public gsf::Module
-        , public gsf::IEvent
+struct Case_DelayMilliseconds
 {
-public:
-	TestClickModule()
-		: Module("TestClickModule")
+	void test()
+	{
+		create_timer_(2000, [&](gsf::Args args) {
+			timer_id_ = args.pop_uint64(0);
+			log_f_(eid::log::info, "Case_DelayMilliseconds", gsf::Args("regist success! timer id = ", timer_id_));
+		});
+	}
+
+	void on_timer()
+	{
+		log_f_(eid::log::info, "Case_DelayMilliseconds", gsf::Args("arrive! timer id = ", timer_id_));
+		timer_id_ = gsf::TimerNil;
+	}
+
+	gsf::LogFunc log_f_;
+	std::function<void(int32_t, gsf::CallbackFunc cb)> create_timer_;
+
+	gsf::TimerID timer_id_;
+	
+};
+
+struct Case_DelayDay
+{
+	void test()
+	{
+		create_timer_(6, 0, [&](gsf::Args args) {
+			timer_id_ = args.pop_uint64(0);
+			log_f_(eid::log::info, "Case_DelayDay", gsf::Args("regist success! timer id = ", args.pop_uint64(0)));
+		});
+	}
+
+	void on_timer()
+	{
+		log_f_(eid::log::info, "Case_DelayDay", gsf::Args("arrive! timer id = ", timer_id_));
+		timer_id_ = gsf::TimerNil;
+	}
+
+	gsf::LogFunc log_f_;
+	std::function<void(int32_t, int32_t, gsf::CallbackFunc cb)> create_timer_;
+
+	gsf::TimerID timer_id_;
+};
+
+struct Case_RemoveTimer
+{
+
+	void test()
+	{
+		create_timer_(1000, [&](gsf::Args args) {
+			timer_id_ = args.pop_uint64(0);
+			log_f_(eid::log::info, "Case_RemoveTimer", gsf::Args("regist success! timer id = ", timer_id_));
+		});
+
+		remove_timer_(timer_id_, [&](gsf::Args args) {
+			log_f_(eid::log::info, "Case_RemoveTimer", gsf::Args("remove ret = ", args.pop_int32(0), " timer id = ", timer_id_));
+		});
+	}
+
+	gsf::LogFunc log_f_;
+	std::function<void(int32_t, gsf::CallbackFunc cb)> create_timer_;
+	std::function<void(gsf::TimerID, gsf::CallbackFunc cb)> remove_timer_;
+
+	gsf::TimerID timer_id_;
+};
+
+
+struct TestCaseModule
+	: public gsf::Module
+	, public gsf::IEvent
+{
+	TestCaseModule()
+		: Module("TestCaseModule")
 	{}
+
+	virtual ~TestCaseModule() {}
 
 	void before_init()
 	{
 		dispatch(eid::app_id, eid::get_module, gsf::Args("TimerModule"), [&](const gsf::Args &args) {
-			timer_m_ = args.pop_uint32(0);
+			timer_m_ = args.pop_int32(0);
 		});
 
 		dispatch(eid::app_id, eid::get_module, gsf::Args("LogModule"), [&](const gsf::Args &args) {
-			log_m_ = args.pop_uint32(0);
+			log_m_ = args.pop_int32(0);
 		});
 
 		dispatch(log_m_, eid::log::log_callback, gsf::Args(), [&](const gsf::Args &args) {
@@ -52,41 +119,51 @@ public:
 
 	void init()
 	{
-		auto _create = 100;
-		_surplus = _create;
+		auto _delay_millisecoinds = [&](int32_t delay, gsf::CallbackFunc cb) {
+			dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::Args(get_module_id(), delay), cb);
+		};
 
-		for (int i = 0; i < _create; ++i)
-		{
-			dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::Args(get_module_id(), uint32_t(i * 100)), [&](const gsf::Args &args) {
-				uint64_t _time_id = args.pop_uint64(0);
-				//log_f_(eid::log::info, "TestClickModule", gsf::make_args("regist time ", args->pop_uint64(0)));
+		auto _delay_day = [&](int32_t hour, int32_t min, gsf::CallbackFunc cb) {
+			dispatch(timer_m_, eid::timer::delay_day, gsf::Args(get_module_id(), hour, min), cb);
+		};
 
-				if (idx_ > 3 && idx_ < 7) {
-					dispatch(timer_m_, eid::timer::remove_timer, gsf::Args(get_module_id(), _time_id), [&](const gsf::Args &args) {
-						_surplus--;
-					});
-				}
+		auto _remove_timer = [&](uint64_t timer_id, gsf::CallbackFunc cb) {
+			dispatch(timer_m_, eid::timer::remove_timer, gsf::Args(get_module_id(), timer_id), cb);
+		};
 
-				idx_++;
-			});
-		}
+		case_delaymillseconds_.create_timer_ = _delay_millisecoinds;
+		case_delaymillseconds_.log_f_ = log_f_;
+		case_delayday_.create_timer_ = _delay_day;
+		case_delayday_.log_f_ = log_f_;
+		case_remove_timer_.create_timer_ = _delay_millisecoinds;
+		case_remove_timer_.remove_timer_ = _remove_timer;
+		case_remove_timer_.log_f_ = log_f_;
 
-		listen(this, eid::timer::timer_arrive, [&](const gsf::Args &args, gsf::CallbackFunc callback) {
-			_surplus--;
-			log_f_(eid::log::info, "TestClickModule", gsf::Args("arrive time ", args.pop_uint64(0), " surplus ", _surplus));
+		listen(this, eid::timer::timer_arrive, [&](gsf::Args args, gsf::CallbackFunc cb) {
+
+			auto _timer_id = args.pop_uint64(0);
+			if (_timer_id == case_delaymillseconds_.timer_id_) {
+				case_delaymillseconds_.on_timer();
+			}
+			if (_timer_id == case_delayday_.timer_id_) {
+				case_delayday_.on_timer();
+			}
 		});
+
+		case_delaymillseconds_.test();
+		case_delayday_.test();
+		case_remove_timer_.test();
 	}
 
 private:
 	uint32_t timer_m_;
-
 	uint32_t log_m_;
 	gsf::LogFunc log_f_;
 
-	uint32_t idx_ = 0;
-	uint32_t _surplus = 0;
+	Case_DelayMilliseconds case_delaymillseconds_;
+	Case_DelayDay case_delayday_;
+	Case_RemoveTimer case_remove_timer_;
 };
-
 
 int main()
 {
@@ -97,7 +174,8 @@ int main()
 
 	app.regist_module(new gsf::modules::LogModule);
 	app.regist_module(new gsf::modules::TimerModule);
-	app.regist_module(new TestClickModule);
+
+	app.regist_module(new TestCaseModule);
 
 	app.run();
 
