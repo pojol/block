@@ -164,9 +164,6 @@ void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, 
 		auto _session_ptr = network_ptr_->session_mgr_->make_session(fd, network_ptr_->module_id_, network_ptr_->binder_);
 		bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, _session_ptr.get());
 		bufferevent_enable(bev, EV_READ | EV_WRITE);
-
-		// dispatch event connect
-		network_ptr_->dispatch(network_ptr_->module_id_, eid::network::new_connect, gsf::Args(int32_t(fd)));
 	}
 }
 

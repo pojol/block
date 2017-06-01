@@ -145,8 +145,6 @@ void gsf::network::ConnectorModule::make_connector(const gsf::Args &args, gsf::C
 		bufferevent_enable(buffer_event_ptr_, EV_READ | EV_WRITE);
 
 		session_ptr_->set_log_module(log_module_);
-
-		dispatch(_module_id, eid::network::new_connect, gsf::Args(int32_t(_fd)));
 	}
 }
 

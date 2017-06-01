@@ -32,6 +32,7 @@ namespace gsf
 			void read(::bufferevent *bev);
 
 			void dis_connect(int32_t err);
+			void new_connect();
 
 			int32_t get_id() const { return fd_; }
 			uint32_t get_module_id() const { return module_id_; }

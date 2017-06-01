@@ -64,6 +64,12 @@ void gsf::network::Session::err_cb(::bufferevent *bev, short what, void *ctx)
 			break;
 		}
 
+		if (what & BEV_EVENT_CONNECTED) {
+			Session * _session_ptr = static_cast<Session *>(ctx);
+			_session_ptr->new_connect();
+			break;
+		}
+
 	} while (0);
 
 	if (0 != _result) {
@@ -135,4 +141,9 @@ void gsf::network::Session::dis_connect(int32_t err)
 	disconnect_callback_(fd_);
 
 	dispatch(module_id_, eid::network::dis_connect, gsf::Args(fd_, err));
+}
+
+void gsf::network::Session::new_connect()
+{
+	dispatch(module_id_, eid::network::new_connect, gsf::Args(fd_));
 }
