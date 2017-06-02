@@ -5,12 +5,16 @@ if(WIN32)
 	INCLUDE_DIRECTORIES(
 		${GSF_SOURCE_DIR}/
 		${GSF_SOURCE_DIR}/modules
+		${GSF_SOURCE_DIR}/3rd/lua-5.3.4/src
+		${GSF_SOURCE_DIR}/3rd/sol2-2.16.0
 	)
 endif()
 if(UNIX)
 	INCLUDE_DIRECTORIES(
 		${GSF_SOURCE_DIR}/
 		${GSF_SOURCE_DIR}/modules
+		${GSF_SOURCE_DIR}/3rd/lua53/lua-5.3.4/src
+		${GSF_SOURCE_DIR}/3rd/sol2
 	)
 endif()
 if(APPLE)
@@ -53,8 +57,8 @@ if(MSVC)
       endif()
     endforeach()
 
-        TARGET_LINK_LIBRARIES(test_timer ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib gsf_core.lib timer.lib glog.lib log.lib)
+        TARGET_LINK_LIBRARIES(test_timer ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib gsf_core.lib timer.lib glog.lib log.lib lua53.lib pbc.lib pbc_lua.lib lua_proxy.lib)
 elseif(UNIX)
-        TARGET_LINK_LIBRARIES(test_timer ${CMAKE_THREAD_LIBS_INIT} liblog.a libglog.a libgsf_core.a libtimer.a)
+        TARGET_LINK_LIBRARIES(test_timer ${CMAKE_THREAD_LIBS_INIT} liblog.a libglog.a libgsf_core.a libtimer.a liblua_proxy.a)
 elseif(APPLE)
 endif()

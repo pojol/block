@@ -62,7 +62,7 @@ namespace gsf
 
 			uint64_t local_idx_ = 0;
 			uint64_t sequence_bit_ = 15;
-			uint16_t sequence_mask_ = (uint64_t)pow(2, sequence_bit_) - 1;
+			uint64_t sequence_mask_ = (uint64_t)pow(2, sequence_bit_) - 1;
 
 		private:
 

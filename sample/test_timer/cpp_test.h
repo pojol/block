@@ -18,12 +18,6 @@
 #include <timer/timer.h>
 #include <log/log.h>
 
-#if defined(WIN32)
-	#include <windows.h>
-#else
-	#include <unistd.h>
-#endif
-
 struct Case_DelayMilliseconds
 {
 	void test()
@@ -164,20 +158,3 @@ private:
 	Case_DelayDay case_delayday_;
 	Case_RemoveTimer case_remove_timer_;
 };
-
-int main()
-{
-	gsf::Application app;
-	gsf::AppConfig cfg;
-	cfg.is_watch_pref = true;
-	app.init_cfg(cfg);
-
-	app.regist_module(new gsf::modules::LogModule);
-	app.regist_module(new gsf::modules::TimerModule);
-
-	app.regist_module(new TestCaseModule);
-
-	app.run();
-
-	return 0;
-}

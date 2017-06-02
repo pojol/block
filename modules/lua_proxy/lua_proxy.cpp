@@ -3,6 +3,8 @@
 
 #include <algorithm>
 
+int luaopen_protobuf_c(lua_State *L);
+
 std::string Traceback(lua_State * _state)
 {
 	lua_Debug info;
@@ -184,6 +186,9 @@ void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_na
 
 	try
 	{
+		// set pbc to lua global
+		luaopen_protobuf_c(_lua->state_.lua_state());
+
 		auto _ret = _lua->state_.do_file(_path.c_str());
 		if (_ret) {
 			std::string _err = Traceback(_lua->state_.lua_state()) + " build err " 
@@ -202,9 +207,11 @@ void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_na
 
 	_lua->state_.new_usertype<gsf::Args>("Args"
 		, "push_uint32", &Args::push_uint32
+		, "push_int32", &Args::push_int32
 		, "push_string", &Args::push_string
 		, "pop_string", &Args::pop_string
 		, "pop_uint32", &Args::pop_uint32
+		, "pop_int32", &Args::pop_int32
 		, "pop_uint64", &Args::pop_uint64
 		, "push_remote_callback", &Args::push_remote_callback
 		, "pop_remote_callback", &Args::pop_remote_callback

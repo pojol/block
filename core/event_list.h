@@ -92,6 +92,11 @@ namespace eid
 		const uint32_t remove = 5002;
 		const uint32_t load = 5003;
 	}
+
+	namespace sample
+	{
+		const uint32_t get_proc_path = 6001;
+	}
 }
 
 #endif

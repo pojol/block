@@ -369,6 +369,11 @@ namespace gsf
 			add(value);
 		}
 
+		void push_int32(const int32_t value)
+		{
+			add(value);
+		}
+
 		void push_string(const std::string &value)
 		{
 			add(value);

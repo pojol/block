@@ -9,7 +9,7 @@ function dispatch(...)
 		
 		if k > 2 then
 			if type(v) == "number" then
-				_args:push_uint32(v)
+				_args:push_int32(v)
 			end
 			if type(v) == "string" then
 				_args:push_string(v)
@@ -42,7 +42,7 @@ function cb_dispatch(...)
 		
 		if k > 2 and k < _len then
 			if type(v) == "number" then
-				_args:push_uint32(v)
+				_args:push_int32(v)
 			end
 			if type(v) == "string" then
 				_args:push_string(v)
@@ -66,8 +66,6 @@ end
 function listen(self_id, event_id, func)
 	event:llisten(module_id, self_id, event_id, func)
 end
-
-g_log_id_ = 0
 
 function print_info( ... )
     arg = { ... }

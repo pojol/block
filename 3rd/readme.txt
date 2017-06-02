@@ -38,3 +38,11 @@ wget -P /home/xx/gsf/3rd/lua53 http://www.lua.org/ftp/lua-5.3.4.tar.gz
 tar -xzvf ./lua-5.3.4.tar.gz
 make linux
 cp liblua.a /home/xx/gsf/lib/linux/
+
+pbc编译
+
+git clone https://github.com/owent-contrib/pbc.git
+git checkout proto_v3
+window --
+建立build目录 ，cmake .. 编译出pdb.lib
+将gsf/3rd目录的 pbc-lua53.c 编译成pdb_lua.lib 

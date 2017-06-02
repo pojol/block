@@ -1,4 +1,4 @@
-/build/*
+build/*
 3rd/libevent-2.0.22-stable/*
 3rd/*
 /.idea/*
