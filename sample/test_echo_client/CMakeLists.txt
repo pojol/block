@@ -1,4 +1,4 @@
-PROJECT(test_echo_client)
+﻿PROJECT(test_echo_client)
 
 #引用头文件目录
 if(WIN32)
@@ -24,7 +24,7 @@ if(APPLE)
     INCLUDE_DIRECTORIES(
             ${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
             ${GSF_SOURCE_DIR}/
-			${GSF_SOURCE_DIR}/modules
+	    ${GSF_SOURCE_DIR}/modules
 	)
 endif()
 
@@ -61,7 +61,7 @@ if(MSVC)
       endif()
     endforeach()
 
-        TARGET_LINK_LIBRARIES(test_echo_client libevent.lib libevent_core.lib libevent_extras.lib network.lib gsf_core.lib ws2_32.lib glog.lib log.lib lua_script.lib lua53.lib)
+        TARGET_LINK_LIBRARIES(test_echo_client libevent.lib libevent_core.lib libevent_extras.lib network.lib gsf_core.lib ws2_32.lib glog.lib log.lib lua53.lib pbc.lib pbc_lua.lib lua_proxy.lib libprotobufd.lib)
 endif()
 if(UNIX)
         TARGET_LINK_LIBRARIES(test_echo_client  ${CMAKE_THREAD_LIBS_INIT} libnetwork.a libevent.a libevent_core.a libevent_extra.a libtimer.a libgsf_core.a liblog.a libglog.a liblua_proxy.a)

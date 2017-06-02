@@ -28,6 +28,8 @@
 
 #include <random>
 
+#include "addressbook.pb.h"
+
 using namespace gsf;
 
 class Client2LoginServer
@@ -120,12 +122,18 @@ public:
 	void test_remote(const gsf::Args &args)
 	{
 		auto fd = args.pop_int32(0);
+		auto block = args.pop_string(2);
+
+		tutorial::Person _p;
+		_p.ParsePartialFromString(block);
+
+		std::cout << _p.name() << " " << _p.id() << " " << _p.email() << std::endl;
 
 		//dispatch(log_, eid::log::info, gsf::Args(str));
-		second_pack_num_++;
+		//second_pack_num_++;
 		//_info.set_name("world");
 		//Face.send_msg<Client2LoginServer>(this, fd, 1002, _info);
-		send_(fd, 1002, "gsf");
+		//send_(fd, 1002, "gsf");
 	}
 
 private :
