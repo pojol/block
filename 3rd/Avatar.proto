@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+
+//---------common----------------------
+message ItemInfo {
+	int64 id 		= 1;
+	uint32 dictId 	= 2;
+	string name 	= 3;
+}
+
+//-----------table----------------------
+
+message Avatar_bag {
+	int64 avatar_id = 1;
+	
+	uint32 pos = 2;
+	string item_info = 3;	// binary
+}
+
+message Avatar_equip {
+	int64 avatar_id = 1;
+	uint32 pos = 2;
+	
+	string item_info = 3;
+}
+
+message Avatar_mission {
+	int64 avatar_id = 1;
+	
+	uint32 mission_id = 2;
+}
+
+message Avatar {
+	enum State{
+		LOGIN_READY 	= 0;
+		LOGIN_ING		= 1;
+		LOGIN_SUCCESS 	= 2;
+		
+		GAMING			= 3;
+		
+		JUMP_READY		= 4;
+		JUMP_ING		= 5;
+		JUMP_SUCCESS	= 6;
+		
+		LOGOUT_READY	= 7;
+		LOGOUT_ING		= 8;
+		LOGOUT_SUCCESS	= 9;
+	}
+
+	int64 avatar_id		= 1;
+	string name 		= 2;
+	
+	State state 		= 3;
+	
+	uint32 hp 			= 4;
+	uint32 mp			= 5;
+	uint32 gold			= 6;
+	
+	repeated Avatar_bag bag = 7;
+	repeated Avatar_equip equip = 8;
+	repeated Avatar_mission mission = 9;
+	
+	// repeated Avatar_mail mail = 10;
+	// repeated Avatar_skill skill = 11;
+}
+
+message Guild_Member_info {
+	int64 guild_id = 1;
+	
+	int32 title = 2;
+	int32 
+}
+
+message Guild {
+	int64 guild_id = 1;
+	
+	int32 guild_gold = 2;
+	
+	// other ..
+	
+	repeated Guild_Member_info member_info = 3;
+}
