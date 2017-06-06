@@ -172,9 +172,7 @@ void gsf::network::AcceptorModule::send_msg(uint32_t fd, uint32_t msg_id, std::s
 	auto _session_ptr = session_mgr_->find(fd);
 	if (_session_ptr) {
 
-		auto _msg = std::make_shared<gsf::Block>(fd, msg_id, block.length());
-		memcpy(_msg->buf_ + _msg->pos_, block.c_str(), block.length());
-
+		auto _msg = std::make_shared<gsf::Block>(fd, msg_id, block);
 		_session_ptr->write(msg_id, _msg);
 	}
 }
