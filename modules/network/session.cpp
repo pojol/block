@@ -95,44 +95,39 @@ void gsf::network::Session::read(::bufferevent *bev)
 
 	uint32_t _buf_len = evbuffer_get_length(in_buf_);
 
-	char * _head = (char*)malloc(gsf::MSGLEN_PACKAGESIZE);
-	evbuffer_copyout(in_buf_, _head, gsf::MSGLEN_PACKAGESIZE);
+	uint32_t _msgheadlen = sizeof(MsgHeadLen);
 
-	uint32_t *_msg_size = reinterpret_cast<uint32_t*>(_head);
+	char * _head = (char*)malloc(_msgheadlen);
+	evbuffer_copyout(in_buf_, _head, _msgheadlen);
 
-	evbuffer *_buff = nullptr;
-	if (_buf_len >= *_msg_size) {
-		_buff = evbuffer_new();
-	}
+	uint32_t _msg_size = *reinterpret_cast<uint32_t*>(_head);
 
-	while (_buf_len >= *_msg_size)
-	{
-		evbuffer_remove_buffer(in_buf_, _buff, *_msg_size);
+	if (_buf_len >= _msg_size) {
 
-		evbuffer_remove(_buff, _head, gsf::MSGLEN_PACKAGESIZE);
-		uint32_t _msg_len = *reinterpret_cast<uint32_t*>(_head);
+		while (_buf_len >= _msg_size)
+		{
+			auto _block = std::make_shared<Block>(_msg_size);
+			evbuffer_remove(in_buf_, _block->buf_, _msg_size);	//! 将完整的包copy进msg_block.
 
-		evbuffer_remove(_buff, _head, gsf::MSGLEN_MSGID);
-		uint32_t _msg_id = *reinterpret_cast<MsgID*>(_head);
+			MsgHeadLen _msg_len = _block->pop_head_len();
+			MsgID _msg_id = _block->pop_msg_id();
 
-		//! 
-		auto _blockptr = std::make_shared<Block>(_msg_len - (gsf::MSGLEN_PACKAGESIZE + gsf::MSGLEN_MSGID));
-		evbuffer_remove(_buff, _blockptr->buf_, _blockptr->size_);
+			auto _func = binder_->get_func(_msg_id);
+			if (_func) {
+				std::string _str(_block->buf_, _block->get_body_len());	//tmp
+				_func(gsf::Args(fd_, _msg_id, _str));
+			}
 
-		auto _func = binder_->get_func(_msg_id);
-		if (_func) {
-			std::string _str(_blockptr->buf_, _blockptr->size_);	//tmp
-			_func(gsf::Args(fd_, _msg_id, _str));
+			_buf_len = evbuffer_get_length(in_buf_);
+			if (_buf_len > _msgheadlen) {
+				evbuffer_copyout(in_buf_, _head, _msgheadlen);
+				_msg_size = *reinterpret_cast<uint32_t*>(_head);
+			}
+			else {
+				break;
+			}
 		}
 
-		_buf_len = evbuffer_get_length(in_buf_);
-		if (_buf_len > gsf::MSGLEN_PACKAGESIZE) {
-			evbuffer_copyout(in_buf_, _head, gsf::MSGLEN_PACKAGESIZE);
-			_msg_size = reinterpret_cast<uint32_t*>(_head);
-		}
-		else {
-			break;
-		}
 	}
 }
 

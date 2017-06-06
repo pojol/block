@@ -23,13 +23,13 @@ namespace gsf
 	typedef int32_t ErrorID;
 	static const uint32_t ErrNil = 0;
 
+	typedef int32_t MsgHeadLen;
+	static const int32_t MsgHeadLenNil = 0;
 
 	static const uint32_t NETWORK_CONNECT_MAX = 65534;		//
 	static const uint32_t SESSION_READ_BUFFER_SIZE = 0;		//
 	static const uint32_t SESSION_WRITE_BUFFER_SIZE = 0;	//
 	
-	static const uint32_t MSGLEN_PACKAGESIZE = 4;			//
-	static const uint32_t MSGLEN_MSGID = 2;					//
 	static const uint32_t MSGLEN_CLIENTSIZE = 1024 * 4;		//
 	static const uint32_t MSGLEN_RPCSIZE = 1024 * 10;		//
 }

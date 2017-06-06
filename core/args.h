@@ -6,8 +6,6 @@
 #include <assert.h>
 #include <memory>
 
-#include "block.h"
-
 namespace gsf
 {
 	class Args;

@@ -5,6 +5,7 @@
 #include <event2/buffer.h>
 
 #include <core/event.h>
+#include "msg_block.h"
 
 #include <map>
 #include <memory>

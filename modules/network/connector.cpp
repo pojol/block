@@ -166,7 +166,6 @@ void gsf::network::ConnectorModule::need_close_session(int fd)
 
 void gsf::network::ConnectorModule::send_msg(uint32_t fd, uint32_t msg_id, std::string block)
 {
-	auto _msg = std::make_shared<gsf::Block>(fd, msg_id, block.length());
-	memcpy(_msg->buf_ + _msg->pos_, block.c_str(), block.length());
+	auto _msg = std::make_shared<gsf::Block>(fd, msg_id, block);
 	session_ptr_->write(msg_id, _msg);
 }
