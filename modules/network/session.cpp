@@ -109,12 +109,11 @@ void gsf::network::Session::read(::bufferevent *bev)
 			auto _block = std::make_shared<Block>(_msg_size);
 			evbuffer_remove(in_buf_, _block->buf_, _msg_size);	//! 将完整的包copy进msg_block.
 
-			MsgHeadLen _msg_len = _block->pop_head_len();
-			MsgID _msg_id = _block->pop_msg_id();
+			MsgID _msg_id = _block->get_msg_id();
 
 			auto _func = binder_->get_func(_msg_id);
 			if (_func) {
-				std::string _str(_block->buf_, _block->get_body_len());	//tmp
+				std::string _str(_block->buf_ + _block->get_head_size(), _block->get_body_size());	//tmp
 				_func(gsf::Args(fd_, _msg_id, _str));
 			}
 

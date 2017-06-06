@@ -37,29 +37,26 @@ namespace gsf
 			pos_ += sizeof(MsgHeadLen);
 		}
 
-		MsgHeadLen pop_head_len()
-		{
-			MsgHeadLen _len = *(MsgHeadLen*)(void*)buf_ + pos_;
-			pos_ += sizeof(MsgHeadLen);
-			return _len;
-		}
-
 		void push_msg_id(MsgID val, char *buf)
 		{
 			*(MsgID*)(void*)buf = val;
 			pos_ += sizeof(MsgID);
 		}
 
-		MsgID pop_msg_id()
+		MsgID get_msg_id()
 		{
-			MsgID _id = *(MsgID*)(void*)buf_ + pos_;
-			pos_ += sizeof(MsgID);
+			MsgID _id = *(MsgID*)(void*)(buf_ + sizeof(MsgHeadLen));
 			return _id;
 		}
 
-		int32_t get_body_len()
+		int32_t get_body_size()
 		{
 			return (size_ - (sizeof(MsgHeadLen) + sizeof(MsgID)));
+		}
+
+		int32_t get_head_size()
+		{
+			return (sizeof(MsgHeadLen) + sizeof(MsgID));
 		}
 
 		~Block()
