@@ -84,10 +84,10 @@ void gsf::network::ConnectorModule::execute()
 
 void gsf::network::ConnectorModule::shut()
 {
+	wipeout(this);
+
 	bufferevent_free(buffer_event_ptr_);
 	event_base_free(event_base_ptr_);
-
-	bind_clear(get_module_id());
 }
 
 void gsf::network::ConnectorModule::after_shut()

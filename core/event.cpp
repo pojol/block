@@ -1,4 +1,5 @@
 #include "event.h"
+#include <algorithm>
 
 
 void gsf::EventModule::execute()
@@ -15,53 +16,78 @@ gsf::EventModule::EventModule()
 
 void gsf::EventModule::bind_event(uint32_t type_id, uint32_t event, EventFunc func)
 {
-	auto regf = [&](InnerMap &itr) {
-		itr.insert(std::make_pair(event, func));
+	auto regf = [&](MIList &itr) {
+
+		ModuleIterfaceObj _obj;
+		_obj.event_id_ = event;
+		_obj.event_func_ = func;
+
+		itr.push_back(_obj);
 	};
 
 	auto typeItr = type_map_.find(type_id);
 	if (typeItr != type_map_.end()) {
 
-		auto eventItr = typeItr->second.find(event);
-		if (eventItr != typeItr->second.end()) {
+		auto listItr = typeItr->second;
+
+		auto fItr = std::find_if(listItr.begin(), listItr.end(), [&](MIList::value_type it) {
+			return (it.event_id_ == event);
+		});
+
+		if (fItr != listItr.end()) {
 			printf("repeated event!\n");
 			return;
 		}
-		
+
 		regf(typeItr->second);
 	}
 	else {
-		InnerMap _map;
-		regf(_map);
+		MIList _list;
+		regf(_list);
 
-		type_map_.insert(std::make_pair(type_id, _map));
+		type_map_.insert(std::make_pair(type_id, _list));
 	}
 }
 
-void gsf::EventModule::add_cmd(uint32_t type_id, uint32_t event, const gsf::Args &args, CallbackFunc callback /* = nullptr */)
+void gsf::EventModule::dispatch(uint32_t type_id, uint32_t event, const gsf::Args &args, CallbackFunc callback /* = nullptr */)
 {
 	auto tItr = type_map_.find(type_id);
 	if (tItr != type_map_.end()) {
 
-		auto iItr = tItr->second.find(event);
-		if (iItr != tItr->second.end()) {
-			iItr->second(args, callback);
+		auto listItr = tItr->second;
+		auto fItr = std::find_if(listItr.begin(), listItr.end(), [&](MIList::value_type it) {
+			return (it.event_id_ == event);
+		});
+
+		if (fItr != listItr.end()) {
+			fItr->event_func_(args, callback);
 		}
 	}
 }
 
-void gsf::EventModule::rmv_event(uint32_t module_id)
+void gsf::EventModule::rmv_event(ModuleID module_id)
 {
-	//! 清理消息协议事件相关的绑定
-	//auto itr = remote_map_.find(module_id);
-	//if (itr != remote_map_.end()) {
-	//	remote_map_.erase(itr);
-	//}
-
-	//! 清理listen相关的事件绑定
 	auto tItr = type_map_.find(module_id);
+
 	if (tItr != type_map_.end()) {
-		type_map_.erase(tItr);
+		tItr->second.clear();
+	}
+}
+
+void gsf::EventModule::rmv_event(ModuleID module_id, EventID event_id)
+{
+	auto tItr = type_map_.find(module_id);
+
+	if (tItr != type_map_.end()) {
+	
+		auto listItr = tItr->second;
+		auto fItr = std::find_if(listItr.begin(), listItr.end(), [&](MIList::value_type it) {
+			return (it.event_id_ == event_id);
+		});
+
+		if (fItr != listItr.end()) {
+			listItr.erase(fItr);
+		}
 	}
 }
 
@@ -79,17 +105,33 @@ void gsf::IEvent::listen(Module *target, uint32_t event, EventFunc func)
 	EventModule::get_ref().bind_event(target->get_module_id(), event, func);
 }
 
-void gsf::IEvent::listen(uint32_t self, uint32_t event, EventFunc func)
+void gsf::IEvent::listen(ModuleID self, uint32_t event, EventFunc func)
 {
 	EventModule::get_ref().bind_event(self, event, func);
 }
 
 void gsf::IEvent::dispatch(uint32_t target, uint32_t event, const Args &args, CallbackFunc callback /* = nullptr */)
 {
-	EventModule::get_ref().add_cmd(target, event, args, callback);
+	EventModule::get_ref().dispatch(target, event, args, callback);
 }
 
-void gsf::IEvent::bind_clear(uint32_t module_id)
+void gsf::IEvent::wipeout(ModuleID self)
 {
-	EventModule::get_ref().rmv_event(module_id);
+	EventModule::get_ref().rmv_event(self);
 }
+
+void gsf::IEvent::wipeout(Module *self, EventID event_id)
+{
+	EventModule::get_ref().rmv_event(self->get_module_id(), event_id);
+}
+
+void gsf::IEvent::wipeout(Module *self)
+{
+	EventModule::get_ref().rmv_event(self->get_module_id());
+}
+
+void gsf::IEvent::wipeout(ModuleID self, EventID event_id)
+{
+	EventModule::get_ref().rmv_event(self, event_id);
+}
+

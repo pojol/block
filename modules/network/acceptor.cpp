@@ -77,6 +77,7 @@ void gsf::network::AcceptorModule::execute()
 
 void gsf::network::AcceptorModule::shut()
 {
+	wipeout(this);
 	evconnlistener_free(accept_listener_);
 }
 
