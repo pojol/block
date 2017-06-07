@@ -1,3 +1,4 @@
+ADD_SUBDIRECTORY(test_dbproxy)
 ADD_SUBDIRECTORY(test_echo_client)
 ADD_SUBDIRECTORY(test_echo_server)
 ADD_SUBDIRECTORY(test_timer)
