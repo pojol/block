@@ -280,6 +280,10 @@ int gsf::modules::LuaProxyModule::destroy(uint32_t module_id)
 	}
 
 	LuaProxy *_lua = itr->second;
+	if (nullptr == _lua) {
+		assert(_lua);
+		return -1;
+	}
 
 	delete _lua;
 	_lua = nullptr;
@@ -293,6 +297,10 @@ void gsf::modules::LuaProxyModule::reload_event(const gsf::Args &args, gsf::Call
 	uint32_t _module_id = args.pop_int32(0);
 
 	LuaProxy *lua = find_lua(_module_id);
+	if (nullptr == lua) {
+		assert(lua);
+		return;
+	}
 
 	std::string _dir_name = lua->dir_name_;
 	std::string _file_name = lua->file_name_;

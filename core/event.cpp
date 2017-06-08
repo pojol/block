@@ -60,6 +60,11 @@ void gsf::EventModule::dispatch(uint32_t type_id, uint32_t event, const gsf::Arg
 		});
 
 		if (fItr != listItr.end()) {
+
+#ifdef WATCH_PERF
+			fItr->calls_++;
+#endif // WATCH_PERF
+
 			fItr->event_func_(args, callback);
 		}
 	}

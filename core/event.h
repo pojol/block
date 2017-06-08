@@ -13,6 +13,7 @@
 #include "types.h"
 
 #include <functional>
+#include <algorithm>
 #include <tuple>
 #include <list>
 #include <vector>
@@ -78,12 +79,62 @@ namespace gsf
 		void rmv_event(ModuleID module_id);
 		void rmv_event(ModuleID module_id, EventID event_id);
 
+#ifdef WATCH_PERF
+		std::string get_tick_info(uint32_t count, uint32_t tick_count)
+		{
+			auto c = tick_consume_ / 1000 / count;
+			char buf[20];
+			sprintf(buf, "%.3f", c);
+			sscanf(buf, "%f", &c);
+
+			std::string _info = get_module_name() + ":" + (buf)+" ms\n";
+
+			typedef std::vector<std::pair<int, std::string>> PFList;
+			std::vector<std::pair<int, std::string>> _pf_list;
+
+			for (auto &itr : type_map_)
+			{
+				for (MIList::iterator militr = itr.second.begin(); militr != itr.second.end(); ++militr)
+				{
+					_pf_list.push_back(std::make_pair(militr->calls_, "module " + std::to_string(itr.first) 
+						+ "\t event " + std::to_string(militr->event_id_) 
+						+ "\t calls " + std::to_string(militr->calls_) + "\n"));
+					militr->calls_ = 0;
+				}
+			}
+
+			std::sort(_pf_list.begin(), _pf_list.end(), [&](PFList::value_type l, PFList::value_type r) ->bool {
+				return (l > r);
+			});
+
+			int _idx = 0;
+			for (auto itr = _pf_list.begin(); itr != _pf_list.end(); ++itr, _idx++)
+			{
+				if (_idx < 10) {
+					_info += itr->second;
+				}
+				else {
+					break;
+				}
+			}
+
+			tick_consume_ = 0;
+			return _info;
+		}
+#endif // WATCH_PERF
+
+
     private:
 
 		struct ModuleIterfaceObj
 		{
 			EventID event_id_;
 			EventFunc event_func_;
+
+#ifdef WATCH_PERF
+			uint64_t calls_ = 0;
+
+#endif // WATCH_PERF
 		};
 
 		typedef std::vector<ModuleIterfaceObj> MIList;

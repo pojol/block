@@ -26,8 +26,8 @@ int main()
 	app.regist_module(new gsf::modules::LogModule);
 	app.regist_module(new gsf::modules::TimerModule);
 
-	//case_cpp_timer(app);
-	case_lua_timer(app);
+	case_cpp_timer(app);
+	//case_lua_timer(app);
 
 	app.run();
 

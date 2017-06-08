@@ -39,7 +39,7 @@ namespace gsf
 		double tick_consume_;
 		void add_tick_consume(double c) { tick_consume_ += c; }
 
-		std::string get_tick_info(uint32_t count, uint32_t tick_count) 
+		virtual std::string get_tick_info(uint32_t count, uint32_t tick_count) 
 		{
 			auto c = tick_consume_ / 1000 / count;
 			char buf[20];
