@@ -39,11 +39,11 @@ namespace gsf
 
 		protected:
 
-			void before_init();
+			void before_init() override;
 
-            void init();
+            void init() override;
 
-            void execute();
+            void execute() override;
 
 		private:
 

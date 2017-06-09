@@ -69,7 +69,7 @@ namespace gsf
 		EventModule();
 
 	protected:
-		void execute();
+		void execute() override;
 
 		void bind_event(uint32_t type_id, uint32_t event, EventFunc func);
 

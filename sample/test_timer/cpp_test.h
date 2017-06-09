@@ -96,7 +96,7 @@ struct TestCaseModule
 
 	virtual ~TestCaseModule() {}
 
-	void before_init()
+	void before_init() override
 	{
 		dispatch(eid::app_id, eid::get_module, gsf::Args("TimerModule"), [&](const gsf::Args &args) {
 			timer_m_ = args.pop_int32(0);
@@ -111,7 +111,7 @@ struct TestCaseModule
 		});
 	}
 
-	void init()
+	void init() override
 	{
 		auto _delay_millisecoinds = [&](int32_t delay, gsf::CallbackFunc cb) {
 			dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::Args(get_module_id(), delay), cb);

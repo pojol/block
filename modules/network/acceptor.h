@@ -26,13 +26,13 @@ namespace gsf
 			AcceptorModule(const std::string &name);
 			~AcceptorModule();
 
-			virtual void before_init();
-			virtual void init();
+			void before_init() override;
+			void init() override;
 
-			virtual void execute();
+			void execute() override;
 
-			virtual void shut();
-			virtual void after_shut();
+			void shut() override;
+			void after_shut() override;
 
 		private:
 

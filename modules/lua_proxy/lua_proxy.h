@@ -48,13 +48,10 @@ namespace gsf
 				: Module("LuaProxyModule")
 			{}
 
-			void before_init();
-
-			void init();
-
-			void execute();
-
-			void shut();
+			void before_init() override;
+			void init() override;
+			void execute() override;
+			void shut() override;
 
 		private:
 			//sol::variadic_args args

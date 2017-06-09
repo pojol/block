@@ -69,7 +69,7 @@ public:
 		});
 	}
 
-	void init()
+	void init() override
 	{
 		dispatch(log_m_, eid::log::log_callback, gsf::Args(), [&](const gsf::Args &args) {
 			log_f_ = args.pop_log_callback(0);

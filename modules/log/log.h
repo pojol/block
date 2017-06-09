@@ -18,13 +18,13 @@ namespace gsf
 			LogModule();
 			~LogModule() {}
 
-			void before_init();
+			void before_init() override;
 
-			void init();
+			void init() override;
 
-			void execute();
+			void execute() override;
 
-			void shut();
+			void shut() override;
 
 		private:
 
