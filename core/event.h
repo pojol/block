@@ -49,6 +49,8 @@ namespace gsf
 		*/
 		virtual void dispatch(uint32_t target, uint32_t event, const Args &args, CallbackFunc callback = nullptr);
 
+		virtual void boardcast(uint32_t event, const Args &args, CallbackFunc callback = nullptr);
+
 		/**!
 			移除module在event层上的绑定.
 		*/
@@ -74,6 +76,7 @@ namespace gsf
 		void bind_event(uint32_t type_id, uint32_t event, EventFunc func);
 
 		void dispatch(uint32_t type_id, uint32_t event, const gsf::Args &args, CallbackFunc callback = nullptr);
+		void boardcast(uint32_t event, const gsf::Args &args, CallbackFunc callback = nullptr);
 		///
 
 		void rmv_event(ModuleID module_id);

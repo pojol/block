@@ -70,6 +70,14 @@ void gsf::EventModule::dispatch(uint32_t type_id, uint32_t event, const gsf::Arg
 	}
 }
 
+void gsf::EventModule::boardcast(uint32_t event, const gsf::Args &args, CallbackFunc callback /*= nullptr*/)
+{
+	for (auto &it : type_map_)
+	{
+		dispatch(it.first, event, args, callback);
+	}
+}
+
 void gsf::EventModule::rmv_event(ModuleID module_id)
 {
 	auto tItr = type_map_.find(module_id);
@@ -118,6 +126,11 @@ void gsf::IEvent::listen(ModuleID self, uint32_t event, EventFunc func)
 void gsf::IEvent::dispatch(uint32_t target, uint32_t event, const Args &args, CallbackFunc callback /* = nullptr */)
 {
 	EventModule::get_ref().dispatch(target, event, args, callback);
+}
+
+void gsf::IEvent::boardcast(uint32_t event, const Args &args, CallbackFunc callback /*= nullptr*/)
+{
+	EventModule::get_ref().boardcast(event, args, callback);
 }
 
 void gsf::IEvent::wipeout(ModuleID self)

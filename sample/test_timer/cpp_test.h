@@ -133,7 +133,7 @@ struct TestCaseModule
 		case_remove_timer_.remove_timer_ = _remove_timer;
 		case_remove_timer_.log_f_ = log_f_;
 
-		listen(this, eid::timer::timer_arrive, [&](gsf::Args args, gsf::CallbackFunc cb) {
+		listen(this, eid::timer::timer_arrive, [&](const gsf::Args &args, gsf::CallbackFunc cb) {
 
 			auto _timer_id = args.pop_uint64(0);
 			if (_timer_id == case_delaymillseconds_.timer_id_) {

@@ -31,6 +31,8 @@ void gsf::modules::TimerModule::init()
 	
 	listen(this, eid::timer::remove_timer
 		, std::bind(&TimerModule::remove_timer, this, _1, _2));
+
+	boardcast(eid::module_init_succ, gsf::Args(get_module_id()));
 }
 
 void gsf::modules::TimerModule::execute()

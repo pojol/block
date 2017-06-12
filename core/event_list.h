@@ -21,6 +21,8 @@ namespace eid
 	const uint32_t new_dynamic_module = 102;
 	const uint32_t delete_dynamic_module = 103;
 
+	const uint32_t module_init_succ = 104;
+
 	namespace log
 	{
 		//const uint32_t init = 1001;	初始化改为在自己模块中实现，regist即初始化
@@ -88,9 +90,8 @@ namespace eid
 
 	namespace db_proxy
 	{
-		const uint32_t update = 5001;
-		const uint32_t remove = 5002;
-		const uint32_t load = 5003;
+		const uint32_t redis_connect = 5001;
+		const uint32_t redis_command = 5002;
 	}
 
 	namespace sample

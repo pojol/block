@@ -1,12 +1,10 @@
-PROJECT(lua_proxy)
+PROJECT(db_proxy)
 
 if(WIN32)
     #引用头文件目录
     INCLUDE_DIRECTORIES(
             ${GSF_SOURCE_DIR}/
             ${GSF_SOURCE_DIR}/3rd/glog-0.3.4/src
-            ${GSF_SOURCE_DIR}/3rd/lua-5.3.4/src
-            ${GSF_SOURCE_DIR}/3rd/sol2-2.16.0
     )
 
     #引用库目录
@@ -19,8 +17,6 @@ if(UNIX)
     INCLUDE_DIRECTORIES(
             ${GSF_SOURCE_DIR}/
             ${GSF_SOURCE_DIR}/lib/linux/glog/include
-            ${GSF_SOURCE_DIR}/3rd/lua53/lua-5.3.4/src
-            ${GSF_SOURCE_DIR}/3rd/sol2
     )
 
     #引用库目录
@@ -30,8 +26,8 @@ if(UNIX)
 endif()
 
 
-FILE(GLOB_RECURSE SRC "*.cpp" "*.h" ".hpp")
-ADD_LIBRARY(lua_proxy STATIC ${SRC})
+FILE(GLOB_RECURSE SRC "*.cpp" "*.h" "*.hpp")
+ADD_LIBRARY(db_proxy STATIC ${SRC})
 
 if(MSVC)     
     # Use the static C library for all build types
