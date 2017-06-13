@@ -17,9 +17,6 @@ void gsf::modules::DBProxyModule::before_init()
 		log_f_ = args.pop_log_callback(0);
 	});
 
-	listen(this, eid::db_proxy::redis_command
-		, std::bind(&DBProxyModule::event_redis_command, this, _1, _2));
-
 	listen(this, eid::db_proxy::redis_connect
 		, std::bind(&DBProxyModule::event_redis_connect, this, _1, _2));
 
@@ -32,13 +29,31 @@ void gsf::modules::DBProxyModule::init()
 
 }
 
+void gsf::modules::DBProxyModule::shut()
+{
+	flush_redis_handler();
+}
+
 void gsf::modules::DBProxyModule::event_redis_connect(const gsf::Args &args, gsf::CallbackFunc callback)
 {
+	using namespace std::placeholders;
+
 	std::string _ip = args.pop_string(0);
 	int _port = args.pop_int32(1);
 
 	if (redis_conn_.connect(_ip.c_str(), _port, nullptr, 1)) {
+		resume_redis_handler();
 
+		is_open_ = true;
+
+		listen(this, eid::db_proxy::redis_command_callback, [&](const Args& args, gsf::CallbackFunc callback) {
+			auto _args = gsf::Args();
+			_args.push_redis_cmd_callback(std::bind(&DBProxyModule::event_redis_command, this, _1, _2, _3, _4));
+
+			callback(_args);
+		});
+
+		boardcast(eid::module_init_succ, gsf::Args(get_module_id()));
 	}
 	else {
 
@@ -46,11 +61,11 @@ void gsf::modules::DBProxyModule::event_redis_connect(const gsf::Args &args, gsf
 }
 
 
-void gsf::modules::DBProxyModule::event_redis_command(const gsf::Args &args, gsf::CallbackFunc callback)
+void gsf::modules::DBProxyModule::event_redis_command(const std::string &cmd, const std::string &key, char *block, int len)
 {
-
-	redis_cmd_.cmd("rpush", "avatar.id", "123");
-
+	aredis::redis_command _cmd;
+	_cmd.cmd(cmd, key, block);
+	redis_cmd_.add(_cmd);
 }
 
 void gsf::modules::DBProxyModule::start_update_redis_timer(const gsf::Args &args, gsf::CallbackFunc callback)
@@ -60,11 +75,11 @@ void gsf::modules::DBProxyModule::start_update_redis_timer(const gsf::Args &args
 	listen(this, eid::timer::timer_arrive, [&](const gsf::Args &args, gsf::CallbackFunc cb) {
 		gsf::TimerID _tid = args.pop_uint64(0);
 
-		if (_tid == sec_timer_id_) {
-			sec_handler();
+		if (_tid == cmd_timer_id_) {
+			cmd_handler();
 		
 			dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::Args(get_module_id(), redis_delay_time_), [&](const gsf::Args &args) {
-				sec_timer_id_ = args.pop_int32(0);
+				cmd_timer_id_ = args.pop_int32(0);
 			});
 		}
 
@@ -80,7 +95,7 @@ void gsf::modules::DBProxyModule::start_update_redis_timer(const gsf::Args &args
 	if (_module_id == timer_m_) {
 
 		dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::Args(get_module_id(), redis_delay_time_), [&](const gsf::Args &args) {
-			sec_timer_id_ = args.pop_int32(0);
+			cmd_timer_id_ = args.pop_int32(0);
 		});
 
 		dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::Args(get_module_id(), redis_rewrite_time_), [&](const gsf::Args &args) {
@@ -89,18 +104,23 @@ void gsf::modules::DBProxyModule::start_update_redis_timer(const gsf::Args &args
 	}
 }
 
-void gsf::modules::DBProxyModule::sec_handler()
+void gsf::modules::DBProxyModule::cmd_handler()
 {
+	if (!is_open_) return;
+	if (redis_cmd_.count == 0) return;
 
 	redis_conn_.command(redis_cmd_);
 	if (redis_conn_.reply(redis_result_)) {
 
 	}
 
+	redis_cmd_.clear();
 }
 
 void gsf::modules::DBProxyModule::rewrite_handler()
 {
+	if (!is_open_) return;
+
 	aredis::redis_command _cmd;
 
 	// for list 
@@ -108,6 +128,22 @@ void gsf::modules::DBProxyModule::rewrite_handler()
 	// cmd.lpop to len = 1
 
 	_cmd.cmd("bgrewriteaof");
+
+	if (redis_conn_.reply(redis_result_)) {
+
+	}
+}
+
+void gsf::modules::DBProxyModule::resume_redis_handler()
+{
+	// 把redis内的数据分发出去， 由具体的avatar模块监听初始化
+}
+
+void gsf::modules::DBProxyModule::flush_redis_handler()
+{
+	aredis::redis_command _cmd;
+
+	_cmd.cmd("flushall");
 
 	if (redis_conn_.reply(redis_result_)) {
 

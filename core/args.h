@@ -12,10 +12,11 @@ namespace gsf
 
 	typedef std::function<void(uint32_t, uint32_t, std::string)> RemoteFunc;
 	typedef std::function<void(uint32_t, const char*, const gsf::Args&)> LogFunc;
+	typedef std::function<void(const std::string &, const std::string &, char *, int len)> RedisCmdFunc;
 
 	class Arg
 	{
-		typedef Variant<bool, uint32_t, int32_t, uint64_t, int64_t, std::string, RemoteFunc, LogFunc> av;
+		typedef Variant<bool, uint32_t, int32_t, uint64_t, int64_t, std::string, RemoteFunc, LogFunc, RedisCmdFunc> av;
 	public:
 		void set_bool(const bool var)
 		{
@@ -63,6 +64,12 @@ namespace gsf
 		{
 			v_ = var;
 			idx_ = 7;
+		}
+
+		void set_redis_cmd_callback(RedisCmdFunc var)
+		{
+			v_ = var;
+			idx_ = 8;
 		}
 
 		av v_;
@@ -204,6 +211,15 @@ namespace gsf
 			arg_list_.push_back(_arg);
 		}
 
+		void add(RedisCmdFunc func)
+		{
+			auto _arg = std::make_shared<Arg>();
+			_arg->set_redis_cmd_callback(func);
+
+			size_++;
+			arg_list_.push_back(_arg);
+		}
+
 		const bool pop_bool(const int index) const
 		{
 			#ifdef _DEBUG
@@ -314,6 +330,19 @@ namespace gsf
 			return var->v_.Get<LogFunc>();
 		}
 
+		const RedisCmdFunc pop_redis_cmd_callback(const int index) const
+		{
+#ifdef _DEBUG
+			assert(index >= 0 && index < size_);
+#else
+			if (index < 0 || index >= size_) {
+				return nullptr;
+			}
+#endif
+			auto var = arg_list_[index];
+			return var->v_.Get<RedisCmdFunc>();
+		}
+
 		uint32_t get_typeid(const int index) const
 		{
 			auto var = arg_list_[index];
@@ -383,6 +412,11 @@ namespace gsf
 		}
 
 		void push_log_callback(LogFunc value)
+		{
+			add(value);
+		}
+
+		void push_redis_cmd_callback(RedisCmdFunc value)
 		{
 			add(value);
 		}

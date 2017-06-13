@@ -91,7 +91,7 @@ namespace eid
 	namespace db_proxy
 	{
 		const uint32_t redis_connect = 5001;
-		const uint32_t redis_command = 5002;
+		const uint32_t redis_command_callback = 5002;
 	}
 
 	namespace sample

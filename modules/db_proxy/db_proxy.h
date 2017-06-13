@@ -33,14 +33,22 @@ namespace gsf
 
 			void init() override;
 
+			void shut() override;
+
 		private:
 
 			void event_redis_connect(const gsf::Args &args, gsf::CallbackFunc callback);
-			void event_redis_command(const gsf::Args &args, gsf::CallbackFunc callback);
+			void event_redis_command(const std::string &cmd, const std::string &key, char *block, int len);
 
 			void start_update_redis_timer(const gsf::Args &args, gsf::CallbackFunc callback);
-			void sec_handler();
+			
+			void cmd_handler();
 			void rewrite_handler();
+
+			// 服务器异常关闭时恢复数据到内存
+			void resume_redis_handler();
+			// 服务器正常退出时调用
+			void flush_redis_handler();
 
 			uint32_t timer_m_;
 			uint32_t log_m_;
@@ -48,12 +56,14 @@ namespace gsf
 
 		private:
 
-			gsf::TimerID sec_timer_id_ = 0;
+			bool is_open_ = false;
+
+			gsf::TimerID cmd_timer_id_ = 0;
 			const uint32_t redis_delay_time_ = 1000;	//ms
 			gsf::TimerID rewrite_timer_id_ = 0;
 			const uint32_t redis_rewrite_time_ = 1000 * 60 * 10;
 
-			aredis::redis_command redis_cmd_;
+			aredis::batch_command redis_cmd_;
 			aredis::resp_result redis_result_;
 			aredis::redis_conn redis_conn_;
 		};
