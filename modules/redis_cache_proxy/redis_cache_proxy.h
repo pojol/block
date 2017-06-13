@@ -4,6 +4,8 @@
 #include <core/module.h>
 #include <core/event.h>
 
+#include <set>
+
 #include "aredis.hpp"
 
 namespace gsf
@@ -38,7 +40,8 @@ namespace gsf
 		private:
 
 			void event_redis_connect(const gsf::Args &args, gsf::CallbackFunc callback);
-			void event_redis_command(const std::string &cmd, const std::string &key, char *block, int len);
+			void event_redis_command(const std::string &field, const std::string &key, char *block, int len);
+			void event_redis_avatar_offline(const gsf::Args &args, gsf::CallbackFunc callback);
 
 			void start_update_redis_timer(const gsf::Args &args, gsf::CallbackFunc callback);
 			

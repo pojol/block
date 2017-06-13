@@ -53,18 +53,31 @@ void gsf::modules::RedisCacheProxyModule::event_redis_connect(const gsf::Args &a
 			callback(_args);
 		});
 
+		listen(this, eid::db_proxy::redis_avatar_offline
+			, std::bind(&RedisCacheProxyModule::event_redis_avatar_offline, this, _1, _2));
+
 		boardcast(eid::module_init_succ, gsf::Args(get_module_id()));
 	}
 	else {
-
+		log_f_(eid::log::error, "RedisCacheProxyModule", gsf::Args("event_redis_connect err"));
 	}
 }
 
-
-void gsf::modules::RedisCacheProxyModule::event_redis_command(const std::string &cmd, const std::string &key, char *block, int len)
+void gsf::modules::RedisCacheProxyModule::event_redis_avatar_offline(const gsf::Args &args, gsf::CallbackFunc callback)
 {
 	aredis::redis_command _cmd;
-	_cmd.cmd(cmd, key, block);
+
+	auto _field = args.pop_string(0);
+	auto _key = args.pop_string(1);
+
+	_cmd.cmd("hdel", _field, _key);
+}
+
+void gsf::modules::RedisCacheProxyModule::event_redis_command(const std::string &field, const std::string &key, char *block, int len)
+{
+	aredis::redis_command _cmd;
+
+	_cmd.cmd("hset", field, key, block);
 	redis_cmd_.add(_cmd);
 }
 
@@ -109,9 +122,14 @@ void gsf::modules::RedisCacheProxyModule::cmd_handler()
 	if (!is_open_) return;
 	if (redis_cmd_.count == 0) return;
 
-	redis_conn_.command(redis_cmd_);
-	if (redis_conn_.reply(redis_result_)) {
+	if (!redis_conn_.command(redis_cmd_)) {
+		log_f_(eid::log::error, "RedisCacheProxyModule", gsf::Args("cmd_handler err"));
+	}
 
+	if (redis_conn_.reply(redis_result_)) {
+		if (redis_result_.error != aredis::rc_ok) {
+			log_f_(eid::log::error, "RedisCacheProxyModule", gsf::Args(redis_result_.dump()));
+		}
 	}
 
 	redis_cmd_.clear();
@@ -122,30 +140,33 @@ void gsf::modules::RedisCacheProxyModule::rewrite_handler()
 	if (!is_open_) return;
 
 	aredis::redis_command _cmd;
-
-	// for list 
-	// cmd llen
-	// cmd.lpop to len = 1
-
 	_cmd.cmd("bgrewriteaof");
 
-	if (redis_conn_.reply(redis_result_)) {
+	if (!redis_conn_.command(_cmd)) {
+		log_f_(eid::log::error, "RedisCacheProxyModule", gsf::Args("rewrite_handler err"));
+	}
 
+	if (redis_conn_.reply(redis_result_)) {
+		if (redis_result_.error != aredis::rc_ok) {
+			log_f_(eid::log::error, "RedisCacheProxyModule", gsf::Args(redis_result_.dump()));
+		}
 	}
 }
 
 void gsf::modules::RedisCacheProxyModule::resume_redis_handler()
 {
 	//把redis内的数据分发出去， 由具体的avatar模块监听初始化
+
+	
 }
 
 void gsf::modules::RedisCacheProxyModule::flush_redis_handler()
 {
 	aredis::redis_command _cmd;
 
-	_cmd.cmd("flushall");
+	_cmd.cmd("flushall");	//这个指令redis不会执行失败
 
-	if (redis_conn_.reply(redis_result_)) {
-
+	if (!redis_conn_.command(_cmd)) {
+		log_f_(eid::log::error, "RedisCacheProxyModule", gsf::Args("flush_redis_handler err"));
 	}
 }
