@@ -1,5 +1,5 @@
-#ifndef _DB_PROXY_HEADER_
-#define _DB_PROXY_HEADER_
+#ifndef _REDIS_CACHE_PROXY_HEADER_
+#define _REDIS_CACHE_PROXY_HEADER_
 
 #include <core/module.h>
 #include <core/event.h>
@@ -23,7 +23,7 @@ namespace gsf
 		//       #auto - aof - rewrite - min - size 64mb 关闭自动rewrite
 
 
-		class DBProxyModule
+		class RedisCacheProxyModule
 			: public gsf::Module
 			, public gsf::IEvent
 		{

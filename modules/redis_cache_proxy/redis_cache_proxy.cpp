@@ -1,7 +1,7 @@
-#include "db_proxy.h"
+#include "redis_cache_proxy.h"
 
 
-void gsf::modules::DBProxyModule::before_init()
+void gsf::modules::RedisCacheProxyModule::before_init()
 {
 	using namespace std::placeholders;
 
@@ -18,23 +18,23 @@ void gsf::modules::DBProxyModule::before_init()
 	});
 
 	listen(this, eid::db_proxy::redis_connect
-		, std::bind(&DBProxyModule::event_redis_connect, this, _1, _2));
+		, std::bind(&RedisCacheProxyModule::event_redis_connect, this, _1, _2));
 
-	listen(this, eid::module_init_succ, std::bind(&DBProxyModule::start_update_redis_timer, this, _1, _2));
+	listen(this, eid::module_init_succ, std::bind(&RedisCacheProxyModule::start_update_redis_timer, this, _1, _2));
 }
 
 
-void gsf::modules::DBProxyModule::init()
+void gsf::modules::RedisCacheProxyModule::init()
 {
 
 }
 
-void gsf::modules::DBProxyModule::shut()
+void gsf::modules::RedisCacheProxyModule::shut()
 {
 	flush_redis_handler();
 }
 
-void gsf::modules::DBProxyModule::event_redis_connect(const gsf::Args &args, gsf::CallbackFunc callback)
+void gsf::modules::RedisCacheProxyModule::event_redis_connect(const gsf::Args &args, gsf::CallbackFunc callback)
 {
 	using namespace std::placeholders;
 
@@ -48,7 +48,7 @@ void gsf::modules::DBProxyModule::event_redis_connect(const gsf::Args &args, gsf
 
 		listen(this, eid::db_proxy::redis_command_callback, [&](const Args& args, gsf::CallbackFunc callback) {
 			auto _args = gsf::Args();
-			_args.push_redis_cmd_callback(std::bind(&DBProxyModule::event_redis_command, this, _1, _2, _3, _4));
+			_args.push_redis_cmd_callback(std::bind(&RedisCacheProxyModule::event_redis_command, this, _1, _2, _3, _4));
 
 			callback(_args);
 		});
@@ -61,14 +61,14 @@ void gsf::modules::DBProxyModule::event_redis_connect(const gsf::Args &args, gsf
 }
 
 
-void gsf::modules::DBProxyModule::event_redis_command(const std::string &cmd, const std::string &key, char *block, int len)
+void gsf::modules::RedisCacheProxyModule::event_redis_command(const std::string &cmd, const std::string &key, char *block, int len)
 {
 	aredis::redis_command _cmd;
 	_cmd.cmd(cmd, key, block);
 	redis_cmd_.add(_cmd);
 }
 
-void gsf::modules::DBProxyModule::start_update_redis_timer(const gsf::Args &args, gsf::CallbackFunc callback)
+void gsf::modules::RedisCacheProxyModule::start_update_redis_timer(const gsf::Args &args, gsf::CallbackFunc callback)
 {
 	ModuleID _module_id = args.pop_int32(0);
 
@@ -104,7 +104,7 @@ void gsf::modules::DBProxyModule::start_update_redis_timer(const gsf::Args &args
 	}
 }
 
-void gsf::modules::DBProxyModule::cmd_handler()
+void gsf::modules::RedisCacheProxyModule::cmd_handler()
 {
 	if (!is_open_) return;
 	if (redis_cmd_.count == 0) return;
@@ -117,7 +117,7 @@ void gsf::modules::DBProxyModule::cmd_handler()
 	redis_cmd_.clear();
 }
 
-void gsf::modules::DBProxyModule::rewrite_handler()
+void gsf::modules::RedisCacheProxyModule::rewrite_handler()
 {
 	if (!is_open_) return;
 
@@ -134,12 +134,12 @@ void gsf::modules::DBProxyModule::rewrite_handler()
 	}
 }
 
-void gsf::modules::DBProxyModule::resume_redis_handler()
+void gsf::modules::RedisCacheProxyModule::resume_redis_handler()
 {
-	// ∞—redisƒ⁄µƒ ˝æ›∑÷∑¢≥ˆ»•£¨ ”…æﬂÃÂµƒavatarƒ£øÈº‡Ã˝≥ı ºªØ
+	//ÊääredisÂÜÖÁöÑÊï∞ÊçÆÂàÜÂèëÂá∫ÂéªÔºå Áî±ÂÖ∑‰ΩìÁöÑavatarÊ®°ÂùóÁõëÂê¨ÂàùÂßãÂåñ
 }
 
-void gsf::modules::DBProxyModule::flush_redis_handler()
+void gsf::modules::RedisCacheProxyModule::flush_redis_handler()
 {
 	aredis::redis_command _cmd;
 
