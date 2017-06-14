@@ -119,7 +119,10 @@ void gsf::modules::RedisCacheProxyModule::start_update_redis_timer(const gsf::Ar
 
 void gsf::modules::RedisCacheProxyModule::cmd_handler()
 {
-	if (!is_open_) return;
+	if (!is_open_) {
+		log_f_(eid::log::warning, "RedisCacheProxyModule", gsf::Args("service terminated! cmd_handler"));
+		return;
+	}
 	if (redis_cmd_.count == 0) return;
 
 	if (!redis_conn_.command(redis_cmd_)) {
@@ -137,7 +140,10 @@ void gsf::modules::RedisCacheProxyModule::cmd_handler()
 
 void gsf::modules::RedisCacheProxyModule::rewrite_handler()
 {
-	if (!is_open_) return;
+	if (!is_open_) {
+		log_f_(eid::log::warning, "RedisCacheProxyModule", gsf::Args("service terminated! rewrite_handler"));
+		return;
+	}
 
 	aredis::redis_command _cmd;
 	_cmd.cmd("bgrewriteaof");
