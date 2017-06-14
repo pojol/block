@@ -89,6 +89,8 @@ void gsf::modules::RedisCacheProxyModule::event_redis_avatar_offline(const gsf::
 	redisReply *_replay_ptr;
 	_replay_ptr = static_cast<redisReply*>(redisCommand(redis_context_, "hdel %s %s", _field.c_str(), _key.c_str()));
 
+	assert(_replay_ptr && _replay_ptr->type != REDIS_REPLY_ERROR);
+	
 	if (_replay_ptr->type == REDIS_REPLY_ERROR) {
 		log_f_(eid::log::error, "RedisCacheProxyModule", gsf::Args("event_redis_avatar_offline", _replay_ptr->str));
 	}
@@ -153,6 +155,7 @@ bool gsf::modules::RedisCacheProxyModule::check_connect()
 
 	redisReply *_replay_ptr;
 	_replay_ptr = static_cast<redisReply*>(redisCommand(redis_context_, "ping"));
+
 	if (_replay_ptr && _replay_ptr->type != REDIS_REPLY_ERROR) {
 		return true;
 	}
@@ -203,6 +206,8 @@ void gsf::modules::RedisCacheProxyModule::rewrite_handler()
 	redisReply *_replay_ptr;
 	_replay_ptr = static_cast<redisReply*>(redisCommand(redis_context_, "bgrewriteaof"));
 
+	assert(_replay_ptr && _replay_ptr->type != REDIS_REPLY_ERROR);
+
 	if (_replay_ptr->type == REDIS_REPLY_ERROR) {
 		log_f_(eid::log::error, "RedisCacheProxyModule", gsf::Args("rewrite_handler", _replay_ptr->str));
 	}
@@ -238,6 +243,8 @@ void gsf::modules::RedisCacheProxyModule::flush_redis_handler()
 	redisReply *_replay_ptr;
 
 	_replay_ptr = static_cast<redisReply*>(redisCommand(redis_context_, "flushall"));
+
+	assert(_replay_ptr && _replay_ptr->type != REDIS_REPLY_ERROR);
 
 	if (_replay_ptr->type == REDIS_REPLY_ERROR) {
 		log_f_(eid::log::error, "RedisCacheProxyModule", gsf::Args("flush_redis_handler", _replay_ptr->str));
