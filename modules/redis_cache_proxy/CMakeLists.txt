@@ -5,6 +5,7 @@ if(WIN32)
     INCLUDE_DIRECTORIES(
             ${GSF_SOURCE_DIR}/
             ${GSF_SOURCE_DIR}/3rd/glog-0.3.4/src
+			${GSF_SOURCE_DIR}/3rd/redis-win-3.0.504/deps/hiredis
     )
 
     #引用库目录

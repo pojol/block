@@ -6,7 +6,7 @@
 
 #include <set>
 
-#include "aredis.hpp"
+#include "hiredis.h"
 
 namespace gsf
 {
@@ -20,9 +20,9 @@ namespace gsf
 		//    appendfsync 同步方式选择 everysec
 		//    no-appendfsync-on-rewrite 设置为 no ，保证数据安全。 如果设置为yes在子进程保存的时候会阻塞redis
 		//    rewrite
-		//       依据客户端的 BGREWRITEAOF 命令， 如果redis正在进行aof 则等待完成之后执行，反正则立即执行。
-		//       #auto-aof-rewrite-percentage 100 关闭自动rewrite
-		//       #auto - aof - rewrite - min - size 64mb 关闭自动rewrite
+		//    依据客户端的 BGREWRITEAOF 命令， 如果redis正在进行aof 则等待完成之后执行，反正则立即执行。
+		//    #auto-aof-rewrite-percentage 100 关闭自动rewrite
+		//    #auto - aof - rewrite - min - size 64mb 关闭自动rewrite
 
 
 		class RedisCacheProxyModule
@@ -44,6 +44,7 @@ namespace gsf
 			void event_redis_avatar_offline(const gsf::Args &args, gsf::CallbackFunc callback);
 
 			void start_update_redis_timer(const gsf::Args &args, gsf::CallbackFunc callback);
+			bool check_connect();
 			
 			void cmd_handler();
 			void rewrite_handler();
@@ -59,6 +60,9 @@ namespace gsf
 
 		private:
 
+			std::string ip_ = "";
+			uint32_t port_ = 0;
+
 			bool is_open_ = false;
 
 			gsf::TimerID cmd_timer_id_ = 0;
@@ -66,9 +70,10 @@ namespace gsf
 			gsf::TimerID rewrite_timer_id_ = 0;
 			const uint32_t redis_rewrite_time_ = 1000 * 60 * 10;
 
-			aredis::batch_command redis_cmd_;
-			aredis::resp_result redis_result_;
-			aredis::redis_conn redis_conn_;
+			redisContext *redis_context_;
+			uint32_t redis_command_count_ = 0;
+
+			std::set<std::string> field_set_;
 		};
 	}
 }

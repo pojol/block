@@ -1,5 +1,8 @@
 #include "redis_cache_proxy.h"
 
+#ifdef WIN32
+#include <winsock.h>
+#endif // WIN32
 
 void gsf::modules::RedisCacheProxyModule::before_init()
 {
@@ -31,7 +34,13 @@ void gsf::modules::RedisCacheProxyModule::init()
 
 void gsf::modules::RedisCacheProxyModule::shut()
 {
+	redis_command_count_ = 0;
+	is_open_ = false;
+	field_set_.clear();
+
 	flush_redis_handler();
+
+	redisFree(redis_context_);
 }
 
 void gsf::modules::RedisCacheProxyModule::event_redis_connect(const gsf::Args &args, gsf::CallbackFunc callback)
@@ -40,8 +49,13 @@ void gsf::modules::RedisCacheProxyModule::event_redis_connect(const gsf::Args &a
 
 	std::string _ip = args.pop_string(0);
 	int _port = args.pop_int32(1);
+	struct timeval _timeout = { 1, 500000 };
 
-	if (redis_conn_.connect(_ip.c_str(), _port, nullptr, 1)) {
+	ip_ = _ip;
+	port_ = _port;
+
+	redis_context_ = redisConnectWithTimeout(ip_.c_str(), port_, _timeout);
+	if (redis_context_) {
 		resume_redis_handler();
 
 		is_open_ = true;
@@ -65,20 +79,33 @@ void gsf::modules::RedisCacheProxyModule::event_redis_connect(const gsf::Args &a
 
 void gsf::modules::RedisCacheProxyModule::event_redis_avatar_offline(const gsf::Args &args, gsf::CallbackFunc callback)
 {
-	aredis::redis_command _cmd;
+	if (!check_connect()) {
+		return;
+	}
 
 	auto _field = args.pop_string(0);
 	auto _key = args.pop_string(1);
 
-	_cmd.cmd("hdel", _field, _key);
+	redisReply *_replay_ptr;
+	_replay_ptr = static_cast<redisReply*>(redisCommand(redis_context_, "hdel %s %s", _field.c_str(), _key.c_str()));
+
+	if (_replay_ptr->type == REDIS_REPLY_ERROR) {
+		log_f_(eid::log::error, "RedisCacheProxyModule", gsf::Args("event_redis_avatar_offline", _replay_ptr->str));
+	}
+
+	freeReplyObject(_replay_ptr);
 }
 
 void gsf::modules::RedisCacheProxyModule::event_redis_command(const std::string &field, const std::string &key, char *block, int len)
 {
-	aredis::redis_command _cmd;
+	field_set_.insert(field);	//记录下域
 
-	_cmd.cmd("hset", field, key, block);
-	redis_cmd_.add(_cmd);
+	if (REDIS_OK != redisAppendCommand(redis_context_, "hset %s %s %s", field.c_str(), key.c_str(), block)) {
+		log_f_(eid::log::error, "RedisCacheProxyModule", gsf::Args("redisAppendCommand fail!"));
+		return;
+	}
+
+	redis_command_count_++;
 }
 
 void gsf::modules::RedisCacheProxyModule::start_update_redis_timer(const gsf::Args &args, gsf::CallbackFunc callback)
@@ -117,62 +144,104 @@ void gsf::modules::RedisCacheProxyModule::start_update_redis_timer(const gsf::Ar
 	}
 }
 
-void gsf::modules::RedisCacheProxyModule::cmd_handler()
+bool gsf::modules::RedisCacheProxyModule::check_connect()
 {
 	if (!is_open_) {
-		log_f_(eid::log::warning, "RedisCacheProxyModule", gsf::Args("service terminated! cmd_handler"));
-		return;
-	}
-	if (redis_cmd_.count == 0) return;
-
-	if (!redis_conn_.command(redis_cmd_)) {
-		log_f_(eid::log::error, "RedisCacheProxyModule", gsf::Args("cmd_handler err"));
+		log_f_(eid::log::warning, "RedisCacheProxyModule", gsf::Args("service terminated! check_connect"));
+		return false;
 	}
 
-	if (redis_conn_.reply(redis_result_)) {
-		if (redis_result_.error != aredis::rc_ok) {
-			log_f_(eid::log::error, "RedisCacheProxyModule", gsf::Args(redis_result_.dump()));
+	redisReply *_replay_ptr;
+	_replay_ptr = static_cast<redisReply*>(redisCommand(redis_context_, "ping"));
+	if (_replay_ptr && _replay_ptr->type != REDIS_REPLY_ERROR) {
+		return true;
+	}
+	else {	// 试着重连一下
+		log_f_(eid::log::warning, "RedisCacheProxyModule", gsf::Args("connect fail! try reconnect!"));
+
+		struct timeval _timeout = { 1, 500000 };
+
+		redisFree(redis_context_);
+
+		redis_context_ = redisConnectWithTimeout(ip_.c_str(), port_, _timeout);
+		if (redis_context_) {
+			return true;
+		}
+		else {
+			return false;
 		}
 	}
+}
 
-	redis_cmd_.clear();
+void gsf::modules::RedisCacheProxyModule::cmd_handler()
+{
+	if (!check_connect()) {
+		return;
+	}
+
+	if (redis_command_count_ == 0) return;
+
+	redisReply *_replay_ptr;
+	for (int i = 0; i < redis_command_count_; ++i)
+	{
+		if (REDIS_OK != redisGetReply(redis_context_, (void**)&_replay_ptr)) {
+			log_f_(eid::log::error, "RedisCacheProxyModule", gsf::Args("redisGetReply fail!"));
+		}
+
+		freeReplyObject(_replay_ptr);
+	}
+
+	redis_command_count_ = 0;
 }
 
 void gsf::modules::RedisCacheProxyModule::rewrite_handler()
 {
-	if (!is_open_) {
-		log_f_(eid::log::warning, "RedisCacheProxyModule", gsf::Args("service terminated! rewrite_handler"));
+	if (!check_connect()) {
 		return;
 	}
 
-	aredis::redis_command _cmd;
-	_cmd.cmd("bgrewriteaof");
+	redisReply *_replay_ptr;
+	_replay_ptr = static_cast<redisReply*>(redisCommand(redis_context_, "bgrewriteaof"));
 
-	if (!redis_conn_.command(_cmd)) {
-		log_f_(eid::log::error, "RedisCacheProxyModule", gsf::Args("rewrite_handler err"));
+	if (_replay_ptr->type == REDIS_REPLY_ERROR) {
+		log_f_(eid::log::error, "RedisCacheProxyModule", gsf::Args("rewrite_handler", _replay_ptr->str));
 	}
 
-	if (redis_conn_.reply(redis_result_)) {
-		if (redis_result_.error != aredis::rc_ok) {
-			log_f_(eid::log::error, "RedisCacheProxyModule", gsf::Args(redis_result_.dump()));
-		}
-	}
+	freeReplyObject(_replay_ptr);
 }
 
 void gsf::modules::RedisCacheProxyModule::resume_redis_handler()
 {
-	//把redis内的数据分发出去， 由具体的avatar模块监听初始化
+	//把redis内的数据分发出去， 由具体的avatar模块监听初始化。 这边要考虑数据极其大的情况!
 
-	
+	redisReply *_replay_ptr;
+
+	for (auto &it : field_set_)
+	{
+		_replay_ptr = static_cast<redisReply*>(redisCommand(redis_context_, "hgetall %s", it.c_str()));
+
+		for (int i = 0; i < _replay_ptr->elements; i += 2)
+		{
+			auto key_ = _replay_ptr->element[i]->str;
+			auto val_ = _replay_ptr->element[i + 1]->str;
+
+			boardcast(eid::db_proxy::redis_resume, gsf::Args(it, key_, val_));
+		}
+
+		freeReplyObject(_replay_ptr);
+
+	}
 }
 
 void gsf::modules::RedisCacheProxyModule::flush_redis_handler()
 {
-	aredis::redis_command _cmd;
+	redisReply *_replay_ptr;
 
-	_cmd.cmd("flushall");	//这个指令redis不会执行失败
+	_replay_ptr = static_cast<redisReply*>(redisCommand(redis_context_, "flushall"));
 
-	if (!redis_conn_.command(_cmd)) {
-		log_f_(eid::log::error, "RedisCacheProxyModule", gsf::Args("flush_redis_handler err"));
+	if (_replay_ptr->type == REDIS_REPLY_ERROR) {
+		log_f_(eid::log::error, "RedisCacheProxyModule", gsf::Args("flush_redis_handler", _replay_ptr->str));
 	}
+
+	freeReplyObject(_replay_ptr);
 }
