@@ -112,7 +112,7 @@ void gsf::network::ConnectorModule::make_connector(const gsf::Args &args, gsf::C
 	do {
 		buffer_event_ptr_ = bufferevent_socket_new(event_base_ptr_, -1, BEV_OPT_CLOSE_ON_FREE);
 		if (!buffer_event_ptr_) {
-			_ret = eid::network::err_socket_new;
+			_ret = eid::error::err_socket_new;
 			break;
 		}
 
@@ -124,13 +124,13 @@ void gsf::network::ConnectorModule::make_connector(const gsf::Args &args, gsf::C
 
 		if (evutil_inet_pton(AF_INET, _ip.c_str(), &_sin.sin_addr) <= 0)
 		{
-			_ret = eid::network::err_inet_pton;
+			_ret = eid::error::err_inet_pton;
 			break;
 		}
 
 		int _ret = bufferevent_socket_connect(buffer_event_ptr_, (sockaddr*)&_sin, sizeof(sockaddr_in));
 		if (_ret != 0) {
-			_ret = eid::network::err_socket_connect;
+			_ret = eid::error::err_socket_connect;
 			break;
 		}
 		else {

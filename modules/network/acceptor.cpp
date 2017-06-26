@@ -143,19 +143,19 @@ void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, 
 	{
 		if (network_ptr_->session_mgr_->find(fd)) {
 			network_ptr_->session_mgr_->set_need_close(fd);
-			_ret = eid::network::err_repeated_fd;
+			_ret = eid::error::err_repeated_fd;
 			break;
 		}
 
 		// check max connect
 		if (network_ptr_->session_mgr_->cur_max_connet() >= NETWORK_CONNECT_MAX) {
-			_ret = eid::network::err_upper_limit_session;
+			_ret = eid::error::err_upper_limit_session;
 			break;
 		}
 
 		bev = bufferevent_socket_new(network_ptr_->event_base_ptr_, fd, BEV_OPT_CLOSE_ON_FREE);
 		if (!bev) {
-			_ret = eid::network::err_socket_new;
+			_ret = eid::error::err_socket_new;
 			break;
 		}
 

@@ -2,8 +2,6 @@
 #include "session.h"
 #include "msg_binder.h"
 
-#include "err.h"
-
 
 gsf::network::SessionMgr::SessionMgr()
 {

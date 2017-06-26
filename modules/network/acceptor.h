@@ -24,7 +24,7 @@ namespace gsf
 		{
 		public:
 			AcceptorModule(const std::string &name);
-			~AcceptorModule();
+			virtual ~AcceptorModule();
 
 			void before_init() override;
 			void init() override;

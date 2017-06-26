@@ -5,6 +5,8 @@
 #ifndef GSF_EVENT_LIST_H_H
 #define GSF_EVENT_LIST_H_H
 
+#include "types.h"
+
 // 后面用工具自动生成
 //! 用于描述框架中用到的事件，和用户事件 （暂时用.h 后面会扩展到通用一点的方案
 
@@ -46,16 +48,24 @@ namespace eid
 		const uint32_t new_connect = 2007;
 		const uint32_t dis_connect = 2008;
 		const uint32_t fail_connect = 2009;
-
-		const int32_t err_repeated_fd = -2001;				// repeated fd
-		const int32_t err_upper_limit_session = -2002;		// upper limit session!
-		const int32_t err_socket_new = -2003;				// bufferevent_socket_new err!
-		const int32_t err_socket_connect = -2004;			// bufferevent_socket_connect err!
-		const int32_t err_event_eof = -2005;
-		const int32_t err_event_error = -2006;
-		const int32_t err_event_timeout = -2007;
-		const int32_t err_inet_pton = -2008;
 	}
+
+	enum distributed
+	{
+		sync_dispatch = 7001,
+	};
+
+	enum error
+	{
+		err_repeated_fd = -10000,
+		err_upper_limit_session,
+		err_socket_new,
+		err_socket_connect,
+		err_event_eof,
+		err_event_error,
+		err_event_timeout,
+		err_inet_pton,
+	};
 
 	namespace timer
 	{

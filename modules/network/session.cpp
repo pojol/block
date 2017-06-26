@@ -50,17 +50,17 @@ void gsf::network::Session::err_cb(::bufferevent *bev, short what, void *ctx)
 
 	do {
 		if (what & BEV_EVENT_EOF) {
-			_result = eid::network::err_event_eof;
+			_result = eid::error::err_event_eof;
 			break;
 		}
 
 		if (what & BEV_EVENT_ERROR) {
-			_result = eid::network::err_event_error;
+			_result = eid::error::err_event_error;
 			break;
 		}
 
 		if (what & BEV_EVENT_TIMEOUT) {
-			_result = eid::network::err_event_timeout;
+			_result = eid::error::err_event_timeout;
 			break;
 		}
 
