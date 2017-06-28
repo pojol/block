@@ -8,7 +8,7 @@
 #include "types.h"
 
 // 后面用工具自动生成
-//! 用于描述框架中用到的事件，和用户事件 （暂时用.h 后面会扩展到通用一点的方案
+//! 用于描述框架中用到的事件, 用户可以以此为模板在自己工程中建立一个event_list 用于工程中的事件描述
 
 namespace eid
 {
@@ -25,34 +25,26 @@ namespace eid
 
 	const uint32_t module_init_succ = 104;
 
-	namespace log
+	enum network
 	{
-		//const uint32_t init = 1001;	初始化改为在自己模块中实现，regist即初始化
-
-		const uint32_t info = 1002;
-		const uint32_t warning = 1003;
-		const uint32_t error = 1004;
-		const uint32_t log_callback = 1005;
-	}
-
-	namespace network
-	{
-		const uint32_t make_acceptor = 2001;
-		const uint32_t make_connector = 2002;
-		const uint32_t recv_remote_callback = 2003;
-		const uint32_t send_remote_callback = 2004;
-		const uint32_t kick_connect = 2005;
-		const uint32_t connector_init = 2006;
+		make_acceptor = 1000,
+		make_connector,
+		recv_remote_callback,
+		send_remote_callback,
+		kick_connect,
+		connector_init,
 
 		//! result code
-		const uint32_t new_connect = 2007;
-		const uint32_t dis_connect = 2008;
-		const uint32_t fail_connect = 2009;
-	}
+		new_connect,
+		dis_connect,
+		fail_connect,
+	};
 
 	enum distributed
 	{
-		sync_dispatch = 7001,
+		sync_dispatch = 2001,
+
+		create_node,
 	};
 
 	enum error
@@ -67,49 +59,57 @@ namespace eid
 		err_inet_pton,
 	};
 
-	namespace timer
+	enum log
+	{
+		//const uint32_t init = 1001;	初始化改为在自己模块中实现，regist即初始化
+
+		info = 3000,
+		warning,
+		error,
+		log_callback,
+	};
+
+	enum timer
 	{
 		//! args {"uint32_t":module_id，"uint32_t":milliseconds}
-		const uint32_t delay_milliseconds = 3001;
+		delay_milliseconds = 4000,
 
 		//! args {"uint32_t":module_id, "uint32_t":hour, "uint32_t":minute}
-		const uint32_t delay_day = 3002;
+		delay_day,
 
 		//! args {"uint32_t":module_id, "uint32_t":day, "uint32_t":hour}
-		const uint32_t delay_week = 3003;
+		delay_week,
 
 		//! args {"uint32_t":module_id, "uint32_t":day, "uint32_t":hour}
-		const uint32_t delay_month = 3004;
+		delay_month,
 
 		//! args {"uint32_t":module_id, "uint32_t":eid}
-		const uint32_t remove_timer = 3005;
+		remove_timer,
 
+		timer_arrive,
+	};
 
-		//! result code
-		const uint32_t timer_arrive = 3006;
-	}
-
-	namespace lua_proxy
+	enum lua_proxy
 	{
-		const uint32_t create = 4001;
+		create = 5000,
 
-		const uint32_t reload = 4002;
+		reload,
 
-		const uint32_t destroy = 4003;
-	}
+		destroy,
+	};
 
-	namespace db_proxy
+	enum db_proxy
 	{
-		const uint32_t redis_connect = 5001;
-		const uint32_t redis_command_callback = 5002;
-		const uint32_t redis_avatar_offline = 5003;
-		const uint32_t redis_resume = 5004;
-	}
+		redis_connect = 6000,
+		redis_command_callback,
+		redis_avatar_offline,
+		redis_resume,
+	};
 
-	namespace sample
+	enum sample
 	{
-		const uint32_t get_proc_path = 6001;
-	}
+		get_proc_path = 7000,
+	};
 }
 
 #endif
