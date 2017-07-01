@@ -26,6 +26,8 @@ namespace gsf
 	typedef int32_t MsgHeadLen;
 	static const int32_t MsgHeadLenNil = 0;
 
+	static const uint16_t ARGS_MAX_SIZE = 1024;				// 用于设定 args_pool中 自动分配的args容量。
+
 	static const uint32_t NETWORK_CONNECT_MAX = 65534;		//
 	static const uint32_t SESSION_READ_BUFFER_SIZE = 0;		//
 	static const uint32_t SESSION_WRITE_BUFFER_SIZE = 0;	//
