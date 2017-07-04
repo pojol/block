@@ -10,7 +10,6 @@
 #include <memory>
 #include <functional>
 
-#include "types.h"
 #include "single.h"
 
 namespace gsf
@@ -42,6 +41,9 @@ namespace gsf
 		void push(const std::string &val);
 
 		template <typename T>
+		void push_impl(const T &val);
+
+		template <typename T>
 		void push_list(std::list<T> &list);
 
 		template <typename T>
@@ -68,7 +70,7 @@ namespace gsf
 		float pop_float();
 		double pop_double();
 
-		std::string & pop_string();
+		std::string pop_string();
 
 		template<typename T>
 		std::list<T> pop_list();
@@ -83,6 +85,7 @@ namespace gsf
 
 		void flush();
 
+		char * get_bits();
 
 	private:
 
@@ -92,27 +95,82 @@ namespace gsf
 		char *tail_;
 
 		uint32_t pos_;
+		uint32_t size_;
 	};
 
-	gsf::Args::Args()
+	template <typename T>
+	void gsf::Args::push_impl(const T &val)
 	{
-		buff_ = (char*)malloc(ARGS_MAX_SIZE);
+		size_t _size = sizeof(T);
+		*reinterpret_cast<T*>(write_) = val;
+		write_ += _size;
 
-		read_ = write_ = tail_ = buff_;
-		pos_ = 0;
+		pos_ += _size;
 	}
 
 	void gsf::Args::push(const int32_t & val)
 	{
+		push_impl(val);
 	}
 
 	void gsf::Args::push(const char * val)
 	{
+		auto _len = std::strlen(val);
+
+		push_impl(_len);
+		
+		memcpy(write_, val, _len);
+		write_ += _len;
+
+		pos_ += _len;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+
+
+	int32_t Args::pop_i32()
+	{
+		auto _i32 = *reinterpret_cast<int32_t*>(read_);
+		read_ += sizeof(int32_t);
+
+		return _i32;
+	}
+
+	uint32_t Args::pop_ui32()
+	{
+		auto _ui32 = *reinterpret_cast<uint32_t*>(read_);
+		read_ += sizeof(uint32_t);
+
+		return _ui32;
+	}
+
+	std::string Args::pop_string()
+	{
+		auto _len = pop_ui32();
+
+		std::string _str;
+		_str.assign(read_, _len);
+		read_ += _len;
+
+		return _str;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+
+	gsf::Args::Args()
+	{
+		buff_ = (char*)malloc(1024);
+		size_ = 1024;
+		pos_ = 0;
+
+		read_ = write_ = tail_ = buff_;
 	}
 
 	void gsf::Args::flush()
 	{
-
+		memset(buff_, 0, pos_);
+		read_ = write_ = tail_ = buff_;
+		pos_ = 0;
 	}
 
 	struct ArgsPool : public utils::Singleton<ArgsPool>
@@ -130,7 +188,7 @@ namespace gsf
 			return _ptr;
 		}
 
-	private:
+		// 服务启动的时候构建args pool，可以依据业务需求分配不同数额
 		void make(uint32_t size)
 		{
 			for (uint32_t i = 0; i < size; ++i)
@@ -139,10 +197,10 @@ namespace gsf
 			}
 		}
 
-		////lua
-		Args * get_ptr()
+		// 在lua层中获取args的原始指针，需要手动释放（lua中使用智能指针会导致资源释放的相关问题
+		Args * get_lptr()
 		{
-
+			return nullptr;
 		}
 
 		void release_ptr(Args *args)
@@ -151,6 +209,7 @@ namespace gsf
 			dirty_vec_.push_back(args);
 		}
 
+		// gsf 当前帧调用结束的时候，讲释放的args 重新放入池中。
 		void reenter()
 		{
 			for (auto it : dirty_vec_)
@@ -166,26 +225,33 @@ namespace gsf
 		std::vector<Args *> dirty_vec_;
 	};
 
-	/*!  args��������1k����Ҫ�ֶ�����
+	/*! 
 		auto args = make_args(11, "22");
 
 		args->pop_i32();
 		args->pop_string();
+
+		//args容量超过1k的需要手动创建
 	*/
 
-	template <typename T>
-	void unpack(ArgsPool::ArgsPtr args, const T &val)
+	template <typename P0, typename ...P>
+	static void pushArg(ArgsPool::ArgsPtr &args, P0 &&p0, P &&... p)
 	{
-		args->push(val);
+		args->push(std::forward<P0>(p0));
+		pushArg(args, std::forward<P>(p)...);
 	}
 
-	template <typename T, typename ...A>
-	ArgsPool::ArgsPtr make_args(const T &t, A ...alist)
+	static void pushArg(ArgsPool::ArgsPtr &args)
+	{
+		//template terminate
+	}
+
+	template <typename ...P>
+	ArgsPool::ArgsPtr make_args(P&& ...upvalues)
 	{
 		auto args = ArgsPool::get_ref().get();
 
-		args->push(t);
-		unpack(std::move(args), alist...);
+		pushArg(args, std::forward<P>(upvalues)...);
 
 		return args;
 	}
