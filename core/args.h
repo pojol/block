@@ -1,449 +1,198 @@
-#ifndef _GSF_VARS_HEADER_
-#define _GSF_VARS_HEADER_
+#ifndef _GSF_ARGS_HEALDER_
+#define _GSF_ARGS_HEALDER_
 
-#include "variant.h"
+#include <string>
 #include <vector>
-#include <assert.h>
+#include <set>
+#include <map>
+#include <list>
+
 #include <memory>
+#include <functional>
+
+#include "single.h"
 
 namespace gsf
 {
-	class Args;
-
-	typedef std::function<void(uint32_t, uint32_t, std::string)> RemoteFunc;
-	typedef std::function<void(uint32_t, const char*, const gsf::Args&)> LogFunc;
-	typedef std::function<void(const std::string &, const std::string &, char *, int len)> RedisCmdFunc;
-
-	class Arg
+	struct Args
 	{
-		typedef Variant<bool, uint32_t, int32_t, uint64_t, int64_t, std::string, RemoteFunc, LogFunc, RedisCmdFunc> av;
-	public:
-		void set_bool(const bool var)
-		{
-			v_ = bool(var);
-			idx_ = 0;
-		}
+		using TypeLen = uint16_t;
 
-		void set_uint32(const uint32_t var)
-		{
-			v_ = uint32_t(var);
-			idx_ = 1;
-		}
+		Args();
+		Args(int size);
 
-		void set_int32(const int32_t var)
-		{
-			v_ = int32_t(var);
-			idx_ = 2;
-		}
+		void push(const uint8_t &val);
+		void push(const int8_t &val);
 
-		void set_uint64(const uint64_t var)
-		{
-			v_ = uint64_t(var);
-			idx_ = 3;
-		}
+		void push(const uint16_t &val);
+		void push(const int16_t &val);
 
-		void set_int64(const int64_t var)
-		{
-			v_ = int64_t(var);
-			idx_ = 4;
-		}
+		void push(const uint32_t &val);
+		void push(const int32_t &val);
 
-		void set_string(const std::string &var)
-		{
-			v_ = std::string(var);
-			idx_ = 5;
-		}
+		void push(const uint64_t &val);
+		void push(const int64_t &val);
 
-		void set_remote_callback(RemoteFunc var)
-		{
-			v_ = var;
-			idx_ = 6;
-		}
+		void push(const bool &val);
+		void push(const float &val);
+		void push(const double &val);
 
-		void set_log_callback(LogFunc var)
-		{
-			v_ = var;
-			idx_ = 7;
-		}
+		void push(const char *val);
+		void push(const std::string &val);
 
-		void set_redis_cmd_callback(RedisCmdFunc var)
-		{
-			v_ = var;
-			idx_ = 8;
-		}
+		template <typename T>
+		void push_impl(const T &val);
 
-		av v_;
-		uint32_t idx_;
+		template <typename T>
+		void push(std::list<T> &list);
+
+		template <typename T>
+		void push(std::vector<T> &vec);
+
+		template <typename Key, typename Value>
+		void push(std::map<Key, Value> &map);
+
+		/////////////////////////////
+
+		uint8_t pop_ui8();
+		int8_t pop_i8();
+
+		uint16_t pop_ui16();
+		int16_t pop_i16();
+
+		uint32_t pop_ui32();
+		int32_t pop_i32();
+
+		uint64_t pop_ui64();
+		int64_t pop_i64();
+
+		bool pop_bool();
+		float pop_float();
+		double pop_double();
+
+		TypeLen pop_typelen();
+
+		std::string pop_string();
+
+		template<typename T>
+		std::list<T> pop_list();
+
+		template <typename T>
+		std::vector<T> pop_vec();
+
+		template <typename Key, typename Value>
+		std::map<Key, Value> pop_map();
+
+		/////////////////////////////
+
+		void flush();
+	private:
+		template <typename T>
+		void pop(T &val);
+
+		void pop_impl(uint8_t &val);
+		void pop_impl(int8_t &val);
+		void pop_impl(uint16_t &val);
+		void pop_impl(int16_t &val);
+		void pop_impl(uint32_t &val);
+		void pop_impl(int32_t &val);
+		void pop_impl(uint64_t &val);
+		void pop_impl(int64_t &val);
+		void pop_impl(bool &val);
+		void pop_impl(float &val);
+		void pop_impl(double &val);
+
+	private:
+
+		char *buff_;
+		char *read_;
+		char *write_;
+		char *tail_;
+
+		uint32_t pos_;
+		uint32_t size_;
 	};
 
-	class Args
+
+
+	using deleter_type = std::function<void(Args*)>;
+	using ArgsPtr = std::unique_ptr<Args, deleter_type>;
+
+	struct ArgsPool : public utils::Singleton<ArgsPool>
 	{
-	public:
-		Args()
-			: size_(0)
+		std::unique_ptr<Args, deleter_type> get()
 		{
+			std::unique_ptr<Args, deleter_type> _ptr(pool_.back().release(), [this](Args *args) {
+				release_ptr(args);
+			});
 
+			pool_.pop_back();
+			return _ptr;
 		}
 
-		template <typename T1>
-		Args(T1 arg1)
-			: size_(0)
-		{	
-			add(arg1);
-		}
-
-		template <typename T1, typename T2>
-		Args(T1 arg1, T2 arg2)
-			: size_(0)
+		void make(uint32_t size)
 		{
-			add(arg1);
-			add(arg2);
-		}
-
-		template <typename T1, typename T2, typename T3>
-		Args(T1 arg1, T2 arg2, T3 arg3)
-			: size_(0)
-		{
-			add(arg1);
-			add(arg2);
-			add(arg3);
-		}
-
-		template <typename T1, typename T2, typename T3, typename T4>
-		Args(T1 arg1, T2 arg2, T3 arg3, T4 arg4)
-			: size_(0)
-		{
-			add(arg1);
-			add(arg2);
-			add(arg3);
-			add(arg4);
-		}
-
-		template <typename T1, typename T2, typename T3, typename T4, typename T5>
-		Args(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5)
-			: size_(0)
-		{
-			add(arg1);
-			add(arg2);
-			add(arg3);
-			add(arg4);
-			add(arg5);
-		}
-
-		void add(const bool value)
-		{
-			auto _arg = std::make_shared<Arg>();
-			_arg->set_bool(value);
-
-			size_++;
-			arg_list_.push_back(_arg);
-		}
-
-		void add(const uint32_t value)
-		{
-			auto _arg = std::make_shared<Arg>();
-			_arg->set_uint32(value);
-
-			size_++;
-			arg_list_.push_back(_arg);
-		}
-
-		void add(const int32_t value)
-		{
-			auto _arg = std::make_shared<Arg>();
-			_arg->set_int32(value);
-
-			size_++;
-			arg_list_.push_back(_arg);
-		}
-
-		void add(const uint64_t value)
-		{
-			auto _arg = std::make_shared<Arg>();
-			_arg->set_uint64(value);
-
-			size_++;
-			arg_list_.push_back(_arg);
-		}
-
-		void add(const int64_t value)
-		{
-			auto _arg = std::make_shared<Arg>();
-			_arg->set_int64(value);
-
-			size_++;
-			arg_list_.push_back(_arg);
-		}
-
-		void add(const char *str)
-		{
-			auto _arg = std::make_shared<Arg>();
-			_arg->set_string(std::string(str));
-			
-			size_++;
-			arg_list_.push_back(_arg);
-		}
-
-		void add(const std::string &value)
-		{
-			auto _arg = std::make_shared<Arg>();
-			_arg->set_string(value);
-
-			size_++;
-			arg_list_.push_back(_arg);
-		}
-
-		void add(RemoteFunc func)
-		{
-			auto _arg = std::make_shared<Arg>();
-			_arg->set_remote_callback(func);
-
-			size_++;
-			arg_list_.push_back(_arg);
-		}
-
-		void add(LogFunc func)
-		{
-			auto _arg = std::make_shared<Arg>();
-			_arg->set_log_callback(func);
-
-			size_++;
-			arg_list_.push_back(_arg);
-		}
-
-		void add(RedisCmdFunc func)
-		{
-			auto _arg = std::make_shared<Arg>();
-			_arg->set_redis_cmd_callback(func);
-
-			size_++;
-			arg_list_.push_back(_arg);
-		}
-
-		const bool pop_bool(const int index) const
-		{
-			#ifdef _DEBUG
-				assert(index >= 0 && index < size_);
-			#else
-				if (index < 0 || index >= size_){
-					return false;
-				}
-			#endif
-
-			auto var = arg_list_[index];
-			return var->v_.Get<bool>();
-		}
-
-		const int32_t pop_int32(const int index) const
-		{
-			#ifdef _DEBUG
-				assert(index >= 0 && index < size_);
-			#else
-				if (index < 0 || index >= size_){
-					return 0;
-				}
-			#endif
-
-			auto var = arg_list_[index];
-			return var->v_.Get<int32_t>();
-		}
-
-		const uint32_t pop_uint32(const int index) const
-		{
-			#ifdef _DEBUG
-				assert(index >= 0 && index < size_);
-			#else
-				if (index < 0 || index >= size_){
-					return 0;
-				}
-			#endif
-
-			auto var = arg_list_[index];
-			return var->v_.Get<uint32_t>();
-		}
-
-		const uint64_t pop_uint64(const int index) const
-		{
-			#ifdef _DEBUG
-				assert(index >= 0 && index < size_);
-			#else
-				if (index < 0 || index >= size_){
-					return 0;
-				}
-			#endif
-
-			auto var = arg_list_[index];
-			return var->v_.Get<uint64_t>(); 
-		}
-
-		const uint64_t pop_int64(const int index) const
-		{
-			#ifdef _DEBUG
-				assert(index >= 0 && index < size_);
-			#else
-				if (index < 0 || index >= size_){
-					return 0;
-				}
-			#endif
-
-			auto var = arg_list_[index];
-			return var->v_.Get<int64_t>(); 
-		}
-
-		const std::string & pop_string(const int index) const
-		{
-			#ifdef _DEBUG
-				assert(index >= 0 && index < size_);
-			#else
-				if (index < 0 || index >= size_){
-					return "";
-				}
-			#endif
-
-			auto var = arg_list_[index];
-			return var->v_.Get<std::string>();
-		}
-
-		const RemoteFunc pop_remote_callback(const int index) const
-		{
-#ifdef _DEBUG
-			assert(index >= 0 && index < size_);
-#else
-			if (index < 0 || index >= size_) {
-				return nullptr;
+			for (uint32_t i = 0; i < size; ++i)
+			{
+				pool_.push_back(std::make_unique<Args>());
 			}
-#endif
-			auto var = arg_list_[index];
-			return var->v_.Get<RemoteFunc>();
 		}
 
-		const LogFunc pop_log_callback(const int index) const
+ 		Args * get_ptr()
 		{
-#ifdef _DEBUG
-			assert(index >= 0 && index < size_);
-#else
-			if (index < 0 || index >= size_) {
-				return nullptr;
+ 			return nullptr;
+  		}
+
+		void release_ptr(Args *args)
+		{
+			args->flush();
+			dirty_vec_.push_back(args);
+		}
+
+		void reenter()
+		{
+			for (auto it : dirty_vec_)
+			{
+				pool_.push_back(std::unique_ptr<Args>(it));
 			}
-#endif
-			auto var = arg_list_[index];
-			return var->v_.Get<LogFunc>();
-		}
-
-		const RedisCmdFunc pop_redis_cmd_callback(const int index) const
-		{
-#ifdef _DEBUG
-			assert(index >= 0 && index < size_);
-#else
-			if (index < 0 || index >= size_) {
-				return nullptr;
-			}
-#endif
-			auto var = arg_list_[index];
-			return var->v_.Get<RedisCmdFunc>();
-		}
-
-		uint32_t get_typeid(const int index) const
-		{
-			auto var = arg_list_[index];
-			return var->idx_;
-		}
-
-		Args & operator << (const bool value)
-		{
-			add(value);
-			return *this;
-		}
-
-		Args & operator << (const uint32_t value)
-		{
-			add(value);
-			return *this;
-		}
-
-		Args & operator << (const int32_t value)
-		{
-			add(value);
-			return *this;
-		}
-
-		Args & operator << (const uint64_t value)
-		{
-			add(value);
-			return *this;
-		}
-
-		Args & operator << (const int64_t value)
-		{
-			add(value);
-			return *this;
-		}
-
-		Args & operator << (const std::string &value)
-		{
-			add(value);
-			return *this;
-		}
-
-		Args & operator << (RemoteFunc value)
-		{
-			add(value);
-			return *this;
-		}
-
-		void push_uint32(const uint32_t value)
-		{
-			add(value);
-		}
-
-		void push_int32(const int32_t value)
-		{
-			add(value);
-		}
-
-		void push_string(const std::string &value)
-		{
-			add(value);
-		}
-
-		void push_remote_callback(RemoteFunc value)
-		{
-			add(value);
-		}
-
-		void push_log_callback(LogFunc value)
-		{
-			add(value);
-		}
-
-		void push_redis_cmd_callback(RedisCmdFunc value)
-		{
-			add(value);
-		}
-
-		int get_count() const
-		{
-			return size_;
+			dirty_vec_.clear();
 		}
 
 	private:
-		std::vector<std::shared_ptr<Arg>> arg_list_;
 
-		int size_;
+		std::vector<std::unique_ptr<Args>> pool_;
+		std::vector<Args *> dirty_vec_;
 	};
 
-	/*
-		Args args;
-		args.add("hello");
+	/*! 
+		auto args = make_args(11, "22");
 
-		std::cout << args.pop_string(0).c_str() << std::endl;
-		
-		Args args;
-		args << 10 << "hello";
+		args->pop_i32();
+		args->pop_string();
 
-		std::cout << args.pop_uint32(0) << args.pop_string(1).c_str() << std::endl;
 	*/
-}
 
+	template <typename P0, typename ...P>
+	static void pushArg(ArgsPtr &args, P0 &&p0, P &&... p)
+	{
+		args->push(std::forward<P0>(p0));
+		pushArg(args, std::forward<P>(p)...);
+	}
+
+	static void pushArg(ArgsPtr &args)
+	{
+		//template terminate
+	}
+
+	template <typename ...P>
+	ArgsPtr make_args(P&& ...upvalues)
+	{
+		auto args = ArgsPool::get_ref().get();
+
+		pushArg(args, std::forward<P>(upvalues)...);
+
+		return args;
+	}
+}
 
 #endif

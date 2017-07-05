@@ -47,12 +47,12 @@ namespace gsf
 
 		private:
 
-			void delay_milliseconds(const gsf::Args &args, gsf::CallbackFunc callback);
-			void delay_day(const gsf::Args &args, gsf::CallbackFunc callback);
+			void delay_milliseconds(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
+			void delay_day(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
 			//void delay_week(std::tuple<gsf::utils::Any> args, gsf::EventHandlerPtr callback);
 			//void delay_month(std::tuple<gsf::utils::Any> args, gsf::EventHandlerPtr callback);
 
-            void remove_timer(const gsf::Args &args, gsf::CallbackFunc callback);
+            void remove_timer(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
 		private:
 	
 			uint64_t get_system_tick();

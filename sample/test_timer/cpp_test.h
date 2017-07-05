@@ -98,15 +98,15 @@ struct TestCaseModule
 
 	void before_init() override
 	{
-		dispatch(eid::app_id, eid::get_module, gsf::Args("TimerModule"), [&](const gsf::Args &args) {
+		dispatch(eid::app_id, eid::get_module, gsf::Args("TimerModule"), [&](const gsf::ArgsPtr &args) {
 			timer_m_ = args.pop_int32(0);
 		});
 
-		dispatch(eid::app_id, eid::get_module, gsf::Args("LogModule"), [&](const gsf::Args &args) {
+		dispatch(eid::app_id, eid::get_module, gsf::Args("LogModule"), [&](const gsf::ArgsPtr &args) {
 			log_m_ = args.pop_int32(0);
 		});
 
-		dispatch(log_m_, eid::log::log_callback, gsf::Args(), [&](const gsf::Args &args) {
+		dispatch(log_m_, eid::log::log_callback, gsf::Args(), [&](const gsf::ArgsPtr &args) {
 			log_f_ = args.pop_log_callback(0);
 		});
 	}
@@ -133,7 +133,7 @@ struct TestCaseModule
 		case_remove_timer_.remove_timer_ = _remove_timer;
 		case_remove_timer_.log_f_ = log_f_;
 
-		listen(this, eid::timer::timer_arrive, [&](const gsf::Args &args, gsf::CallbackFunc cb) {
+		listen(this, eid::timer::timer_arrive, [&](const gsf::ArgsPtr &args, gsf::CallbackFunc cb) {
 
 			auto _timer_id = args.pop_uint64(0);
 			if (_timer_id == case_delaymillseconds_.timer_id_) {

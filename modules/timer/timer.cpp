@@ -14,8 +14,8 @@ gsf::modules::TimerModule::TimerModule()
 
 void gsf::modules::TimerModule::before_init()
 {
-	dispatch(eid::app_id, eid::get_module, gsf::Args("LogModule"), [&](const gsf::Args &args) {
-		log_m_ = args.pop_int32(0);
+	dispatch(eid::app_id, eid::get_module, gsf::make_args("LogModule"), [&](const gsf::ArgsPtr &args) {
+		//log_m_ = args->pop_i32();
 	});
 }
 
@@ -32,7 +32,7 @@ void gsf::modules::TimerModule::init()
 	listen(this, eid::timer::remove_timer
 		, std::bind(&TimerModule::remove_timer, this, _1, _2));
 
-	boardcast(eid::module_init_succ, gsf::Args(get_module_id()));
+	boardcast(eid::module_init_succ, gsf::make_args(get_module_id()));
 }
 
 void gsf::modules::TimerModule::execute()
@@ -47,7 +47,7 @@ void gsf::modules::TimerModule::execute()
 
 		while ((_time_id >> sequence_bit_) < _now)
 		{
-			dispatch(itr->second->target_, eid::timer::timer_arrive, gsf::Args(itr->second->timerid_));
+			dispatch(itr->second->target_, eid::timer::timer_arrive, gsf::make_args(itr->second->timerid_));
 			map_.erase(itr);
 
 			if (!map_.empty()) {
@@ -79,10 +79,10 @@ uint64_t gsf::modules::TimerModule::make_timer_id(uint64_t delay)
 	return _tick;
 }
 
-void gsf::modules::TimerModule::delay_milliseconds(const gsf::Args &args, gsf::CallbackFunc callback)
+void gsf::modules::TimerModule::delay_milliseconds(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
 {
-	uint32_t _sender = args.pop_int32(0);
-	uint32_t _milliseconds = args.pop_int32(1);
+	uint32_t _sender = args->pop_i32();
+	uint32_t _milliseconds = args->pop_i32();
 
 	auto _tid = make_timer_id(_milliseconds);
 
@@ -93,17 +93,17 @@ void gsf::modules::TimerModule::delay_milliseconds(const gsf::Args &args, gsf::C
 	assert(map_.find(_tid) == map_.end());
 	map_.insert(std::make_pair(_tid, _event));
 
-	callback(gsf::Args(_tid));
+	callback(gsf::make_args(_tid));
 }
 
 
-void gsf::modules::TimerModule::delay_day(const gsf::Args &args, gsf::CallbackFunc callback)
+void gsf::modules::TimerModule::delay_day(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
 {
 	using namespace std::chrono;
 
-	uint32_t _sender = args.pop_int32(0);
-	uint32_t _hour = args.pop_int32(1);
-	uint32_t _minute = args.pop_int32(2);
+	uint32_t _sender = args->pop_i32();
+	uint32_t _hour = args->pop_i32();
+	uint32_t _minute = args->pop_i32();
 
 	typedef duration<int, std::ratio<60 * 60 * 24>> dur_day;
 	time_point<system_clock, dur_day> _today = time_point_cast<dur_day>(system_clock::now());
@@ -131,19 +131,19 @@ void gsf::modules::TimerModule::delay_day(const gsf::Args &args, gsf::CallbackFu
 
 	map_.insert(std::make_pair(_tid, _event));
 
-	callback(gsf::Args(_tid));
+	callback(gsf::make_args(_tid));
 }
 
 
-void gsf::modules::TimerModule::remove_timer(const gsf::Args &args, gsf::CallbackFunc callback)
+void gsf::modules::TimerModule::remove_timer(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
 {
-	uint32_t _sender = args.pop_int32(0);
-	uint64_t _timer_id = args.pop_uint64(1);
+	uint32_t _sender = args->pop_i32();
+	uint64_t _timer_id = args->pop_ui64();
 
 	auto itr = map_.find(_timer_id);
 	if (itr != map_.end()) {
 		map_.erase(itr);
 
-		callback(gsf::Args(1));
+		callback(gsf::make_args(1));
 	}
 }

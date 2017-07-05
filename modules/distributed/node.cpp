@@ -29,7 +29,7 @@ void gsf::distributed::NodeModule::shut()
 
 }
 
-void gsf::distributed::NodeModule::event_create_node(const gsf::Args &args, gsf::CallbackFunc callback)
+void gsf::distributed::NodeModule::event_create_node(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
 {
 
 

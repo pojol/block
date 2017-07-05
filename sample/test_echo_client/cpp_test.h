@@ -40,22 +40,22 @@ public:
 
 	void before_init() override
 	{
-		dispatch(eid::app_id, eid::new_dynamic_module, gsf::Args("ConnectorModule"), [&](const gsf::Args &args) {
-			connector_id_ = args.pop_int32(0);
+		dispatch(eid::app_id, eid::new_dynamic_module, gsf::make_args("ConnectorModule"), [&](const gsf::ArgsPtr &args) {
+			connector_id_ = args->pop_i32();
 
 			listen(connector_id_, eid::network::connector_init, std::bind(&Client::create_connector_succ, this, std::placeholders::_1));
 		});
 
 	}
 
-	void create_connector_succ(const gsf::Args &args)
+	void create_connector_succ(const gsf::ArgsPtr &args)
 	{
-		dispatch(connector_id_, eid::network::send_remote_callback, gsf::Args(), [&](const gsf::Args &args) {
-			send_ = args.pop_remote_callback(0);
+		dispatch(connector_id_, eid::network::send_remote_callback, nullptr, [&](const gsf::ArgsPtr &args) {
+			//send_ = args.pop_remote_callback(0);
 		});
 
-		listen(this, eid::network::new_connect, [&](const gsf::Args &args, gsf::CallbackFunc callback) {
-			fd_ = args.pop_int32(0);
+		listen(this, eid::network::new_connect, [&](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
+			fd_ = args->pop_i32();
 
 			tutorial::Person _p;
 			_p.set_name("jack");
@@ -64,7 +64,7 @@ public:
 			std::string _msg = "";
 			
 			if (_p.SerializeToString(&_msg)) {
-				send_(fd_, 1001, _msg);
+				//send_(fd_, 1001, _msg);
 			}
 
 		});
@@ -75,7 +75,7 @@ public:
 			, 1002), std::bind(&Client::msg_handler, this, std::placeholders::_1));
 		*/
 		dispatch(connector_id_, eid::network::make_connector
-			, gsf::Args(get_module_id(), "127.0.0.1", 8001));
+			, gsf::make_args(get_module_id(), "127.0.0.1", 8001));
 	}
 
 	void init() override
@@ -83,14 +83,14 @@ public:
 
 	}
 
-	void msg_handler(const gsf::Args &args)
+	void msg_handler(const gsf::ArgsPtr &args)
 	{
-		send_(fd_, 1001, "hello");
+		//send_(fd_, 1001, "hello");
 	}
 
 private:
 	gsf::ModuleID connector_id_ = gsf::ModuleNil;
 	gsf::SessionID fd_ = gsf::SessionNil;
 
-	gsf::RemoteFunc send_;
+	//gsf::RemoteFunc send_;
 };

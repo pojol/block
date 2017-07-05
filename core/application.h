@@ -24,6 +24,7 @@ namespace gsf
 	struct AppConfig
 	{
 		uint32_t tick_count = 20;
+		uint32_t pool_args_count = 1024 * 10;
 		bool is_watch_pref = false;
 		std::string name = "default";
 	};

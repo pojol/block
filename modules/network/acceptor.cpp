@@ -54,13 +54,13 @@ void gsf::network::AcceptorModule::init()
 		, std::placeholders::_2));
 
 	listen(this, eid::network::send_remote_callback
-		, [&](const gsf::Args &args, gsf::CallbackFunc callback) {
+		, [&](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
 
-		auto _args = gsf::Args();
-		_args.push_remote_callback(std::bind(&AcceptorModule::send_msg, this
-			, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+		//auto _args = gsf::Args();
+		//_args.push_remote_callback(std::bind(&AcceptorModule::send_msg, this
+		//	, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
-		callback(_args);
+		//callback(_args);
 	});
 }
 
@@ -94,20 +94,20 @@ void gsf::network::AcceptorModule::after_shut()
 	}
 }
 
-void gsf::network::AcceptorModule::make_acceptor(const gsf::Args &args, gsf::CallbackFunc callback)
+void gsf::network::AcceptorModule::make_acceptor(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
 {
-	uint32_t _module_id = args.pop_int32(0);
-	std::string _ip = args.pop_string(1);
-	uint32_t _port = args.pop_int32(2);
+	uint32_t _module_id = args->pop_i32();
+	std::string _ip = args->pop_string();
+	uint32_t _port = args->pop_i32();
 
 	module_id_ = _module_id;	//! 绑定代理Module的id
 	accept_bind(_ip, _port);
 }
 
-void gsf::network::AcceptorModule::bind_remote(const gsf::Args &args, gsf::CallbackFunc callback)
+void gsf::network::AcceptorModule::bind_remote(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
 {
-	uint32_t _module_id = args.pop_int32(0);
-	uint32_t _msg_id = args.pop_int32(1);
+	uint32_t _module_id = args->pop_i32();
+	uint32_t _msg_id = args->pop_i32();
 
 	auto _info_ptr = std::make_shared<RemoteInfo>(_module_id, _msg_id, callback);
 	binder_->regist(_info_ptr);

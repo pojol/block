@@ -25,7 +25,7 @@ namespace gsf
 			
 		private:
 
-			void event_create_node(const gsf::Args &args, gsf::CallbackFunc callback);
+			void event_create_node(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
 
 		private:
 

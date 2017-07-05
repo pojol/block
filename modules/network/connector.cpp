@@ -53,24 +53,24 @@ void gsf::network::ConnectorModule::before_init()
 			, std::placeholders::_2));
 
 	listen(this, eid::network::send_remote_callback
-		, [&](const gsf::Args &args, gsf::CallbackFunc callback) {
+		, [&](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
 
-		auto _args = gsf::Args();
-		_args.push_remote_callback(std::bind(&ConnectorModule::send_msg, this
-			, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+		//auto _args = gsf::Args();
+		//_args.push_remote_callback(std::bind(&ConnectorModule::send_msg, this
+		//	, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
-		callback(_args);
+		//callback(_args);
 	});
 
-	dispatch(eid::app_id, eid::get_module, gsf::Args(std::string("LogModule")), [=](const gsf::Args &args)
+	dispatch(eid::app_id, eid::get_module, gsf::make_args("LogModule"), [=](const gsf::ArgsPtr &args)
 	{
-		log_module_ = args.pop_int32(0);
+		log_module_ = args->pop_i32();
 	});
 }
 
 void gsf::network::ConnectorModule::init()
 {
-	dispatch(get_module_id(), eid::network::connector_init, gsf::Args());
+	dispatch(get_module_id(), eid::network::connector_init, nullptr);
 }
 
 void gsf::network::ConnectorModule::execute()
@@ -98,11 +98,11 @@ void gsf::network::ConnectorModule::after_shut()
 	}
 }
 
-void gsf::network::ConnectorModule::make_connector(const gsf::Args &args, gsf::CallbackFunc callback)
+void gsf::network::ConnectorModule::make_connector(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
 {
-	uint32_t _module_id = args.pop_int32(0);
-	std::string _ip = args.pop_string(1);
-	uint32_t _port = args.pop_int32(2);
+	uint32_t _module_id = args->pop_i32();
+	std::string _ip = args->pop_string();
+	uint32_t _port = args->pop_i32();
 
 	module_id_ = _module_id;
 
@@ -149,10 +149,10 @@ void gsf::network::ConnectorModule::make_connector(const gsf::Args &args, gsf::C
 }
 
 
-void gsf::network::ConnectorModule::bind_remote(const gsf::Args &args, gsf::CallbackFunc callback)
+void gsf::network::ConnectorModule::bind_remote(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
 {
-	uint32_t _module_id = args.pop_int32(0);
-	uint32_t _msg_id = args.pop_int32(1);
+	uint32_t _module_id = args->pop_i32();
+	uint32_t _msg_id = args->pop_i32();
 
 	auto _info_ptr = std::make_shared<RemoteInfo>(_module_id, _msg_id, callback);
 	binder_->regist(_info_ptr);

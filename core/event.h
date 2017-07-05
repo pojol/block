@@ -26,8 +26,8 @@
 namespace gsf
 {
 	typedef std::pair<uint32_t, uint32_t> EventPair;
-	typedef std::function<void(const gsf::Args&)> CallbackFunc;
-	typedef std::function<void(const gsf::Args&, CallbackFunc)> EventFunc;
+	typedef std::function<void(const ArgsPtr &)> CallbackFunc;
+	typedef std::function<void(const ArgsPtr &, CallbackFunc)> EventFunc;
 
 	class Module;
 
@@ -47,9 +47,9 @@ namespace gsf
 		/**!
 			用于将事件发往不同模块
 		*/
-		virtual void dispatch(uint32_t target, uint32_t event, const Args &args, CallbackFunc callback = nullptr);
+		virtual void dispatch(uint32_t target, uint32_t event, const ArgsPtr &args, CallbackFunc callback = nullptr);
 
-		virtual void boardcast(uint32_t event, const Args &args, CallbackFunc callback = nullptr);
+		virtual void boardcast(uint32_t event, const ArgsPtr &args, CallbackFunc callback = nullptr);
 
 		/**!
 			移除module在event层上的绑定.
@@ -75,8 +75,8 @@ namespace gsf
 
 		void bind_event(uint32_t type_id, uint32_t event, EventFunc func);
 
-		void dispatch(uint32_t type_id, uint32_t event, const gsf::Args &args, CallbackFunc callback = nullptr);
-		void boardcast(uint32_t event, const gsf::Args &args, CallbackFunc callback = nullptr);
+		void dispatch(uint32_t type_id, uint32_t event, const ArgsPtr &args, CallbackFunc callback = nullptr);
+		void boardcast(uint32_t event, const ArgsPtr &args, CallbackFunc callback = nullptr);
 		///
 
 		void rmv_event(ModuleID module_id);

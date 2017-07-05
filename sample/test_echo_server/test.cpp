@@ -60,34 +60,34 @@ public:
 
 	void before_init() override
 	{
-		dispatch(eid::app_id, eid::get_module, gsf::Args("LogModule"), [&](const gsf::Args &args) {
+		dispatch(eid::app_id, eid::get_module, gsf::Args("LogModule"), [&](const gsf::ArgsPtr &args) {
 			log_m_ = args.pop_int32(0);
 		});
 
-		dispatch(eid::app_id, eid::get_module, gsf::Args("Client2LoginServer"), [&](const gsf::Args &args) {
+		dispatch(eid::app_id, eid::get_module, gsf::Args("Client2LoginServer"), [&](const gsf::ArgsPtr &args) {
 			client2login_ = args.pop_int32(0);
 		});
 	}
 
 	void init() override
 	{
-		dispatch(log_m_, eid::log::log_callback, gsf::Args(), [&](const gsf::Args &args) {
+		dispatch(log_m_, eid::log::log_callback, gsf::Args(), [&](const gsf::ArgsPtr &args) {
 			log_f_ = args.pop_log_callback(0);
 		});
 
 
 		//test
 		listen(this, eid::network::new_connect
-			, [=](const gsf::Args &args, gsf::CallbackFunc callback) {
+			, [=](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
 			log_f_(eid::log::info, "EntityMgr", gsf::Args("new connect fd : ", args.pop_int32(0)));
 		});
 
 		listen(this, eid::network::dis_connect
-			, [=](const gsf::Args &args, gsf::CallbackFunc callback) {
+			, [=](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
 			log_f_(eid::log::info, "EntityMgr", gsf::Args("dis connect fd : ", args.pop_int32(0)));
 		});
 
-		dispatch(client2login_, eid::network::send_remote_callback, gsf::Args(), [&](const gsf::Args &args) {
+		dispatch(client2login_, eid::network::send_remote_callback, gsf::Args(), [&](const gsf::ArgsPtr &args) {
 			send_ = args.pop_remote_callback(0);
 		});
 
@@ -119,7 +119,7 @@ public:
 		last_tick_ = _t;
 	}
 
-	void test_remote(const gsf::Args &args)
+	void test_remote(const gsf::ArgsPtr &args)
 	{
 		auto fd = args.pop_int32(0);
 		auto block = args.pop_string(2);

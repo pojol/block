@@ -65,7 +65,7 @@ public:
 
 		path_ = _path;
 
-		listen(this, eid::sample::get_proc_path, [=](const gsf::Args &args, gsf::CallbackFunc callback) {
+		listen(this, eid::sample::get_proc_path, [=](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
 			callback(gsf::Args(path_));
 		});
 	}
@@ -87,16 +87,16 @@ public:
 
 	void before_init()
 	{
-		dispatch(eid::app_id, eid::get_module, gsf::Args("LuaProxyModule"), [&](const gsf::Args &args) {
+		dispatch(eid::app_id, eid::get_module, gsf::Args("LuaProxyModule"), [&](const gsf::ArgsPtr &args) {
 			luaproxy_m_ = args.pop_int32(0);
 		});
 
 		gsf::ModuleID _path_m = 0;
-		dispatch(eid::app_id, eid::get_module, gsf::Args("PathModule"), [&](const gsf::Args &args) {
+		dispatch(eid::app_id, eid::get_module, gsf::Args("PathModule"), [&](const gsf::ArgsPtr &args) {
 			_path_m = args.pop_int32(0);
 		});
 
-		dispatch(_path_m, eid::sample::get_proc_path, gsf::Args(), [&](const gsf::Args &_args) {
+		dispatch(_path_m, eid::sample::get_proc_path, gsf::Args(), [&](const gsf::ArgsPtr &_args) {
 			path_ = _args.pop_string(0);
 		});
 	}

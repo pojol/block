@@ -49,7 +49,7 @@ void gsf::EventModule::bind_event(uint32_t type_id, uint32_t event, EventFunc fu
 	}
 }
 
-void gsf::EventModule::dispatch(uint32_t type_id, uint32_t event, const gsf::Args &args, CallbackFunc callback /* = nullptr */)
+void gsf::EventModule::dispatch(uint32_t type_id, uint32_t event, const ArgsPtr &args, CallbackFunc callback /* = nullptr */)
 {
 	auto tItr = type_map_.find(type_id);
 	if (tItr != type_map_.end()) {
@@ -70,7 +70,7 @@ void gsf::EventModule::dispatch(uint32_t type_id, uint32_t event, const gsf::Arg
 	}
 }
 
-void gsf::EventModule::boardcast(uint32_t event, const gsf::Args &args, CallbackFunc callback /*= nullptr*/)
+void gsf::EventModule::boardcast(uint32_t event, const ArgsPtr &args, CallbackFunc callback /*= nullptr*/)
 {
 	for (auto &it : type_map_)
 	{
@@ -123,12 +123,12 @@ void gsf::IEvent::listen(ModuleID self, uint32_t event, EventFunc func)
 	EventModule::get_ref().bind_event(self, event, func);
 }
 
-void gsf::IEvent::dispatch(uint32_t target, uint32_t event, const Args &args, CallbackFunc callback /* = nullptr */)
+void gsf::IEvent::dispatch(uint32_t target, uint32_t event, const gsf::ArgsPtr &args, CallbackFunc callback /* = nullptr */)
 {
 	EventModule::get_ref().dispatch(target, event, args, callback);
 }
 
-void gsf::IEvent::boardcast(uint32_t event, const Args &args, CallbackFunc callback /*= nullptr*/)
+void gsf::IEvent::boardcast(uint32_t event, const gsf::ArgsPtr &args, CallbackFunc callback /*= nullptr*/)
 {
 	EventModule::get_ref().boardcast(event, args, callback);
 }

@@ -21,13 +21,8 @@ gsf::modules::LogModule::LogModule()
 
 void gsf::modules::LogModule::before_init()
 {
-	listen(this, eid::log::log_callback, [&](const gsf::Args &args, gsf::CallbackFunc callback) {
-		auto _args = gsf::Args();
-		_args.push_log_callback(std::bind(&LogModule::log_print, this
-			, std::placeholders::_1
-			, std::placeholders::_2
-			, std::placeholders::_3));
-		callback(_args);
+	listen(this, eid::log::log_callback, [&](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
+
 	});
 
 #ifdef WIN32
@@ -56,8 +51,8 @@ void gsf::modules::LogModule::before_init()
 	}
 #endif // WIN32
 
-	dispatch(eid::app_id, eid::get_app_name, gsf::Args(), [&](const gsf::Args &args){
-		init_impl(args.pop_string(0));	
+	dispatch(eid::app_id, eid::get_app_name, nullptr, [&](const gsf::ArgsPtr &args){
+		init_impl(args->pop_string());	
 	});
 }
 
@@ -94,8 +89,9 @@ void gsf::modules::LogModule::init_impl(const std::string &exe_name)
 }
 
 
-void gsf::modules::LogModule::log_print(uint32_t type, const char * title, const gsf::Args &args)
+void gsf::modules::LogModule::log_print(uint32_t type, const char * title, const gsf::ArgsPtr &args)
 {
+/*
 	std::ostringstream oss;
 
 	for (int i = 0; i < args.get_count(); ++i)
@@ -141,5 +137,6 @@ void gsf::modules::LogModule::log_print(uint32_t type, const char * title, const
 		LOG(ERROR) << "[ERROR] " << title << " " << oss.str();
 		break;
 	}
+*/
 }
 

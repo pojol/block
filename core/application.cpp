@@ -2,6 +2,7 @@
 
 #include <ctime>
 #include <algorithm>
+#include <iostream>
 #include <string>
 
 #ifdef WIN32
@@ -33,25 +34,28 @@ void gsf::Application::init_cfg(const gsf::AppConfig &cfg)
 	cfg_ = cfg;
 
 	new gsf::EventModule;
+	new gsf::ArgsPool;
+	gsf::ArgsPool::get_ref().make(cfg.pool_args_count);
 
-	listen(this, eid::get_module, [=](const gsf::Args &args, CallbackFunc callback) {
 
-		std::string _name = args.pop_string(0);
+	listen(this, eid::get_module, [=](const gsf::ArgsPtr &args, CallbackFunc callback) {
+
+		std::string _name = args->pop_string();
 
 		auto itr = module_name_map_.find(_name);
 		if (itr != module_name_map_.end()) {
-			callback(gsf::Args(itr->second));
+			callback(gsf::make_args(itr->second));
 		}
 
 	});
 
-	listen(this, eid::get_app_name, [=](const gsf::Args &args, CallbackFunc callback){
-		callback(gsf::Args(cfg_.name));
+	listen(this, eid::get_app_name, [=](const gsf::ArgsPtr &args, CallbackFunc callback){
+		callback(gsf::make_args(cfg_.name));
 	});
 
-	listen(this, eid::new_dynamic_module, [=](const gsf::Args &args, CallbackFunc callback) {
+	listen(this, eid::new_dynamic_module, [=](const gsf::ArgsPtr &args, CallbackFunc callback) {
 
-		std::string _name = args.pop_string(0);
+		std::string _name = args->pop_string();
 
 		gsf::Module *_module_ptr = static_cast<gsf::Module*>(DynamicModuleFactory::create(_name));
 		_module_ptr->set_id(make_module_id());
@@ -61,12 +65,12 @@ void gsf::Application::init_cfg(const gsf::AppConfig &cfg)
 		push_frame(cur_frame_ + 3, std::make_tuple(2, nullptr, nullptr
 			, std::bind(&Application::regist_module<Module>, this, std::placeholders::_1, std::placeholders::_2), _module_ptr));
 
-		callback(gsf::Args(_module_ptr->get_module_id()));
+		callback(gsf::make_args(_module_ptr->get_module_id()));
 	});
 
-	listen(this, eid::delete_dynamic_module, [=](const gsf::Args &args, CallbackFunc callback) {
+	listen(this, eid::delete_dynamic_module, [=](const gsf::ArgsPtr &args, CallbackFunc callback) {
 
-		uint32_t _module_id = args.pop_int32(0);
+		uint32_t _module_id = args->pop_i32();
 		unregist_list_.push_back(_module_id);
 
 	});
@@ -82,7 +86,7 @@ void gsf::Application::pop_frame()
 	if (halfway_frame_.empty()) { return; }
 
 	auto itr = halfway_frame_.find(cur_frame_);
-	for (int i = 0; i < halfway_frame_.count(cur_frame_); ++i, ++itr)
+	for (auto i = 0; i < halfway_frame_.count(cur_frame_); ++i, ++itr)
 	{
 		int idx = std::get<0>(itr->second);
 		if (idx == 0) {
