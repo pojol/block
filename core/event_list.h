@@ -67,7 +67,6 @@ namespace eid
 		info,
 		warning,
 		error,
-		log_callback,
 	};
 
 	enum timer

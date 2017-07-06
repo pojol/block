@@ -8,6 +8,7 @@
 #include <list>
 
 #include <memory>
+#include <sstream>
 #include <functional>
 
 #include "types.h"
@@ -208,15 +209,15 @@ namespace gsf
 
 	static void pushFmt(std::ostringstream &oss)
 	{
-
+		//template terminate
 	}
 
 	template <typename ...P>
-	ArgsPool::ArgsPtr make_fmt(P && ...upvalues)
+	ArgsPtr make_log(uint32_t loglv, const char *title, P && ...upvalues)
 	{
 		std::ostringstream oss;
 		pushFmt(oss, std::forward<P>(upvalues)...);
-		return std::move(make_args(oss.str()));
+		return std::move(make_args(loglv, title, oss.str()));
 	}
 }
 

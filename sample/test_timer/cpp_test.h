@@ -24,19 +24,17 @@ struct Case_DelayMilliseconds
 	{
 		create_timer_(2000, [&](const gsf::ArgsPtr &args) {
 			timer_id_ = args->pop_ui64();
-			//log_f_(eid::log::info, "Case_DelayMilliseconds", gsf::Args("regist success! timer id = ", timer_id_));
-			std::cout << "Case_DelayMilliseconds" << "regist success! timer id = " << timer_id_ << std::endl;
+			print_f_(gsf::make_log(eid::log::info, "Case_DelayMilliseconds", "regist success! timer id = ", timer_id_));
 		});
 	}
 
 	void on_timer()
 	{
-		//log_f_(eid::log::info, "Case_DelayMilliseconds", gsf::Args("arrive! timer id = ", timer_id_));
-		std::cout << "Case_DelayMilliseconds" << "arrive! timer id = " << timer_id_ << std::endl;
+		print_f_(gsf::make_log(eid::log::info, "Case_DelayMilliseconds", "arrive! timer id = ", timer_id_));
 		timer_id_ = gsf::TimerNil;
 	}
 
-	//gsf::LogFunc log_f_;
+	std::function<void(const gsf::ArgsPtr &args)> print_f_;
 	std::function<void(int32_t, gsf::CallbackFunc cb)> create_timer_;
 
 	gsf::TimerID timer_id_;
@@ -49,17 +47,17 @@ struct Case_DelayDay
 	{
 		create_timer_(6, 0, [&](const gsf::ArgsPtr &args) {
 			timer_id_ = args->pop_ui64();
-			//log_f_(eid::log::info, "Case_DelayDay", gsf::Args("regist success! timer id = ", args.pop_uint64(0)));
+			print_f_(gsf::make_log(eid::log::info, "Case_DelayDay", "regist success! timer id = ", timer_id_));
 		});
 	}
 
 	void on_timer()
 	{
-		//log_f_(eid::log::info, "Case_DelayDay", gsf::Args("arrive! timer id = ", timer_id_));
+		print_f_(gsf::make_log(eid::log::info, "Case_DelayDay", "arrive! timer id = ", timer_id_));
 		timer_id_ = gsf::TimerNil;
 	}
 
-	//gsf::LogFunc log_f_;
+	std::function<void(const gsf::ArgsPtr &args)> print_f_;
 	std::function<void(int32_t, int32_t, gsf::CallbackFunc cb)> create_timer_;
 
 	gsf::TimerID timer_id_;
@@ -72,17 +70,15 @@ struct Case_RemoveTimer
 	{
 		create_timer_(1000, [&](const gsf::ArgsPtr &args) {
 			timer_id_ = args->pop_ui64();
-			//log_f_(eid::log::info, "Case_RemoveTimer", gsf::Args("regist success! timer id = ", timer_id_));
-			std::cout << "Case_RemoveTimer" << "regist success! timer id = " << timer_id_ << std::endl;
+			print_f_(gsf::make_log(eid::log::info, "Case_RemoveTimer", "regist success! timer id = ", timer_id_));
 		});
 
 		remove_timer_(timer_id_, [&](const gsf::ArgsPtr &args) {
-			//log_f_(eid::log::info, "Case_RemoveTimer", gsf::Args("remove ret = ", args.pop_int32(0), " timer id = ", timer_id_));
-			std::cout << "Case_RemoveTimer" << "remove ret = " << args->pop_i32() << " " << timer_id_ << std::endl;
+			print_f_(gsf::make_log(eid::log::info, "Case_RemoveTimer", "remove ret = ", args->pop_i32(), " timer id = ", timer_id_));
 		});
 	}
 
-	//gsf::LogFunc log_f_;
+	std::function<void(const gsf::ArgsPtr &args)> print_f_;
 	std::function<void(int32_t, gsf::CallbackFunc cb)> create_timer_;
 	std::function<void(gsf::TimerID, gsf::CallbackFunc cb)> remove_timer_;
 
@@ -109,10 +105,6 @@ struct TestCaseModule
 		dispatch(eid::app_id, eid::get_module, gsf::make_args("LogModule"), [&](const gsf::ArgsPtr &args) {
 			log_m_ = args->pop_i32();
 		});
-
-		dispatch(log_m_, eid::log::log_callback, nullptr, [&](const gsf::ArgsPtr &args) {
-			//log_f_ = args.pop_log_callback(0);
-		});
 	}
 
 	void init() override
@@ -129,16 +121,17 @@ struct TestCaseModule
 			dispatch(timer_m_, eid::timer::remove_timer, gsf::make_args(get_module_id(), timer_id), cb);
 		};
 
-		auto _print = [&](uint32_t loglv, const char *title, const std::string &str) {
+		auto _print = [&](const gsf::ArgsPtr &args) {
+			dispatch(log_m_, eid::log::print, args);
 		};
 
 		case_delaymillseconds_.create_timer_ = _delay_millisecoinds;
-		//case_delaymillseconds_.log_f_ = log_f_;
+		case_delaymillseconds_.print_f_ = _print;
 		case_delayday_.create_timer_ = _delay_day;
-		//case_delayday_.log_f_ = log_f_;
+		case_delayday_.print_f_ = _print;
 		case_remove_timer_.create_timer_ = _delay_millisecoinds;
 		case_remove_timer_.remove_timer_ = _remove_timer;
-		//case_remove_timer_.log_f_ = log_f_;
+		case_remove_timer_.print_f_ = _print;
 
 		listen(this, eid::timer::timer_arrive, [&](const gsf::ArgsPtr &args, gsf::CallbackFunc cb) {
 
@@ -159,7 +152,6 @@ struct TestCaseModule
 private:
 	uint32_t timer_m_;
 	uint32_t log_m_;
-	//gsf::LogFunc log_f_;
 
 	Case_DelayMilliseconds case_delaymillseconds_;
 	Case_DelayDay case_delayday_;
