@@ -19,6 +19,8 @@ modules
 		- election 			分布式选主业务 （待实现
 	6. lua_proxy				c++ module 和 lua module 之间的协调， 还有管理lua状态的职责
 	7. redis_cache_proxy			灾备
+	8. mysql_proxy				mysql代理 （待实现
+	9. aoi					aoi服务（待实现
 
 /
 feature
