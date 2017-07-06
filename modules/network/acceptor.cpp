@@ -38,7 +38,6 @@ void gsf::network::AcceptorModule::before_init()
 	binder_ = new MsgBinder();
 
 	event_base_ptr_ = event_base_new();
-
 }
 
 void gsf::network::AcceptorModule::init()
@@ -48,20 +47,10 @@ void gsf::network::AcceptorModule::init()
 		, std::placeholders::_1
 		, std::placeholders::_2));
 
-	listen(this, eid::network::recv_remote_callback
-		, std::bind(&AcceptorModule::bind_remote, this
+	listen(this, eid::network::send
+		, std::bind(&AcceptorModule::send_msg, this
 		, std::placeholders::_1
 		, std::placeholders::_2));
-
-	listen(this, eid::network::send_remote_callback
-		, [&](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
-
-		//auto _args = gsf::Args();
-		//_args.push_remote_callback(std::bind(&AcceptorModule::send_msg, this
-		//	, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-
-		//callback(_args);
-	});
 }
 
 void gsf::network::AcceptorModule::execute()
@@ -104,6 +93,7 @@ void gsf::network::AcceptorModule::make_acceptor(const gsf::ArgsPtr &args, gsf::
 	accept_bind(_ip, _port);
 }
 
+/*
 void gsf::network::AcceptorModule::bind_remote(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
 {
 	uint32_t _module_id = args->pop_i32();
@@ -112,7 +102,7 @@ void gsf::network::AcceptorModule::bind_remote(const gsf::ArgsPtr &args, gsf::Ca
 	auto _info_ptr = std::make_shared<RemoteInfo>(_module_id, _msg_id, callback);
 	binder_->regist(_info_ptr);
 }
-
+*/
 void gsf::network::AcceptorModule::accept_bind(const std::string &ip, int port)
 {
 	struct sockaddr_in sin;
@@ -168,13 +158,16 @@ void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, 
 	}
 }
 
-void gsf::network::AcceptorModule::send_msg(uint32_t fd, uint32_t msg_id, std::string block)
+void gsf::network::AcceptorModule::send_msg(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
 {
-	auto _session_ptr = session_mgr_->find(fd);
-	if (_session_ptr) {
+	auto _fd = args->pop_fd();
+	auto _msg = args->pop_msgid();
+	auto _str = args->pop_string();
 
-		auto _msg = std::make_shared<gsf::Block>(fd, msg_id, block);
-		_session_ptr->write(msg_id, _msg);
+	auto _session_ptr = session_mgr_->find(_fd);
+	if (_session_ptr) {
+		auto _block = std::make_shared<gsf::Block>(_fd, _msg, _str);
+		_session_ptr->write(_msg, _block);
 	}
 }
 

@@ -1,6 +1,5 @@
 #include "args.h"
 
-
 template <typename T>
 void gsf::Args::push_impl(const T &val)
 {
@@ -275,6 +274,16 @@ gsf::Args::TypeLen gsf::Args::pop_typelen()
 	TypeLen _len = *reinterpret_cast<TypeLen*>(read_);
 	read_ += sizeof(TypeLen);
 	return _len;
+}
+
+gsf::SessionID gsf::Args::pop_fd()
+{
+	return pop_ui16();
+}
+
+gsf::MsgID gsf::Args::pop_msgid()
+{
+	return pop_ui16();
 }
 
 std::string gsf::Args::pop_string()

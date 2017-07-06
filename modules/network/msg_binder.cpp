@@ -30,3 +30,14 @@ gsf::CallbackFunc gsf::network::MsgBinder::get_func(uint32_t msg_id)
 	return nullptr;
 }
 
+uint32_t gsf::network::MsgBinder::get_module(uint32_t msg_id)
+{
+	auto _itr = remote_map_.find(msg_id);
+
+	if (_itr != remote_map_.end()) {
+		return _itr->second->module_id_;
+	}
+
+	return 0;
+}
+

@@ -10,6 +10,7 @@
 #include <memory>
 #include <functional>
 
+#include "types.h"
 #include "single.h"
 
 namespace gsf
@@ -71,6 +72,9 @@ namespace gsf
 		double pop_double();
 
 		TypeLen pop_typelen();
+
+		gsf::SessionID pop_fd();
+		gsf::MsgID pop_msgid();
 
 		std::string pop_string();
 

@@ -39,11 +39,10 @@ namespace gsf
 
 		private:
 			void make_connector(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
-			void bind_remote(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
 			
 			void need_close_session(int fd);
 
-			void send_msg(uint32_t fd, uint32_t msg_id, std::string block);
+			void send_msg(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
 
 		private:
 

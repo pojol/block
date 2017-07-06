@@ -60,53 +60,52 @@ public:
 
 	void before_init() override
 	{
-		dispatch(eid::app_id, eid::get_module, gsf::Args("LogModule"), [&](const gsf::ArgsPtr &args) {
-			log_m_ = args.pop_int32(0);
+		dispatch(eid::app_id, eid::get_module, gsf::make_args("LogModule"), [&](const gsf::ArgsPtr &args) {
+			log_m_ = args->pop_i32();
 		});
 
-		dispatch(eid::app_id, eid::get_module, gsf::Args("Client2LoginServer"), [&](const gsf::ArgsPtr &args) {
-			client2login_ = args.pop_int32(0);
+		dispatch(eid::app_id, eid::get_module, gsf::make_args("Client2LoginServer"), [&](const gsf::ArgsPtr &args) {
+			client2login_ = args->pop_i32();
 		});
 	}
 
 	void init() override
 	{
-		dispatch(log_m_, eid::log::log_callback, gsf::Args(), [&](const gsf::ArgsPtr &args) {
-			log_f_ = args.pop_log_callback(0);
+		dispatch(log_m_, eid::log::log_callback, nullptr, [&](const gsf::ArgsPtr &args) {
+			//log_f_ = args.pop_log_callback(0);
 		});
 
 
 		//test
 		listen(this, eid::network::new_connect
 			, [=](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
-			log_f_(eid::log::info, "EntityMgr", gsf::Args("new connect fd : ", args.pop_int32(0)));
+			//log_f_(eid::log::info, "EntityMgr", gsf::make_args("new connect fd : ", args->pop_i32()));
 		});
 
 		listen(this, eid::network::dis_connect
 			, [=](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
-			log_f_(eid::log::info, "EntityMgr", gsf::Args("dis connect fd : ", args.pop_int32(0)));
+			//log_f_(eid::log::info, "EntityMgr", gsf::Args("dis connect fd : ", args.pop_int32(0)));
 		});
 
-		dispatch(client2login_, eid::network::send_remote_callback, gsf::Args(), [&](const gsf::ArgsPtr &args) {
-			send_ = args.pop_remote_callback(0);
+		dispatch(client2login_, eid::network::send_remote_callback, nullptr, [&](const gsf::ArgsPtr &args) {
+			//send_ = args.pop_remote_callback(0);
 		});
 
-		dispatch(client2login_, eid::network::make_acceptor, gsf::Args(get_module_id(), "127.0.0.1", 8001));
-	
+		dispatch(client2login_, eid::network::make_acceptor, gsf::make_args(get_module_id(), "127.0.0.1", 8001));
 
-		// bind msg
-		auto arr = {
-			std::make_pair(1001, std::bind(&EntityMgr::test_remote, this
-				, std::placeholders::_1)),
-		};
+		listen(this, eid::network::recv, [&](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
+			auto _fd = args->pop_i32();
+			auto _msgid = args->pop_ui16();
 
-		for (auto nod : arr)
-		{
-			//! 向协议绑定器申请，module 和 协议的绑定.
-			dispatch(client2login_, eid::network::recv_remote_callback
-				, gsf::Args(get_module_id(), 1001)
-				, std::bind(&EntityMgr::test_remote, this, std::placeholders::_1));
-		}
+			if (1001 == _msgid) {
+				auto block = args->pop_string();
+
+				tutorial::Person _p;
+				_p.ParsePartialFromString(block);
+
+				std::cout << _p.name() << " " << _p.id() << " " << _p.email() << std::endl;
+			}
+		});
 	}
 
 	void execute() override
@@ -119,23 +118,6 @@ public:
 		last_tick_ = _t;
 	}
 
-	void test_remote(const gsf::ArgsPtr &args)
-	{
-		auto fd = args.pop_int32(0);
-		auto block = args.pop_string(2);
-
-		tutorial::Person _p;
-		_p.ParsePartialFromString(block);
-
-		std::cout << _p.name() << " " << _p.id() << " " << _p.email() << std::endl;
-
-		//dispatch(log_, eid::log::info, gsf::Args(str));
-		//second_pack_num_++;
-		//_info.set_name("world");
-		//Face.send_msg<Client2LoginServer>(this, fd, 1002, _info);
-		//send_(fd, 1002, "gsf");
-	}
-
 private :
 	uint32_t tick_len_;
 	int32_t last_tick_;
@@ -143,11 +125,11 @@ private :
 	uint32_t second_pack_num_;
 
 	ModuleID log_m_ = ModuleNil;
-	gsf::LogFunc log_f_ = nullptr;
+	//gsf::LogFunc log_f_ = nullptr;
 
 	ModuleID client2login_ = ModuleNil;
 
-	gsf::RemoteFunc send_;
+	//gsf::RemoteFunc send_;
 };
 
 int main()

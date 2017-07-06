@@ -31,8 +31,8 @@ int main()
 	app.regist_module(new gsf::modules::LogModule);
 	app.regist_module(new gsf::network::ConnectorModule);
 
-	//case_cpp_client(app);
-	case_lua_client(app);
+	case_cpp_client(app);
+	//case_lua_client(app);
 
 	app.run();
 

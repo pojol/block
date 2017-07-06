@@ -20,7 +20,7 @@ int main()
 {
 	gsf::Application app;
 	gsf::AppConfig cfg;
-	cfg.is_watch_pref = true;
+	//cfg.is_watch_pref = true;
 	app.init_cfg(cfg);
 
 	app.regist_module(new gsf::modules::LogModule);

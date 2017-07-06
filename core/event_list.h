@@ -33,7 +33,8 @@ namespace eid
 		send_remote_callback,
 		kick_connect,
 		connector_init,
-
+		send,
+		recv,
 		//! result code
 		new_connect,
 		dis_connect,

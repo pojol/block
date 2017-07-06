@@ -32,6 +32,7 @@ namespace gsf
 			void unregist(uint32_t msg_id);
 			
 			gsf::CallbackFunc get_func(uint32_t msg_id);
+			uint32_t get_module(uint32_t msg_id);
 
 		private:
 			std::unordered_map<uint32_t, RemoteInfoPtr> remote_map_;

@@ -6,7 +6,7 @@
 #include <errno.h>
 #include <stdint.h>
 #include <sstream>
-
+#include <iostream>
 
 #ifdef WIN32
 #include <winsock2.h>
@@ -62,13 +62,26 @@ public:
 			_p.set_id(1000);
 			_p.set_email("127.0.0.1");
 			std::string _msg = "";
-			
+
 			if (_p.SerializeToString(&_msg)) {
 				//send_(fd_, 1001, _msg);
+
+				dispatch(connector_id_, eid::network::send, gsf::make_args(fd_, gsf::MsgID(1001), _msg));
 			}
 
 		});
 		
+		listen(this, eid::network::recv, [&](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
+			
+			auto _fd = args->pop_i32();
+			auto _msgid = args->pop_ui16();
+			if (_msgid == 1002) {
+					
+				std::cout << "recv msg = 1002" << std::endl;
+
+			}
+		});
+
 		/*
 		dispatch(connector_id_, eid::network::recv_remote_callback, gsf::Args(
 			get_module_id()
@@ -81,11 +94,6 @@ public:
 	void init() override
 	{
 
-	}
-
-	void msg_handler(const gsf::ArgsPtr &args)
-	{
-		//send_(fd_, 1001, "hello");
 	}
 
 private:

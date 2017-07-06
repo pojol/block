@@ -31,7 +31,7 @@ void db_avatar::shut()
 }
 
 
-void db_avatar::event_update(gsf::Args args, gsf::CallbackFunc callback)
+void db_avatar::event_update(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
 {
 	google::protobuf::Message *msg;
 	Avatar _avatar;
@@ -62,12 +62,12 @@ void db_avatar::event_update(gsf::Args args, gsf::CallbackFunc callback)
 	}
 }
 
-void db_avatar::event_remove(gsf::Args args, gsf::CallbackFunc callback)
+void db_avatar::event_remove(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
 {
 
 }
 
-void db_avatar::event_load(gsf::Args args, gsf::CallbackFunc callback)
+void db_avatar::event_load(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
 {
 
 }

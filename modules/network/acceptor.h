@@ -37,7 +37,6 @@ namespace gsf
 		private:
 
 			void make_acceptor(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
-			void bind_remote(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
 
 			void accept_bind(const std::string &ip, int port);
 			static void accept_listen_cb(::evconnlistener *listener
@@ -46,7 +45,7 @@ namespace gsf
 				, int socklen
 				, void *arg);
 
-			void send_msg(uint32_t fd, uint32_t msg_id, std::string block);
+			void send_msg(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
 
 		private:
 

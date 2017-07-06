@@ -66,7 +66,7 @@ public:
 		path_ = _path;
 
 		listen(this, eid::sample::get_proc_path, [=](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
-			callback(gsf::Args(path_));
+			callback(gsf::make_args(path_));
 		});
 	}
 
@@ -87,28 +87,28 @@ public:
 
 	void before_init()
 	{
-		dispatch(eid::app_id, eid::get_module, gsf::Args("LuaProxyModule"), [&](const gsf::ArgsPtr &args) {
-			luaproxy_m_ = args.pop_int32(0);
+		dispatch(eid::app_id, eid::get_module, gsf::make_args("LuaProxyModule"), [&](const gsf::ArgsPtr &args) {
+			luaproxy_m_ = args->pop_i32();
 		});
 
 		gsf::ModuleID _path_m = 0;
-		dispatch(eid::app_id, eid::get_module, gsf::Args("PathModule"), [&](const gsf::ArgsPtr &args) {
-			_path_m = args.pop_int32(0);
+		dispatch(eid::app_id, eid::get_module, gsf::make_args("PathModule"), [&](const gsf::ArgsPtr &args) {
+			_path_m = args->pop_i32();
 		});
 
-		dispatch(_path_m, eid::sample::get_proc_path, gsf::Args(), [&](const gsf::ArgsPtr &_args) {
-			path_ = _args.pop_string(0);
+		dispatch(_path_m, eid::sample::get_proc_path, nullptr, [&](const gsf::ArgsPtr &_args) {
+			path_ = _args->pop_string();
 		});
 	}
 
 	void init()
 	{
-		dispatch(luaproxy_m_, eid::lua_proxy::create, gsf::Args(get_module_id(), path_, "client.lua"));
+		dispatch(luaproxy_m_, eid::lua_proxy::create, gsf::make_args(get_module_id(), path_, "client.lua"));
 	}
 
 	void shut()
 	{
-		dispatch(luaproxy_m_, eid::lua_proxy::destroy, gsf::Args(get_module_id()));
+		dispatch(luaproxy_m_, eid::lua_proxy::destroy, gsf::make_args(get_module_id()));
 	}
 
 private:

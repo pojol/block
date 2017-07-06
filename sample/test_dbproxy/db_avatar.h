@@ -23,11 +23,11 @@ public:
 
 private:
 
-	void event_update(gsf::Args args, gsf::CallbackFunc callback);
+	void event_update(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
 	
-	void event_remove(gsf::Args args, gsf::CallbackFunc callback);
+	void event_remove(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
 
-	void event_load(gsf::Args args, gsf::CallbackFunc callback);
+	void event_load(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
 	
 
 private:

@@ -30,9 +30,8 @@ namespace gsf
 
 			void init_impl(const std::string &exe_name);
 
-
 			void log_print(uint32_t type, const char * title, const gsf::ArgsPtr &args);
-	
+
 		private:
 			
 			char path_[512];

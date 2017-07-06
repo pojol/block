@@ -111,11 +111,11 @@ void gsf::network::Session::read(::bufferevent *bev)
 
 			MsgID _msg_id = _block->get_msg_id();
 
-			auto _func = binder_->get_func(_msg_id);
-			if (_func) {
-				std::string _str(_block->buf_ + _block->get_head_size(), _block->get_body_size());	//tmp
-				_func(gsf::make_args(fd_, _msg_id, _str));
-			}
+			//auto _module = binder_->get_module(_msg_id);
+			//if (0 != _module) {
+			std::string _str(_block->buf_ + _block->get_head_size(), _block->get_body_size());	//tmp
+			dispatch(module_id_, eid::network::recv, gsf::make_args(fd_, _msg_id, _str));
+			//}
 
 			_buf_len = evbuffer_get_length(in_buf_);
 			if (_buf_len > _msgheadlen) {
