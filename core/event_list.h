@@ -63,8 +63,8 @@ namespace eid
 	enum log
 	{
 		//const uint32_t init = 1001;	初始化改为在自己模块中实现，regist即初始化
-
-		info = 3000,
+		print = 3000,
+		info,
 		warning,
 		error,
 		log_callback,

@@ -89,7 +89,7 @@ void gsf::modules::LogModule::init_impl(const std::string &exe_name)
 }
 
 
-void gsf::modules::LogModule::log_print(uint32_t type, const char * title, const gsf::ArgsPtr &args)
+void gsf::modules::LogModule::log_print(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
 {
 /*
 	std::ostringstream oss;

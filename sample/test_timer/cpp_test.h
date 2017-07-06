@@ -129,6 +129,9 @@ struct TestCaseModule
 			dispatch(timer_m_, eid::timer::remove_timer, gsf::make_args(get_module_id(), timer_id), cb);
 		};
 
+		auto _print = [&](uint32_t loglv, const char *title, const std::string &str) {
+		};
+
 		case_delaymillseconds_.create_timer_ = _delay_millisecoinds;
 		//case_delaymillseconds_.log_f_ = log_f_;
 		case_delayday_.create_timer_ = _delay_day;
