@@ -4,13 +4,29 @@
 
 ```c++
 /*
+
+modules
+	1. core					核心模块，主要实现event+args的模型和按帧驱动的框架运行时
+	2. network
+		- acceptor			TCP网络接收器( 服务端
+		- connector			TCP网络连接器( 客户端
+		- http_acceptor			HTTP网络接收器 (待实现
+	3. timer				负责时钟类业务
+	4. log					负责日志类业务
+	5. distributed		
+		- node				负责分布式单点去网络的业务 （待实现
+		- coordinate			负责分布式协调业务 （待实现
+		- election 			负责分布式选主业务 （待实现
+	6. lua_proxy				负责c++ module 和 lua module 之间的协调， 还有管理lua状态的职责
+	7. redis_cache_proxy	负责灾备
+
 /
-特性
-	1. 模块隔离
-	2. 事件通知
-	3. 支持脚本编程 (lua
-	4. 轻量的分布式集群 (后续支持
-	5. 跨平台( linux, windows, apple
+feature
+	- 模块访问隔离
+	- 使用event, arg list 粘合不同模块，服务，语言
+	- 支持使用lua编写module
+	- 支持分布式架构（可依据业务自行组织
+	- 跨平台 (linux, windows, apple
 
 /
 框架结构概览
