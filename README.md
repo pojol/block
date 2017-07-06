@@ -11,14 +11,14 @@ modules
 		- acceptor			TCP网络接收器( 服务端
 		- connector			TCP网络连接器( 客户端
 		- http_acceptor			HTTP网络接收器 (待实现
-	3. timer				负责时钟类业务
-	4. log					负责日志类业务
+	3. timer				时钟类业务
+	4. log					日志类业务
 	5. distributed		
-		- node				负责分布式单点去网络的业务 （待实现
-		- coordinate			负责分布式协调业务 （待实现
-		- election 			负责分布式选主业务 （待实现
-	6. lua_proxy				负责c++ module 和 lua module 之间的协调， 还有管理lua状态的职责
-	7. redis_cache_proxy	负责灾备
+		- node				分布式单点去网络的业务 （待实现
+		- coordinate			分布式协调业务 （待实现
+		- election 			分布式选主业务 （待实现
+	6. lua_proxy				c++ module 和 lua module 之间的协调， 还有管理lua状态的职责
+	7. redis_cache_proxy			灾备
 
 /
 feature
