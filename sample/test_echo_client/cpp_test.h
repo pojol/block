@@ -64,7 +64,7 @@ public:
 			}
 
 			// 分布式rpc调用接口预定义
-			//dispatch(coordinate_m_, eid::login::auth, gsf::make_args("account", "password", "verify_key"));
+			//dispatch(node_m_, eid::login::auth, gsf::make_args("account", "password", "verify_key"));
 
 		});
 		
