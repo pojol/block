@@ -43,10 +43,10 @@ namespace gsf
 		protected:
 
 		private:
-			int fd_;
-			int module_id_;
+			gsf::SessionID fd_ = gsf::SessionNil;
+			gsf::ModuleID module_id_ = gsf::ModuleNil;
 
-			uint32_t log_module_;
+			gsf::ModuleID log_module_ = gsf::ModuleNil;
 			MsgBinder *binder_;
 
 			std::function<void(int)> disconnect_callback_;

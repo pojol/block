@@ -17,8 +17,8 @@ namespace gsf
 	typedef uint16_t SessionID;
 	static const uint16_t SessionNil = 0;
 
-	typedef uint16_t MsgID;
-	static const uint16_t MsgNil = 0;
+	typedef int32_t MsgID;
+	static const int32_t MsgNil = 0;
 
 	static const uint16_t LogErr = 0;
 	static const uint16_t LogWarning = 1;

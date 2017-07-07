@@ -25,12 +25,22 @@ namespace eid
 
 	const uint32_t module_init_succ = 104;
 
+	enum error
+	{
+		err_repeated_fd = -10000,
+		err_upper_limit_session,
+		err_socket_new,
+		err_socket_connect,
+		err_event_eof,
+		err_event_error,
+		err_event_timeout,
+		err_inet_pton,
+	};
+
 	enum network
 	{
 		make_acceptor = 1000,
 		make_connector,
-		recv_remote_callback,
-		send_remote_callback,
 		kick_connect,
 		connector_init,
 		send,
@@ -46,18 +56,6 @@ namespace eid
 		sync_dispatch = 2001,
 
 		create_node,
-	};
-
-	enum error
-	{
-		err_repeated_fd = -10000,
-		err_upper_limit_session,
-		err_socket_new,
-		err_socket_connect,
-		err_event_eof,
-		err_event_error,
-		err_event_timeout,
-		err_inet_pton,
 	};
 
 	enum log

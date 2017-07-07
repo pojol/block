@@ -74,23 +74,19 @@ public:
 		//test
 		listen(this, eid::network::new_connect
 			, [=](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
-			//log_f_(eid::log::info, "EntityMgr", gsf::make_args("new connect fd : ", args->pop_i32()));
+			dispatch(log_m_, eid::log::print, gsf::make_log(gsf::LogInfo, "test", "new connect fd = ", args->pop_i32()));
 		});
 
 		listen(this, eid::network::dis_connect
 			, [=](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
-			//log_f_(eid::log::info, "EntityMgr", gsf::Args("dis connect fd : ", args.pop_int32(0)));
-		});
-
-		dispatch(client2login_, eid::network::send_remote_callback, nullptr, [&](const gsf::ArgsPtr &args) {
-			//send_ = args.pop_remote_callback(0);
+			dispatch(log_m_, eid::log::print, gsf::make_log(gsf::LogInfo, "test", "dis connect fd = ", args->pop_i32()));
 		});
 
 		dispatch(client2login_, eid::network::make_acceptor, gsf::make_args(get_module_id(), "127.0.0.1", 8001));
 
 		listen(this, eid::network::recv, [&](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
-			auto _fd = args->pop_i32();
-			auto _msgid = args->pop_ui16();
+			auto _fd = args->pop_fd();
+			auto _msgid = args->pop_msgid();
 
 			if (1001 == _msgid) {
 				auto block = args->pop_string();
@@ -120,11 +116,9 @@ private :
 	uint32_t second_pack_num_;
 
 	ModuleID log_m_ = ModuleNil;
-	//gsf::LogFunc log_f_ = nullptr;
 
 	ModuleID client2login_ = ModuleNil;
 
-	//gsf::RemoteFunc send_;
 };
 
 int main()

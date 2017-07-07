@@ -73,9 +73,9 @@ namespace gsf
 	protected:
 		void execute() override;
 
-		void bind_event(uint32_t type_id, uint32_t event, EventFunc func);
+		void bind_event(uint32_t module_id, uint32_t event, EventFunc func);
 
-		void dispatch(uint32_t type_id, uint32_t event, const ArgsPtr &args, CallbackFunc callback = nullptr);
+		void dispatch(uint32_t module_id, uint32_t event, const ArgsPtr &args, CallbackFunc callback = nullptr);
 		void boardcast(uint32_t event, const ArgsPtr &args, CallbackFunc callback = nullptr);
 		///
 

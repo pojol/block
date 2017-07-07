@@ -50,10 +50,6 @@ public:
 
 	void create_connector_succ(const gsf::ArgsPtr &args)
 	{
-		dispatch(connector_id_, eid::network::send_remote_callback, nullptr, [&](const gsf::ArgsPtr &args) {
-			//send_ = args.pop_remote_callback(0);
-		});
-
 		listen(this, eid::network::new_connect, [&](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
 			fd_ = args->pop_i32();
 
@@ -64,10 +60,11 @@ public:
 			std::string _msg = "";
 
 			if (_p.SerializeToString(&_msg)) {
-				//send_(fd_, 1001, _msg);
-
-				dispatch(connector_id_, eid::network::send, gsf::make_args(fd_, gsf::MsgID(1001), _msg));
+				dispatch(connector_id_, eid::network::send, gsf::make_args(fd_, 1001, _msg));
 			}
+
+			// 分布式rpc调用接口预定义
+			//dispatch(coordinate_m_, eid::login::auth, gsf::make_args("account", "password", "verify_key"));
 
 		});
 		
@@ -82,11 +79,6 @@ public:
 			}
 		});
 
-		/*
-		dispatch(connector_id_, eid::network::recv_remote_callback, gsf::Args(
-			get_module_id()
-			, 1002), std::bind(&Client::msg_handler, this, std::placeholders::_1));
-		*/
 		dispatch(connector_id_, eid::network::make_connector
 			, gsf::make_args(get_module_id(), "127.0.0.1", 8001));
 	}
@@ -99,6 +91,4 @@ public:
 private:
 	gsf::ModuleID connector_id_ = gsf::ModuleNil;
 	gsf::SessionID fd_ = gsf::SessionNil;
-
-	//gsf::RemoteFunc send_;
 };

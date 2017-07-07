@@ -14,7 +14,7 @@ gsf::EventModule::EventModule()
 }
 
 
-void gsf::EventModule::bind_event(uint32_t type_id, uint32_t event, EventFunc func)
+void gsf::EventModule::bind_event(uint32_t module_id, uint32_t event, EventFunc func)
 {
 	auto regf = [&](MIList &itr) {
 
@@ -25,7 +25,7 @@ void gsf::EventModule::bind_event(uint32_t type_id, uint32_t event, EventFunc fu
 		itr.push_back(_obj);
 	};
 
-	auto typeItr = type_map_.find(type_id);
+	auto typeItr = type_map_.find(module_id);
 	if (typeItr != type_map_.end()) {
 
 		auto listItr = typeItr->second;
@@ -45,13 +45,13 @@ void gsf::EventModule::bind_event(uint32_t type_id, uint32_t event, EventFunc fu
 		MIList _list;
 		regf(_list);
 
-		type_map_.insert(std::make_pair(type_id, _list));
+		type_map_.insert(std::make_pair(module_id, _list));
 	}
 }
 
-void gsf::EventModule::dispatch(uint32_t type_id, uint32_t event, const ArgsPtr &args, CallbackFunc callback /* = nullptr */)
+void gsf::EventModule::dispatch(uint32_t module_id, uint32_t event, const ArgsPtr &args, CallbackFunc callback /* = nullptr */)
 {
-	auto tItr = type_map_.find(type_id);
+	auto tItr = type_map_.find(module_id);
 	if (tItr != type_map_.end()) {
 
 		auto listItr = tItr->second;
@@ -67,6 +67,9 @@ void gsf::EventModule::dispatch(uint32_t type_id, uint32_t event, const ArgsPtr 
 
 			fItr->event_func_(args, callback);
 		}
+	}
+	else { // 如果没有在本地找到事件（服务），则看下当前的app是否有注册转发的服务，如果存在则将这个event转交到转发服务。
+		
 	}
 }
 

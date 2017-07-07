@@ -283,7 +283,7 @@ gsf::SessionID gsf::Args::pop_fd()
 
 gsf::MsgID gsf::Args::pop_msgid()
 {
-	return pop_ui16();
+	return pop_i32();
 }
 
 std::string gsf::Args::pop_string()
