@@ -114,7 +114,7 @@ void gsf::network::Session::read(::bufferevent *bev)
 			//auto _module = binder_->get_module(_msg_id);
 			//if (0 != _module) {
 			std::string _str(_block->buf_ + _block->get_head_size(), _block->get_body_size());	//tmp
-			dispatch(module_id_, eid::network::recv, gsf::make_args(fd_, _msg_id, _str));
+			dispatch(module_id_, eid::network::recv, gsf::make_args(fd_, _msg_id, std::move(_str)));
 			//}
 
 			_buf_len = evbuffer_get_length(in_buf_);
