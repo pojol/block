@@ -31,8 +31,16 @@ void gsf::distributed::NodeModule::shut()
 
 void gsf::distributed::NodeModule::event_create_node(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
 {
+	auto _ip;
+	auto _port;
 
-
+	auto _vec;
+	for (auto &it : _vec)
+	{
+		auto _id;
+		auto _ip;
+		auto _port;
+	}
 
 }
 

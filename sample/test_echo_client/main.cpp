@@ -16,6 +16,7 @@ void case_lua_client(gsf::Application &app)
 	app.regist_module(new TestClientLuaModule);
 }
 
+
 int main()
 {
 #ifdef WIN32
