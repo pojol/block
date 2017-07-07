@@ -57,7 +57,7 @@ if(MSVC)
       endif()
     endforeach()
 
-        TARGET_LINK_LIBRARIES(test_timer ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib gsf_core.lib timer.lib glog.lib log.lib lua53.lib pbc.lib pbc_lua.lib lua_proxy.lib)
+        TARGET_LINK_LIBRARIES(test_timer ws2_32.lib libevent.lib libevent_core.lib libevent_extras.lib gsf_core.lib timer.lib glog.lib log.lib lua53.lib lua_proxy.lib)
 elseif(UNIX)
         TARGET_LINK_LIBRARIES(test_timer ${CMAKE_THREAD_LIBS_INIT} liblog.a libglog.a libgsf_core.a libtimer.a liblua_proxy.a)
 elseif(APPLE)

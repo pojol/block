@@ -71,11 +71,6 @@ public:
 
 	void init() override
 	{
-		dispatch(log_m_, eid::log::log_callback, nullptr, [&](const gsf::ArgsPtr &args) {
-			//log_f_ = args.pop_log_callback(0);
-		});
-
-
 		//test
 		listen(this, eid::network::new_connect
 			, [=](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {

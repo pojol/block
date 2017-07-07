@@ -56,7 +56,6 @@ namespace gsf
 
 			uint32_t timer_m_;
 			uint32_t log_m_;
-			//gsf::LogFunc log_f_;
 
 		private:
 

@@ -137,6 +137,7 @@ void gsf::Application::run()
 					it->add_tick_consume(t1);
 					_ttime = time_point_cast<microseconds>(system_clock::now());
 #endif // WATCH_PERF
+					gsf::ArgsPool::get_ref().reenter();
 				}
 				else if (state == AppState::SHUT) {
 					it->shut();

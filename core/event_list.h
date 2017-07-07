@@ -64,9 +64,6 @@ namespace eid
 	{
 		//const uint32_t init = 1001;	初始化改为在自己模块中实现，regist即初始化
 		print = 3000,
-		info,
-		warning,
-		error,
 	};
 
 	enum timer

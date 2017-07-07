@@ -21,10 +21,6 @@ gsf::modules::LogModule::LogModule()
 
 void gsf::modules::LogModule::before_init()
 {
-	listen(this, eid::log::log_callback, [&](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
-
-	});
-
 #ifdef WIN32
 	GetModuleFileName(NULL, path_, 512);
 	//取出文件路径
@@ -50,6 +46,10 @@ void gsf::modules::LogModule::before_init()
 		}
 	}
 #endif // WIN32
+
+	using namespace std::placeholders;
+
+	listen(this, eid::log::print, std::bind(&LogModule::log_print, this, _1, _2));
 
 	dispatch(eid::app_id, eid::get_app_name, nullptr, [&](const gsf::ArgsPtr &args){
 		init_impl(args->pop_string());	
@@ -91,52 +91,21 @@ void gsf::modules::LogModule::init_impl(const std::string &exe_name)
 
 void gsf::modules::LogModule::log_print(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
 {
-/*
-	std::ostringstream oss;
+	auto _lv = args->pop_ui32();
+	auto _title = args->pop_string();
+	auto _context = args->pop_string();
 
-	for (int i = 0; i < args.get_count(); ++i)
+	switch (_lv)
 	{
-		uint32_t _type = args.get_typeid(i);
-		switch (_type)
-		{
-		case 0:
-			if (args.pop_bool(i)) {
-				oss << "true";
-			}
-			else {
-				oss << "false";
-			}
-			break;
-		case 1:
-			oss << args.pop_uint32(i);
-			break;
-		case 2:
-			oss << args.pop_int32(i);
-			break;
-		case 3:
-			oss << args.pop_uint64(i);
-			break;
-		case 4:
-			oss << args.pop_int64(i);
-			break;
-		case 5:
-			oss << args.pop_string(i);
-			break;
-		}
-	}
-
-	switch (type)
-	{
-	case eid::log::info:
-		LOG(INFO) << "[INFO] " << title << " " << oss.str();
+	case gsf::LogInfo:
+		LOG(INFO) << "[INFO] " << _title << " " << _context;
 		break;
-	case eid::log::warning:
-		LOG(WARNING) << "[WARNING] " << title << " " << oss.str();
+	case gsf::LogWarning:
+		LOG(WARNING) << "[WARNING] " << _title << " " << _context;
 		break;
-	case eid::log::error:
-		LOG(ERROR) << "[ERROR] " << title << " " << oss.str();
+	case gsf::LogErr:
+		LOG(ERROR) << "[ERROR] " << _title << " " << _context;
 		break;
 	}
-*/
 }
 

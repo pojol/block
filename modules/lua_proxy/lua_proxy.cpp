@@ -3,7 +3,7 @@
 
 #include <algorithm>
 
-int luaopen_protobuf_c(lua_State *L);
+//int luaopen_protobuf_c(lua_State *L);
 
 std::string Traceback(lua_State * _state)
 {
@@ -186,7 +186,7 @@ void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_na
 	try
 	{
 		// set pbc to lua global
-		luaopen_protobuf_c(_lua->state_.lua_state());
+		//luaopen_protobuf_c(_lua->state_.lua_state());
 
 		auto _ret = _lua->state_.do_file(_path.c_str());
 		if (_ret) {

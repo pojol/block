@@ -24,13 +24,13 @@ struct Case_DelayMilliseconds
 	{
 		create_timer_(2000, [&](const gsf::ArgsPtr &args) {
 			timer_id_ = args->pop_ui64();
-			print_f_(gsf::make_log(eid::log::info, "Case_DelayMilliseconds", "regist success! timer id = ", timer_id_));
+			print_f_(gsf::make_log(gsf::LogInfo, "Case_DelayMilliseconds", "regist success! timer id = ", timer_id_));
 		});
 	}
 
 	void on_timer()
 	{
-		print_f_(gsf::make_log(eid::log::info, "Case_DelayMilliseconds", "arrive! timer id = ", timer_id_));
+		print_f_(gsf::make_log(gsf::LogInfo, "Case_DelayMilliseconds", "arrive! timer id = ", timer_id_));
 		timer_id_ = gsf::TimerNil;
 	}
 
@@ -47,13 +47,13 @@ struct Case_DelayDay
 	{
 		create_timer_(6, 0, [&](const gsf::ArgsPtr &args) {
 			timer_id_ = args->pop_ui64();
-			print_f_(gsf::make_log(eid::log::info, "Case_DelayDay", "regist success! timer id = ", timer_id_));
+			print_f_(gsf::make_log(gsf::LogInfo, "Case_DelayDay", "regist success! timer id = ", timer_id_));
 		});
 	}
 
 	void on_timer()
 	{
-		print_f_(gsf::make_log(eid::log::info, "Case_DelayDay", "arrive! timer id = ", timer_id_));
+		print_f_(gsf::make_log(gsf::LogInfo, "Case_DelayDay", "arrive! timer id = ", timer_id_));
 		timer_id_ = gsf::TimerNil;
 	}
 
@@ -70,11 +70,11 @@ struct Case_RemoveTimer
 	{
 		create_timer_(1000, [&](const gsf::ArgsPtr &args) {
 			timer_id_ = args->pop_ui64();
-			print_f_(gsf::make_log(eid::log::info, "Case_RemoveTimer", "regist success! timer id = ", timer_id_));
+			print_f_(gsf::make_log(gsf::LogInfo, "Case_RemoveTimer", "regist success! timer id = ", timer_id_));
 		});
 
 		remove_timer_(timer_id_, [&](const gsf::ArgsPtr &args) {
-			print_f_(gsf::make_log(eid::log::info, "Case_RemoveTimer", "remove ret = ", args->pop_i32(), " timer id = ", timer_id_));
+			print_f_(gsf::make_log(gsf::LogInfo, "Case_RemoveTimer", "remove ret = ", args->pop_i32(), " timer id = ", timer_id_));
 		});
 	}
 

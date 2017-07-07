@@ -19,6 +19,10 @@ namespace gsf
 
 	typedef uint16_t MsgID;
 	static const uint16_t MsgNil = 0;
+
+	static const uint16_t LogErr = 0;
+	static const uint16_t LogWarning = 1;
+	static const uint16_t LogInfo = 2;
 	
 	typedef int32_t ErrorID;
 	static const uint32_t ErrNil = 0;
