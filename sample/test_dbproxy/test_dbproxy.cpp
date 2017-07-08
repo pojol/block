@@ -166,6 +166,7 @@ int main()
 
 	app.regist_module(gsf::EventModule::get_ptr());
 	app.regist_module(new gsf::modules::LogModule());
+
 	app.regist_module(new TestModule());
 
 	app.run();

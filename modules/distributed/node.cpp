@@ -1,45 +1,47 @@
 #include "node.h"
 
 
-gsf::distributed::NodeModule::NodeModule()
+gsf::modules::NodeModule::NodeModule()
 	: Module("NodeModule")
 {
 
 }
 
-gsf::distributed::NodeModule::~NodeModule()
+gsf::modules::NodeModule::~NodeModule()
 {
 
 }
 
-void gsf::distributed::NodeModule::init()
+void gsf::modules::NodeModule::init()
 {
 	using namespace std::placeholders;
 
 	listen(this, eid::distributed::create_node, std::bind(&NodeModule::event_create_node, this, _1, _2));
 }
 
-void gsf::distributed::NodeModule::execute()
+void gsf::modules::NodeModule::execute()
 {
 
 }
 
-void gsf::distributed::NodeModule::shut()
+void gsf::modules::NodeModule::shut()
 {
 
 }
 
-void gsf::distributed::NodeModule::event_create_node(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
+void gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
 {
-	auto _ip;
-	auto _port;
+	auto _isListen = args->pop_bool();
+	auto _name = args->pop_string();
+	auto _ip = args->pop_string();
+	auto _port = args->pop_i32();
 
-	auto _vec;
-	for (auto &it : _vec)
+	auto _num = args->pop_i32();
+	for (int i = 0; i < _num; ++i)
 	{
-		auto _id;
-		auto _ip;
-		auto _port;
+		auto _connect_namee = args->pop_string();
+		auto _connect_ip = args->pop_string();
+		auto _connect_port = args->pop_i32();
 	}
 
 }

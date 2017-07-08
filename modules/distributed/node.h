@@ -6,7 +6,7 @@
 
 namespace gsf
 {
-	namespace distributed
+	namespace modules
 	{
 
 		class NodeModule
