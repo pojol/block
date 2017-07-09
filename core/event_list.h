@@ -12,18 +12,17 @@
 
 namespace eid
 {
-	//! 每个进程中application module 的id ，因为application的作用范围只在自身进程所以 id 可以是固定的。
-	const uint32_t app_id = 1;
-	const uint32_t get_app_name = 2;
+	enum base
+	{
+		app_id = 1,					//! 每个进程中application module 的id ，因为application的作用范围只在自身进程所以 id 可以是固定的。
+		get_app_name,
+		get_module,					//! 通过字符串获得module的id， 只能获取静态显示声明的module。
+		new_dynamic_module,			//! ͨ通过已经定义的module，创建多份实例。
+		delete_dynamic_module,
+		module_init_succ,
+		regist_module,
+	};
 
-	//! 通过字符串获得module的id， 只能获取静态显示声明的module。
-	const uint32_t get_module = 101;
-
-	//! ͨ通过已经定义的module，创建多份实例。
-	const uint32_t new_dynamic_module = 102;
-	const uint32_t delete_dynamic_module = 103;
-
-	const uint32_t module_init_succ = 104;
 
 	enum error
 	{
@@ -56,6 +55,9 @@ namespace eid
 		sync_dispatch = 2001,
 
 		create_node,
+
+		distributed_state_change,
+		node_state_change,
 	};
 
 	enum log

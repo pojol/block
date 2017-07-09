@@ -18,6 +18,7 @@ namespace gsf
 			NodeModule();
 			virtual ~NodeModule();
 
+			void before_init() override;
 			void init() override;
 			void execute() override;
 			void shut() override;

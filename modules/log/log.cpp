@@ -51,7 +51,7 @@ void gsf::modules::LogModule::before_init()
 
 	listen(this, eid::log::print, std::bind(&LogModule::log_print, this, _1, _2));
 
-	dispatch(eid::app_id, eid::get_app_name, nullptr, [&](const gsf::ArgsPtr &args){
+	dispatch(eid::app_id, eid::base::get_app_name, nullptr, [&](const gsf::ArgsPtr &args){
 		init_impl(args->pop_string());	
 	});
 }
