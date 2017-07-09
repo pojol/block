@@ -91,11 +91,15 @@ void gsf::Application::pop_frame()
 		int idx = std::get<0>(itr->second);
 		if (idx == 0) {
 			auto func = std::get<1>(itr->second);
-			func();
+			auto ptr = std::get<4>(itr->second);
+			//func();
+			ptr->before_init();
 		}
 		else if (idx == 1) {
 			auto func = std::get<2>(itr->second);
-			func();
+			auto ptr = std::get<4>(itr->second);
+			//func();
+			ptr->init();
 		}
 		else if (idx == 2) {
 			auto func = std::get<3>(itr->second);

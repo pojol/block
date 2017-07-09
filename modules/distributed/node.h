@@ -4,10 +4,21 @@
 #include <core/module.h>
 #include <core/event.h>
 
+#include <vector>
+#include <tuple>
+#include <functional>
+
 namespace gsf
 {
 	namespace modules
 	{
+		struct ConnInfo
+		{
+			gsf::ModuleID m_ = gsf::ModuleNil;
+			std::string name_ = "";
+			std::string ip_ = "";
+			int32_t port_ = 0;
+		};
 
 		class NodeModule
 			: public gsf::Module
@@ -30,6 +41,12 @@ namespace gsf
 
 		private:
 
+			gsf::ModuleID log_m_ = gsf::ModuleNil;
+
+			gsf::ModuleID acceptor_m_ = gsf::ModuleNil;
+			
+			ConnInfo accept_info_;
+			std::vector<ConnInfo> conn_vec_;
 		};
 
 	}

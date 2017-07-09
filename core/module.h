@@ -5,7 +5,7 @@
 #include <istream>
 #include <vector>
 #include <string>
-
+#include "types.h"
 
 #define WATCH_PERF
 
@@ -18,7 +18,7 @@ namespace gsf
 		Module(const std::string &name);
 		virtual ~Module();
 
-		int32_t get_module_id() { return module_id_; }
+		gsf::ModuleID get_module_id() { return module_id_; }
 		std::string & get_module_name() { return name_; }
 
 	protected:
@@ -31,8 +31,8 @@ namespace gsf
 		virtual void after_shut();
 
 	protected:
-		void set_id(int32_t id) { module_id_ = id; }
-		int32_t module_id_;
+		void set_id(gsf::ModuleID id) { module_id_ = id; }
+		gsf::ModuleID module_id_ = gsf::ModuleNil;
 		std::string name_;
 
 #ifdef WATCH_PERF

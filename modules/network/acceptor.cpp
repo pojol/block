@@ -27,6 +27,12 @@ gsf::network::AcceptorModule::AcceptorModule(const std::string &name)
 
 }
 
+gsf::network::AcceptorModule::AcceptorModule()
+	: Module("")
+{
+
+}
+
 gsf::network::AcceptorModule::~AcceptorModule()
 {
 
@@ -51,6 +57,8 @@ void gsf::network::AcceptorModule::init()
 		, std::bind(&AcceptorModule::send_msg, this
 		, std::placeholders::_1
 		, std::placeholders::_2));
+
+	boardcast(eid::base::module_init_succ, gsf::make_args(get_module_id()));
 }
 
 void gsf::network::AcceptorModule::execute()
@@ -120,6 +128,9 @@ void gsf::network::AcceptorModule::accept_bind(const std::string &ip, int port)
 
 	if (!accept_listener_) {
 		printf("accept listen err!\n");
+	}
+	else {
+		printf("accept listen ready!");
 	}
 }
 

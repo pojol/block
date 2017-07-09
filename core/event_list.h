@@ -20,7 +20,6 @@ namespace eid
 		new_dynamic_module,			//! ͨ通过已经定义的module，创建多份实例。
 		delete_dynamic_module,
 		module_init_succ,
-		regist_module,
 	};
 
 
@@ -34,6 +33,7 @@ namespace eid
 		err_event_error,
 		err_event_timeout,
 		err_inet_pton,
+		err_distributed_node_repeat,
 	};
 
 	enum network
@@ -55,9 +55,6 @@ namespace eid
 		sync_dispatch = 2001,
 
 		create_node,
-
-		distributed_state_change,
-		node_state_change,
 	};
 
 	enum log
