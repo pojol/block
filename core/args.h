@@ -76,6 +76,7 @@ namespace gsf
 
 		gsf::SessionID pop_fd();
 		gsf::MsgID pop_msgid();
+		gsf::ModuleID pop_moduleid();
 
 		std::string pop_string();
 

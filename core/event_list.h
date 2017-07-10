@@ -55,6 +55,11 @@ namespace eid
 		sync_dispatch = 2001,
 
 		create_node,
+		regist_node,
+		regist_node_callabck,
+
+		login,
+		logout,
 	};
 
 	enum log

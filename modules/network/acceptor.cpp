@@ -28,7 +28,7 @@ gsf::network::AcceptorModule::AcceptorModule(const std::string &name)
 }
 
 gsf::network::AcceptorModule::AcceptorModule()
-	: Module("")
+	: Module("AcceptorModule")
 {
 
 }
@@ -130,7 +130,7 @@ void gsf::network::AcceptorModule::accept_bind(const std::string &ip, int port)
 		printf("accept listen err!\n");
 	}
 	else {
-		printf("accept listen ready!");
+		printf("accept listen ready!\n");
 	}
 }
 
@@ -164,7 +164,7 @@ void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, 
 
 	if (0 == _ret) {
 		auto _session_ptr = network_ptr_->session_mgr_->make_session(fd, network_ptr_->module_id_, network_ptr_->binder_);
-		bufferevent_setcb(bev, Session::read_cb, NULL, Session::err_cb, _session_ptr.get());
+		bufferevent_setcb(bev, Session::read_cb, NULL, Session::event_cb, _session_ptr.get());
 		bufferevent_enable(bev, EV_READ | EV_WRITE);
 	}
 }

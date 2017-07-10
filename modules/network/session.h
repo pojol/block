@@ -27,7 +27,7 @@ namespace gsf
 			~Session();
 
 			static void read_cb(::bufferevent *bev, void *ctx);
-			static void err_cb(::bufferevent *bev, short what, void *ctx);
+			static void event_cb(::bufferevent *bev, short what, void *ctx);
 
 			int write(uint32_t msg_id, BlockPtr blockptr);
 			void read(::bufferevent *bev);

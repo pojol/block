@@ -44,7 +44,7 @@ void gsf::network::Session::read_cb(::bufferevent *bev, void *ctx)
 	//evbuffer_add_buffer()
 }
 
-void gsf::network::Session::err_cb(::bufferevent *bev, short what, void *ctx)
+void gsf::network::Session::event_cb(::bufferevent *bev, short what, void *ctx)
 {
 	int32_t _result = 0;
 

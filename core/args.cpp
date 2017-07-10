@@ -286,6 +286,11 @@ gsf::MsgID gsf::Args::pop_msgid()
 	return pop_i32();
 }
 
+gsf::ModuleID gsf::Args::pop_moduleid()
+{
+	return pop_i32();
+}
+
 std::string gsf::Args::pop_string()
 {
 	TypeLen _len = pop_typelen();
