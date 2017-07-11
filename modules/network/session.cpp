@@ -111,11 +111,17 @@ void gsf::network::Session::read(::bufferevent *bev)
 
 			MsgID _msg_id = _block->get_msg_id();
 
-			//auto _module = binder_->get_module(_msg_id);
-			//if (0 != _module) {
-			std::string _str(_block->buf_ + _block->get_head_size(), _block->get_body_size());	//tmp
-			dispatch(module_id_, eid::network::recv, gsf::make_args(fd_, _msg_id, std::move(_str)));
-			//}
+			if (_msg_id > eid::distributed::rpc_begin && _msg_id < eid::distributed::rpc_end) {
+				auto args_ptr = ArgsPool::get_ref().get();
+				args_ptr->push(fd_);
+				args_ptr->push(_msg_id);
+				args_ptr->push_block(_block->buf_ + _block->get_head_size(), _block->get_body_size());
+				dispatch(module_id_, eid::network::recv, args_ptr);
+			}
+			else {
+				std::string _str(_block->buf_ + _block->get_head_size(), _block->get_body_size());	//tmp
+				dispatch(module_id_, eid::network::recv, gsf::make_args(fd_, _msg_id, std::move(_str)));
+			}
 
 			_buf_len = evbuffer_get_length(in_buf_);
 			if (_buf_len > _msgheadlen) {

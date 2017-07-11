@@ -35,8 +35,8 @@ namespace gsf
 			void dis_connect(int32_t err);
 			void new_connect();
 
-			int32_t get_id() const { return fd_; }
-			uint32_t get_module_id() const { return module_id_; }
+			gsf::SessionID get_id() const { return fd_; }
+			gsf::ModuleID get_module_id() const { return module_id_; }
 
 			void set_log_module(uint32_t log_module) { log_module_ = log_module; }
 

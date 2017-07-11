@@ -15,6 +15,12 @@ void gsf::Args::push(const uint8_t &val)
 	push_impl(val);
 }
 
+void gsf::Args::push_block(const char *block, int len)
+{
+	memcpy(write_, block, len);
+	pos_ += len;
+}
+
 void gsf::Args::push(const int8_t &val)
 {
 	push_impl(val);
@@ -351,6 +357,18 @@ std::map<Key, Value> gsf::Args::pop_map()
 	}
 
 	return _map;
+}
+
+std::string gsf::Args::pop_block(int beg, int size)
+{
+	std::string _str;
+	_str.append(buff_ + beg, size);
+	return _str;
+}
+
+uint32_t gsf::Args::get_size() const
+{
+	return size_;
 }
 
 //////////////////////////////////////////////////////////////////////////

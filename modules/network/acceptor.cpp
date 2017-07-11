@@ -166,6 +166,8 @@ void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, 
 		auto _session_ptr = network_ptr_->session_mgr_->make_session(fd, network_ptr_->module_id_, network_ptr_->binder_);
 		bufferevent_setcb(bev, Session::read_cb, NULL, Session::event_cb, _session_ptr.get());
 		bufferevent_enable(bev, EV_READ | EV_WRITE);
+
+		Session::event_cb(bev, BEV_EVENT_CONNECTED, (void*)_session_ptr.get());
 	}
 }
 
@@ -173,7 +175,15 @@ void gsf::network::AcceptorModule::send_msg(const gsf::ArgsPtr &args, gsf::Callb
 {
 	auto _fd = args->pop_fd();
 	auto _msg = args->pop_msgid();
-	auto _str = args->pop_string();
+	std::string _str = "";
+
+	if (_msg > eid::distributed::rpc_begin && _msg < eid::distributed::rpc_end) {
+		auto _headlen = sizeof(gsf::SessionID) + sizeof(gsf::MsgID);
+		_str = args->pop_block(_headlen, args->get_size());
+	}
+	else {
+		_str = args->pop_string();
+	}
 
 	auto _session_ptr = session_mgr_->find(_fd);
 	if (_session_ptr) {

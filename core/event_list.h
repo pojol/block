@@ -52,14 +52,22 @@ namespace eid
 
 	enum distributed
 	{
-		sync_dispatch = 2001,
+		rpc_begin = 2001,
+		sync_dispatch,
 
 		create_node,
 		regist_node,
 		regist_node_callabck,
 
+		regist_module,
+		increase_module_weight,
+		reduce_module_weight,
+
 		login,
+		select_login,
+		select_login_callback,
 		logout,
+		rpc_end,
 	};
 
 	enum log

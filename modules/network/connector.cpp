@@ -161,10 +161,16 @@ void gsf::network::ConnectorModule::need_close_session(int fd)
 
 void gsf::network::ConnectorModule::send_msg(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
 {
-	auto _fd = args->pop_fd();
 	auto _msg = args->pop_msgid();
-	auto _str = args->pop_string();
+	std::string _str = "";
+	if (_msg > eid::distributed::rpc_begin && _msg < eid::distributed::rpc_end) {
+		auto _headlen = sizeof(gsf::MsgID);
+		_str = args->pop_block(_headlen, args->get_size());
+	}
+	else {
+		_str = args->pop_string();
+	}
 
-	auto _block = std::make_shared<gsf::Block>(_fd, _msg, _str);
+	auto _block = std::make_shared<gsf::Block>(session_ptr_->get_id(), _msg, _str);
 	session_ptr_->write(_msg, _block);
 }

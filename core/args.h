@@ -54,6 +54,8 @@ namespace gsf
 		template <typename Key, typename Value>
 		void push(std::map<Key, Value> &map);
 
+		void push_block(const char *block, int len);
+
 		/////////////////////////////
 
 		uint8_t pop_ui8();
@@ -90,6 +92,10 @@ namespace gsf
 		std::map<Key, Value> pop_map();
 
 		/////////////////////////////
+
+		std::string pop_block(int beg, int end);
+
+		uint32_t get_size() const;
 
 		void flush();
 	private:
