@@ -37,6 +37,7 @@ namespace gsf
 		public:
 
 			Coodinator();
+			virtual ~Coodinator() {}
 
 			void before_init() override;
 

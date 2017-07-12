@@ -118,6 +118,7 @@ namespace eid
 	enum sample
 	{
 		get_proc_path = 7000,
+		get_cfg,
 	};
 }
 

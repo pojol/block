@@ -57,8 +57,10 @@ namespace gsf
 			//sol::variadic_args args
 
 			//代理下event的dispatch 和 listen 接口，因为要在这里集中捕获下lua产生的异常。
-			void ldispatch(uint32_t lua_id, uint32_t target, uint32_t event, const gsf::ArgsPtr &args, gsf::CallbackFunc callback = nullptr);
-			void llisten(uint32_t lua_id, uint32_t self, uint32_t event, sol::function func);
+			void ldispatch(uint32_t lua_id, uint32_t target, uint32_t event, gsf::Args *args, sol::function func);
+			
+			void llisten(uint32_t lua_id, uint32_t self, uint32_t event
+				, std::function<void(gsf::Args *, std::function<void(gsf::Args *)>)> func);
 
 			void create_event(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
 			void create(uint32_t module_id, std::string dar_name, std::string file_name);
@@ -73,7 +75,6 @@ namespace gsf
 
 		private:
 			uint32_t log_m_ = 0;
-			//gsf::LogFunc log_f_ = nullptr;
 
 			typedef std::vector<std::pair<uint32_t, LuaProxy*>> StateMap;
 			StateMap lua_map_;

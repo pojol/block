@@ -21,6 +21,21 @@ void gsf::Args::push_block(const char *block, int len)
 	pos_ += len;
 }
 
+void gsf::Args::push_ui32(const uint32_t &val)
+{
+	push_impl(val);
+}
+
+void gsf::Args::push_i32(const int32_t &val)
+{
+	push_impl(val);
+}
+
+void gsf::Args::push_string(const std::string &val)
+{
+	push(val.c_str());
+}
+
 void gsf::Args::push(const int8_t &val)
 {
 	push_impl(val);

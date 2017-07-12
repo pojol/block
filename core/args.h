@@ -56,6 +56,11 @@ namespace gsf
 
 		void push_block(const char *block, int len);
 
+		////////////////lua/////////////////////
+		void push_ui32(const uint32_t &val);
+		void push_i32(const int32_t &val);
+		void push_string(const std::string &val);
+
 		/////////////////////////////
 
 		uint8_t pop_ui8();
@@ -135,7 +140,8 @@ namespace gsf
 		std::unique_ptr<Args, deleter_type> get()
 		{
 			std::unique_ptr<Args, deleter_type> _ptr(pool_.back().release(), [this](Args *args) {
-				release_ptr(args);
+				args->flush();
+				dirty_vec_.push_back(args);
 			});
 
 			pool_.pop_back();
@@ -148,17 +154,6 @@ namespace gsf
 			{
 				pool_.push_back(std::make_unique<Args>());
 			}
-		}
-
- 		Args * get_ptr()
-		{
- 			return nullptr;
-  		}
-
-		void release_ptr(Args *args)
-		{
-			args->flush();
-			dirty_vec_.push_back(args);
 		}
 
 		void reenter()
