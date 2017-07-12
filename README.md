@@ -16,7 +16,7 @@ modules
 	4. log					日志类业务
 	5. distributed		
 		- node				分布式单点去网络的业务 （待实现
-		- coordinate			分布式协调业务 （待实现
+		- coordinate			分布式协调业务
 		- election 			分布式选主业务 （待实现
 	6. lua_proxy				c++ module 和 lua module 之间的协调， 还有管理lua状态的职责
 	7. redis_cache_proxy			灾备
@@ -25,73 +25,31 @@ modules
 
 /
 feature
-	- 模块访问隔离
+	- 模块访问隔离 (面向事件编程
 	- 使用event, arg list 粘合不同模块，服务，语言
 	- 支持使用lua编写module
 	- 支持分布式架构（可依据业务自行组织
 	- 跨平台 (linux, windows, apple
 
 /
-框架结构概览
-
-	+---------+
-	|   app   |
-	+----+----+
-	     |
-             | 组合
-             |
-	+----+-------+
-	| module 1~N |
-	+---+--------+
-            |     ╲
-       组合  |       ╲  组合
-	    |          ╲
-	+---+-----+  +-----------+
-	|interface|  | logic 1~N |
-	+---------+  +-----------+
-
-/
-核心接口概览
-
-	app.init_cfg			进程的初始化
-	app.regist_module		管理module
-	app.run	
-	
-	进程的运行时
-			     execute
-	            init     +---------------------------------> +          shut
-	  app run   +        |                                   |          +       exit
-	  ++-+-+-------------+                                   +------------------->
-	   ^ ^ ^    +        |                                   |          +
-	   | | |             + <---------------------------------+
-	   + + +                                                          unregist
-	regist module
-
-
-/
-	SampleModule
-		: public gsf::IModule			
-		, public gsf::IEvent			
-	{
-		// 接口类
-		// 1. 用于装载逻辑单元、和模块状态控制
-		// 2. 用于接收、发送等各种事件的接口申明
-	}
-
-
-/
-	module.before_init  // 模块创建
-	module.init
-	module.execute      // 服务器每帧调用
-	module.shut         // 模块销毁
-	module.after_shut		
-
-
-/
-	event.listen        // 侦听消息
-	event.dispatch      // 发送消息
-	event.broadcast     // 广播消息
-	
+	- 在框架中所有的数据都应该被切分到不同的module之中，在分布式的情景下
+	 访问非本app的module会进行rpc调用，由root节点协调。 建议将频繁访问的数据限制在本app内部或者同个module内部。
+	 
+		 root 1~N		
+	 +---------------------+	//根节点服务器 （主要挂载coordinate module		
+	 ^                     ^		
+	 |                     |              		
+	 |                     |              db 1~N  //数据库缓存服务器 (主要挂载 redis_cache module		
+	 |                     |                 ++		
+	 |           +-------------------------->++		
+	 |                     ^    game 1~N     ++		
+	 |                     |       //游戏服务器 （挂载各种游戏逻辑功能模块     		
+       +---+                 +---+                		
+      login 1~N               gate 1~N		
+	 ^ //登陆服务器CDN负载  ^ //网关服务器		
+	 |                     |		
+	 +---------------------+		
+		  client
 	
 /
 依赖
