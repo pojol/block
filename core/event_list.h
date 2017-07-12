@@ -60,9 +60,10 @@ namespace eid
 		regist_node,
 		regist_node_callabck,
 
-		regist_module,
-		increase_module_weight,
-		reduce_module_weight,
+		coordinat_regist,
+		coordinat_unregit,
+		coordinat_adjust_weight,
+		coordinat_get,
 
 		login,
 		select_login,

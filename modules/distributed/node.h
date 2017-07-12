@@ -12,11 +12,6 @@ namespace gsf
 {
 	namespace modules
 	{
-		struct NodeInfo
-		{
-
-		};
-
 		class NodeModule
 			: public gsf::Module
 			, public gsf::IEvent
