@@ -42,8 +42,10 @@ namespace gsf
 		template <typename T>
 		void regist_module(T *module, bool dynamic = false);
 
-		template <typename T>
-		uint32_t find_module_id();
+		void unregist_module(gsf::ModuleID module_id);
+
+		//template <typename T>
+		//uint32_t find_module_id();
 
 		void run();
 
@@ -55,7 +57,7 @@ namespace gsf
 		//！ 临时先写在这里，未来如果支持分布式可能要放在其他地方生成，保证服务器集群唯一。
 		int32_t make_module_id();
 
-		void unregist_dynamic_module(uint32_t module_id);
+		//void unregist_dynamic_module(uint32_t module_id);
 
 		typedef std::tuple<uint32_t, std::function<void()>, std::function<void()>, std::function<void(Module*, bool)>, Module*> Frame;
 		void push_frame(uint64_t index, Frame frame);
@@ -65,9 +67,8 @@ namespace gsf
 		AppState state_;
 
 		std::list<Module *> module_list_;
-		std::list<ModuleID> unregist_list_;
+		std::multimap<uint64_t, std::pair<uint16_t, Module*>> exit_list_;
 
-		std::unordered_map<uint32_t, int32_t> module_id_map_;
 		std::unordered_map<std::string, int32_t> module_name_map_;
 
 		std::multimap<uint64_t, Frame> halfway_frame_;
@@ -93,18 +94,18 @@ namespace gsf
 		
 		if (!dynamic) {
 			module->set_id(make_module_id());
-			auto _type_id = typeid(T).hash_code();
-			auto _id_itr = module_id_map_.find(_type_id);
-			if (_id_itr != module_id_map_.end()) {
-				printf("regist repeated module!\n");
-				return;
-			}
+			//auto _type_id = typeid(T).hash_code();
+			//auto _id_itr = module_id_map_.find(_type_id);
+			//if (_id_itr != module_id_map_.end()) {
+			//	printf("regist repeated module!\n");
+			//	return;
+			//}
 
-			module_id_map_.insert(std::make_pair(_type_id, module->get_module_id()));
+			//module_id_map_.insert(std::make_pair(_type_id, module->get_module_id()));
 			module_name_map_.insert(std::make_pair(module->get_module_name(), module->get_module_id()));
 		}
 	}
-
+	/*
 	template <typename T>
 	uint32_t gsf::Application::find_module_id()
 	{
@@ -116,6 +117,7 @@ namespace gsf
 
 		return 0;
 	}
+	*/
 }
 
 #endif

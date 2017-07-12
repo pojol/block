@@ -18,8 +18,9 @@ namespace eid
 		get_app_name,
 		get_module,					//! 通过字符串获得module的id， 只能获取静态显示声明的module。
 		new_dynamic_module,			//! ͨ通过已经定义的module，创建多份实例。
-		delete_dynamic_module,
+		delete_module,
 		module_init_succ,
+		module_shut_succ,
 	};
 
 

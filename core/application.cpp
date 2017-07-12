@@ -68,12 +68,31 @@ void gsf::Application::init_cfg(const gsf::AppConfig &cfg)
 		callback(gsf::make_args(_module_ptr->get_module_id()));
 	});
 
-	listen(this, eid::delete_dynamic_module, [=](const gsf::ArgsPtr &args, CallbackFunc callback) {
-
-		uint32_t _module_id = args->pop_i32();
-		unregist_list_.push_back(_module_id);
-
+	listen(this, eid::delete_module, [=](const gsf::ArgsPtr &args, CallbackFunc callback) {
+		uint32_t _module_id = args->pop_moduleid();
+		unregist_module(_module_id);
 	});
+}
+
+void gsf::Application::unregist_module(gsf::ModuleID module_id)
+{
+	auto itr = std::find_if(module_list_.begin(), module_list_.end(), [&](std::list<Module *>::value_type it) {
+		return (it->get_module_id() == module_id);
+	});
+
+	if (itr != module_list_.end()) {
+	
+		auto module_ptr = *itr;
+
+		exit_list_.insert(std::make_pair(cur_frame_, std::make_pair(0, module_ptr))); // 在循环外处理清理逻辑
+		exit_list_.insert(std::make_pair(cur_frame_ + 1, std::make_pair(1, module_ptr)));
+		exit_list_.insert(std::make_pair(cur_frame_ + 2, std::make_pair(2, module_ptr)));
+		exit_list_.insert(std::make_pair(cur_frame_ + 3, std::make_pair(3, module_ptr)));
+
+	}
+	else {
+		std::cout << "unregist_module not find module " << module_id << std::endl;
+	}
 }
 
 void gsf::Application::push_frame(uint64_t index, Frame frame)
@@ -83,32 +102,73 @@ void gsf::Application::push_frame(uint64_t index, Frame frame)
 
 void gsf::Application::pop_frame()
 {
-	if (halfway_frame_.empty()) { return; }
+	if (!halfway_frame_.empty()) {
+		auto itr = halfway_frame_.find(cur_frame_);
+		for (auto i = 0; i < halfway_frame_.count(cur_frame_); ++i, ++itr)
+		{
+			int idx = std::get<0>(itr->second);
+			if (idx == 0) {
+				auto func = std::get<1>(itr->second);
+				auto ptr = std::get<4>(itr->second);
+				//func();
+				ptr->before_init();
+			}
+			else if (idx == 1) {
+				auto func = std::get<2>(itr->second);
+				auto ptr = std::get<4>(itr->second);
+				//func();
+				ptr->init();
+			}
+			else if (idx == 2) {
+				auto func = std::get<3>(itr->second);
+				auto point = std::get<4>(itr->second);
+				func(point, true);
+			}
+		}
 
-	auto itr = halfway_frame_.find(cur_frame_);
-	for (auto i = 0; i < halfway_frame_.count(cur_frame_); ++i, ++itr)
-	{
-		int idx = std::get<0>(itr->second);
-		if (idx == 0) {
-			auto func = std::get<1>(itr->second);
-			auto ptr = std::get<4>(itr->second);
-			//func();
-			ptr->before_init();
-		}
-		else if (idx == 1) {
-			auto func = std::get<2>(itr->second);
-			auto ptr = std::get<4>(itr->second);
-			//func();
-			ptr->init();
-		}
-		else if (idx == 2) {
-			auto func = std::get<3>(itr->second);
-			auto point = std::get<4>(itr->second);
-			func(point, true);
-		}
+		halfway_frame_.erase(cur_frame_);
 	}
 
-	halfway_frame_.erase(cur_frame_);
+	if (!exit_list_.empty()) {
+
+		auto itr = exit_list_.find(cur_frame_);
+		for (auto i = 0; i < exit_list_.count(cur_frame_); ++i, ++itr)
+		{
+			auto idx = itr->second.first;
+			if (idx == 0) {
+
+				auto _module_id = (itr->second.second)->get_module_id();
+				auto _module_name = (itr->second.second)->get_module_name();
+				auto litr = std::find_if(module_list_.begin(), module_list_.end(), [&](std::list<Module *>::value_type it) {
+					return (it->get_module_id() == _module_id);
+				});
+
+				if (litr != module_list_.end()) {
+					module_list_.erase(litr);
+
+					auto _mitr = module_name_map_.find(_module_name);
+					assert(_mitr != module_name_map_.end());
+					module_name_map_.erase(_mitr);
+				}
+				else {
+					std::cout << "unregist_module pop frame not find module " << _module_id << std::endl;
+				}
+			}
+			else if (idx == 1) {
+				(itr->second.second)->shut();
+			}
+			else if (idx == 2) {
+				(itr->second.second)->after_shut();
+			}
+			else {
+				delete itr->second.second;
+				itr->second.second = nullptr;
+			}
+		}
+
+		exit_list_.erase(cur_frame_);
+	}
+
 }
 
 void gsf::Application::run()
@@ -155,11 +215,11 @@ void gsf::Application::run()
 			}
 
 			pop_frame();
-			while (!unregist_list_.empty()) {
-				auto itr = unregist_list_.front();
-				unregist_dynamic_module(itr);
-				unregist_list_.pop_front();
-			}
+			//while (!unregist_list_.empty()) {
+			//	auto itr = unregist_list_.front();
+			//	unregist_dynamic_module(itr);
+			//	unregist_list_.pop_front();
+			//}
 
 			static_cast<Module*>(gsf::EventModule::get_ptr())->execute();
 #ifdef WATCH_PERF
@@ -214,6 +274,7 @@ int32_t gsf::Application::make_module_id()
 	return module_idx_++;
 }
 
+/*
 void gsf::Application::unregist_dynamic_module(uint32_t module_id)
 {
 	auto itr = std::find_if(module_list_.begin(), module_list_.end(), [&](std::list<Module *>::value_type it){
@@ -230,6 +291,7 @@ void gsf::Application::unregist_dynamic_module(uint32_t module_id)
 		module_list_.erase(itr);
 	}
 }
+*/
 
 void gsf::Application::tick()
 {

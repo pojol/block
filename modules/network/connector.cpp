@@ -61,7 +61,9 @@ void gsf::network::ConnectorModule::before_init()
 
 void gsf::network::ConnectorModule::init()
 {
-	dispatch(get_module_id(), eid::network::connector_init, nullptr);
+	// todo ...
+	
+	boardcast(eid::module_init_succ, gsf::make_args(get_module_id()));
 }
 
 void gsf::network::ConnectorModule::execute()
@@ -87,6 +89,8 @@ void gsf::network::ConnectorModule::after_shut()
 		delete binder_;
 		binder_ = nullptr;
 	}
+
+	boardcast(eid::module_shut_succ, gsf::make_args(get_module_id()));
 }
 
 void gsf::network::ConnectorModule::make_connector(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
