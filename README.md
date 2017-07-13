@@ -15,7 +15,7 @@ modules
 	3. timer				时钟类业务
 	4. log					日志类业务
 	5. distributed		
-		- node				分布式单点去网络的业务 （待实现
+		- node				分布式单点去网络的业务 
 		- coordinate			分布式协调业务
 		- election 			分布式选主业务 （待实现
 	6. lua_proxy				c++ module 和 lua module 之间的协调， 还有管理lua状态的职责
@@ -31,6 +31,7 @@ feature
 	- 支持分布式架构（可依据业务自行组织
 	- 跨平台 (linux, windows, apple
 
+	
 /
 	- 在框架中所有的数据都应该被切分到不同的module之中，在分布式的情景下
 	 访问非本app的module会进行rpc调用，由root节点协调。 建议将频繁访问的数据限制在本app内部或者同个module内部。
@@ -50,6 +51,7 @@ feature
 	 |                     |		
 	 +---------------------+		
 		  client
+	
 	
 /
 依赖

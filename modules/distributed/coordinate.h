@@ -30,14 +30,14 @@ namespace gsf
 		/**
 		coodinator 协调多个相同业务app之间的负载
 		*/
-		class Coodinator
+		class CoodinatorModule
 			: public gsf::Module
 			, public gsf::IEvent
 		{
 		public:
 
-			Coodinator();
-			virtual ~Coodinator() {}
+			CoodinatorModule();
+			virtual ~CoodinatorModule() {}
 
 			void before_init() override;
 
@@ -49,6 +49,9 @@ namespace gsf
 
 			void event_regist(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
 			void event_unregist(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
+
+
+			void adjust_module_weight(int32_t port, const std::string &module_name, gsf::ModuleID module_id, int32_t weight);
 
 		private:
 

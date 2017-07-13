@@ -46,6 +46,9 @@ void gsf::Application::init_cfg(const gsf::AppConfig &cfg)
 		if (itr != module_name_map_.end()) {
 			callback(gsf::make_args(itr->second));
 		}
+		else {
+			callback(gsf::make_args(gsf::ModuleNil));
+		}
 
 	});
 

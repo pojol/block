@@ -29,6 +29,9 @@ namespace gsf
 	typedef std::function<void(const ArgsPtr &)> CallbackFunc;
 	typedef std::function<void(const ArgsPtr &, CallbackFunc)> EventFunc;
 
+	typedef std::function<void(const ArgsPtr &, bool)> RpcCallback;
+	typedef std::function<void(const std::string &, uint32_t, const gsf::ArgsPtr &, gsf::RpcCallback)> RpcFunc;
+
 	class Module;
 
 	class IEvent
@@ -52,6 +55,14 @@ namespace gsf
 		virtual void boardcast(uint32_t event, const ArgsPtr &args, CallbackFunc callback = nullptr);
 
 		/**!
+			rpc call ， 在分布式架构中需要远程调用的接口，依赖 NodeModule。
+			callback 如果为nullptr， 则不等待 可以重复发起。
+			callback 存在，则异步等待callback  如果 result 返回false 则代表这次调用没有成功。 需要进入回滚逻辑
+			如果是业务层导致的事件执行失败，则在args中处理， result返回的成功、失败只代表框架层调用失败.
+		*/
+		virtual void rpc(const std::string &module, uint32_t event, const ArgsPtr &args, RpcCallback callback = nullptr);
+
+		/**!
 			移除module在event层上的绑定.
 		*/
 		virtual void wipeout(ModuleID self);
@@ -59,6 +70,10 @@ namespace gsf
 
 		virtual void wipeout(Module *self);
 		virtual void wipeout(Module *self, EventID event_id);
+
+
+		// private - -
+		virtual void rpc_listen(RpcFunc rpc_callback);
 	};
 
 	class EventModule
@@ -78,6 +93,9 @@ namespace gsf
 		void dispatch(uint32_t module_id, uint32_t event, const ArgsPtr &args, CallbackFunc callback = nullptr);
 		void boardcast(uint32_t event, const ArgsPtr &args, CallbackFunc callback = nullptr);
 		///
+
+		void bind_rpc(RpcFunc rpc_callback);
+		void dispatch_rpc(const std::string &module, uint32_t event, const ArgsPtr &args, RpcCallback callback = nullptr);
 
 		void rmv_event(ModuleID module_id);
 		void rmv_event(ModuleID module_id, EventID event_id);
@@ -145,6 +163,7 @@ namespace gsf
 
 		ModuleEventMap type_map_;
 
+		RpcFunc rpc_;
 	};
 }
 

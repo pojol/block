@@ -54,11 +54,10 @@ namespace eid
 	enum distributed
 	{
 		rpc_begin = 2001,
-		sync_dispatch,
 
+		rpc,
 		create_node,
-		regist_node,
-		regist_node_callabck,
+		create_node_succ,
 
 		coordinat_regist,
 		coordinat_unregit,
