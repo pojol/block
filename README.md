@@ -38,7 +38,7 @@
 ```
 
 ### distributed
-![distributed](http://img.hb.aicdn.com/da102d9f94fe7d8c5c6e20908987d09df2e1b647d5da-xs5RoL_fw658)
+![](http://pan.baidu.com/s/1qYhVrM8)
 
 ***
 ## depend
