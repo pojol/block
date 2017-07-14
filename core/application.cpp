@@ -204,7 +204,6 @@ void gsf::Application::run()
 					it->add_tick_consume(t1);
 					_ttime = time_point_cast<microseconds>(system_clock::now());
 #endif // WATCH_PERF
-					gsf::ArgsPool::get_ref().reenter();
 				}
 				else if (state == AppState::SHUT) {
 					it->shut();
@@ -251,6 +250,7 @@ void gsf::Application::run()
 
 		++cur_frame_;
 		tick();
+		gsf::ArgsPool::get_ref().reenter();
 
 		auto _use = time_point_cast<microseconds>(system_clock::now()) - _before;
 		uint32_t _use_ms = static_cast<uint32_t>(_use.count() / 1000);
@@ -309,7 +309,7 @@ void gsf::Application::tick()
 			}
 
 			_pref += static_cast<Module*>(gsf::EventModule::get_ptr())->get_tick_info(tick_len_, cfg_.tick_count) + "\n";
-			std::cout << _pref << std::endl;
+			std::cout << _pref << gsf::ArgsPool::get_ref().get_perf();
 		}
 
 		last_tick_ = _t;

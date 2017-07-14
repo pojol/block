@@ -139,6 +139,10 @@ namespace gsf
 	{
 		std::unique_ptr<Args, deleter_type> get()
 		{
+#ifdef WATCH_PERF
+			count_++;
+#endif // WATCH_PERF
+
 			std::unique_ptr<Args, deleter_type> _ptr(pool_.back().release(), [this](Args *args) {
 				args->flush();
 				dirty_vec_.push_back(args);
@@ -163,7 +167,26 @@ namespace gsf
 				pool_.push_back(std::unique_ptr<Args>(it));
 			}
 			dirty_vec_.clear();
+#ifdef WATCH_PERF
+			if (count_ > maximun_) {
+				maximun_ = count_;
+				count_ = 0;
+			}
+#endif // WATCH_PERF
 		}
+
+#ifdef WATCH_PERF
+		std::string get_perf()
+		{
+			std::string _perf = "event pool : single frame maximun use " + std::to_string(maximun_) + '\n';
+			_perf += "event pool : size = " + std::to_string(pool_.size()) + '\n';
+			maximun_ = 0;
+			return _perf;
+		}
+
+		uint32_t count_ = 0;
+		uint32_t maximun_ = 0;
+#endif
 
 	private:
 
