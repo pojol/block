@@ -18,7 +18,7 @@ namespace gsf
 			std::vector<std::pair<gsf::ModuleID, std::string>> modules;
 
 			std::string ip_ = "";
-			uint32_t port_ = 0;
+			uint32_t nod_id = 0;
 
 			std::string type_ = "";
 
@@ -51,7 +51,7 @@ namespace gsf
 			void event_unregist(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
 
 
-			void adjust_module_weight(int32_t port, const std::string &module_name, gsf::ModuleID module_id, int32_t weight);
+			void adjust_module_weight(int32_t nod_id, const std::string &module_name, gsf::ModuleID module_id, int32_t weight);
 
 		private:
 
