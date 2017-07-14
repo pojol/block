@@ -55,19 +55,19 @@ namespace eid
 	{
 		rpc_begin = 2001,
 
-		rpc,
-		create_node,
-		create_node_succ,
+		node_create,
+		node_create_succ,
 
 		coordinat_regist,
 		coordinat_unregit,
 		coordinat_adjust_weight,
 		coordinat_get,
 
-		login,
-		select_login,
-		select_login_callback,
-		logout,
+		login_server,
+		login_select_gate,
+		login_select_gate_cb,
+		login_logout,
+
 		rpc_end,
 	};
 

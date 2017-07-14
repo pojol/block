@@ -45,7 +45,7 @@ void gsf::modules::NodeModule::before_init()
 	});
 
 	using namespace std::placeholders;
-	listen(this, eid::distributed::create_node, std::bind(&NodeModule::event_create_node, this, _1, _2));
+	listen(this, eid::distributed::node_create, std::bind(&NodeModule::event_create_node, this, _1, _2));
 
 	rpc_listen(std::bind(&NodeModule::event_rpc, this, _1, _2, _3, _4));
 }
@@ -180,7 +180,7 @@ void gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &args, gsf::
 			}
 			event_rpc("CoodinatorModule", eid::distributed::coordinat_regist, _args, [&](const gsf::ArgsPtr &args, bool result) {
 				if (result) {
-					dispatch(target_m_, eid::distributed::create_node_succ, nullptr);
+					dispatch(target_m_, eid::distributed::node_create_succ, nullptr);
 				}
 			});
 		});
