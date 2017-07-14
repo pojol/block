@@ -55,13 +55,13 @@ namespace eid
 	{
 		rpc_begin = 2001,
 
-		node_create,
+		node_create,				// by cfg
 		node_create_succ,
 
-		coordinat_regist,
+		coordinat_regist,			
 		coordinat_unregit,
-		coordinat_adjust_weight,
-		coordinat_get,
+		coordinat_adjust_weight,	// args (i32 node_id, string module_name, i32 module_characteristic, i32 weight)
+		coordinat_get,				// args (string module_name, i32 module_characteristic)
 
 		login_server,
 		login_select_gate,

@@ -26,14 +26,16 @@ void gsf::modules::CoodinatorModule::event_adjust_module_weight(const gsf::ArgsP
 {
 	auto _nod_id = args->pop_i32();
 	auto _module = args->pop_string();
+	auto _characteristic = args->pop_i32();
 	auto _weight = args->pop_i32();
 
-	adjust_module_weight(_nod_id, _module, 0, _weight);
+	adjust_module_weight(_nod_id, _module, 0, _characteristic, _weight);
 }
 
 void gsf::modules::CoodinatorModule::event_get_light_module(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
 {
 	auto _module_name = args->pop_string();
+	auto _module_characteristic = args->pop_i32();
 
 	auto _count = node_name_map_.count(_module_name);
 	if (_count == 0) {
@@ -47,6 +49,14 @@ void gsf::modules::CoodinatorModule::event_get_light_module(const gsf::ArgsPtr &
 		auto _itr = node_name_map_.find(_module_name);
 		for (size_t i = 0; i < _count; ++i, ++_itr)
 		{
+			auto _modules = _itr->second->modules;
+			auto _ctItr = std::find_if(_modules.begin(), _modules.end(), [&](std::vector<CModuleInfo>::value_type it) {
+				return (it.module_characteristic_ == _module_characteristic);
+			});
+			if (_ctItr == _modules.end()) {
+				continue;
+			}
+
 			if (!_ptr) {
 				_ptr = _itr->second;
 			}
@@ -77,7 +87,7 @@ void gsf::modules::CoodinatorModule::event_regist(const gsf::ArgsPtr &args, gsf:
 		return;
 	}
 
-	auto nod = std::make_shared<NodeInfo>();
+	auto nod = std::make_shared<CNodeInfo>();
 	nod->ip_ = _ip;
 	nod->nod_id = _nod_id;
 	nod->type_ = _type;
@@ -89,8 +99,9 @@ void gsf::modules::CoodinatorModule::event_regist(const gsf::ArgsPtr &args, gsf:
 	{
 		auto _module_name = args->pop_string();
 		auto _module_id = args->pop_moduleid();
+		auto _module_characteristic = args->pop_i32();
 
-		adjust_module_weight(_nod_id, _module_name, _module_id, 0);
+		adjust_module_weight(_nod_id, _module_name, _module_id, _module_characteristic, 0);
 	}
 
 	callback(nullptr);
@@ -101,7 +112,7 @@ void gsf::modules::CoodinatorModule::event_unregist(const gsf::ArgsPtr &args, gs
 	auto _port = args->pop_i32();
 }
 
-void gsf::modules::CoodinatorModule::adjust_module_weight(int32_t nod_id, const std::string &module_name, gsf::ModuleID module_id, int32_t weight)
+void gsf::modules::CoodinatorModule::adjust_module_weight(int32_t nod_id, const std::string &module_name, gsf::ModuleID module_id, int32_t characteristic, int32_t weight)
 {
 	auto _itr = node_id_map_.find(nod_id);
 	if (_itr == node_id_map_.end()) {
@@ -123,14 +134,27 @@ void gsf::modules::CoodinatorModule::adjust_module_weight(int32_t nod_id, const 
 		for (size_t i = 0; i < _count; ++i, ++_mitr)
 		{
 			if (_mitr->second->nod_id == nod_id) {
-				_flag = true;
-				break;
+
+				auto _modules = _mitr->second->modules;
+				auto _ctItr = std::find_if(_modules.begin(), _modules.end(), [&](std::vector<CModuleInfo>::value_type it) {
+					return (it.module_characteristic_ == characteristic);
+				});
+
+				if (_ctItr != _modules.end()) {
+					_flag = true;
+					break;
+				}
 			}
 		}
 	}
 
 	if (!_flag && module_id != 0) {
-		_itr->second->modules.push_back(std::make_pair(module_id, module_name));
+		CModuleInfo _info;
+		_info.module_id_ = module_id;
+		_info.module_name_ = module_name;
+		_info.module_characteristic_ = characteristic;
+
+		_itr->second->modules.push_back(_info);
 		node_name_map_.insert(std::make_pair(module_name, _itr->second));
 	}
 }

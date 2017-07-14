@@ -13,9 +13,16 @@ namespace gsf
 {
 	namespace modules
 	{
-		struct NodeInfo
+		struct CModuleInfo
 		{
-			std::vector<std::pair<gsf::ModuleID, std::string>> modules;
+			gsf::ModuleID module_id_;
+			std::string module_name_;
+			int32_t module_characteristic_;
+		};
+
+		struct CNodeInfo
+		{
+			std::vector<CModuleInfo> modules;
 
 			std::string ip_ = "";
 			uint32_t nod_id = 0;
@@ -24,7 +31,7 @@ namespace gsf
 
 			uint32_t weight_ = 0;
 		};
-		typedef std::shared_ptr<NodeInfo> NodePtr;
+		typedef std::shared_ptr<CNodeInfo> NodePtr;
 
 
 		/**
@@ -51,7 +58,7 @@ namespace gsf
 			void event_unregist(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
 
 
-			void adjust_module_weight(int32_t nod_id, const std::string &module_name, gsf::ModuleID module_id, int32_t weight);
+			void adjust_module_weight(int32_t nod_id, const std::string &module_name, gsf::ModuleID module_id, int32_t characteristic, int32_t weight);
 
 		private:
 
