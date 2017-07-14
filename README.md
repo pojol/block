@@ -1,41 +1,44 @@
-# gsf
+# GSF
 
-组件式游戏服务器框架
+## feature
+- 组件结构，模块访问隔离
+- 基于命令（接口）编程
+- 有一定的内省能力（可以运行时开启资源，性能的使用报告
+- 支持编写lua module （建议用于配置，热更，或频繁修改的小逻辑
+- 支持分布式架构（可依据业务定制，建议多对数据进行分片，少同步
+- 跨平台 （linux, windows, apple
 
+***
+## modules
+- [x] core
+- [ ] network
+    - [x] acceptor
+    - [x] connector
+    - [ ] http_acceptor
+- [ ] distributed
+    - [x] node
+    - [x] coordinate
+    - [ ] election
+- [x] timer
+- [x] log
+- [x] lua_proxy
+- [x] reids_cache_proxy
+- [ ] mysql_proxy
+
+***
+## sample
+### echo
 ```c++
-/*
 
-/
-modules
-	1. core					核心模块，主要实现event+args的模型和按帧驱动的框架运行时
-	2. network
-		- acceptor			TCP网络接收器( 服务端
-		- connector			TCP网络连接器( 客户端
-		- http_acceptor			HTTP网络接收器 (待实现
-	3. timer				时钟类业务
-	4. log					日志类业务
-	5. distributed		
-		- node				分布式单点去网络的业务 
-		- coordinate			分布式协调业务
-		- election 			分布式选主业务 （待实现
-	6. lua_proxy				c++ module 和 lua module 之间的协调， 还有管理lua状态的职责
-	7. redis_cache_proxy			灾备
-	8. mysql_proxy				mysql代理 （待实现
-	9. aoi					aoi服务（待实现
+```
 
-/
-feature
-	- 模块访问隔离 (面向事件编程
-	- 使用event, arg list 粘合不同模块，服务，语言
-	- 支持使用lua编写module
-	- 支持分布式架构（可依据业务自行组织
-	- 跨平台 (linux, windows, apple
+### timer
+```c++
 
-	
-/
-	- 在框架中所有的数据都应该被切分到不同的module之中，在分布式的情景下
-	 访问非本app的module会进行rpc调用，由root节点协调。 建议将频繁访问的数据限制在本app内部或者同个module内部。
-	 
+```
+
+### distributed
+```c++
 		 root 1~N		
 	 +---------------------+	//根节点服务器 （主要挂载coordinate module		
 	 ^                     ^		
@@ -51,25 +54,18 @@ feature
 	 |                     |		
 	 +---------------------+		
 		  client
-	
-	
-/
-依赖
-	core                depend c++11, cmake 2.8+
-	
-	network module      depend libevent 2.0.22+, protobuf3
-	lua_proxy module    depend lua5.3+, sol2 2.16+
-	timer module        depend c++11
-	log module          depeng glog
-	mysql_cache module  depend redis 3.0+
-	mongo_cache module  
+```
 
-/
-License
+***
+## depend
+- core, distributed, timer --------------- c++1y & cmake 2.8+
+- network -------------------------------- libevent 2.0.22+
+- log ------------------------------------ glog 0.3.4+
+- redis_cache_proxy ---------------------- redis 3.0+
+
+***
+### License
 	MIT
 	Copyright (c) 2016 pojol
 	
 	pojol@outlook.com
-*/
-```
-
