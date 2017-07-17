@@ -11,10 +11,9 @@
 ***
 ## modules
 - [x] core
-- [ ] network
+- [x] network
     - [x] acceptor
     - [x] connector
-    - [ ] http_acceptor
 - [ ] distributed
     - [x] node
     - [x] coordinate

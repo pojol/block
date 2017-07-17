@@ -68,7 +68,6 @@ message Guild_Member_info {
 	int64 guild_id = 1;
 	
 	int32 title = 2;
-	int32 
 }
 
 message Guild {
