@@ -109,7 +109,7 @@ namespace eid
 	enum db_proxy
 	{
 		redis_connect = 6000,
-		redis_command_callback,
+		redis_command,
 		redis_avatar_offline,
 		redis_resume,
 	};

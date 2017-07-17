@@ -56,12 +56,7 @@ void gsf::modules::RedisCacheProxyModule::event_redis_connect(const gsf::ArgsPtr
 
 		is_open_ = true;
 
-		listen(this, eid::db_proxy::redis_command_callback, [&](const gsf::ArgsPtr& args, gsf::CallbackFunc callback) {
-			//auto _args = gsf::Args();
-			//_args.push_redis_cmd_callback(std::bind(&RedisCacheProxyModule::event_redis_command, this, _1, _2, _3, _4));
-
-			//callback(_args);
-		});
+		listen(this, eid::db_proxy::redis_command, std::bind(&RedisCacheProxyModule::event_redis_command, this, _1, _2));
 
 		listen(this, eid::db_proxy::redis_avatar_offline
 			, std::bind(&RedisCacheProxyModule::event_redis_avatar_offline, this, _1, _2));
@@ -94,11 +89,15 @@ void gsf::modules::RedisCacheProxyModule::event_redis_avatar_offline(const gsf::
 	freeReplyObject(_replay_ptr);
 }
 
-void gsf::modules::RedisCacheProxyModule::event_redis_command(const std::string &field, const std::string &key, char *block, int len)
+void gsf::modules::RedisCacheProxyModule::event_redis_command(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
 {
-	field_set_.insert(field);	//记录下域
+	auto _field = args->pop_string();
+	auto _key = args->pop_string();
+	auto _block = args->pop_string();	//need slice
 
-	if (REDIS_OK != redisAppendCommand(redis_context_, "hset %s %s %s", field.c_str(), key.c_str(), block)) {
+	field_set_.insert(_field);	//记录下域
+
+	if (REDIS_OK != redisAppendCommand(redis_context_, "hset %s %s %s", _field.c_str(), _key.c_str(), _block.c_str())) {
 		dispatch(log_m_, eid::log::print, gsf::make_log(LogErr, "RedisCacheProxyModule", "redisAppendCommand fail!"));
 		return;
 	}

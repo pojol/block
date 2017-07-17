@@ -40,7 +40,7 @@ namespace gsf
 		private:
 
 			void event_redis_connect(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
-			void event_redis_command(const std::string &field, const std::string &key, char *block, int len);
+			void event_redis_command(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
 			void event_redis_avatar_offline(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
 
 			void start_update_redis_timer(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
