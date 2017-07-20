@@ -37,7 +37,9 @@
 ```
 
 ### distributed
-![distributed](http://img.hb.aicdn.com/56cad9be02eacdad0fca4f28d5b4a5792b3040996380-4VdFMZ_fw658)
+```c++
+
+```
 
 ***
 ## depend
