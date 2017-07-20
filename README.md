@@ -37,23 +37,7 @@
 ```
 
 ### distributed
-```c++
-		 root 1~N		
-	 +---------------------+	//根节点服务器 （主要挂载coordinate module		
-	 ^                     ^		
-	 |                     |              		
-	 |                     |              db 1~N  //数据库缓存服务器 (主要挂载 redis_cache module		
-	 |                     |                 ++		
-	 |           +-------------------------->++		
-	 |                     ^    game 1~N     ++		
-	 |                     |       //游戏服务器 （挂载各种游戏逻辑功能模块     		
-       +---+                 +---+                		
-      login 1~N               gate 1~N		
-	 ^ //登陆服务器CDN负载  ^ //网关服务器		
-	 |                     |		
-	 +---------------------+		
-		  client
-```
+![distributed](http://img.hb.aicdn.com/56cad9be02eacdad0fca4f28d5b4a5792b3040996380-4VdFMZ_fw658)
 
 ***
 ## depend
