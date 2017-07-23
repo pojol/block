@@ -26,14 +26,14 @@
 
 
 ## depend
-- core, distributed, timer --------------- c++1y & cmake 2.8+
+- core, distributed, timer --------------- c++1y
 - network -------------------------------- libevent 2.0.22+
 - log ------------------------------------ glog 0.3.4+
 - redis_cache_proxy ---------------------- redis 3.0+
 
 
 # build & install 
-- supported compilers , gcc >= 4.9, msvc >= vs2015
+- supported compilers , gcc4.9+, vs2015+, cmake2.8+
 
 
 ### License
