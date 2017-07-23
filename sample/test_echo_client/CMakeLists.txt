@@ -1,4 +1,4 @@
-﻿PROJECT(test_echo_client)
+PROJECT(test_echo_client)
 
 #引用头文件目录
 if(WIN32)

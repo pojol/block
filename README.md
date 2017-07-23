@@ -8,7 +8,7 @@
 - 支持分布式架构（可依据业务定制，建议多对数据进行分片，少同步
 - 跨平台 （linux, windows, apple
 
-***
+
 ## modules
 - [x] core
 - [x] network
@@ -24,31 +24,18 @@
 - [x] reids_cache_proxy
 - [ ] mysql_proxy
 
-***
-## sample
-### echo
-```c++
 
-```
-
-### timer
-```c++
-
-```
-
-### distributed
-```c++
-
-```
-
-***
 ## depend
 - core, distributed, timer --------------- c++1y & cmake 2.8+
 - network -------------------------------- libevent 2.0.22+
 - log ------------------------------------ glog 0.3.4+
 - redis_cache_proxy ---------------------- redis 3.0+
 
-***
+
+# build & install 
+- supported compilers , gcc >= 4.9, msvc >= vs2015
+
+
 ### License
 	MIT
 	Copyright (c) 2016 pojol

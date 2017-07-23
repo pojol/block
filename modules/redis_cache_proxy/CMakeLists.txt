@@ -1,4 +1,4 @@
-﻿PROJECT(redis_cache_proxy)
+PROJECT(redis_cache_proxy)
 
 if(WIN32)
     #引用头文件目录

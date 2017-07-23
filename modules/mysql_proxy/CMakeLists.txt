@@ -1,4 +1,4 @@
-﻿PROJECT(mysql_proxy)
+PROJECT(mysql_proxy)
 
 if(WIN32)
     #引用头文件目录

@@ -1,4 +1,4 @@
-﻿PROJECT(test_timer)
+PROJECT(test_timer)
 
 #引用头文件目录
 if(WIN32)
