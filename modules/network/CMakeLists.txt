@@ -9,13 +9,13 @@ if(WIN32)
 endif()
 if(UNIX)
     INCLUDE_DIRECTORIES(
-            ${GSF_SOURCE_DIR}/lib/linux/libevent/include
+            ${GSF_SOURCE_DIR}/lib/libevent/include
             ${GSF_SOURCE_DIR}/
 			)
 endif()
 if(APPLE)
     INCLUDE_DIRECTORIES(
-            ${GSF_SOURCE_DIR}/lib/linux/libevent/include
+            ${GSF_SOURCE_DIR}/lib/libevent/include
             ${GSF_SOURCE_DIR}/
 			)
 endif()
@@ -24,12 +24,12 @@ endif()
 #引用库目录
 if(WIN32)
     LINK_DIRECTORIES(
-            ${GSF_SOURCE_DIR}/lib/linux
+            ${GSF_SOURCE_DIR}/lib
     )
 elseif(UNIX)
     LINK_DIRECTORIES(
-            ${GSF_SOURCE_DIR}/lib/linux/libevent/lib
-            ${GSF_SOURCE_DIR}/lib/linux
+            ${GSF_SOURCE_DIR}/lib/libevent/lib
+            ${GSF_SOURCE_DIR}/lib
     )
 elseif(APPLE)
 	LINK_DIRECTORIES(
@@ -58,7 +58,7 @@ if(MSVC)
 	SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/win)        
         #TARGET_LINK_LIBRARIES(network ws2_32.lib)      项目本身是静态库不需要链接静态库
 elseif(UNIX)
-        SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/linux)
+        SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/)
 elseif(APPLE)
-	SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/apple)
+	SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/)
 endif()

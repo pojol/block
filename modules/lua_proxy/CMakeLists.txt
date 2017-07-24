@@ -18,8 +18,8 @@ if(UNIX)
     #引用头文件目录
     INCLUDE_DIRECTORIES(
             ${GSF_SOURCE_DIR}/
-            ${GSF_SOURCE_DIR}/lib/linux/glog/include
-            ${GSF_SOURCE_DIR}/3rd/lua53/lua-5.3.4/src
+            ${GSF_SOURCE_DIR}/lib/glog/include
+            ${GSF_SOURCE_DIR}/lib/lua
             ${GSF_SOURCE_DIR}/3rd/sol2
     )
 
@@ -48,7 +48,7 @@ if(MSVC)
     
     SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/win)
 elseif(UNIX)
-	SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/linux)
+	SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib)
 elseif(APPLE)
 endif()
 

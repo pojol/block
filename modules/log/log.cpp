@@ -2,6 +2,7 @@
 
 #include <string>
 #include <sstream>
+#include <iostream>
 
 #define GOOGLE_GLOG_DLL_DECL
 #include <glog/logging.h>

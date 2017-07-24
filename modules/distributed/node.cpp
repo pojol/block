@@ -1,7 +1,7 @@
 #include "node.h"
 
-#include <modules\network\acceptor.h>
-#include <modules\network\connector.h>
+#include <modules/network/acceptor.h>
+#include <modules/network/connector.h>
 
 #include <core/dynamic_module_factory.h>
 
@@ -152,7 +152,7 @@ void gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &args, gsf::
 			auto _module_name = args->pop_string();
 			auto _module_id = args->pop_i32();
 
-			// £¡¼ì²é
+			// ï¿½ï¿½ï¿½ï¿½ï¿½
 			// todo 
 			modules_.push_back(std::make_pair(_module_name, _module_id));
 		}

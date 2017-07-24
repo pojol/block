@@ -1,7 +1,7 @@
 ADD_SUBDIRECTORY(log)
-ADD_SUBDIRECTORY(distributed)
 ADD_SUBDIRECTORY(network)
 ADD_SUBDIRECTORY(timer)
+ADD_SUBDIRECTORY(distributed)
 ADD_SUBDIRECTORY(lua_proxy)
 ADD_SUBDIRECTORY(redis_cache_proxy)
 ADD_SUBDIRECTORY(mysql_proxy)

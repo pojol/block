@@ -11,7 +11,7 @@ if(WIN32)
 endif()
 if(UNIX)
 	INCLUDE_DIRECTORIES(
-			${GSF_SOURCE_DIR}/3rd/libevent/include
+			${GSF_SOURCE_DIR}/lib/libevent/include
 			${GSF_SOURCE_DIR}/
 			${GSF_SOURCE_DIR}/modules
 		)
@@ -31,8 +31,11 @@ if(WIN32)
 	)
 endif()
 if(UNIX)
+	find_package(Threads)
 	LINK_DIRECTORIES(
-			${GSF_SOURCE_DIR}/lib/linux
+			${GSF_SOURCE_DIR}/lib
+			${GSF_SOURCE_DIR}/lib/libevent/lib
+			${GSF_SOURCE_DIR}/lib/glog/lib
 	)
 endif()
 if(APPLE)
@@ -57,7 +60,7 @@ if(MSVC)
         TARGET_LINK_LIBRARIES(test_dbproxy libevent.lib libevent_core.lib libevent_extras.lib network.lib gsf_core.lib ws2_32.lib libprotocd.lib libprotobufd.lib glog.lib log.lib)
 endif()
 if(UNIX)
-        TARGET_LINK_LIBRARIES(test_dbproxy  libnetwork.a libevent.a libevent_core.a libevent_extra.a libtimer.a libprotobuf.a libmodule.a liblog.a libglog.a)
+        TARGET_LINK_LIBRARIES(test_dbproxy ${CMAKE_THREAD_LIBS_INIT} libgsf_core.a libnetwork.a libevent.a libevent_core.a libevent_extra.a libtimer.a libprotobuf.a liblog.a libglog.a)
 endif()
 if(APPLE)
 

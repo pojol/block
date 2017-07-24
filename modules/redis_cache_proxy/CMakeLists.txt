@@ -17,7 +17,8 @@ if(UNIX)
     #引用头文件目录
     INCLUDE_DIRECTORIES(
             ${GSF_SOURCE_DIR}/
-            ${GSF_SOURCE_DIR}/lib/linux/glog/include
+            ${GSF_SOURCE_DIR}/lib/hiredis
+            ${GSF_SOURCE_DIR}/lib/glog/include
     )
 
     #引用库目录

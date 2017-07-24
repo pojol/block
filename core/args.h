@@ -225,7 +225,6 @@ namespace gsf
 		return args;
 	}
 
-	// 用于打印日志
 	template <typename P0, typename ...P>
 	static void pushFmt(std::ostringstream &oss, P0 &&p0, P &&... p)
 	{

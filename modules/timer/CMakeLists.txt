@@ -27,7 +27,7 @@ if(MSVC)
     
     SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/win)
 elseif(UNIX)
-	SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/linux)
+	SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib)
 elseif(APPLE)
 endif()
 
