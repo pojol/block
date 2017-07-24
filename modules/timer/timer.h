@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <map>
+#include <math.h>
 
 #include <chrono>
 #include <ctime>
