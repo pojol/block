@@ -34,7 +34,7 @@
 
 # build & install 
 - supported compilers , gcc4.9+, vs2015+
-- depend cmake2.8+
+- depend cmake2.8+ 
 
 
 ### License
