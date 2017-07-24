@@ -32,7 +32,7 @@ before_script:
   - cd glog
   - git checkout v0.3.4
   - ls
-  - ./configure --prefix=/usr/local/gsf/glog
+  - ./configure --prefix=/home/travis/build/pojol/gsf/lib/glog
   - make && make install
 
 script:
