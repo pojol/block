@@ -26,6 +26,15 @@ install:
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq cmake; fi
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq git; fi
   
+  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq unzip; fi
+  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq libtool; fi
+  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq autoconf; fi
+  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq automake; fi
+  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq curl; fi
+
+  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq readline-devel; fi
+  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq ncurses-devel; fi
+
 before_script:
   - cd 3rd
   - git clone https://github.com/google/glog.git
@@ -35,7 +44,39 @@ before_script:
   - ./configure --prefix=/home/travis/build/pojol/gsf/lib/glog
   - make && make install
 
+  - cd /home/travis/build/pojol/gsf/3rd
+  - git clone git clone https://github.com/nmathewson/Libevent.git
+  - cd Libevent
+  - git checkout release-2.0.22-stable
+  - ./autogen.sh
+  - ./configure --prefix=/home/travis/build/pojol/gsf/lib/libevent
+  - make && make install
+
+  - cd /home/travis/build/pojol/gsf/3rd
+  - git clone https://github.com/google/protobuf.git
+  - cd protobuf
+  - git checkout v3.2.0
+  - ./autogen.sh
+  - ./configure --prefix=/home/travis/build/pojol/gsf/lib/protobuf
+  - make
+  - make install
+
+  - cd /home/travis/build/pojol/gsf/3rd
+  - git clone https://github.com/ThePhD/sol2.git
+  - cd sol2
+  - git checkout v2.16.0
+
+  - cd /home/travis/build/pojol/gsf/3rd
+  - wget -P /home/travis/build/pojol/gsf/3rd/lua53 http://www.lua.org/ftp/lua-5.3.4.tar.gz
+  - cd lua53
+  - tar -xzvf ./lua-5.3.4.tar.gz
+  - cd lua-5.3.4
+  - make linux
+  - mkdir /home/travis/build/pojol/gsf/lib/lua
+  - cp /home/travis/build/pojol/gsf/3rd/lua53/lua-5.3.4/src* /home/travis/build/pojol/gsf/lib/lua
+
 script:
+  - cd /home/travis/build/pojol/gsf
   - cmake --version
   - cmake .
   - make
