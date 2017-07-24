@@ -31,11 +31,11 @@ before_script:
   - git clone https://github.com/google/glog.git
   - cd glog
   - git checkout v0.3.4
-  - ls
   - ./configure --prefix=/home/travis/build/pojol/gsf/lib/glog
   - make && make install
 
 script:
+  - cd /home/travis/build/pojol/gsf
   - cmake --version
   - cmake .
   - make
