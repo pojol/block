@@ -16,8 +16,10 @@ if(UNIX)
 		${GSF_SOURCE_DIR}/lib/libevent/include
 		${GSF_SOURCE_DIR}/
 		${GSF_SOURCE_DIR}/modules
+		${GSF_SOURCE_DIR}/lib/glog/include
 		${GSF_SOURCE_DIR}/lib/lua
 		${GSF_SOURCE_DIR}/3rd/sol2
+		${GSF_SOURCE_DIR}/lib/protobuf/include
 		)
 endif()
 if(APPLE)
@@ -41,6 +43,7 @@ if(UNIX)
 			${GSF_SOURCE_DIR}/lib/lua
 			${GSF_SOURCE_DIR}/lib/libevent/lib
 			${GSF_SOURCE_DIR}/lib/glog/lib
+			${GSF_SOURCE_DIR}/lib/protobuf/lib
 	)
 endif()
 if(APPLE)
@@ -65,7 +68,7 @@ if(MSVC)
         TARGET_LINK_LIBRARIES(test_echo_client libevent.lib libevent_core.lib libevent_extras.lib network.lib gsf_core.lib ws2_32.lib glog.lib log.lib lua53.lib lua_proxy.lib libprotobufd.lib)
 endif()
 if(UNIX)
-        TARGET_LINK_LIBRARIES(test_echo_client  ${CMAKE_THREAD_LIBS_INIT} libnetwork.a libevent.a libevent_core.a libevent_extra.a libtimer.a libgsf_core.a liblog.a libglog.a liblua.a liblua_proxy.a)
+        TARGET_LINK_LIBRARIES(test_echo_client ${CMAKE_THREAD_LIBS_INIT} libgsf_core.a libnetwork.a libevent_core.a libevent_extra.a libtimer.a libglog.a liblog.a liblua.a liblua_proxy.a libprotobuf.a)
 endif()
 if(APPLE)
 
