@@ -32,9 +32,6 @@ install:
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq automake; fi
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq curl; fi
 
-  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq readline-devel; fi
-  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq ncurses-devel; fi
-
 before_script:
   - cd 3rd
   - git clone https://github.com/google/glog.git
