@@ -15,18 +15,27 @@ matrix:
          - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9"
 
 before_install:
-    - eval "${MATRIX_EVAL}"
+  - eval "${MATRIX_EVAL}"
          
 compiler:
-    - g++
+  - g++
 os:
-    - linux
+  - linux
     
 install:
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq cmake; fi
+  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq git; fi
   
-  
+before_script:
+  - cd 3rd
+  - git clone https://github.com/google/glog.git
+  - cd glog
+  - git checkout v0.3.4
+  - ./autogen.sh
+  - ./configure
+  - make && make install
+
 script:
-    - cmake --version
-    - cmake .
-    - make
+  - cmake --version
+  - cmake .
+  - make
