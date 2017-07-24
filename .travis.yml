@@ -31,9 +31,9 @@ before_script:
   - git clone https://github.com/google/glog.git
   - cd glog
   - git checkout v0.3.4
-  - sudo ./autogen.sh
-  - sudo ./configure
-  - sudo make && make install
+  - ls
+  - ./configure --prefix=/usr/local/gsf/glog
+  - make && make install
 
 script:
   - cmake --version
