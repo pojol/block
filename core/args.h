@@ -2,6 +2,7 @@
 #define _GSF_ARGS_HEALDER_
 
 #include <string>
+#include <cstring>
 #include <vector>
 #include <set>
 #include <map>
