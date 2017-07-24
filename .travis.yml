@@ -70,13 +70,12 @@ before_script:
   - cp -r /home/travis/build/pojol/gsf/3rd/hiredis /home/travis/build/pojol/gsf/lib
 
   - cd /home/travis/build/pojol/gsf/3rd
-  - wget -P /home/travis/build/pojol/gsf/3rd/lua53 http://www.lua.org/ftp/lua-5.3.4.tar.gz
-  - cd lua53
+  - wget -P /home/travis/build/pojol/gsf/3rd http://www.lua.org/ftp/lua-5.3.4.tar.gz
   - tar -xzvf ./lua-5.3.4.tar.gz
   - cd lua-5.3.4
   - make linux
   - mkdir /home/travis/build/pojol/gsf/lib/lua
-  - cp -r /home/travis/build/pojol/gsf/3rd/lua53/lua-5.3.4/src /home/travis/build/pojol/gsf/lib/lua
+  - cp -r /home/travis/build/pojol/gsf/3rd/lua53/lua-5.3.4/src/* /home/travis/build/pojol/gsf/lib/lua/
 
 script:
   - cd /home/travis/build/pojol/gsf
