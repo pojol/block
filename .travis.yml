@@ -1,0 +1,18 @@
+sudo: true
+language: cpp
+
+compiler:
+    - g++
+os:
+    - linux
+    
+install:
+  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq cmake; fi
+  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then sudo apt-get install -qq g++-4.9; fi
+  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then export CXX="g++-4.9"; fi
+  
+  
+script:
+    - cmake --version
+    - cmake .
+    - make

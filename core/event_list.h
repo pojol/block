@@ -113,9 +113,10 @@ namespace eid
 		redis_avatar_offline,
 		redis_resume,
 
-		load,
-		update,
-		query_offline,  //不提供在线数据查询操作，去目标服务器查询
+		mysql_connect,
+		mysql_update,
+		mysql_query,
+		mysql_execute,
 	};
 
 	enum sample
