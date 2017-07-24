@@ -41,7 +41,7 @@ before_script:
   - make && make install
 
   - cd /home/travis/build/pojol/gsf/3rd
-  - git clone git clone https://github.com/nmathewson/Libevent.git
+  - git clone https://github.com/nmathewson/Libevent.git
   - cd Libevent
   - git checkout release-2.0.22-stable
   - ./autogen.sh
