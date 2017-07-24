@@ -75,7 +75,7 @@ before_script:
   - cd lua-5.3.4
   - make linux
   - mkdir /home/travis/build/pojol/gsf/lib/lua
-  - cp -r /home/travis/build/pojol/gsf/3rd/lua53/lua-5.3.4/src/* /home/travis/build/pojol/gsf/lib/lua/
+  - cp -r /home/travis/build/pojol/gsf/3rd/lua-5.3.4/src/* /home/travis/build/pojol/gsf/lib/lua/
 
 script:
   - cd /home/travis/build/pojol/gsf
