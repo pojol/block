@@ -32,7 +32,7 @@ os.system('make')
 os.system('make install')
 
 os.chdir(cur_path_)
-'''
+
 #################glog####################################
 print("download glog version 0.3.4")
 
@@ -42,6 +42,9 @@ if os.path.exists(cur_path_ + "/glog"):
 os.system('git clone https://github.com/google/glog.git')
 os.chdir(cur_path_ + "/glog")
 os.system('git checkout v0.3.4')
+os.system('./configure --prefix=/' + root_path + '/lib/glog')
+os.system('make')
+os.system('make install')
 os.chdir(cur_path_)
 
 
@@ -54,6 +57,10 @@ if os.path.exists(cur_path_ + "/protobuf"):
 os.system('git clone https://github.com/google/protobuf.git')
 os.chdir(cur_path_ + '/protobuf')
 os.system('git checkout v3.2.0')
+os.system('./autogen.sh')
+os.system('./configure --prefix=/' + root_path + '/lib/protobuf')
+os.system('make')
+os.system('make install')
 os.chdir(cur_path_)
 
 
@@ -69,73 +76,28 @@ os.system('git checkout v2.16.0')
 os.chdir(cur_path_)
 
 
+#########################hiredis##############################
+print("download hiredis version 0.13.3")
+
+if os.path.exists(cur_path_ + "/hiredis"):
+    rmtree(cur_path_ + "/hiredis")
+os.system('git clone https://github.com/redis/hiredis.git')
+os.chdir(cur_path_ + '/hiredis')
+os.system('git checkout v0.13.3')
+os.system('make')
+os.system('cp -r ' + cur_path_ + '/hiredis' + ' ' + root_path + '/lib/hiredis')
+os.chdir(cur_path_)
+
 ######################lua############################
 print("download lua version 5.3.0")
 
-if os.path.exists(cur_path_ + "/lua"):
-    rmtree(cur_path_ + "/lua")
+if os.path.exists(cur_path_ + "/lua-5.3.4"):
+    rmtree(cur_path_ + "/lua-5.3.4")
 
-os.system('git clone https://github.com/LuaDist/lua.git')
-os.chdir(cur_path_ + '/lua')
-os.system('git checkout 5.3.0')
+os.system('wget -P ' + root_path + '/3rd http://www.lua.org/ftp/lua-5.3.4.tar.gz')
+os.system('tar -xzvf ./lua-5.3.4.tar.gz')
+os.chdir(cur_path_ + '/lua-5.3.4')
+os.system('make linux')
+os.system('mkdir ' + root_path + '/lib/lua')
+os.system('cp -r ' + cur_path_ + '/lua-5.3.4/src/* ' + ' ' + root_path + '/lib/lua/')
 os.chdir(cur_path_)
-
-
-##################pbc################################
-print("download pbc version proto_v3")
-
-if os.path.exists(cur_path_ + '/pbc'):
-    rmtree(cur_path_ + '/pbc')
-
-os.system('git clone https://github.com/owent-contrib/pbc.git')
-os.chdir(cur_path_ + '/pbc')
-os.system('git checkout proto_v3')
-os.chdir(cur_path_)
-'''
-
-
-'''
-  - cd 3rd
-  - git clone https://github.com/google/glog.git
-  - cd glog
-  - git checkout v0.3.4
-  - ./configure --prefix=/home/travis/build/pojol/gsf/lib/glog
-  - make && make install
-
-  - cd /home/travis/build/pojol/gsf/3rd
-  - git clone https://github.com/nmathewson/Libevent.git
-  - cd Libevent
-  - git checkout release-2.0.22-stable
-  - ./autogen.sh
-  - ./configure --prefix=/home/travis/build/pojol/gsf/lib/libevent
-  - make && make install
-
-  - cd /home/travis/build/pojol/gsf/3rd
-  - git clone https://github.com/google/protobuf.git
-  - cd protobuf
-  - git checkout v3.2.0
-  - ./autogen.sh
-  - ./configure --prefix=/home/travis/build/pojol/gsf/lib/protobuf
-  - make
-  - make install
-
-  - cd /home/travis/build/pojol/gsf/3rd
-  - git clone https://github.com/ThePhD/sol2.git
-  - cd sol2
-  - git checkout v2.16.0
-
-  - cd /home/travis/build/pojol/gsf/3rd
-  - git clone https://github.com/redis/hiredis.git
-  - cd hiredis
-  - git checkout v0.13.3
-  - make
-  - cp -r /home/travis/build/pojol/gsf/3rd/hiredis /home/travis/build/pojol/gsf/lib
-
-  - cd /home/travis/build/pojol/gsf/3rd
-  - wget -P /home/travis/build/pojol/gsf/3rd http://www.lua.org/ftp/lua-5.3.4.tar.gz
-  - tar -xzvf ./lua-5.3.4.tar.gz
-  - cd lua-5.3.4
-  - make linux
-  - mkdir /home/travis/build/pojol/gsf/lib/lua
-  - cp -r /home/travis/build/pojol/gsf/3rd/lua-5.3.4/src/* /home/travis/build/pojol/gsf/lib/lua/
-'''
