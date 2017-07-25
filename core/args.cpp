@@ -10,24 +10,27 @@ void gsf::Args::push_impl(const T &val)
 	pos_ += _size;
 }
 
-void gsf::Args::push(const uint8_t &val)
-{
-	push_impl(val);
-}
-
 void gsf::Args::push_block(const char *block, int len)
 {
 	memcpy(write_, block, len);
 	pos_ += len;
 }
 
+void gsf::Args::push(const uint8_t &val)
+{
+	push_impl(at_uint8);
+	push_impl(val);
+}
+
 void gsf::Args::push_ui32(const uint32_t &val)
 {
+	push_impl(at_uint32);
 	push_impl(val);
 }
 
 void gsf::Args::push_i32(const int32_t &val)
 {
+	push_impl(at_int32);
 	push_impl(val);
 }
 
@@ -38,51 +41,61 @@ void gsf::Args::push_string(const std::string &val)
 
 void gsf::Args::push(const int8_t &val)
 {
+	push_impl(at_int8);
 	push_impl(val);
 }
 
 void gsf::Args::push(const uint16_t &val)
 {
+	push_impl(at_uint16);
 	push_impl(val);
 }
 
 void gsf::Args::push(const int16_t &val)
 {
+	push_impl(at_int16);
 	push_impl(val);
 }
 
 void gsf::Args::push(const uint32_t &val)
 {
+	push_impl(at_uint32);
 	push_impl(val);
 }
 
 void gsf::Args::push(const int32_t & val)
 {
+	push_impl(at_int32);
 	push_impl(val);
 }
 
 void gsf::Args::push(const uint64_t &val)
 {
+	push_impl(at_uint64);
 	push_impl(val);
 }
 
 void gsf::Args::push(const int64_t &val)
 {
+	push_impl(at_uint64);
 	push_impl(val);
 }
 
 void gsf::Args::push(const bool &val)
 {
+	push_impl(at_bool);
 	push_impl(val);
 }
 
 void gsf::Args::push(const float &val)
 {
+	push_impl(at_float);
 	push_impl(val);
 }
 
 void gsf::Args::push(const double &val)
 {
+	push_impl(at_double);
 	push_impl(val);
 }
 
@@ -94,6 +107,7 @@ void gsf::Args::push(const std::string &val)
 template <typename T>
 void gsf::Args::push(std::list<T> &list)
 {
+	push_impl(at_list);
 	TypeLen _len = static_cast<TypeLen>(list.size());
 	push_impl(_len);
 
@@ -106,6 +120,7 @@ void gsf::Args::push(std::list<T> &list)
 template <typename T>
 void gsf::Args::push(std::vector<T> &vec)
 {
+	push_impl(at_vector);
 	TypeLen _len = static_cast<TypeLen>(vec.size());
 	push_impl(_len);
 
@@ -118,6 +133,7 @@ void gsf::Args::push(std::vector<T> &vec)
 template <typename Key, typename Value>
 void gsf::Args::push(std::map<Key, Value> &map)
 {
+	push_impl(at_map);
 	TypeLen _len = static_cast<TypeLen>(map.size());
 	push_impl(_len);
 
@@ -130,6 +146,7 @@ void gsf::Args::push(std::map<Key, Value> &map)
 
 void gsf::Args::push(const char * val)
 {
+	push_impl(at_string);
 	TypeLen _len = static_cast<TypeLen>(std::strlen(val));
 
 	push_impl(_len);
@@ -141,8 +158,19 @@ void gsf::Args::push(const char * val)
 }
 
 //////////////////////////////////////////////////////////////////////////
+
+uint8_t gsf::Args::pop_tag()
+{
+	auto _ui8 = *reinterpret_cast<uint8_t*>(read_);
+	read_ += sizeof(uint8_t);
+
+	return _ui8;
+}
+
 uint8_t gsf::Args::pop_ui8()
 {
+	assert(pop_tag() == at_uint8);
+
 	auto _ui8 = *reinterpret_cast<uint8_t*>(read_);
 	read_ += sizeof(uint8_t);
 
@@ -151,6 +179,8 @@ uint8_t gsf::Args::pop_ui8()
 
 int8_t gsf::Args::pop_i8()
 {
+	assert(pop_tag() == at_int8);
+
 	auto _val = *reinterpret_cast<int8_t*>(read_);
 	read_ += sizeof(int8_t);
 
@@ -159,6 +189,8 @@ int8_t gsf::Args::pop_i8()
 
 uint16_t gsf::Args::pop_ui16()
 {
+	assert(pop_tag() == at_uint16);
+
 	auto _val = *reinterpret_cast<uint16_t*>(read_);
 	read_ += sizeof(uint16_t);
 
@@ -167,6 +199,8 @@ uint16_t gsf::Args::pop_ui16()
 
 int16_t gsf::Args::pop_i16()
 {
+	assert(pop_tag() == at_int16);
+
 	auto _val = *reinterpret_cast<int16_t*>(read_);
 	read_ += sizeof(int16_t);
 
@@ -175,6 +209,8 @@ int16_t gsf::Args::pop_i16()
 
 int32_t gsf::Args::pop_i32()
 {
+	assert(pop_tag() == at_int32);
+
 	auto _i32 = *reinterpret_cast<int32_t*>(read_);
 	read_ += sizeof(int32_t);
 
@@ -183,6 +219,8 @@ int32_t gsf::Args::pop_i32()
 
 uint64_t gsf::Args::pop_ui64()
 {
+	assert(pop_tag() == at_uint64);
+
 	auto _val = *reinterpret_cast<uint64_t*>(read_);
 	read_ += sizeof(uint64_t);
 
@@ -191,6 +229,8 @@ uint64_t gsf::Args::pop_ui64()
 
 int64_t gsf::Args::pop_i64()
 {
+	assert(pop_tag() == at_int64);
+
 	auto _val = *reinterpret_cast<int64_t*>(read_);
 	read_ += sizeof(int64_t);
 
@@ -199,6 +239,8 @@ int64_t gsf::Args::pop_i64()
 
 bool gsf::Args::pop_bool()
 {
+	assert(pop_tag() == at_bool);
+
 	auto _val = *reinterpret_cast<bool*>(read_);
 	read_ += sizeof(bool);
 
@@ -207,6 +249,8 @@ bool gsf::Args::pop_bool()
 
 float gsf::Args::pop_float()
 {
+	assert(pop_tag() == at_float);
+
 	auto _val = *reinterpret_cast<float*>(read_);
 	read_ += sizeof(float);
 
@@ -215,6 +259,8 @@ float gsf::Args::pop_float()
 
 double gsf::Args::pop_double()
 {
+	assert(pop_tag() == at_double);
+
 	auto _val = *reinterpret_cast<double*>(read_);
 	read_ += sizeof(double);
 
@@ -223,6 +269,8 @@ double gsf::Args::pop_double()
 
 uint32_t gsf::Args::pop_ui32()
 {
+	assert(pop_tag() == at_uint32);
+
 	auto _ui32 = *reinterpret_cast<uint32_t*>(read_);
 	read_ += sizeof(uint32_t);
 
@@ -314,6 +362,8 @@ gsf::ModuleID gsf::Args::pop_moduleid()
 
 std::string gsf::Args::pop_string()
 {
+	assert(pop_tag() == at_string);
+
 	TypeLen _len = pop_typelen();
 
 	std::string _str;
@@ -326,6 +376,8 @@ std::string gsf::Args::pop_string()
 template<typename T>
 std::list<T> gsf::Args::pop_list()
 {
+	assert(pop_tag() == at_list);
+
 	TypeLen _len = pop_typelen();
 
 	std::list<T> _list;
@@ -342,6 +394,8 @@ std::list<T> gsf::Args::pop_list()
 template <typename T>
 std::vector<T> gsf::Args::pop_vec()
 {
+	assert(pop_tag() == at_vec);
+
 	TypeLen _len = pop_typelen();
 
 	std::vector<T> _vec;
@@ -358,6 +412,8 @@ std::vector<T> gsf::Args::pop_vec()
 template <typename Key, typename Value>
 std::map<Key, Value> gsf::Args::pop_map()
 {
+	assert(pop_tag() == at_map);
+
 	TypeLen _len = pop_typelen();
 
 	std::map<Key, Value> _map;

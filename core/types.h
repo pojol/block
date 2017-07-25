@@ -38,6 +38,23 @@ namespace gsf
 	
 	static const uint32_t MSGLEN_CLIENTSIZE = 1024 * 4;		//
 	static const uint32_t MSGLEN_RPCSIZE = 1024 * 10;		//
+
+	// args type
+	static const uint8_t at_uint8 = 1;
+	static const uint8_t at_int8 = 2;
+	static const uint8_t at_uint16 = 3;
+	static const uint8_t at_int16 = 4;
+	static const uint8_t at_uint32 = 5;
+	static const uint8_t at_int32 = 6;
+	static const uint8_t at_uint64 = 7;
+	static const uint8_t at_int64 = 8;
+	static const uint8_t at_bool = 9;
+	static const uint8_t at_float = 10;
+	static const uint8_t at_double = 11;
+	static const uint8_t at_string = 12;
+	static const uint8_t at_list = 13;
+	static const uint8_t at_vector = 14;
+	static const uint8_t at_map = 15;
 }
 
 #endif

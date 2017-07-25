@@ -20,6 +20,7 @@ namespace gsf
 	struct Args
 	{
 		using TypeLen = uint16_t;
+		using TypeTag = uint8_t;
 
 		Args();
 		Args(int size);
@@ -63,6 +64,7 @@ namespace gsf
 		void push_string(const std::string &val);
 
 		/////////////////////////////
+		uint8_t pop_tag();
 
 		uint8_t pop_ui8();
 		int8_t pop_i8();
@@ -242,6 +244,7 @@ namespace gsf
 	{
 		std::ostringstream oss;
 		pushFmt(oss, std::forward<P>(upvalues)...);
+
 		return std::move(make_args(loglv, title, oss.str()));
 	}
 }
