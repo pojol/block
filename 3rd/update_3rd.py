@@ -20,6 +20,8 @@ def rmtree(top):
 ###################libevent###################################
 print("download Libevent version release-2.0.22-stable")
 
+os.chdir(cur_path_)
+
 if os.path.exists(cur_path_ + "/Libevent"):
     rmtree(cur_path_ + "/Libevent")
 
