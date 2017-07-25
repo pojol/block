@@ -1,7 +1,7 @@
 import os
 import stat
 
-cur_path_ = os.getcwd() + '/gsf'
+cur_path_ = os.getcwd()
 
 def rmtree(top):
     for root, dirs, files in os.walk(top, topdown=False):
@@ -19,6 +19,7 @@ print("download Libevent version release-2.0.22-stable")
 
 root_path = cur_path_[:cur_path_.rfind('/')]
 print("root path ", root_path)
+print("cur path", cur_path_)
 
 if os.path.exists(cur_path_ + "/Libevent"):
     rmtree(cur_path_ + "/Libevent")
