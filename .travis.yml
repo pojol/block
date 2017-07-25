@@ -36,55 +36,12 @@ install:
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq automake; fi
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq curl; fi
   
-  - "pip install -r requirements.txt "
+  - "pip install -r  "
 
 before_script:
-  - cd 3rd
-  - git clone https://github.com/google/glog.git
-  - cd glog
-  - git checkout v0.3.4
-  - ./configure --prefix=/home/travis/build/pojol/gsf/lib/glog
-  - make && make install
-
-  - cd /home/travis/build/pojol/gsf/3rd
-  - git clone https://github.com/nmathewson/Libevent.git
-  - cd Libevent
-  - git checkout release-2.0.22-stable
-  - ./autogen.sh
-  - ./configure --prefix=/home/travis/build/pojol/gsf/lib/libevent
-  - make && make install
-
-  - cd /home/travis/build/pojol/gsf/3rd
-  - git clone https://github.com/google/protobuf.git
-  - cd protobuf
-  - git checkout v3.2.0
-  - ./autogen.sh
-  - ./configure --prefix=/home/travis/build/pojol/gsf/lib/protobuf
-  - make
-  - make install
-
-  - cd /home/travis/build/pojol/gsf/3rd
-  - git clone https://github.com/ThePhD/sol2.git
-  - cd sol2
-  - git checkout v2.16.0
-
-  - cd /home/travis/build/pojol/gsf/3rd
-  - git clone https://github.com/redis/hiredis.git
-  - cd hiredis
-  - git checkout v0.13.3
-  - make
-  - cp -r /home/travis/build/pojol/gsf/3rd/hiredis /home/travis/build/pojol/gsf/lib
-
-  - cd /home/travis/build/pojol/gsf/3rd
-  - wget -P /home/travis/build/pojol/gsf/3rd http://www.lua.org/ftp/lua-5.3.4.tar.gz
-  - tar -xzvf ./lua-5.3.4.tar.gz
-  - cd lua-5.3.4
-  - make linux
-  - mkdir /home/travis/build/pojol/gsf/lib/lua
-  - cp -r /home/travis/build/pojol/gsf/3rd/lua-5.3.4/src/* /home/travis/build/pojol/gsf/lib/lua/
+  - python 3rd/update_3rd.py
 
 script:
-  - cd /home/travis/build/pojol/gsf
   - cmake --version
   - cmake .
   - make
