@@ -35,8 +35,6 @@ install:
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq autoconf; fi
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq automake; fi
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq curl; fi
-  
-  - "pip install -r  "
 
 before_script:
   - python 3rd/update_3rd.py
