@@ -1,7 +1,10 @@
 import os
 import stat
 
-cur_path_ = os.getcwd()
+cur_path_ = os.getcwd() + '/3rd'
+root_path = cur_path_[:cur_path_.rfind('/')]
+print("root path ", root_path)
+print("cur path", cur_path_)
 
 def rmtree(top):
     for root, dirs, files in os.walk(top, topdown=False):
@@ -16,10 +19,6 @@ def rmtree(top):
 
 ###################libevent###################################
 print("download Libevent version release-2.0.22-stable")
-
-root_path = cur_path_[:cur_path_.rfind('/')]
-print("root path ", root_path)
-print("cur path", cur_path_)
 
 if os.path.exists(cur_path_ + "/Libevent"):
     rmtree(cur_path_ + "/Libevent")
