@@ -102,4 +102,5 @@ os.chdir(cur_path_ + '/lua-5.3.4')
 os.system('make linux')
 os.system('mkdir ' + root_path + '/lib/lua')
 os.system('cp -r ' + cur_path_ + '/lua-5.3.4/src/* ' + ' ' + root_path + '/lib/lua/')
-os.chdir(cur_path_)
+
+os.chdir(root_path)
