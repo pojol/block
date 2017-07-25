@@ -38,6 +38,8 @@ install:
 
 before_script:
   - python 3rd/update_3rd.py
+  - export CC=/usr/local/bin/gcc 
+  - export CXX=/usr/local/bin/g++
 
 script:
   - cmake --version
