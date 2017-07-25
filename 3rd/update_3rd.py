@@ -1,7 +1,7 @@
 import os
 import stat
 
-cur_path_ = os.getcwd()
+cur_path_ = os.getcwd() + '/gsf'
 
 def rmtree(top):
     for root, dirs, files in os.walk(top, topdown=False):
