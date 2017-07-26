@@ -14,6 +14,7 @@ if(UNIX)
 			${GSF_SOURCE_DIR}/lib/libevent/include
 			${GSF_SOURCE_DIR}/
 			${GSF_SOURCE_DIR}/modules
+			${GSF_SOURCE_DIR}/lib/protobuf/include
 		)
 endif()
 if(APPLE)
@@ -36,6 +37,7 @@ if(UNIX)
 			${GSF_SOURCE_DIR}/lib
 			${GSF_SOURCE_DIR}/lib/libevent/lib
 			${GSF_SOURCE_DIR}/lib/glog/lib
+			${GSF_SOURCE_DIR}/lib/protobuf/lib
 	)
 endif()
 if(APPLE)

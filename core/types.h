@@ -30,7 +30,7 @@ namespace gsf
 	typedef int32_t MsgHeadLen;
 	static const int32_t MsgHeadLenNil = 0;
 
-	static const uint16_t ARGS_MAX_SIZE = 1024;				// ÓÃÓÚÉè¶¨ args_poolÖÐ ×Ô¶¯·ÖÅäµÄargsÈÝÁ¿¡£
+	static const uint16_t ARGS_MAX_SIZE = 1024;				// ï¿½ï¿½ï¿½ï¿½ï¿½è¶¨ args_poolï¿½ï¿½ ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½argsï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 	static const uint32_t NETWORK_CONNECT_MAX = 65534;		//
 	static const uint32_t SESSION_READ_BUFFER_SIZE = 0;		//
@@ -53,7 +53,7 @@ namespace gsf
 	static const uint8_t at_double = 11;
 	static const uint8_t at_string = 12;
 	static const uint8_t at_list = 13;
-	static const uint8_t at_vector = 14;
+	static const uint8_t at_vec = 14;
 	static const uint8_t at_map = 15;
 }
 

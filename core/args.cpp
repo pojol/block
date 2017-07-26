@@ -120,7 +120,7 @@ void gsf::Args::push(std::list<T> &list)
 template <typename T>
 void gsf::Args::push(std::vector<T> &vec)
 {
-	push_impl(at_vector);
+	push_impl(at_vec);
 	TypeLen _len = static_cast<TypeLen>(vec.size());
 	push_impl(_len);
 
