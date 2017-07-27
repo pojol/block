@@ -35,6 +35,12 @@
 # build & install 
 - supported compilers , gcc4.9+, vs2015+
 - depend cmake2.8+ 
+- build (linux
+    - python 3rd/update_3rd.py
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make
 
 
 ### License
