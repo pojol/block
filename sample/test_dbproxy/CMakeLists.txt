@@ -15,6 +15,7 @@ if(UNIX)
 			${GSF_SOURCE_DIR}/
 			${GSF_SOURCE_DIR}/modules
 			${GSF_SOURCE_DIR}/lib/protobuf/include
+			${GSF_SOURCE_DIR}/lib/glog/include	
 		)
 endif()
 if(APPLE)
@@ -63,12 +64,8 @@ if(MSVC)
 endif()
 if(UNIX)
 
-	if(THREADS_HAVE_PTHREAD_ARG)
-		target_compile_options(test_dbproxy PUBLIC "-pthread")
-	endif()
-	if(CMAKE_THREAD_LIBS_INIT)
+		set(CMAKE_EXE_LINKER_FLAGS "-pthread")
 		target_link_libraries(test_dbproxy ${CMAKE_THREAD_LIBS_INIT} libgsf_core.a libnetwork.a libevent.a libevent_core.a libevent_extra.a libtimer.a libprotobuf.a liblog.a libglog.a)
-	endif()
 
 endif()
 if(APPLE)

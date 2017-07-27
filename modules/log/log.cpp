@@ -94,6 +94,7 @@ void gsf::modules::LogModule::log_print(const gsf::ArgsPtr &args, gsf::CallbackF
 {
 	auto _lv = args->pop_ui32();
 	auto _title = args->pop_string();
+
 	auto _context = args->pop_string();
 
 	switch (_lv)

@@ -86,7 +86,7 @@ void gsf::modules::LuaProxyModule::execute()
 			std::string _err = e.what() + '\n';
 			_err += Traceback(_lua->state_.lua_state());
 
-			//dispatch(log_m_, eid::log::print, gsf::make_log(gsf::LogErr, "LuaProxy", _err));
+			dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
 		}
 
 		if (_lua->app_state_ == LuaAppState::AFTER_SHUT) {
@@ -141,7 +141,7 @@ void gsf::modules::LuaProxyModule::ldispatch(uint32_t lua_id, uint32_t target, u
 				_err += Traceback(lua->state_.lua_state());
 			}
 
-			//dispatch(log_m_, eid::log::print, gsf::make_log(gsf::LogErr, "LuaProxy", _err));
+			dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
 		}
 	});
 }
@@ -175,7 +175,7 @@ void gsf::modules::LuaProxyModule::llisten(uint32_t lua_id, uint32_t self, uint3
 				_err += Traceback(lua->state_.lua_state());
 			}
 
-			//dispatch(log_m_, eid::log::print, gsf::make_log(gsf::LogErr, "LuaProxy", _err));
+			dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
 		}
 	});
 }
@@ -207,7 +207,7 @@ void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_na
 			std::string _err = Traceback(_lua->state_.lua_state()) + " build err " 
 				+ _path + '\t' + lua_tostring(_lua->state_.lua_state(), _ret.stack_index()) + "\n";
 
-			//dispatch(log_m_, eid::log::print, gsf::make_log(gsf::LogErr, "LuaProxy", _err));
+			dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
 			return;
 		}
 	}
@@ -216,7 +216,7 @@ void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_na
 		std::string _err = e.what() + '\n';
 		_err += Traceback(_lua->state_.lua_state());
 
-		//dispatch(log_m_, eid::log::print, gsf::make_log(gsf::LogErr, "LuaProxy", _err));
+		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
 	}
 
 	_lua->state_.new_usertype<gsf::Args>("Args"
@@ -259,7 +259,7 @@ void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_na
 		std::string _err = e.what() + '\n';
 		_err += Traceback(_lua->state_.lua_state());
 
-		//dispatch(log_m_, eid::log::print, gsf::make_log(gsf::LogErr, "LuaProxy", _err));
+		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
 	}
 
 	lua_map_.push_back(std::make_pair(module_id, _lua));

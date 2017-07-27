@@ -40,7 +40,7 @@ void gsf::modules::NodeModule::before_init()
 	dispatch(eid::base::app_id, eid::get_module, gsf::make_args("TimerModule"), [&](const gsf::ArgsPtr &args) {
 		timer_m_ = args->pop_i32();
 		if (timer_m_ == gsf::ModuleNil) {
-			dispatch(log_m_, eid::log::print, gsf::make_log(gsf::LogErr, "lack of dependency on TimerModule!"));
+			dispatch(log_m_, eid::log::print, gsf::log_error("NodeModule", "lack of dependency on TimerModule!"));
 		}
 	});
 
@@ -102,7 +102,7 @@ void gsf::modules::NodeModule::event_rpc(const std::string &module, uint32_t eve
 {
 	auto _itr = callback_map_.find(event);
 	if (_itr != callback_map_.end()) {
-		dispatch(log_m_, eid::log::print, gsf::make_log(gsf::LogWarning, "repeat rpc event!"));
+		dispatch(log_m_, eid::log::print, gsf::log_warring("NodeModule", "repeat rpc event!"));
 		return;
 	}
 
@@ -165,7 +165,7 @@ void gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &args, gsf::
 		listen(this, eid::network::new_connect, [&](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
 			connector_fd_ = args->pop_fd();
 
-			dispatch(log_m_, eid::log::print, gsf::make_log(gsf::LogInfo, "distributed nod connect 2 root!"));
+			dispatch(log_m_, eid::log::print, gsf::log_info("NodeModule", "distributed nod connect 2 root!"));
 			service_ = true;
 
 			auto _args = gsf::ArgsPool::get_ref().get();
@@ -191,7 +191,7 @@ void gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &args, gsf::
 
 			if (_module_id == connector_m_) {
 
-				dispatch(log_m_, eid::log::print, gsf::make_log(gsf::LogInfo, "distributed nod connector init success!"));
+				dispatch(log_m_, eid::log::print, gsf::log_info("NodeModule", "distributed nod connector init success!"));
 
 				dispatch(connector_m_, eid::network::make_connector, gsf::make_args(get_module_id(), root_ip_, root_port_));
 			}

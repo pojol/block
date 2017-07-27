@@ -74,12 +74,12 @@ public:
 		//test
 		listen(this, eid::network::new_connect
 			, [=](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
-			dispatch(log_m_, eid::log::print, gsf::make_log(gsf::LogInfo, "test", "new connect fd = ", args->pop_fd()));
+			dispatch(log_m_, eid::log::print, gsf::log_info("test", "new connect fd = ", args->pop_fd()));
 		});
 
 		listen(this, eid::network::dis_connect
 			, [=](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
-			dispatch(log_m_, eid::log::print, gsf::make_log(gsf::LogInfo, "test", "dis connect fd = ", args->pop_fd()));
+			dispatch(log_m_, eid::log::print, gsf::log_info("test", "dis connect fd = ", args->pop_fd()));
 		});
 
 		dispatch(client2login_, eid::network::make_acceptor, gsf::make_args(get_module_id(), "127.0.0.1", 8001));

@@ -11,11 +11,13 @@ if(WIN32)
 endif()
 if(UNIX)
 	INCLUDE_DIRECTORIES(
-			${GSF_SOURCE_DIR}/
-			${GSF_SOURCE_DIR}/modules
-			${GSF_SOURCE_DIR}/lib/linux/libevent/include
-			${GSF_SOURCE_DIR}/3rd/lua53/lua-5.3.4/src
-			${GSF_SOURCE_DIR}/3rd/sol2
+		${GSF_SOURCE_DIR}/lib/libevent/include
+		${GSF_SOURCE_DIR}/
+		${GSF_SOURCE_DIR}/modules
+		${GSF_SOURCE_DIR}/lib/glog/include
+		${GSF_SOURCE_DIR}/lib/lua
+		${GSF_SOURCE_DIR}/3rd/sol2
+		${GSF_SOURCE_DIR}/lib/protobuf/include
 		)
 endif()
 if(APPLE)
@@ -35,9 +37,11 @@ endif()
 if(UNIX)
 	find_package(Threads)
 	LINK_DIRECTORIES(
-			${GSF_SOURCE_DIR}/lib/linux
-			${GSF_SOURCE_DIR}/lib/linux/libevent/lib
-			${GSF_SOURCE_DIR}/lib/linux/glog/lib
+			${GSF_SOURCE_DIR}/lib
+			${GSF_SOURCE_DIR}/lib/lua
+			${GSF_SOURCE_DIR}/lib/libevent/lib
+			${GSF_SOURCE_DIR}/lib/glog/lib
+			${GSF_SOURCE_DIR}/lib/protobuf/lib
 	)
 endif()
 if(APPLE)
@@ -62,7 +66,7 @@ if(MSVC)
         TARGET_LINK_LIBRARIES(test_echo_server libevent.lib libevent_core.lib libevent_extras.lib network.lib gsf_core.lib ws2_32.lib libprotocd.lib libprotobufd.lib glog.lib log.lib)
 endif()
 if(UNIX)
-		TARGET_LINK_LIBRARIES(test_echo_server  ${CMAKE_THREAD_LIBS_INIT} libnetwork.a libevent.a libevent_core.a libevent_extra.a libtimer.a libgsf_core.a liblog.a libglog.a liblua_proxy.a)
+		TARGET_LINK_LIBRARIES(test_echo_server ${CMAKE_THREAD_LIBS_INIT} libgsf_core.a libnetwork.a libevent_core.a libevent_extra.a libtimer.a liblog.a libglog.a liblua_proxy.a liblua.a libprotobuf.a)
 endif()
 if(APPLE)
 
