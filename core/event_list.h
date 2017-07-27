@@ -42,7 +42,6 @@ namespace eid
 		make_acceptor = 1000,
 		make_connector,
 		kick_connect,
-		connector_init,
 		send,
 		recv,
 		//! result code

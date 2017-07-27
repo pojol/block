@@ -64,7 +64,7 @@ if(MSVC)
 endif()
 if(UNIX)
 
-		set(CMAKE_EXE_LINKER_FLAGS "-pthread")
+		set(CMAKE_EXE_LINKER_FLAGS "-lpthread")
 		target_link_libraries(test_dbproxy ${CMAKE_THREAD_LIBS_INIT} libgsf_core.a libnetwork.a libevent.a libevent_core.a libevent_extra.a libtimer.a libprotobuf.a liblog.a libglog.a)
 
 endif()

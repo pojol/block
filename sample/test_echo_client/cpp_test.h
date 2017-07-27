@@ -43,15 +43,18 @@ public:
 		dispatch(eid::app_id, eid::new_dynamic_module, gsf::make_args("ConnectorModule"), [&](const gsf::ArgsPtr &args) {
 			connector_id_ = args->pop_i32();
 
-			listen(connector_id_, eid::network::connector_init, std::bind(&Client::create_connector_succ, this, std::placeholders::_1));
+			listen(connector_id_, eid::base::module_init_succ, std::bind(&Client::create_connector_succ, this, std::placeholders::_1));
 		});
 
 	}
 
 	void create_connector_succ(const gsf::ArgsPtr &args)
 	{
+		auto _module_id = args->pop_moduleid();
+		if (_module_id != connector_id_) { return; }
+
 		listen(this, eid::network::new_connect, [&](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
-			fd_ = args->pop_i32();
+			fd_ = args->pop_fd();
 
 			tutorial::Person _p;
 			_p.set_name("jack");
@@ -60,7 +63,7 @@ public:
 			std::string _msg = "";
 
 			if (_p.SerializeToString(&_msg)) {
-				dispatch(connector_id_, eid::network::send, gsf::make_args(fd_, 1001, _msg));
+				dispatch(connector_id_, eid::network::send, gsf::make_args(1001, _msg));
 			}
 
 			// 分布式rpc调用接口预定义
@@ -70,8 +73,8 @@ public:
 		
 		listen(this, eid::network::recv, [&](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
 			
-			auto _fd = args->pop_i32();
-			auto _msgid = args->pop_ui16();
+			auto _fd = args->pop_fd();
+			auto _msgid = args->pop_msgid();
 			if (_msgid == 1002) {
 					
 				std::cout << "recv msg = 1002" << std::endl;
