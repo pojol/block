@@ -62,7 +62,7 @@ if(MSVC)
         TARGET_LINK_LIBRARIES(test_dbproxy libevent.lib libevent_core.lib libevent_extras.lib network.lib gsf_core.lib ws2_32.lib libprotocd.lib libprotobufd.lib glog.lib log.lib)
 endif()
 if(UNIX)
-	set(CMAKE_EXE_LINKER_FLAGS "-ldl")
+	set(CMAKE_EXE_LINKER_FLAGS "-dl")
 
 	if ("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" LESS 3.1)
 		find_package(Threads)
