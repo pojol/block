@@ -69,9 +69,10 @@ if(UNIX)
 		set(CMAKE_EXE_LINKER_FLAGS "-ldl")
 	else()
 		set(THREADS_PREFER_PTHREAD_FLAG ON)
+		set(CMAKE_EXE_LINKER_FLAGS "-dl")
+
 		find_package(Threads REQUIRED)
 		target_link_libraries(test_dbproxy Threads::Threads)
-		set(CMAKE_EXE_LINKER_FLAGS "-dl")
 	endif()
 	
 	target_link_libraries(test_dbproxy libgsf_core.a libnetwork.a libevent.a libevent_core.a libevent_extra.a libtimer.a libprotobuf.a liblog.a libglog.a)

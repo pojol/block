@@ -67,9 +67,10 @@ elseif(UNIX)
 		set(CMAKE_EXE_LINKER_FLAGS "-ldl")
 	else()
 		set(THREADS_PREFER_PTHREAD_FLAG ON)
+		set(CMAKE_EXE_LINKER_FLAGS "-dl")
+
 		find_package(Threads REQUIRED)
 		target_link_libraries(test_timer Threads::Threads)
-		set(CMAKE_EXE_LINKER_FLAGS "-dl")
 	endif()
 
     TARGET_LINK_LIBRARIES(test_timer liblog.a libglog.a libgsf_core.a liblua_proxy.a liblua.a libtimer.a)

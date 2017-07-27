@@ -72,9 +72,10 @@ if(UNIX)
 		set(CMAKE_EXE_LINKER_FLAGS "-ldl")
 	else()
 		set(THREADS_PREFER_PTHREAD_FLAG ON)
+		set(CMAKE_EXE_LINKER_FLAGS "-dl")
+
 		find_package(Threads REQUIRED)
 		target_link_libraries(test_echo_server Threads::Threads)
-		set(CMAKE_EXE_LINKER_FLAGS "-dl")
 	endif()
 
 	TARGET_LINK_LIBRARIES(test_echo_server libgsf_core.a libnetwork.a libevent_core.a libevent_extra.a libtimer.a liblog.a libglog.a liblua_proxy.a liblua.a libprotobuf.a)
