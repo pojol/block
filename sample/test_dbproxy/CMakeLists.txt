@@ -64,8 +64,16 @@ if(MSVC)
 endif()
 if(UNIX)
 
-		set(CMAKE_EXE_LINKER_FLAGS -pthread)
-		target_link_libraries(test_dbproxy ${CMAKE_THREAD_LIBS_INIT} libgsf_core.a libnetwork.a libevent.a libevent_core.a libevent_extra.a libtimer.a libprotobuf.a liblog.a libglog.a)
+	if(THREADS_HAVE_PTHREAD_ARG)  
+ 		set_property(TARGET test_dbproxy PROPERTY COMPILE_OPTIONS "-pthread")  
+  		set_property(TARGET test_dbproxy PROPERTY INTERFACE_COMPILE_OPTIONS "-pthread")  
+	endif() 
+
+	if(CMAKE_THREAD_LIBS_INIT)  
+	target_link_libraries(test_dbproxy "${CMAKE_THREAD_LIBS_INIT}")  
+	endif()  
+
+	target_link_libraries(test_dbproxy libgsf_core.a libnetwork.a libevent.a libevent_core.a libevent_extra.a libtimer.a libprotobuf.a liblog.a libglog.a)
 
 endif()
 if(APPLE)
