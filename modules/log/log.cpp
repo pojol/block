@@ -92,7 +92,7 @@ void gsf::modules::LogModule::init_impl(const std::string &exe_name)
 
 void gsf::modules::LogModule::log_print(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
 {
-	auto _lv = args->pop_ui32();
+	auto _lv = args->pop_ui16();
 	auto _title = args->pop_string();
 
 	auto _context = args->pop_string();
