@@ -75,7 +75,8 @@ if(UNIX)
 	else()
 		set(THREADS_PREFER_PTHREAD_FLAG ON)
 		set(CMAKE_EXE_LINKER_FLAGS "-dl")
-		
+		message(STATUS "link -dl")
+
 		find_package(Threads REQUIRED)
 		target_link_libraries(test_echo_client Threads::Threads)
 	endif()
