@@ -71,7 +71,7 @@ if(UNIX)
 	if ("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" LESS 3.1)
 		target_link_libraries(test_echo_client ${CMAKE_THREAD_LIBS_INIT})
 	else()
-		target_link_libraries(test_echo_client Threads::Threads)
+		target_link_libraries(test_echo_client Threads::Threads -ldl)
 	endif()
 
     TARGET_LINK_LIBRARIES(test_echo_client libgsf_core.a libnetwork.a libevent_core.a libevent_extra.a libtimer.a liblog.a libglog.a liblua_proxy.a liblua.a libprotobuf.a)
