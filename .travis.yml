@@ -39,3 +39,4 @@ script:
   - cmake --version
   - cmake .
   - make
+  
