@@ -25,6 +25,7 @@ os:
 install:
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq cmake; fi
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq git; fi
+  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq libc6-dev; fi
   
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq unzip; fi
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq libtool; fi
