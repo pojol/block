@@ -74,7 +74,7 @@ if(UNIX)
 		target_link_libraries(test_echo_client Threads::Threads)
 	endif()
 
-    TARGET_LINK_LIBRARIES(test_echo_client libgsf_core.a libnetwork.a libevent_core.a libevent_extra.a libtimer.a liblog.a libglog.a liblua_proxy.a liblua.a libprotobuf.a)
+    TARGET_LINK_LIBRARIES(test_echo_client libgsf_core.a libnetwork.a libevent_core.a libevent_extra.a libtimer.a liblog.a libglog.a liblua_proxy.a liblua.a libprotobuf.a -ldl)
 endif()
 if(APPLE)
 

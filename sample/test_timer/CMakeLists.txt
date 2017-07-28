@@ -67,6 +67,6 @@ elseif(UNIX)
 		target_link_libraries(test_timer Threads::Threads)
 	endif()
 
-    TARGET_LINK_LIBRARIES(test_timer liblog.a libglog.a libgsf_core.a liblua_proxy.a liblua.a libtimer.a)
+    TARGET_LINK_LIBRARIES(test_timer liblog.a libglog.a libgsf_core.a liblua_proxy.a liblua.a libtimer.a -ldl)
 elseif(APPLE)
 endif()
