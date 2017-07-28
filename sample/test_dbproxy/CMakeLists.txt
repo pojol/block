@@ -64,14 +64,8 @@ endif()
 if(UNIX)
 	
 	if ("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" LESS 3.1)
-		find_package(Threads)
 		target_link_libraries(test_dbproxy ${CMAKE_THREAD_LIBS_INIT})
-		set(CMAKE_EXE_LINKER_FLAGS "-ldl")
 	else()
-		set(THREADS_PREFER_PTHREAD_FLAG ON)
-		set(CMAKE_EXE_LINKER_FLAGS "-dl")
-
-		find_package(Threads REQUIRED)
 		target_link_libraries(test_dbproxy Threads::Threads)
 	endif()
 	

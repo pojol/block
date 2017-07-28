@@ -1,3 +1,13 @@
+if ("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" LESS 3.1)
+    set(CMAKE_EXE_LINKER_FLAGS "-ldl")
+    find_package(Threads)
+else()
+    set(CMAKE_EXE_LINKER_FLAGS "-dl")
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+    find_package(Threads REQUIRED)
+endif()
+
+
 ADD_SUBDIRECTORY(test_dbproxy)
 ADD_SUBDIRECTORY(test_echo_client)
 ADD_SUBDIRECTORY(test_echo_server)
