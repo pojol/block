@@ -10,9 +10,9 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-5
+            - g++-4.9
       env:
-         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+         - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9"
 
 before_install:
   - eval "${MATRIX_EVAL}"
@@ -25,7 +25,6 @@ os:
 install:
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq cmake; fi
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq git; fi
-  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq libc6-dev; fi
   
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq unzip; fi
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq libtool; fi
