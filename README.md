@@ -1,5 +1,5 @@
 # GSF
-![](https://travis-ci.org/pojol/gsf.svg?branch=master)
+[![Build Status](https://travis-ci.org/pojol/gsf.svg?branch=master)](https://travis-ci.org/pojol/gsf)  
 
 ## feature
 - 组件结构，模块访问隔离
