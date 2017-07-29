@@ -59,6 +59,21 @@ namespace gsf
 			return (sizeof(MsgHeadLen) + sizeof(MsgID));
 		}
 
+		bool check()
+		{
+			MsgHeadLen _len = *(MsgHeadLen*)(void*)(buf_);
+			if (_len != size_) {
+				return false;
+			}
+
+			MsgID _id = get_msg_id();
+			if (_id <= 0 || _id > MsgMax) {
+				return false;
+			}
+
+			return true;
+		}
+
 		~Block()
 		{
 			free(buf_);

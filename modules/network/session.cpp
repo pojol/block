@@ -107,7 +107,7 @@ void gsf::network::Session::read(::bufferevent *bev)
 		while (_buf_len >= _msg_size)
 		{
 			auto _block = std::make_shared<Block>(_msg_size);
-			evbuffer_remove(in_buf_, _block->buf_, _msg_size);	//! �������İ�copy��msg_block.
+			evbuffer_remove(in_buf_, _block->buf_, _msg_size);	//! 将数据流拷贝到msg block中
 
 			MsgID _msg_id = _block->get_msg_id();
 
@@ -119,6 +119,10 @@ void gsf::network::Session::read(::bufferevent *bev)
 				dispatch(module_id_, eid::network::recv, args_ptr);
 			}
 			else {
+				if (!_block->check()) { //! 先这样检查下block中的内容是否合法，后面肯定不能这样明文传输
+					break;
+				}
+
 				std::string _str(_block->buf_ + _block->get_head_size(), _block->get_body_size());	//tmp
 				dispatch(module_id_, eid::network::recv, gsf::make_args(fd_, _msg_id, std::move(_str)));
 			}
