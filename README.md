@@ -33,7 +33,7 @@
 - redis_cache_proxy ---------------------- redis 3.0+
 
 
-# build & install 
+## build & install 
 - supported compilers , gcc4.9+, vs2015+
 - depend cmake2.8+ 
 - build (linux
@@ -43,8 +43,10 @@
     - cmake ..
     - make
 
-
-### License
+## sample
+- https://github.com/pojol/gsf_sample
+	
+## License
 	MIT
 	Copyright (c) 2016 pojol
 	
