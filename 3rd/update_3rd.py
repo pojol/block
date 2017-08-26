@@ -19,7 +19,7 @@ def rmtree(top):
 
 ###################libevent###################################
 print("download Libevent version release-2.0.22-stable")
-'''
+
 os.chdir(cur_path_)
 
 if os.path.exists(cur_path_ + "/Libevent"):
@@ -32,7 +32,7 @@ os.system('./autogen.sh')
 os.system('./configure --prefix=/' + root_path + '/lib/libevent')
 os.system('make')
 os.system('make install')
-'''
+
 os.chdir(cur_path_)
 
 #################glog####################################
