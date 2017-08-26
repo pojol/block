@@ -1,6 +1,7 @@
 #include "timer.h"
 
 #include <assert.h>
+#include <fmt/format.h>
 
 gsf::modules::TimerModule::~TimerModule()
 {
@@ -15,7 +16,7 @@ gsf::modules::TimerModule::TimerModule()
 void gsf::modules::TimerModule::before_init()
 {
 	dispatch(eid::app_id, eid::get_module, gsf::make_args("LogModule"), [&](const gsf::ArgsPtr &args) {
-		//log_m_ = args->pop_i32();
+		log_m_ = args->pop_i32();
 	});
 }
 
@@ -145,5 +146,8 @@ void gsf::modules::TimerModule::remove_timer(const gsf::ArgsPtr &args, gsf::Call
 		map_.erase(itr);
 
 		callback(gsf::make_args(1));
+	}
+	else {
+		dispatch(log_m_, eid::log::print, gsf::log_warring("TimerModule", fmt::format("remove timer not find {}", _timer_id)));
 	}
 }

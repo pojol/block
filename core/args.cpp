@@ -472,4 +472,17 @@ void gsf::Args::flush()
 
 //////////////////////////////////////////////////////////////////////////
 
+gsf::ArgsPtr gsf::log_info(const std::string &module, const std::string &content)
+{
+	return std::move(make_args(gsf::LogInfo, module, content));
+}
 
+gsf::ArgsPtr gsf::log_warring(const std::string &module, const std::string &content)
+{
+	return std::move(make_args(gsf::LogWarning, module, content));
+}
+
+gsf::ArgsPtr gsf::log_error(const std::string &module, const std::string &content)
+{
+	return std::move(make_args(gsf::LogErr, module, content));
+}

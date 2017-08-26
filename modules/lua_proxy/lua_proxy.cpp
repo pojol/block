@@ -3,6 +3,8 @@
 
 #include <algorithm>
 
+#include <fmt/format.h>
+
 //int luaopen_protobuf_c(lua_State *L);
 
 std::string Traceback(lua_State * _state)

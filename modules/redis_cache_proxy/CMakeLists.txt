@@ -19,6 +19,7 @@ if(UNIX)
             ${GSF_SOURCE_DIR}/
             ${GSF_SOURCE_DIR}/lib/hiredis
             ${GSF_SOURCE_DIR}/lib/glog/include
+            ${GSF_SOURCE_DIR}/lib/fmt/include
     )
 
     #引用库目录
@@ -46,7 +47,7 @@ if(MSVC)
     
     SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/win)
 elseif(UNIX)
-	SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/linux)
+	SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/)
 elseif(APPLE)
 endif()
 

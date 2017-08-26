@@ -227,47 +227,11 @@ namespace gsf
 		return args;
 	}
 
-	template <typename P0, typename ...P>
-	static void pushFmt(std::ostringstream &oss, P0 &&p0, P &&... p)
-	{
-		oss << std::forward<P0>(p0);
-		pushFmt(oss, std::forward<P>(p)...);
-	}
+	ArgsPtr log_info(const std::string &module, const std::string &content);
 
-	static void pushFmt(std::ostringstream &)
-	{
-		//template terminate
-	}
+	ArgsPtr log_warring(const std::string &module, const std::string &content);
 
-	template <typename ...P>
-	ArgsPtr log_info(P && ...upvalues)
-	{
-		//std::ostringstream oss;
-		//pushFmt(oss, std::forward<P>(upvalues)...);
-
-		//return std::move(make_args(gsf::LogInfo, oss.str()));
-		return std::move(make_args(gsf::LogInfo, "", ""));
-	}
-
-	template <typename ...P>
-	ArgsPtr log_warring(P && ...upvalues)
-	{
-		//std::ostringstream oss;
-		//pushFmt(oss, std::forward<P>(upvalues)...);
-
-		//return std::move(make_args(gsf::LogWarning, oss.str()));
-		return std::move(make_args(gsf::LogInfo, "", ""));
-	}
-
-	template <typename ...P>
-	ArgsPtr log_error(P && ...upvalues)
-	{
-		//std::ostringstream oss;
-		//pushFmt(oss, std::forward<P>(upvalues)...);
-
-		//return std::move(make_args(gsf::LogErr, oss.str()));
-		return std::move(make_args(gsf::LogInfo, "", ""));
-	}
+	ArgsPtr log_error(const std::string &module, const std::string &content);
 }
 
 #endif

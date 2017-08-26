@@ -4,6 +4,8 @@
 #include <winsock.h>
 #endif // WIN32
 
+#include <fmt/format.h>
+
 void gsf::modules::RedisCacheProxyModule::before_init()
 {
 	using namespace std::placeholders;
@@ -83,7 +85,7 @@ void gsf::modules::RedisCacheProxyModule::event_redis_avatar_offline(const gsf::
 	assert(_replay_ptr && _replay_ptr->type != REDIS_REPLY_ERROR);
 	
 	if (_replay_ptr->type == REDIS_REPLY_ERROR) {
-		dispatch(log_m_, eid::log::print, gsf::log_error("RedisCacheProxyModule", " event_redis_avatar_offline", _replay_ptr->str));
+		dispatch(log_m_, eid::log::print, gsf::log_error("RedisCacheProxyModule", fmt::format("event_redis_avatar_offline {}", _replay_ptr->str)));
 	}
 
 	freeReplyObject(_replay_ptr);
@@ -204,7 +206,7 @@ void gsf::modules::RedisCacheProxyModule::rewrite_handler()
 	assert(_replay_ptr && _replay_ptr->type != REDIS_REPLY_ERROR);
 
 	if (_replay_ptr->type == REDIS_REPLY_ERROR) {
-		dispatch(log_m_, eid::log::print, gsf::log_error("RedisCacheProxyModule", "rewrite_handler ", _replay_ptr->str));
+		dispatch(log_m_, eid::log::print, gsf::log_error("RedisCacheProxyModule", fmt::format("rewrite_handler {}", _replay_ptr->str)));
 	}
 
 	freeReplyObject(_replay_ptr);
@@ -242,7 +244,7 @@ void gsf::modules::RedisCacheProxyModule::flush_redis_handler()
 	assert(_replay_ptr && _replay_ptr->type != REDIS_REPLY_ERROR);
 
 	if (_replay_ptr->type == REDIS_REPLY_ERROR) {
-		dispatch(log_m_, eid::log::print, gsf::log_error("RedisCacheProxyModule", "flush_redis_handler ", _replay_ptr->str));
+		dispatch(log_m_, eid::log::print, gsf::log_error("RedisCacheProxyModule", fmt::format("flush_redis_handler {}", _replay_ptr->str)));
 	}
 
 	freeReplyObject(_replay_ptr);

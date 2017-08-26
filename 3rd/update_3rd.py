@@ -19,7 +19,7 @@ def rmtree(top):
 
 ###################libevent###################################
 print("download Libevent version release-2.0.22-stable")
-
+'''
 os.chdir(cur_path_)
 
 if os.path.exists(cur_path_ + "/Libevent"):
@@ -32,7 +32,7 @@ os.system('./autogen.sh')
 os.system('./configure --prefix=/' + root_path + '/lib/libevent')
 os.system('make')
 os.system('make install')
-
+'''
 os.chdir(cur_path_)
 
 #################glog####################################
@@ -49,7 +49,6 @@ os.system('make')
 os.system('make install')
 os.chdir(cur_path_)
 
-
 ###################protobuf############################
 print("download protobuf version 3.2.0")
 
@@ -64,7 +63,6 @@ os.system('./configure --prefix=/' + root_path + '/lib/protobuf')
 os.system('make')
 os.system('make install')
 os.chdir(cur_path_)
-
 
 ##################sol##############################
 print("download sol2 version 2.16.0")
@@ -102,5 +100,30 @@ os.chdir(cur_path_ + '/lua-5.3.4')
 os.system('make linux')
 os.system('mkdir ' + root_path + '/lib/lua')
 os.system('cp -r ' + cur_path_ + '/lua-5.3.4/src/* ' + ' ' + root_path + '/lib/lua/')
+os.chdir(cur_path_)
+
+########################fmtlib###########################
+print("download fmtlib version 4.0.0")
+if os.path.exists(cur_path_ + "/fmt"):
+    rmtree(cur_path_ + "/fmt")
+if os.path.exists(root_path + "/lib/fmt"):
+    rmtree(root_path + "/lib/fmt")
+
+os.system('git clone https://github.com/fmtlib/fmt.git')
+os.chdir(cur_path_ + '/fmt')
+os.system('git checkout 4.0.0')
+os.system('mkdir build')
+os.chdir(cur_path_ + '/fmt/build')
+os.system('cmake ..')
+os.system('make')
+os.chdir(root_path + "/lib")
+os.system('mkdir fmt')
+os.chdir(root_path + "/lib/fmt")
+os.system('mkdir lib')
+os.system('mkdir include')
+os.chdir(root_path + "/lib/fmt/include")
+os.system('mkdir fmt')
+os.system('cp -rf ' + cur_path_ + '/fmt/build/fmt/libfmt.a' + ' ' + root_path + '/lib/fmt/lib/')
+os.system('cp -rf ' + cur_path_ + '/fmt/fmt/*' + ' ' + root_path + '/lib/fmt/include/fmt')
 
 os.chdir(root_path)

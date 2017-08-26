@@ -1,13 +1,28 @@
 PROJECT(timer)
 
-#引用头文件目录
-INCLUDE_DIRECTORIES(
-        ${GSF_SOURCE_DIR}/
-)
+if(WIN32)
+    #引用头文件目录
+    INCLUDE_DIRECTORIES(
+            ${GSF_SOURCE_DIR}/
+    )
 
-#引用库目录
-LINK_DIRECTORIES(
-)
+    #引用库目录
+    LINK_DIRECTORIES(
+    )
+
+endif()
+if(UNIX)
+    #引用头文件目录
+    INCLUDE_DIRECTORIES(
+            ${GSF_SOURCE_DIR}/
+            ${GSF_SOURCE_DIR}/lib/fmt/include
+    )
+
+    #引用库目录
+    LINK_DIRECTORIES(
+            ${GSF_SOURCE_DIR}/lib/
+    )
+endif()
 
 FILE(GLOB_RECURSE SRC "*.cpp" "*.h")
 ADD_LIBRARY(timer STATIC ${SRC})

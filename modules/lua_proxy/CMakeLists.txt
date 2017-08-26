@@ -21,6 +21,7 @@ if(UNIX)
             ${GSF_SOURCE_DIR}/lib/glog/include
             ${GSF_SOURCE_DIR}/lib/lua
             ${GSF_SOURCE_DIR}/3rd/sol2
+            ${GSF_SOURCE_DIR}/lib/fmt/include
     )
 
     #引用库目录

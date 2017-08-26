@@ -67,7 +67,7 @@ namespace gsf
 
 		private:
 
-			uint32_t log_m_;
+			gsf::ModuleID log_m_ = gsf::ModuleNil;
 
 			typedef std::map<uint64_t, TimerEventPtr> TimerMap;
 			TimerMap map_;
