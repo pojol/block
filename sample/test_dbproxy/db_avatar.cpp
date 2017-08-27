@@ -1,5 +1,6 @@
 #include "db_avatar.h"
 
+
 void db_avatar::init()
 {
 	//auto _eid = make_event_id(eid::db_proxy::update);

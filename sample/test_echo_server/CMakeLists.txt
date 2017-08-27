@@ -18,6 +18,7 @@ if(UNIX)
 		${GSF_SOURCE_DIR}/lib/lua
 		${GSF_SOURCE_DIR}/3rd/sol2
 		${GSF_SOURCE_DIR}/lib/protobuf/include
+		${GSF_SOURCE_DIR}/lib/fmt/include
 		)
 endif()
 if(APPLE)
@@ -42,6 +43,7 @@ if(UNIX)
 			${GSF_SOURCE_DIR}/lib/libevent/lib
 			${GSF_SOURCE_DIR}/lib/glog/lib
 			${GSF_SOURCE_DIR}/lib/protobuf/lib
+			${GSF_SOURCE_DIR}/lib/fmt/lib
 	)
 endif()
 if(APPLE)
@@ -72,7 +74,7 @@ if(UNIX)
 		target_link_libraries(test_echo_server Threads::Threads)
 	endif()
 
-	TARGET_LINK_LIBRARIES(test_echo_server libgsf_core.a libnetwork.a libevent_core.a libevent_extra.a libtimer.a liblog.a libglog.a liblua_proxy.a liblua.a libprotobuf.a)
+	TARGET_LINK_LIBRARIES(test_echo_server libgsf_core.a libnetwork.a libevent_core.a libevent_extra.a libtimer.a liblog.a libglog.a liblua_proxy.a liblua.a libprotobuf.a libfmt.a)
 endif()
 if(APPLE)
 

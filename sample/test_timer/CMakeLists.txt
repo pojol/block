@@ -16,6 +16,7 @@ if(UNIX)
 		${GSF_SOURCE_DIR}/lib/glog/include
 		${GSF_SOURCE_DIR}/lib/lua
 		${GSF_SOURCE_DIR}/3rd/sol2
+		${GSF_SOURCE_DIR}/lib/fmt/include
 	)
 endif()
 if(APPLE)
@@ -38,6 +39,7 @@ if(UNIX)
 		${GSF_SOURCE_DIR}/lib
 		${GSF_SOURCE_DIR}/lib/lua
 		${GSF_SOURCE_DIR}/lib/glog/lib
+		${GSF_SOURCE_DIR}/lib/fmt/lib
 	)
 endif()
 if(APPLE)
@@ -67,6 +69,6 @@ elseif(UNIX)
 		target_link_libraries(test_timer Threads::Threads)
 	endif()
 
-    TARGET_LINK_LIBRARIES(test_timer liblog.a libglog.a libgsf_core.a liblua_proxy.a liblua.a libtimer.a -ldl)
+    TARGET_LINK_LIBRARIES(test_timer liblog.a libglog.a libgsf_core.a liblua_proxy.a liblua.a libtimer.a libfmt.a -ldl)
 elseif(APPLE)
 endif()
