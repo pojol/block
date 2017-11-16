@@ -6,7 +6,7 @@ if(WIN32)
     #引用头文件目录
     INCLUDE_DIRECTORIES(
             ${GSF_SOURCE_DIR}/
-            ${GSF_SOURCE_DIR}/3rd/glog-master/src
+            ${GSF_SOURCE_DIR}/3rd/glog/src
     )
 
     #引用库目录

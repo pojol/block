@@ -125,8 +125,8 @@ void gsf::modules::LuaProxyModule::ldispatch(uint32_t lua_id, uint32_t target, u
 {	
 	auto _smartPtr = gsf::ArgsPool::get_ref().get();
 	_smartPtr->push_block(args->pop_block(0, args->get_size()).c_str(), args->get_size());
-	delete args;
-	args = nullptr;
+	//delete args;
+	//args = nullptr;
 
 	dispatch(target, event, _smartPtr, [=](const gsf::ArgsPtr &_args) {
 		try {
