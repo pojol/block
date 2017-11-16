@@ -131,8 +131,10 @@ void gsf::modules::LuaProxyModule::ldispatch(uint32_t lua_id, uint32_t target, u
 	dispatch(target, event, _smartPtr, [=](const gsf::ArgsPtr &_args) {
 		try {
 			auto oargs = new Args();
-			oargs->push_block(args->pop_block(0, args->get_size()).c_str(), args->get_size());
+			oargs->push_block(_args->pop_block(0, _args->get_size()).c_str(), _args->get_size());
 			func(oargs);
+			delete oargs;
+			oargs = nullptr;
 		}
 		catch (sol::error e) {
 	
