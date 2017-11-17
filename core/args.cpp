@@ -167,6 +167,12 @@ uint8_t gsf::Args::pop_tag()
 	return _ui8;
 }
 
+uint8_t gsf::Args::get_tag()
+{
+	auto _ui8 = *reinterpret_cast<uint8_t*>(read_);
+	return _ui8;
+}
+
 uint8_t gsf::Args::pop_ui8()
 {
 	assert(pop_tag() == at_uint8);
@@ -448,8 +454,8 @@ gsf::Args::Args()
 {
 	buff_ = (char*)malloc(1024);
 	size_ = 1024;
+	
 	pos_ = 0;
-
 	read_ = write_ = tail_ = buff_;
 }
 
@@ -457,14 +463,15 @@ gsf::Args::Args(int size)
 {
 	buff_ = (char*)malloc(size);
 	size_ = size;
-	pos_ = 0;
 
+	pos_ = 0;
 	read_ = write_ = tail_ = buff_;
 }
 
 void gsf::Args::flush()
 {
 	memset(buff_, 0, pos_);
+
 	read_ = write_ = tail_ = buff_;
 	pos_ = 0;
 }

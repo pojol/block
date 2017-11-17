@@ -6,7 +6,8 @@ if(WIN32)
             ${GSF_SOURCE_DIR}/
             ${GSF_SOURCE_DIR}/3rd/glog-0.3.4/src
             ${GSF_SOURCE_DIR}/3rd/lua-5.3.4/src
-            ${GSF_SOURCE_DIR}/3rd/sol2-2.16.0
+            ${GSF_SOURCE_DIR}/3rd/sol2
+			${GSF_SOURCE_DIR}/3rd/fmt
     )
 
     #引用库目录

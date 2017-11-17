@@ -56,6 +56,7 @@ namespace gsf
 	static const uint8_t at_list = 13;
 	static const uint8_t at_vec = 14;
 	static const uint8_t at_map = 15;
+	static const uint8_t at_eof = 20;
 }
 
 #endif
