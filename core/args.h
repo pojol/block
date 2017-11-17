@@ -65,6 +65,7 @@ namespace gsf
 
 		/////////////////////////////
 		uint8_t pop_tag();
+		uint8_t get_tag();
 
 		uint8_t pop_ui8();
 		int8_t pop_i8();
