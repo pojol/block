@@ -52,7 +52,7 @@ if platform.system() == 'Linux':
     os.system('make install')
 else:
     pass
-    os.chdir(cur_path_)
+os.chdir(cur_path_)
 ###################protobuf############################
 print("download protobuf version 3.2.0")
 
