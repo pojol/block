@@ -46,3 +46,30 @@ git checkout proto_v3
 window --
 建立build目录 ，cmake .. 编译出pdb.lib
 将gsf/3rd目录的 pbc-lua53.c 编译成pdb_lua.lib 
+
+
+
+编译glog错误
+
+err 1:
+	CDPATH="${ZSH_VERSION+.}:" && cd . && aclocal-1.14 -I m4
+	/bin/sh: aclocal-1.14: command not found
+
+	fix:
+	wget http://ftp.gnu.org/gnu/automake/automake-1.14.tar.gz
+	wget http://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.gz
+	tar xvzf autoconf-2.69.tar.gz; 
+	cd autoconf-2.69
+	./configure
+	make && make install
+
+	cd automake-1.14
+	./configure
+	make && make install
+
+err 2:
+	parallel-tests: error: required file './test-driver' not found
+	parallel-tests:   'automake --add-missing' can install 'test-driver'
+
+	fix:
+	autoreconf -i

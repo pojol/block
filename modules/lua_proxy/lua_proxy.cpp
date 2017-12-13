@@ -121,7 +121,7 @@ void gsf::modules::LuaProxyModule::create_event(const gsf::ArgsPtr &args, gsf::C
 	create(_module_id, _dir_name, _file_name);
 }
 
-void gsf::modules::LuaProxyModule::ldispatch(uint32_t lua_id, uint32_t target, uint32_t event, sol::table &tb, sol::function func)
+int gsf::modules::LuaProxyModule::ldispatch(uint32_t lua_id, uint32_t target, uint32_t event, const sol::table &tb, sol::function func)
 {	
 	auto _smartPtr = gsf::ArgsPool::get_ref().get();
 
@@ -202,20 +202,14 @@ void gsf::modules::LuaProxyModule::ldispatch(uint32_t lua_id, uint32_t target, u
 			dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
 		}
 	});
+
+	return 0;
 }
 
-void gsf::modules::LuaProxyModule::llisten(uint32_t lua_id, uint32_t self, uint32_t event , sol::function func)
+int gsf::modules::LuaProxyModule::llisten(uint32_t lua_id, uint32_t self, uint32_t event , sol::function func)
 {
 	listen(self, event, [=](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
 		try {
-			/*
-			auto icallback = [&](gsf::Args *args) {
-				auto _ptr = gsf::ArgsPool::get_ref().get();
-				_ptr->push_block(args->pop_block(0, args->get_size()).c_str(), args->get_size());
-				callback(_ptr);
-			};
-			*/
-			// tmp �� don't pass the argsPtr to lua
 			if (args) {
 				auto _tag = args->get_tag();
 				auto lua = find_lua(lua_id);
@@ -272,6 +266,8 @@ void gsf::modules::LuaProxyModule::llisten(uint32_t lua_id, uint32_t self, uint3
 			dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
 		}
 	});
+
+	return 0;
 }
 
 void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_name, std::string file_name)
