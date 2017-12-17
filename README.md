@@ -31,7 +31,7 @@
 - network -------------------------------- libevent 2.0.22+
 - log ------------------------------------ glog 0.3.4+, fmtlib
 - luaProxy ------------------------------- lua5.3, sol2
-- redis_cache_proxy ---------------------- redis 3.0+
+- redisCacheProxy ---------------------- redis 3.0+
 
 
 ## build & install 
