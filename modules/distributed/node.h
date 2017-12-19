@@ -39,7 +39,7 @@ namespace gsf
 
 			void event_rpc(const std::string &module, uint32_t event, const gsf::ArgsPtr &args, gsf::RpcCallback callback);
 
-			void event_create_node(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
+			gsf::ArgsPtr event_create_node(const gsf::ArgsPtr &args);
 
 		private:
 

@@ -50,12 +50,11 @@ namespace gsf
 
 
 		private:
-			void event_adjust_module_weight(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
+			gsf::ArgsPtr event_adjust_module_weight(const gsf::ArgsPtr &args);
+			gsf::ArgsPtr event_get_light_module(const gsf::ArgsPtr &args);
 
-			void event_get_light_module(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
-
-			void event_regist(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
-			void event_unregist(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
+			gsf::ArgsPtr event_regist(const gsf::ArgsPtr &args);
+			gsf::ArgsPtr event_unregist(const gsf::ArgsPtr &args);
 
 
 			void adjust_module_weight(int32_t nod_id, const std::string &module_name, gsf::ModuleID module_id, int32_t characteristic, int32_t weight);

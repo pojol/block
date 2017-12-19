@@ -366,6 +366,11 @@ gsf::ModuleID gsf::Args::pop_moduleid()
 	return pop_i32();
 }
 
+gsf::TimerID gsf::Args::pop_timerid()
+{
+	return pop_ui64();
+}
+
 std::string gsf::Args::pop_string()
 {
 	assert(pop_tag() == at_string);

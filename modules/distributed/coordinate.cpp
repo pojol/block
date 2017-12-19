@@ -11,18 +11,18 @@ void gsf::modules::CoodinatorModule::before_init()
 {
 	using namespace std::placeholders;
 
-	listen(this, eid::distributed::coordinat_regist, std::bind(&CoodinatorModule::event_regist, this, _1, _2));
-	listen(this, eid::distributed::coordinat_unregit, std::bind(&CoodinatorModule::event_unregist, this, _1, _2));
+	listen(this, eid::distributed::coordinat_regist, std::bind(&CoodinatorModule::event_regist, this, _1));
+	listen(this, eid::distributed::coordinat_unregit, std::bind(&CoodinatorModule::event_unregist, this, _1));
 
 	listen(this, eid::distributed::coordinat_adjust_weight
-		, std::bind(&CoodinatorModule::event_adjust_module_weight, this, _1, _2));
+		, std::bind(&CoodinatorModule::event_adjust_module_weight, this, _1));
 
 	listen(this, eid::distributed::coordinat_get
-		, std::bind(&CoodinatorModule::event_get_light_module, this, _1, _2));
+		, std::bind(&CoodinatorModule::event_get_light_module, this, _1));
 }
 
 //int32_t port, const std::string &module, gsf::ModuleID module_id, int32_t weight
-void gsf::modules::CoodinatorModule::event_adjust_module_weight(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
+gsf::ArgsPtr gsf::modules::CoodinatorModule::event_adjust_module_weight(const gsf::ArgsPtr &args)
 {
 	auto _nod_id = args->pop_i32();
 	auto _module = args->pop_string();
@@ -30,16 +30,18 @@ void gsf::modules::CoodinatorModule::event_adjust_module_weight(const gsf::ArgsP
 	auto _weight = args->pop_i32();
 
 	adjust_module_weight(_nod_id, _module, 0, _characteristic, _weight);
+
+	return nullptr;
 }
 
-void gsf::modules::CoodinatorModule::event_get_light_module(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
+gsf::ArgsPtr gsf::modules::CoodinatorModule::event_get_light_module(const gsf::ArgsPtr &args)
 {
 	auto _module_name = args->pop_string();
 	auto _module_characteristic = args->pop_i32();
 
 	auto _count = node_name_map_.count(_module_name);
 	if (_count == 0) {
-		return;
+		return nullptr;
 	}
 	else {
 		NodePtr _ptr;
@@ -70,12 +72,14 @@ void gsf::modules::CoodinatorModule::event_get_light_module(const gsf::ArgsPtr &
 		}
 
 		assert(_ptr->nod_id != 0);
-		callback(gsf::make_args(_ptr->nod_id));
+		return gsf::make_args(_ptr->nod_id);
 	}
+
+	return nullptr;
 }
 
 //const std::string &type, const std::string &ip, int32_t port
-void gsf::modules::CoodinatorModule::event_regist(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
+gsf::ArgsPtr gsf::modules::CoodinatorModule::event_regist(const gsf::ArgsPtr &args)
 {
 	auto _type = args->pop_string();
 	auto _ip = args->pop_string();
@@ -84,7 +88,7 @@ void gsf::modules::CoodinatorModule::event_regist(const gsf::ArgsPtr &args, gsf:
 	auto itr = node_id_map_.find(_nod_id);
 	if (itr != node_id_map_.end()) {
 		printf("coordnate regist app repeat! %d \n", _nod_id);
-		return;
+		return nullptr;
 	}
 
 	auto nod = std::make_shared<CNodeInfo>();
@@ -104,12 +108,14 @@ void gsf::modules::CoodinatorModule::event_regist(const gsf::ArgsPtr &args, gsf:
 		adjust_module_weight(_nod_id, _module_name, _module_id, _module_characteristic, 0);
 	}
 
-	callback(nullptr);
+	return nullptr;
 }
 
-void gsf::modules::CoodinatorModule::event_unregist(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
+gsf::ArgsPtr gsf::modules::CoodinatorModule::event_unregist(const gsf::ArgsPtr &args)
 {
 	auto _port = args->pop_i32();
+
+	return nullptr;
 }
 
 void gsf::modules::CoodinatorModule::adjust_module_weight(int32_t nod_id, const std::string &module_name, gsf::ModuleID module_id, int32_t characteristic, int32_t weight)

@@ -38,25 +38,25 @@ void gsf::Application::init_cfg(const gsf::AppConfig &cfg)
 	gsf::ArgsPool::get_ref().make(cfg.pool_args_count);
 
 
-	listen(this, eid::get_module, [=](const gsf::ArgsPtr &args, CallbackFunc callback) {
+	listen(this, eid::get_module, [=](const gsf::ArgsPtr &args) {
 
 		std::string _name = args->pop_string();
 
 		auto itr = module_name_map_.find(_name);
 		if (itr != module_name_map_.end()) {
-			callback(gsf::make_args(itr->second));
+			return gsf::make_args(itr->second);
 		}
 		else {
-			callback(gsf::make_args(gsf::ModuleNil));
+			return gsf::make_args(gsf::ModuleNil);
 		}
 
 	});
 
-	listen(this, eid::get_app_name, [=](const gsf::ArgsPtr &args, CallbackFunc callback){
-		callback(gsf::make_args(cfg_.name));
+	listen(this, eid::get_app_name, [=](const gsf::ArgsPtr &args){
+		return gsf::make_args(cfg_.name);
 	});
 
-	listen(this, eid::new_dynamic_module, [=](const gsf::ArgsPtr &args, CallbackFunc callback) {
+	listen(this, eid::new_dynamic_module, [=](const gsf::ArgsPtr &args) {
 
 		std::string _name = args->pop_string();
 
@@ -68,12 +68,14 @@ void gsf::Application::init_cfg(const gsf::AppConfig &cfg)
 		push_frame(cur_frame_ + 3, std::make_tuple(2, nullptr, nullptr
 			, std::bind(&Application::regist_module<Module>, this, std::placeholders::_1, std::placeholders::_2), _module_ptr));
 
-		callback(gsf::make_args(_module_ptr->get_module_id()));
+		return gsf::make_args(_module_ptr->get_module_id());
 	});
 
-	listen(this, eid::delete_module, [=](const gsf::ArgsPtr &args, CallbackFunc callback) {
+	listen(this, eid::delete_module, [=](const gsf::ArgsPtr &args) {
 		uint32_t _module_id = args->pop_moduleid();
 		unregist_module(_module_id);
+
+		return nullptr;
 	});
 }
 

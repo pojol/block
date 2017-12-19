@@ -44,19 +44,14 @@ void gsf::network::ConnectorModule::before_init()
 
 	listen(this, eid::network::make_connector
 		, std::bind(&ConnectorModule::make_connector, this
-			, std::placeholders::_1
-			, std::placeholders::_2));
+			, std::placeholders::_1));
 
 	listen(this, eid::network::send
 		, std::bind(&ConnectorModule::send_msg, this
-			, std::placeholders::_1
-			, std::placeholders::_2));
+			, std::placeholders::_1));
 	
 
-	dispatch(eid::app_id, eid::get_module, gsf::make_args("LogModule"), [=](const gsf::ArgsPtr &args)
-	{
-		log_module_ = args->pop_i32();
-	});
+	log_m_ = dispatch(eid::app_id, eid::get_module, gsf::make_args("LogModule"))->pop_moduleid();
 }
 
 void gsf::network::ConnectorModule::init()
@@ -93,7 +88,7 @@ void gsf::network::ConnectorModule::after_shut()
 	boardcast(eid::module_shut_succ, gsf::make_args(get_module_id()));
 }
 
-void gsf::network::ConnectorModule::make_connector(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
+gsf::ArgsPtr gsf::network::ConnectorModule::make_connector(const gsf::ArgsPtr &args)
 {
 	uint32_t _module_id = args->pop_i32();
 	std::string _ip = args->pop_string();
@@ -139,8 +134,10 @@ void gsf::network::ConnectorModule::make_connector(const gsf::ArgsPtr &args, gsf
 		bufferevent_setcb(buffer_event_ptr_, Session::read_cb, NULL, Session::event_cb, session_ptr_.get());
 		bufferevent_enable(buffer_event_ptr_, EV_READ | EV_WRITE);
 
-		session_ptr_->set_log_module(log_module_);
+		session_ptr_->set_log_module(log_m_);
 	}
+
+	return gsf::make_args(true);
 }
 
 
@@ -163,7 +160,7 @@ void gsf::network::ConnectorModule::need_close_session(int fd)
 }
 
 
-void gsf::network::ConnectorModule::send_msg(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
+gsf::ArgsPtr gsf::network::ConnectorModule::send_msg(const gsf::ArgsPtr &args)
 {
 	auto _msg = args->pop_msgid();
 	std::string _str = "";
@@ -177,4 +174,6 @@ void gsf::network::ConnectorModule::send_msg(const gsf::ArgsPtr &args, gsf::Call
 
 	auto _block = std::make_shared<gsf::Block>(session_ptr_->get_id(), _msg, _str);
 	session_ptr_->write(_msg, _block);
+
+	return nullptr;
 }

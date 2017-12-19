@@ -27,7 +27,8 @@ namespace gsf
 {
 	typedef std::pair<uint32_t, uint32_t> EventPair;
 	typedef std::function<void(const ArgsPtr &)> CallbackFunc;
-	typedef std::function<void(const ArgsPtr &, CallbackFunc)> EventFunc;
+	typedef std::function<ArgsPtr(const ArgsPtr &)> DispatchFunc;
+	typedef std::function<void (const ArgsPtr &, DispatchFunc)> EventFunc;
 
 	typedef std::function<void(const ArgsPtr &, bool)> RpcCallback;
 	typedef std::function<void(const std::string &, uint32_t, const gsf::ArgsPtr &, gsf::RpcCallback)> RpcFunc;
@@ -44,15 +45,15 @@ namespace gsf
 		/**!
 			用于侦听模块之间的消息
 		*/
-		virtual void listen(Module *self, uint32_t event, EventFunc func);
-		virtual void listen(ModuleID self, uint32_t event, EventFunc func);
+		virtual void listen(Module *self, uint32_t event, DispatchFunc func);
+		virtual void listen(ModuleID self, uint32_t event, DispatchFunc func);
 
 		/**!
 			用于将事件发往不同模块
 		*/
-		virtual void dispatch(uint32_t target, uint32_t event, const ArgsPtr &args, CallbackFunc callback = nullptr);
+		virtual gsf::ArgsPtr dispatch(uint32_t target, uint32_t event, const ArgsPtr &args);
 
-		virtual void boardcast(uint32_t event, const ArgsPtr &args, CallbackFunc callback = nullptr);
+		virtual void boardcast(uint32_t event, const ArgsPtr &args);
 
 		/**!
 			rpc call ， 在分布式架构中需要远程调用的接口，依赖 NodeModule。
@@ -88,10 +89,10 @@ namespace gsf
 	protected:
 		void execute() override;
 
-		void bind_event(uint32_t module_id, uint32_t event, EventFunc func);
+		void bind_event(uint32_t module_id, uint32_t event, DispatchFunc func);
 
-		void dispatch(uint32_t module_id, uint32_t event, const ArgsPtr &args, CallbackFunc callback = nullptr);
-		void boardcast(uint32_t event, const ArgsPtr &args, CallbackFunc callback = nullptr);
+		ArgsPtr dispatch(uint32_t module_id, uint32_t event, const ArgsPtr &args);
+		void boardcast(uint32_t event, const ArgsPtr &args);
 		///
 
 		void bind_rpc(RpcFunc rpc_callback);
@@ -150,7 +151,7 @@ namespace gsf
 		struct ModuleIterfaceObj
 		{
 			EventID event_id_;
-			EventFunc event_func_;
+			DispatchFunc event_func_;
 
 #ifdef WATCH_PERF
 			uint64_t calls_ = 0;

@@ -30,29 +30,18 @@ gsf::modules::NodeModule::~NodeModule()
 
 void gsf::modules::NodeModule::before_init()
 {
-	dispatch(eid::base::app_id, eid::get_module, gsf::make_args("LogModule"), [&](const gsf::ArgsPtr &args) {
-		log_m_ = args->pop_i32();
-		if (log_m_ == gsf::ModuleNil) {
-			printf("lack of dependency on LogModule\n");
-		}
-	});
-
-	dispatch(eid::base::app_id, eid::get_module, gsf::make_args("TimerModule"), [&](const gsf::ArgsPtr &args) {
-		timer_m_ = args->pop_i32();
-		if (timer_m_ == gsf::ModuleNil) {
-			dispatch(log_m_, eid::log::print, gsf::log_error("NodeModule", "lack of dependency on TimerModule!"));
-		}
-	});
+	log_m_ = dispatch(eid::base::app_id, eid::get_module, gsf::make_args("LogModule"))->pop_moduleid();
+	timer_m_ = dispatch(eid::base::app_id, eid::get_module, gsf::make_args("TimerModule"))->pop_moduleid();
 
 	using namespace std::placeholders;
-	listen(this, eid::distributed::node_create, std::bind(&NodeModule::event_create_node, this, _1, _2));
+	listen(this, eid::distributed::node_create, std::bind(&NodeModule::event_create_node, this, _1));
 
 	rpc_listen(std::bind(&NodeModule::event_rpc, this, _1, _2, _3, _4));
 }
 
 void gsf::modules::NodeModule::init()
 {
-	listen(this, eid::network::recv, [&](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
+	listen(this, eid::network::recv, [&](const gsf::ArgsPtr &args) {
 	
 		auto _fd = args->pop_fd();
 		auto _msgid = args->pop_msgid();
@@ -69,9 +58,11 @@ void gsf::modules::NodeModule::init()
 			assert(_titr != timer_set_.end());
 			timer_set_.erase(_titr);
 		}
+
+		return nullptr;
 	});
 
-	listen(this, eid::timer::timer_arrive, [&](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
+	listen(this, eid::timer::timer_arrive, [&](const gsf::ArgsPtr &args) {
 		auto _tid = args->pop_ui64();
 
 		auto _itr = timer_set_.find(_tid);
@@ -85,6 +76,8 @@ void gsf::modules::NodeModule::init()
 			_info->callback(nullptr, false);
 			callback_map_.erase(_citr);
 		}
+
+		return nullptr;
 	});
 }
 
@@ -107,10 +100,7 @@ void gsf::modules::NodeModule::event_rpc(const std::string &module, uint32_t eve
 	}
 
 	if (callback) {
-		uint64_t _tid = 0;
-		dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::make_args(rpc_delay_), [&](const gsf::ArgsPtr &args) {
-			_tid = args->pop_ui64();
-		});
+		uint64_t _tid = dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::make_args(rpc_delay_))->pop_timerid();
 
 		auto _callbackPtr = std::make_shared<CallbackInfo>();
 		_callbackPtr->callback = callback;
@@ -133,7 +123,7 @@ void gsf::modules::NodeModule::event_rpc(const std::string &module, uint32_t eve
 	}
 }
 
-void gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
+gsf::ArgsPtr gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &args)
 {
 	if (!service_) {
 		id_ = args->pop_i32();
@@ -157,12 +147,9 @@ void gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &args, gsf::
 			modules_.push_back(std::make_pair(_module_name, _module_id));
 		}
 
-		dispatch(eid::base::app_id, eid::base::new_dynamic_module, gsf::make_args("ConnectorModule"), [&](const gsf::ArgsPtr &args) {
-			connector_m_ = args->pop_moduleid();
-		});
+		connector_m_ = dispatch(eid::base::app_id, eid::base::new_dynamic_module, gsf::make_args("ConnectorModule"))->pop_moduleid();
 
-
-		listen(this, eid::network::new_connect, [&](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
+		listen(this, eid::network::new_connect, [&](const gsf::ArgsPtr &args) {
 			connector_fd_ = args->pop_fd();
 
 			dispatch(log_m_, eid::log::print, gsf::log_info("NodeModule", "distributed nod connect 2 root!"));
@@ -183,10 +170,12 @@ void gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &args, gsf::
 					dispatch(target_m_, eid::distributed::node_create_succ, nullptr);
 				}
 			});
+
+			return nullptr;
 		});
 
 
-		listen(this, eid::base::module_init_succ, [&](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
+		listen(this, eid::base::module_init_succ, [&](const gsf::ArgsPtr &args) {
 			auto _module_id = args->pop_moduleid();
 
 			if (_module_id == connector_m_) {
@@ -195,7 +184,11 @@ void gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &args, gsf::
 
 				dispatch(connector_m_, eid::network::make_connector, gsf::make_args(get_module_id(), root_ip_, root_port_));
 			}
+
+			return nullptr;
 		});
+
+		return nullptr;
 	}
 
 }
