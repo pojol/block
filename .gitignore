@@ -70,3 +70,5 @@ lib/
 3rd/redis-win-3.0.504
 3rd/sol2-2.16.0
 3rd/lua-5.3.4.tar.gz
+3rd/glog/
+3rd/pbc/
