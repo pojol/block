@@ -10,18 +10,13 @@ void gsf::modules::RedisCacheProxyModule::before_init()
 {
 	using namespace std::placeholders;
 
-	dispatch(eid::app_id, eid::get_module, gsf::make_args("TimerModule"), [&](const gsf::ArgsPtr &args) {
-		timer_m_ = args->pop_i32();
-	});
-
-	dispatch(eid::app_id, eid::get_module, gsf::make_args("LogModule"), [&](const gsf::ArgsPtr &args) {
-		log_m_ = args->pop_i32();
-	});
+	timer_m_ = dispatch(eid::app_id, eid::get_module, gsf::make_args("TimerModule"))->pop_moduleid();
+	log_m_ = dispatch(eid::app_id, eid::get_module, gsf::make_args("LogModule"))->pop_moduleid();
 
 	listen(this, eid::db_proxy::redis_connect
-		, std::bind(&RedisCacheProxyModule::event_redis_connect, this, _1, _2));
+		, std::bind(&RedisCacheProxyModule::event_redis_connect, this, _1));
 
-	listen(this, eid::module_init_succ, std::bind(&RedisCacheProxyModule::start_update_redis_timer, this, _1, _2));
+	listen(this, eid::module_init_succ, std::bind(&RedisCacheProxyModule::start_update_redis_timer, this, _1));
 }
 
 
@@ -123,17 +118,13 @@ gsf::ArgsPtr gsf::modules::RedisCacheProxyModule::start_update_redis_timer(const
 		if (_tid == cmd_timer_id_) {
 			cmd_handler();
 		
-			dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::make_args(get_module_id(), redis_delay_time_), [&](const gsf::ArgsPtr &args) {
-				cmd_timer_id_ = args->pop_i32();
-			});
+			cmd_timer_id_ = dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::make_args(get_module_id(), redis_delay_time_))->pop_moduleid();
 		}
 
 		if (_tid == rewrite_timer_id_) {
 			rewrite_handler();
 
-			dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::make_args(get_module_id(), redis_rewrite_time_), [&](const gsf::ArgsPtr &args) {
-				rewrite_timer_id_ = args->pop_i32();
-			});
+			rewrite_timer_id_ = dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::make_args(get_module_id(), redis_rewrite_time_))->pop_moduleid();
 		}
 
 		return nullptr;
@@ -141,13 +132,9 @@ gsf::ArgsPtr gsf::modules::RedisCacheProxyModule::start_update_redis_timer(const
 
 	if (_module_id == timer_m_) {
 
-		dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::make_args(get_module_id(), redis_delay_time_), [&](const gsf::ArgsPtr &args) {
-			cmd_timer_id_ = args->pop_i32();
-		});
+		cmd_timer_id_ = dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::make_args(get_module_id(), redis_delay_time_))->pop_moduleid();
 
-		dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::make_args(get_module_id(), redis_rewrite_time_), [&](const gsf::ArgsPtr &args) {
-			rewrite_timer_id_ = args->pop_i32();
-		});
+		rewrite_timer_id_ = dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::make_args(get_module_id(), redis_rewrite_time_))->pop_moduleid();
 	}
 
 	return nullptr;
