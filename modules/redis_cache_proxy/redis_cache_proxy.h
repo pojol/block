@@ -39,11 +39,11 @@ namespace gsf
 
 		private:
 
-			void event_redis_connect(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
-			void event_redis_command(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
-			void event_redis_avatar_offline(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
+			gsf::ArgsPtr event_redis_connect(const gsf::ArgsPtr &args);
+			gsf::ArgsPtr event_redis_command(const gsf::ArgsPtr &args);
+			gsf::ArgsPtr event_redis_avatar_offline(const gsf::ArgsPtr &args);
 
-			void start_update_redis_timer(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
+			gsf::ArgsPtr start_update_redis_timer(const gsf::ArgsPtr &args);
 			bool check_connect();
 			
 			void cmd_handler();

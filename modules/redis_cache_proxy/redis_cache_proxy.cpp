@@ -41,7 +41,7 @@ void gsf::modules::RedisCacheProxyModule::shut()
 	redisFree(redis_context_);
 }
 
-void gsf::modules::RedisCacheProxyModule::event_redis_connect(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
+gsf::ArgsPtr gsf::modules::RedisCacheProxyModule::event_redis_connect(const gsf::ArgsPtr &args)
 {
 	using namespace std::placeholders;
 
@@ -58,22 +58,24 @@ void gsf::modules::RedisCacheProxyModule::event_redis_connect(const gsf::ArgsPtr
 
 		is_open_ = true;
 
-		listen(this, eid::db_proxy::redis_command, std::bind(&RedisCacheProxyModule::event_redis_command, this, _1, _2));
+		listen(this, eid::db_proxy::redis_command, std::bind(&RedisCacheProxyModule::event_redis_command, this, _1));
 
 		listen(this, eid::db_proxy::redis_avatar_offline
-			, std::bind(&RedisCacheProxyModule::event_redis_avatar_offline, this, _1, _2));
+			, std::bind(&RedisCacheProxyModule::event_redis_avatar_offline, this, _1));
 
 		boardcast(eid::module_init_succ, gsf::make_args(get_module_id()));
 	}
 	else {
 		dispatch(log_m_, eid::log::print, gsf::log_error("RedisCacheProxyModule", " event_redis_connect err"));
 	}
+
+	return nullptr;
 }
 
-void gsf::modules::RedisCacheProxyModule::event_redis_avatar_offline(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
+gsf::ArgsPtr gsf::modules::RedisCacheProxyModule::event_redis_avatar_offline(const gsf::ArgsPtr &args)
 {
 	if (!check_connect()) {
-		return;
+		return gsf::make_args(false);
 	}
 
 	auto _field = args->pop_string();
@@ -89,9 +91,11 @@ void gsf::modules::RedisCacheProxyModule::event_redis_avatar_offline(const gsf::
 	}
 
 	freeReplyObject(_replay_ptr);
+
+	return gsf::make_args(true);
 }
 
-void gsf::modules::RedisCacheProxyModule::event_redis_command(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
+gsf::ArgsPtr gsf::modules::RedisCacheProxyModule::event_redis_command(const gsf::ArgsPtr &args)
 {
 	auto _field = args->pop_string();
 	auto _key = args->pop_string();
@@ -101,17 +105,19 @@ void gsf::modules::RedisCacheProxyModule::event_redis_command(const gsf::ArgsPtr
 
 	if (REDIS_OK != redisAppendCommand(redis_context_, "hset %s %s %s", _field.c_str(), _key.c_str(), _block.c_str())) {
 		dispatch(log_m_, eid::log::print, gsf::log_error("RedisCacheProxyModule", "redisAppendCommand fail!"));
-		return;
+		return gsf::make_args(false);
 	}
 
 	redis_command_count_++;
+
+	return gsf::make_args(true);
 }
 
-void gsf::modules::RedisCacheProxyModule::start_update_redis_timer(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
+gsf::ArgsPtr gsf::modules::RedisCacheProxyModule::start_update_redis_timer(const gsf::ArgsPtr &args)
 {
 	ModuleID _module_id = args->pop_i32();
 
-	listen(this, eid::timer::timer_arrive, [&](const gsf::ArgsPtr &args, gsf::CallbackFunc cb) {
+	listen(this, eid::timer::timer_arrive, [&](const gsf::ArgsPtr &args) {
 		gsf::TimerID _tid = args->pop_ui64();
 
 		if (_tid == cmd_timer_id_) {
@@ -129,6 +135,8 @@ void gsf::modules::RedisCacheProxyModule::start_update_redis_timer(const gsf::Ar
 				rewrite_timer_id_ = args->pop_i32();
 			});
 		}
+
+		return nullptr;
 	});
 
 	if (_module_id == timer_m_) {
@@ -141,6 +149,8 @@ void gsf::modules::RedisCacheProxyModule::start_update_redis_timer(const gsf::Ar
 			rewrite_timer_id_ = args->pop_i32();
 		});
 	}
+
+	return nullptr;
 }
 
 bool gsf::modules::RedisCacheProxyModule::check_connect()
