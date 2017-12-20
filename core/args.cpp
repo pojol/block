@@ -458,19 +458,17 @@ uint32_t gsf::Args::get_size() const
 gsf::Args::Args()
 {
 	buff_ = (char*)malloc(1024);
-	size_ = 1024;
+	pos_ = size_ = 1024;
 	
-	pos_ = 0;
-	read_ = write_ = tail_ = buff_;
+	flush();
 }
 
 gsf::Args::Args(int size)
 {
 	buff_ = (char*)malloc(size);
-	size_ = size;
+	pos_ = size_ = size;
 
-	pos_ = 0;
-	read_ = write_ = tail_ = buff_;
+	flush();
 }
 
 void gsf::Args::flush()
