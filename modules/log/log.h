@@ -30,7 +30,7 @@ namespace gsf
 
 			void init_impl(const std::string &exe_name);
 
-			void log_print(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
+			gsf::ArgsPtr log_print(const gsf::ArgsPtr &args);
 
 		private:
 			

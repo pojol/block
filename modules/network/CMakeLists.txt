@@ -3,7 +3,7 @@ PROJECT(network)
 #引用头文件目录
 if(WIN32)
     INCLUDE_DIRECTORIES(
-            ${GSF_SOURCE_DIR}/3rd/Libevent/include
+            ${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
             ${GSF_SOURCE_DIR}/
     )
 endif()

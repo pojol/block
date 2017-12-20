@@ -14,7 +14,7 @@ gsf::EventModule::EventModule()
 }
 
 
-void gsf::EventModule::bind_event(uint32_t module_id, uint32_t event, EventFunc func)
+void gsf::EventModule::bind_event(uint32_t module_id, uint32_t event, DispatchFunc func)
 {
 	auto regf = [&](MIList &itr) {
 
@@ -49,7 +49,7 @@ void gsf::EventModule::bind_event(uint32_t module_id, uint32_t event, EventFunc 
 	}
 }
 
-void gsf::EventModule::dispatch(uint32_t module_id, uint32_t event, const ArgsPtr &args, CallbackFunc callback /* = nullptr */)
+gsf::ArgsPtr gsf::EventModule::dispatch(uint32_t module_id, uint32_t event, const ArgsPtr &args)
 {
 	auto tItr = type_map_.find(module_id);
 	if (tItr != type_map_.end()) {
@@ -65,19 +65,21 @@ void gsf::EventModule::dispatch(uint32_t module_id, uint32_t event, const ArgsPt
 			fItr->calls_++;
 #endif // WATCH_PERF
 
-			fItr->event_func_(args, callback);
+			return fItr->event_func_(args);
 		}
 	}
 	else { // 如果没有在本地找到事件（服务），则看下当前的app是否有注册转发的服务，如果存在则将这个event转交到转发服务。
 		
 	}
+
+	return nullptr;
 }
 
-void gsf::EventModule::boardcast(uint32_t event, const ArgsPtr &args, CallbackFunc callback /*= nullptr*/)
+void gsf::EventModule::boardcast(uint32_t event, const ArgsPtr &args)
 {
 	for (auto &it : type_map_)
 	{
-		dispatch(it.first, event, args, callback);
+		dispatch(it.first, event, args);
 	}
 }
 
@@ -132,24 +134,24 @@ void gsf::IEvent::rpc_listen(RpcFunc rpc_callback)
 	EventModule::get_ref().bind_rpc(rpc_callback);
 }
 
-void gsf::IEvent::listen(Module *target, uint32_t event, EventFunc func)
+void gsf::IEvent::listen(Module *target, uint32_t event, DispatchFunc func)
 {
 	EventModule::get_ref().bind_event(target->get_module_id(), event, func);
 }
 
-void gsf::IEvent::listen(ModuleID self, uint32_t event, EventFunc func)
+void gsf::IEvent::listen(ModuleID self, uint32_t event, DispatchFunc func)
 {
 	EventModule::get_ref().bind_event(self, event, func);
 }
 
-void gsf::IEvent::dispatch(uint32_t target, uint32_t event, const gsf::ArgsPtr &args, CallbackFunc callback /* = nullptr */)
+gsf::ArgsPtr gsf::IEvent::dispatch(uint32_t target, uint32_t event, const gsf::ArgsPtr &args)
 {
-	EventModule::get_ref().dispatch(target, event, args, callback);
+	return EventModule::get_ref().dispatch(target, event, args);
 }
 
-void gsf::IEvent::boardcast(uint32_t event, const gsf::ArgsPtr &args, CallbackFunc callback /*= nullptr*/)
+void gsf::IEvent::boardcast(uint32_t event, const gsf::ArgsPtr &args)
 {
-	EventModule::get_ref().boardcast(event, args, callback);
+	EventModule::get_ref().boardcast(event, args);
 }
 
 

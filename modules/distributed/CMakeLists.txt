@@ -6,7 +6,7 @@ if(WIN32)
     #引用头文件目录
     INCLUDE_DIRECTORIES(
 		${GSF_SOURCE_DIR}/
-		${GSF_SOURCE_DIR}/3rd/Libevent/include
+		${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
     )
 
     #引用库目录

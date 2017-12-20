@@ -50,11 +50,10 @@ void gsf::modules::LogModule::before_init()
 
 	using namespace std::placeholders;
 
-	listen(this, eid::log::print, std::bind(&LogModule::log_print, this, _1, _2));
+	listen(this, eid::log::print, std::bind(&LogModule::log_print, this, _1));
 
-	dispatch(eid::app_id, eid::base::get_app_name, nullptr, [&](const gsf::ArgsPtr &args){
-		init_impl(args->pop_string());	
-	});
+	auto exeName = dispatch(eid::app_id, eid::base::get_app_name, nullptr)->pop_string();
+	init_impl(exeName);
 }
 
 void gsf::modules::LogModule::init()
@@ -90,7 +89,7 @@ void gsf::modules::LogModule::init_impl(const std::string &exe_name)
 }
 
 
-void gsf::modules::LogModule::log_print(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
+gsf::ArgsPtr gsf::modules::LogModule::log_print(const gsf::ArgsPtr &args)
 {
 	auto _lv = args->pop_ui16();
 	auto _title = args->pop_string();
@@ -109,5 +108,7 @@ void gsf::modules::LogModule::log_print(const gsf::ArgsPtr &args, gsf::CallbackF
 		LOG(ERROR) << "[ERROR] " << _title << " " << _context;
 		break;
 	}
+
+	return nullptr;
 }
 

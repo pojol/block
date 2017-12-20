@@ -15,9 +15,7 @@ gsf::modules::TimerModule::TimerModule()
 
 void gsf::modules::TimerModule::before_init()
 {
-	dispatch(eid::app_id, eid::get_module, gsf::make_args("LogModule"), [&](const gsf::ArgsPtr &args) {
-		log_m_ = args->pop_i32();
-	});
+	log_m_ = dispatch(eid::app_id, eid::get_module, gsf::make_args("LogModule"))->pop_moduleid();
 }
 
 void gsf::modules::TimerModule::init()
@@ -25,13 +23,13 @@ void gsf::modules::TimerModule::init()
 	using namespace std::placeholders;
 
 	listen(this, eid::timer::delay_milliseconds	
-		, std::bind(&TimerModule::delay_milliseconds, this, _1, _2));
+		, std::bind(&TimerModule::delay_milliseconds, this, _1));
 	
 	listen(this, eid::timer::delay_day
-		, std::bind(&TimerModule::delay_day, this, _1, _2));
+		, std::bind(&TimerModule::delay_day, this, _1));
 	
 	listen(this, eid::timer::remove_timer
-		, std::bind(&TimerModule::remove_timer, this, _1, _2));
+		, std::bind(&TimerModule::remove_timer, this, _1));
 
 	boardcast(eid::module_init_succ, gsf::make_args(get_module_id()));
 }
@@ -80,7 +78,7 @@ uint64_t gsf::modules::TimerModule::make_timer_id(uint64_t delay)
 	return _tick;
 }
 
-void gsf::modules::TimerModule::delay_milliseconds(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
+gsf::ArgsPtr gsf::modules::TimerModule::delay_milliseconds(const gsf::ArgsPtr &args)
 {
 	uint32_t _sender = args->pop_i32();
 	uint32_t _milliseconds = args->pop_i32();
@@ -94,11 +92,11 @@ void gsf::modules::TimerModule::delay_milliseconds(const gsf::ArgsPtr &args, gsf
 	assert(map_.find(_tid) == map_.end());
 	map_.insert(std::make_pair(_tid, _event));
 
-	callback(gsf::make_args(_tid));
+	return gsf::make_args(_tid);
 }
 
 
-void gsf::modules::TimerModule::delay_day(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
+gsf::ArgsPtr gsf::modules::TimerModule::delay_day(const gsf::ArgsPtr &args)
 {
 	using namespace std::chrono;
 
@@ -132,11 +130,11 @@ void gsf::modules::TimerModule::delay_day(const gsf::ArgsPtr &args, gsf::Callbac
 
 	map_.insert(std::make_pair(_tid, _event));
 
-	callback(gsf::make_args(_tid));
+	return gsf::make_args(_tid);
 }
 
 
-void gsf::modules::TimerModule::remove_timer(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
+gsf::ArgsPtr gsf::modules::TimerModule::remove_timer(const gsf::ArgsPtr &args)
 {
 	uint32_t _sender = args->pop_i32();
 	uint64_t _timer_id = args->pop_ui64();
@@ -145,9 +143,11 @@ void gsf::modules::TimerModule::remove_timer(const gsf::ArgsPtr &args, gsf::Call
 	if (itr != map_.end()) {
 		map_.erase(itr);
 
-		callback(gsf::make_args(1));
+		return gsf::make_args(true);
 	}
 	else {
 		dispatch(log_m_, eid::log::print, gsf::log_warring("TimerModule", fmt::format("remove timer not find {}", _timer_id)));
 	}
+
+	return gsf::make_args(false);
 }

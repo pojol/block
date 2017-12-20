@@ -38,17 +38,17 @@ namespace gsf
 			void after_shut() override;
 
 		private:
-			void make_connector(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
+			gsf::ArgsPtr make_connector(const gsf::ArgsPtr &args);
 			
 			void need_close_session(int fd);
 
-			void send_msg(const gsf::ArgsPtr &args, gsf::CallbackFunc callback);
+			gsf::ArgsPtr send_msg(const gsf::ArgsPtr &args);
 
 		private:
 
 			uint32_t module_id_;
 
-			uint32_t log_module_;
+			uint32_t log_m_;
 
 			event_base *event_base_ptr_;
 

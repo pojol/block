@@ -35,28 +35,22 @@ std::string Traceback(lua_State * _state)
 
 void gsf::modules::LuaProxyModule::before_init()
 {
-	dispatch(eid::app_id, eid::get_module, gsf::make_args("LogModule"), [=](const gsf::ArgsPtr &args)
-	{
-		log_m_ = args->pop_i32();
-	});
+	log_m_ = dispatch(eid::app_id, eid::get_module, gsf::make_args("LogModule"))->pop_i32();
 }
 
 void gsf::modules::LuaProxyModule::init()
 {
 	listen(this, eid::lua_proxy::create
 		, std::bind(&LuaProxyModule::create_event, this
-			, std::placeholders::_1
-			, std::placeholders::_2));
+			, std::placeholders::_1));
 
 	listen(this, eid::lua_proxy::destroy
 		, std::bind(&LuaProxyModule::destroy_event, this
-			, std::placeholders::_1
-			, std::placeholders::_2));
+			, std::placeholders::_1));
 
 	listen(this, eid::lua_proxy::reload
 		, std::bind(&LuaProxyModule::reload_event, this
-			, std::placeholders::_1
-			, std::placeholders::_2));
+			, std::placeholders::_1));
 }
 
 void gsf::modules::LuaProxyModule::execute()
@@ -112,104 +106,107 @@ void gsf::modules::LuaProxyModule::shut()
 	lua_map_.clear();
 }
 
-void gsf::modules::LuaProxyModule::create_event(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
+gsf::ArgsPtr gsf::modules::LuaProxyModule::create_event(const gsf::ArgsPtr &args)
 {
 	uint32_t _module_id = args->pop_i32();
 	std::string _dir_name = args->pop_string();
 	std::string _file_name = args->pop_string();
 
 	create(_module_id, _dir_name, _file_name);
+
+	return gsf::make_args(true);
 }
 
-int gsf::modules::LuaProxyModule::ldispatch(uint32_t lua_id, uint32_t target, uint32_t event, const sol::table &tb, sol::function func)
-{	
+sol::table gsf::modules::LuaProxyModule::ldispatch(uint32_t lua_id, uint32_t target, uint32_t event, const sol::table &tb)
+{
 	auto _smartPtr = gsf::ArgsPool::get_ref().get();
+	auto lua = find_lua(lua_id);
+	auto _resTable = lua->state_.create_table();
 
-	std::size_t iterations = 0;
-	for (auto & kvp : tb)
-	{
-		[&](sol::object key, sol::object value) {
-			++iterations;
-			sol::type keyType = value.get_type();
-			switch (keyType)
-			{
-			case sol::type::number:
-				_smartPtr->push_i32(value.as<double>());
-				break;
-			case sol::type::string:
-				_smartPtr->push_string(value.as<std::string>());
-				break;
-			case sol::type::nil:
-				std::cout << "nil" << std::endl;
-				break;
-			default:
-				break;
-			}
-		}(kvp.first, kvp.second);
-	}
-
-	dispatch(target, event, _smartPtr, [=](const gsf::ArgsPtr &_args) {
-		try {
-			auto _tag = _args->get_tag();
-			auto lua = find_lua(lua_id);
-			auto tb = lua->state_.create_table();
-			while (_tag != 0)
-			{
-				switch (_tag)
+	try {
+		std::size_t iterations = 0;
+		for (auto & kvp : tb)
+		{
+			[&](sol::object key, sol::object value) {
+				++iterations;
+				sol::type keyType = value.get_type();
+				switch (keyType)
 				{
-				case at_uint8:
-					tb.add(_args->pop_ui8());
+				case sol::type::number:
+					_smartPtr->push_i32(value.as<double>());
 					break;
-				case at_int8:
-					tb.add(_args->pop_i8());
+				case sol::type::string:
+					_smartPtr->push_string(value.as<std::string>());
 					break;
-				case at_int16:
-					tb.add(_args->pop_i16());
+				case sol::type::nil:
+					std::cout << "nil" << std::endl;
 					break;
-				case at_uint16:
-					tb.add(_args->pop_ui16());
-					break;
-				case at_int32:
-					tb.add(_args->pop_i32());
-					break;
-				case at_uint32:
-					tb.add(_args->pop_ui32());
-					break;
-				case at_int64:
-					tb.add(_args->pop_i64());
-					break;
-				case at_uint64:
-					tb.add(_args->pop_ui64());
-					break;
-				case at_string:
-					tb.add(_args->pop_string());
+				default:
 					break;
 				}
-				_tag = _args->get_tag();
-			}
-
-			func(tb);
+			}(kvp.first, kvp.second);
 		}
-		catch (sol::error e) {
-	
-			std::string _err = e.what() + '\n';
 
-			auto lua = find_lua(lua_id);
-			if (lua) {
-				_err += Traceback(lua->state_.lua_state());
+		auto args = dispatch(target, event, _smartPtr);
+		auto _tag = args->get_tag();
+		
+		while (_tag != 0)
+		{
+			switch (_tag)
+			{
+			case at_uint8:
+				_resTable.add(args->pop_ui8());
+				break;
+			case at_int8:
+				_resTable.add(args->pop_i8());
+				break;
+			case at_int16:
+				_resTable.add(args->pop_i16());
+				break;
+			case at_uint16:
+				_resTable.add(args->pop_ui16());
+				break;
+			case at_int32:
+				_resTable.add(args->pop_i32());
+				break;
+			case at_uint32:
+				_resTable.add(args->pop_ui32());
+				break;
+			case at_int64:
+				_resTable.add(args->pop_i64());
+				break;
+			case at_uint64:
+				_resTable.add(args->pop_ui64());
+				break;
+			case at_string:
+				_resTable.add(args->pop_string());
+				break;
 			}
-
-			dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
+			_tag = args->get_tag();
 		}
-	});
+	}
+	catch (sol::error e) {
 
-	return 0;
+		std::string _err = e.what() + '\n';
+
+		auto lua = find_lua(lua_id);
+		if (lua) {
+			_err += Traceback(lua->state_.lua_state());
+		}
+
+		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
+	}
+
+	return _resTable;
 }
 
-int gsf::modules::LuaProxyModule::llisten(uint32_t lua_id, uint32_t self, uint32_t event , sol::function func)
+int gsf::modules::LuaProxyModule::llisten(uint32_t lua_id, uint32_t self, uint32_t event, const sol::function &func)
 {
-	listen(self, event, [=](const gsf::ArgsPtr &args, gsf::CallbackFunc callback) {
-		try {
+	try {
+		listen(self, event, [=](const gsf::ArgsPtr &args)->gsf::ArgsPtr {
+
+			sol::table _resTable;
+
 			if (args) {
 				auto _tag = args->get_tag();
 				auto lua = find_lua(lua_id);
@@ -249,23 +246,56 @@ int gsf::modules::LuaProxyModule::llisten(uint32_t lua_id, uint32_t self, uint32
 					_tag = args->get_tag();
 				}
 
-				func(tb, nullptr);
+				_resTable = func(tb);
 			}
 			else {
-				func(nullptr, nullptr);
-			}
-		}
-		catch (sol::error e) {
-			std::string _err = e.what() + '\n';
-
-			auto lua = find_lua(lua_id);
-			if (lua) {
-				_err += Traceback(lua->state_.lua_state());
+				_resTable = func(nullptr);
 			}
 
-			dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
+			if (!_resTable.empty()) {
+				auto _smartPtr = gsf::ArgsPool::get_ref().get();
+				std::size_t iterations = 0;
+
+				for (auto & kvp : _resTable)
+				{
+					[&](sol::object key, sol::object value) {
+						++iterations;
+						sol::type keyType = value.get_type();
+						switch (keyType)
+						{
+						case sol::type::number:
+							_smartPtr->push_i32(value.as<double>());
+							break;
+						case sol::type::string:
+							_smartPtr->push_string(value.as<std::string>());
+							break;
+						case sol::type::nil:
+							std::cout << "nil" << std::endl;
+							break;
+						default:
+							break;
+						}
+					}(kvp.first, kvp.second);
+				}
+
+				return _smartPtr;
+			}
+			else {
+				return nullptr;
+			}
+			
+		});
+	}
+	catch (sol::error e) {
+		std::string _err = e.what() + '\n';
+
+		auto lua = find_lua(lua_id);
+		if (lua) {
+			_err += Traceback(lua->state_.lua_state());
 		}
-	});
+
+		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
+	}	
 
 	return 0;
 }
@@ -355,7 +385,7 @@ void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_na
 	}
 }
 
-void gsf::modules::LuaProxyModule::destroy_event(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
+gsf::ArgsPtr gsf::modules::LuaProxyModule::destroy_event(const gsf::ArgsPtr &args)
 {
 	uint32_t _module_id = args->pop_i32();
 	auto itr = std::find_if(lua_map_.begin(), lua_map_.end(), [&](StateMap::value_type t) {
@@ -363,11 +393,13 @@ void gsf::modules::LuaProxyModule::destroy_event(const gsf::ArgsPtr &args, gsf::
 	});
 
 	if (itr == lua_map_.end()) {
-		return;
+		return gsf::make_args(false);
 	}
 
 	LuaProxy *_lua = itr->second;
 	_lua->app_state_ = LuaAppState::AFTER_SHUT;
+
+	return gsf::make_args(true);
 }
 
 int gsf::modules::LuaProxyModule::destroy(uint32_t module_id)
@@ -393,24 +425,26 @@ int gsf::modules::LuaProxyModule::destroy(uint32_t module_id)
 	return 0;
 }
 
-void gsf::modules::LuaProxyModule::reload_event(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
+gsf::ArgsPtr gsf::modules::LuaProxyModule::reload_event(const gsf::ArgsPtr &args)
 {
 	uint32_t _module_id = args->pop_i32();
 
 	LuaProxy *lua = find_lua(_module_id);
 	if (nullptr == lua) {
 		assert(lua);
-		return;
+		return gsf::make_args(false);
 	}
 
 	std::string _dir_name = lua->dir_name_;
 	std::string _file_name = lua->file_name_;
 
 	if (destroy(_module_id) != 0) {
-		return;
+		return gsf::make_args(false);
 	}
 
 	create(_module_id, _dir_name, _file_name);
+
+	return gsf::make_args(true);
 }
 
 gsf::modules::LuaProxy * gsf::modules::LuaProxyModule::find_lua(uint32_t id)
