@@ -36,6 +36,7 @@ std::string Traceback(lua_State * _state)
 void gsf::modules::LuaProxyModule::before_init()
 {
 	log_m_ = dispatch(eid::app_id, eid::get_module, gsf::make_args("LogModule"))->pop_i32();
+	assert(log_m_ != gsf::ModuleNil);
 }
 
 void gsf::modules::LuaProxyModule::init()

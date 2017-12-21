@@ -116,6 +116,7 @@ void gsf::network::Session::read(::bufferevent *bev)
 				args_ptr->push(fd_);
 				args_ptr->push(_msg_id);
 				args_ptr->push_block(_block->buf_ + _block->get_head_size(), _block->get_body_size());
+				
 				dispatch(module_id_, eid::network::recv, args_ptr);
 			}
 			else {

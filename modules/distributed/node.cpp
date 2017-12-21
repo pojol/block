@@ -6,6 +6,7 @@
 #include <core/dynamic_module_factory.h>
 
 #include <algorithm>
+#include <iostream>
 
 
 namespace gsf
@@ -32,6 +33,9 @@ void gsf::modules::NodeModule::before_init()
 {
 	log_m_ = dispatch(eid::base::app_id, eid::get_module, gsf::make_args("LogModule"))->pop_moduleid();
 	timer_m_ = dispatch(eid::base::app_id, eid::get_module, gsf::make_args("TimerModule"))->pop_moduleid();
+
+	assert(log_m_ != gsf::ModuleNil);
+	assert(timer_m_ != gsf::ModuleNil);
 
 	using namespace std::placeholders;
 	listen(this, eid::distributed::node_create, std::bind(&NodeModule::event_create_node, this, _1));
@@ -91,7 +95,7 @@ void gsf::modules::NodeModule::shut()
 
 }
 
-void gsf::modules::NodeModule::event_rpc(const std::string &module, uint32_t event, const gsf::ArgsPtr &args, gsf::RpcCallback callback)
+void gsf::modules::NodeModule::event_rpc(const std::string &module, int event, const gsf::ArgsPtr &args, gsf::RpcCallback callback)
 {
 	auto _itr = callback_map_.find(event);
 	if (_itr != callback_map_.end()) {
@@ -100,7 +104,7 @@ void gsf::modules::NodeModule::event_rpc(const std::string &module, uint32_t eve
 	}
 
 	if (callback) {
-		uint64_t _tid = dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::make_args(rpc_delay_))->pop_timerid();
+		uint64_t _tid = dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::make_args(get_module_id(), rpc_delay_))->pop_timerid();
 
 		auto _callbackPtr = std::make_shared<CallbackInfo>();
 		_callbackPtr->callback = callback;
@@ -115,7 +119,8 @@ void gsf::modules::NodeModule::event_rpc(const std::string &module, uint32_t eve
 		auto argsPtr = gsf::ArgsPool::get_ref().get();
 		argsPtr->push(event);
 		argsPtr->push(module);
-		argsPtr->push_block(args->pop_block(0, args->get_size()).c_str(), args->get_size());
+		argsPtr->push_block(args->pop_block(0, args->get_pos()).c_str(), args->get_pos());
+
 		dispatch(connector_m_, eid::network::send, std::move(argsPtr));
 	}
 	else {
@@ -139,12 +144,13 @@ gsf::ArgsPtr gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &arg
 		auto _module_len = args->pop_i32();
 		for (int i = 0; i < _module_len; ++i)
 		{
-			auto _module_name = args->pop_string();
-			auto _module_id = args->pop_i32();
-
 			// �����
 			// todo 
-			modules_.push_back(std::make_pair(_module_name, _module_id));
+			ModuleInfo info;
+			info.moduleName = args->pop_string();
+			info.moduleID = args->pop_moduleid();
+			info.characteristic = args->pop_i32();
+			modules_.push_back(info);
 		}
 
 		connector_m_ = dispatch(eid::base::app_id, eid::base::new_dynamic_module, gsf::make_args("ConnectorModule"))->pop_moduleid();
@@ -162,8 +168,9 @@ gsf::ArgsPtr gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &arg
 			_args->push(int32_t(modules_.size()));
 			for (auto &it : modules_)
 			{
-				_args->push(it.first);
-				_args->push(it.second);
+				_args->push(it.moduleName);
+				_args->push(it.moduleID);
+				_args->push(it.characteristic);
 			}
 			event_rpc("CoodinatorModule", eid::distributed::coordinat_regist, _args, [&](const gsf::ArgsPtr &args, bool result) {
 				if (result) {

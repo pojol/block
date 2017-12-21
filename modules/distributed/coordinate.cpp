@@ -88,7 +88,7 @@ gsf::ArgsPtr gsf::modules::CoodinatorModule::event_regist(const gsf::ArgsPtr &ar
 	auto itr = node_id_map_.find(_nod_id);
 	if (itr != node_id_map_.end()) {
 		printf("coordnate regist app repeat! %d \n", _nod_id);
-		return nullptr;
+		return gsf::make_args(false);
 	}
 
 	auto nod = std::make_shared<CNodeInfo>();
@@ -108,7 +108,7 @@ gsf::ArgsPtr gsf::modules::CoodinatorModule::event_regist(const gsf::ArgsPtr &ar
 		adjust_module_weight(_nod_id, _module_name, _module_id, _module_characteristic, 0);
 	}
 
-	return nullptr;
+	return gsf::make_args(true);
 }
 
 gsf::ArgsPtr gsf::modules::CoodinatorModule::event_unregist(const gsf::ArgsPtr &args)
