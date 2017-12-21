@@ -25,7 +25,7 @@ namespace gsf
 			std::vector<CModuleInfo> modules;
 
 			std::string ip_ = "";
-			uint32_t nod_id = 0;
+			int32_t nod_id = 0;
 
 			std::string type_ = "";
 
