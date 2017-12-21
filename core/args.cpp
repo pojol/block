@@ -1,4 +1,5 @@
 #include "args.h"
+#include <sstream>
 
 template <typename T>
 void gsf::Args::push_impl(const T &val)
@@ -451,6 +452,54 @@ std::string gsf::Args::pop_block(int beg, int size)
 uint32_t gsf::Args::get_size() const
 {
 	return size_;
+}
+
+uint32_t gsf::Args::get_pos() const
+{
+	return pos_;
+}
+
+std::string gsf::Args::toString()
+{
+	std::stringstream ss;
+
+	auto tag = get_tag();
+	while (tag != 0)
+	{
+		switch (tag)
+		{
+		case at_uint8:
+			ss << "uint8:" << pop_ui8() << std::endl;
+			break;
+		case at_int8:
+			ss << "int8:" << pop_i8() << std::endl;
+			break;
+		case at_int16:
+			ss << "int16:" << pop_i16() << std::endl;
+			break;
+		case at_uint16:
+			ss << "uint16:" << pop_ui16() << std::endl;
+			break;
+		case at_int32:
+			ss << "int32:" << pop_i32() << std::endl;
+			break;
+		case at_uint32:
+			ss << "uint32:" << pop_ui32() << std::endl;
+			break;
+		case at_int64:
+			ss << "int64:" << pop_i64() << std::endl;
+			break;
+		case at_uint64:
+			ss << "uint64:" << pop_ui64() << std::endl;
+			break;
+		case at_string:
+			ss << "string:" << pop_string() << std::endl;
+			break;
+		}
+		tag = get_tag();
+	}
+
+	return ss.str();
 }
 
 //////////////////////////////////////////////////////////////////////////

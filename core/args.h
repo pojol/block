@@ -105,7 +105,9 @@ namespace gsf
 
 		std::string pop_block(int beg, int end);
 
-		uint32_t get_size() const;
+		uint32_t get_pos() const;
+
+		std::string toString();
 
 		void flush();
 	private:
@@ -124,6 +126,7 @@ namespace gsf
 		void pop_impl(float &val);
 		void pop_impl(double &val);
 
+		uint32_t get_size() const;
 	private:
 
 		char *buff_;
