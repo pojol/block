@@ -178,7 +178,7 @@ gsf::ArgsPtr gsf::network::AcceptorModule::send_msg(const gsf::ArgsPtr &args)
 	std::string _str = "";
 
 	if (_msg > eid::distributed::rpc_begin && _msg < eid::distributed::rpc_end) {
-		auto _headlen = sizeof(gsf::SessionID) + sizeof(gsf::MsgID);
+		auto _headlen = sizeof(gsf::SessionID) + 1 + sizeof(gsf::MsgID) + 1;
 		_str = args->pop_block(_headlen, args->get_pos());
 	}
 	else {
