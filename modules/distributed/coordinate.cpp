@@ -41,7 +41,7 @@ gsf::ArgsPtr gsf::modules::CoodinatorModule::event_get_light_module(const gsf::A
 
 	auto _count = node_name_map_.count(_module_name);
 	if (_count == 0) {
-		return nullptr;
+		return gsf::make_args(0);
 	}
 	else {
 		NodePtr _ptr;
@@ -75,7 +75,7 @@ gsf::ArgsPtr gsf::modules::CoodinatorModule::event_get_light_module(const gsf::A
 		return gsf::make_args(_ptr->nod_id);
 	}
 
-	return nullptr;
+	return gsf::make_args(0);
 }
 
 //const std::string &type, const std::string &ip, int32_t port
