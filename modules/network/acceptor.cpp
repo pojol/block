@@ -179,7 +179,7 @@ gsf::ArgsPtr gsf::network::AcceptorModule::send_msg(const gsf::ArgsPtr &args)
 
 	if (_msg > eid::distributed::rpc_begin && _msg < eid::distributed::rpc_end) {
 		auto _headlen = sizeof(gsf::SessionID) + sizeof(gsf::MsgID);
-		_str = args->pop_block(_headlen, args->get_size());
+		_str = args->pop_block(_headlen, args->get_pos());
 	}
 	else {
 		_str = args->pop_string();

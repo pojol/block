@@ -16,6 +16,7 @@ gsf::modules::TimerModule::TimerModule()
 void gsf::modules::TimerModule::before_init()
 {
 	log_m_ = dispatch(eid::app_id, eid::get_module, gsf::make_args("LogModule"))->pop_moduleid();
+	assert(log_m_ != gsf::ModuleNil);
 }
 
 void gsf::modules::TimerModule::init()

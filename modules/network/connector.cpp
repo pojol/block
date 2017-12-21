@@ -52,6 +52,7 @@ void gsf::network::ConnectorModule::before_init()
 	
 
 	log_m_ = dispatch(eid::app_id, eid::get_module, gsf::make_args("LogModule"))->pop_moduleid();
+	assert(log_m_ != gsf::ModuleNil);
 }
 
 void gsf::network::ConnectorModule::init()
@@ -165,8 +166,8 @@ gsf::ArgsPtr gsf::network::ConnectorModule::send_msg(const gsf::ArgsPtr &args)
 	auto _msg = args->pop_msgid();
 	std::string _str = "";
 	if (_msg > eid::distributed::rpc_begin && _msg < eid::distributed::rpc_end) {
-		auto _headlen = sizeof(gsf::MsgID);
-		_str = args->pop_block(_headlen, args->get_size());
+		auto _headlen = sizeof(gsf::MsgID) + 1;
+		_str = args->pop_block(_headlen, args->get_pos() - _headlen);
 	}
 	else {
 		_str = args->pop_string();

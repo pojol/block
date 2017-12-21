@@ -21,6 +21,13 @@ namespace gsf
 		};
 		typedef std::shared_ptr<CallbackInfo> CallbackPtr;
 
+		struct ModuleInfo
+		{
+			std::string moduleName = "";
+			gsf::ModuleID moduleID = gsf::ModuleNil;
+			int32_t characteristic = 0;
+		};
+
 		class NodeModule
 			: public gsf::Module
 			, public gsf::IEvent
@@ -37,7 +44,7 @@ namespace gsf
 
 		protected:
 
-			void event_rpc(const std::string &module, uint32_t event, const gsf::ArgsPtr &args, gsf::RpcCallback callback);
+			void event_rpc(const std::string &module, int event, const gsf::ArgsPtr &args, gsf::RpcCallback callback);
 
 			gsf::ArgsPtr event_create_node(const gsf::ArgsPtr &args);
 
@@ -57,11 +64,11 @@ namespace gsf
 			int32_t id_ = 0;
 			std::string type_ = "";
 
-			uint32_t rpc_delay_ = 3000;
+			int32_t rpc_delay_ = 3000;
 			bool service_ = false;
 			gsf::ModuleID target_m_ = gsf::ModuleNil;
 
-			std::vector<std::pair<std::string, gsf::ModuleID>> modules_;
+			std::vector<ModuleInfo> modules_;
 
 			std::map<uint32_t, CallbackPtr> callback_map_;
 			std::map<uint64_t, CallbackPtr> timer_set_;
