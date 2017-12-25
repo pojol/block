@@ -23,6 +23,7 @@ namespace gsf
 		using TypeTag = uint8_t;
 
 		Args();
+		Args(const char* block);
 		Args(int size);
 
 		void push(const uint8_t &val);

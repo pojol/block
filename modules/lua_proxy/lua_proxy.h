@@ -57,7 +57,7 @@ namespace gsf
 			//sol::variadic_args args
 
 			//代理下event的dispatch 和 listen 接口，因为要在这里集中捕获下lua产生的异常。
-			sol::table ldispatch(uint32_t lua_id, uint32_t target, uint32_t event, const sol::table &tb);
+			std::string ldispatch(uint32_t lua_id, uint32_t target, uint32_t event, const std::string &buf);
 
 			int llisten(uint32_t lua_id, uint32_t self, uint32_t event, const sol::function &func);
 

@@ -512,6 +512,16 @@ gsf::Args::Args()
 	flush();
 }
 
+gsf::Args::Args(const char* block)
+{
+	buff_ = (char*)malloc(1024);
+	pos_ = size_ = 1024;
+
+	flush();
+
+	push_block(block, strlen(block));
+}
+
 gsf::Args::Args(int size)
 {
 	buff_ = (char*)malloc(size);
