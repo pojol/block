@@ -128,7 +128,9 @@ std::string gsf::modules::LuaProxyModule::ldispatch(uint32_t lua_id, uint32_t ta
 		_smartPtr->push_block(buf.c_str(), buf.size());
 
 		auto args = dispatch(target, event, _smartPtr);
-		_res = args->pop_block(0, args->get_pos());
+		if (args) {
+			_res = args->pop_block(0, args->get_pos());
+		}
 	}
 	catch (sol::error e) {
 
@@ -177,7 +179,7 @@ int gsf::modules::LuaProxyModule::llisten(uint32_t lua_id, uint32_t self, uint32
 		}
 
 		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
-	}	
+	}
 
 	return 0;
 }

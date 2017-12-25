@@ -23,7 +23,6 @@ namespace eid
 		module_shut_succ,
 	};
 
-
 	enum error
 	{
 		err_repeated_fd = -10000,
@@ -39,7 +38,7 @@ namespace eid
 
 	enum network
 	{
-		make_acceptor = 1000,
+		make_acceptor = 100,
 		make_connector,
 		kick_connect,
 		send,
