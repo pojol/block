@@ -158,7 +158,7 @@ int gsf::modules::LuaProxyModule::llisten(uint32_t lua_id, uint32_t self, uint32
 				_req = args->pop_block(0, args->get_pos());
 			}
 
-			std::string _res = func(_req);
+			std::string _res = func(_req, args->get_pos());
 
 			if (_res != "") {
 				auto _smartPtr = gsf::ArgsPool::get_ref().get();
@@ -224,11 +224,13 @@ void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_na
 	}
 
 	_lua->state_.new_usertype<gsf::Args>("Args"
-		, sol::constructors<Args(), Args(const char *)>()
+		, sol::constructors<Args(), Args(const char *, int)>()
+		, "push_ui16", &Args::push_ui16
 		, "push_ui32", &Args::push_ui32
 		, "push_i32", &Args::push_i32
 		, "push_string", &Args::push_string
 		, "pop_string", &Args::pop_string
+		, "pop_ui16", &Args::pop_ui16
 		, "pop_ui32", &Args::pop_ui32
 		, "pop_i32", &Args::pop_i32
 		, "pop_ui64", &Args::pop_ui64

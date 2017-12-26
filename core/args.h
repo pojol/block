@@ -23,7 +23,7 @@ namespace gsf
 		using TypeTag = uint8_t;
 
 		Args();
-		Args(const char* block);
+		Args(const char* block, int len);
 		Args(int size);
 
 		void push(const uint8_t &val);
@@ -60,6 +60,7 @@ namespace gsf
 		void push_block(const char *block, int len);
 
 		////////////////lua/////////////////////
+		void push_ui16(const uint16_t &val);
 		void push_ui32(const uint32_t &val);
 		void push_i32(const int32_t &val);
 		void push_string(const std::string &val);

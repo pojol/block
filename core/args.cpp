@@ -23,6 +23,12 @@ void gsf::Args::push(const uint8_t &val)
 	push_impl(val);
 }
 
+void gsf::Args::push_ui16(const uint16_t &val)
+{
+	push_impl(at_uint16);
+	push_impl(val);
+}
+
 void gsf::Args::push_ui32(const uint32_t &val)
 {
 	push_impl(at_uint32);
@@ -512,14 +518,14 @@ gsf::Args::Args()
 	flush();
 }
 
-gsf::Args::Args(const char* block)
+gsf::Args::Args(const char* block, int len)
 {
 	buff_ = (char*)malloc(1024);
 	pos_ = size_ = 1024;
 
 	flush();
 
-	push_block(block, strlen(block));
+	push_block(block, len);
 }
 
 gsf::Args::Args(int size)
