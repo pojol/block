@@ -118,72 +118,18 @@ gsf::ArgsPtr gsf::modules::LuaProxyModule::create_event(const gsf::ArgsPtr &args
 	return gsf::make_args(true);
 }
 
-sol::table gsf::modules::LuaProxyModule::ldispatch(uint32_t lua_id, uint32_t target, uint32_t event, const sol::table &tb)
+std::string gsf::modules::LuaProxyModule::ldispatch(uint32_t lua_id, uint32_t target, uint32_t event, const std::string &buf)
 {
 	auto _smartPtr = gsf::ArgsPool::get_ref().get();
 	auto lua = find_lua(lua_id);
-	auto _resTable = lua->state_.create_table();
+	std::string _res = "";
 
 	try {
-		std::size_t iterations = 0;
-		for (auto & kvp : tb)
-		{
-			[&](sol::object key, sol::object value) {
-				++iterations;
-				sol::type keyType = value.get_type();
-				switch (keyType)
-				{
-				case sol::type::number:
-					_smartPtr->push_i32(value.as<double>());
-					break;
-				case sol::type::string:
-					_smartPtr->push_string(value.as<std::string>());
-					break;
-				case sol::type::nil:
-					std::cout << "nil" << std::endl;
-					break;
-				default:
-					break;
-				}
-			}(kvp.first, kvp.second);
-		}
+		_smartPtr->push_block(buf.c_str(), buf.size());
 
 		auto args = dispatch(target, event, _smartPtr);
-		auto _tag = args->get_tag();
-		
-		while (_tag != 0)
-		{
-			switch (_tag)
-			{
-			case at_uint8:
-				_resTable.add(args->pop_ui8());
-				break;
-			case at_int8:
-				_resTable.add(args->pop_i8());
-				break;
-			case at_int16:
-				_resTable.add(args->pop_i16());
-				break;
-			case at_uint16:
-				_resTable.add(args->pop_ui16());
-				break;
-			case at_int32:
-				_resTable.add(args->pop_i32());
-				break;
-			case at_uint32:
-				_resTable.add(args->pop_ui32());
-				break;
-			case at_int64:
-				_resTable.add(args->pop_i64());
-				break;
-			case at_uint64:
-				_resTable.add(args->pop_ui64());
-				break;
-			case at_string:
-				_resTable.add(args->pop_string());
-				break;
-			}
-			_tag = args->get_tag();
+		if (args) {
+			_res = args->pop_block(0, args->get_pos());
 		}
 	}
 	catch (sol::error e) {
@@ -198,7 +144,7 @@ sol::table gsf::modules::LuaProxyModule::ldispatch(uint32_t lua_id, uint32_t tar
 		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
 	}
 
-	return _resTable;
+	return _res;
 }
 
 int gsf::modules::LuaProxyModule::llisten(uint32_t lua_id, uint32_t self, uint32_t event, const sol::function &func)
@@ -206,85 +152,22 @@ int gsf::modules::LuaProxyModule::llisten(uint32_t lua_id, uint32_t self, uint32
 	try {
 		listen(self, event, [=](const gsf::ArgsPtr &args)->gsf::ArgsPtr {
 
-			sol::table _resTable;
+			std::string _req = "";
 
 			if (args) {
-				auto _tag = args->get_tag();
-				auto lua = find_lua(lua_id);
-				auto tb = lua->state_.create_table();
-				while (_tag != 0)
-				{
-					switch (_tag)
-					{
-					case at_uint8:
-						tb.add(args->pop_ui8());
-						break;
-					case at_int8:
-						tb.add(args->pop_i8());
-						break;
-					case at_int16:
-						tb.add(args->pop_i16());
-						break;
-					case at_uint16:
-						tb.add(args->pop_ui16());
-						break;
-					case at_int32:
-						tb.add(args->pop_i32());
-						break;
-					case at_uint32:
-						tb.add(args->pop_ui32());
-						break;
-					case at_int64:
-						tb.add(args->pop_i64());
-						break;
-					case at_uint64:
-						tb.add(args->pop_ui64());
-						break;
-					case at_string:
-						tb.add(args->pop_string());
-						break;
-					}
-					_tag = args->get_tag();
-				}
-
-				_resTable = func(tb);
-			}
-			else {
-				_resTable = func(nullptr);
+				_req = args->pop_block(0, args->get_pos());
 			}
 
-			if (!_resTable.empty()) {
+			std::string _res = func(_req, args->get_pos());
+
+			if (_res != "") {
 				auto _smartPtr = gsf::ArgsPool::get_ref().get();
-				std::size_t iterations = 0;
-
-				for (auto & kvp : _resTable)
-				{
-					[&](sol::object key, sol::object value) {
-						++iterations;
-						sol::type keyType = value.get_type();
-						switch (keyType)
-						{
-						case sol::type::number:
-							_smartPtr->push_i32(value.as<double>());
-							break;
-						case sol::type::string:
-							_smartPtr->push_string(value.as<std::string>());
-							break;
-						case sol::type::nil:
-							std::cout << "nil" << std::endl;
-							break;
-						default:
-							break;
-						}
-					}(kvp.first, kvp.second);
-				}
-
+				_smartPtr->push_block(_res.c_str(), _res.size());
 				return _smartPtr;
 			}
 			else {
 				return nullptr;
 			}
-			
 		});
 	}
 	catch (sol::error e) {
@@ -296,7 +179,7 @@ int gsf::modules::LuaProxyModule::llisten(uint32_t lua_id, uint32_t self, uint32
 		}
 
 		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
-	}	
+	}
 
 	return 0;
 }
@@ -341,13 +224,18 @@ void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_na
 	}
 
 	_lua->state_.new_usertype<gsf::Args>("Args"
+		, sol::constructors<Args(), Args(const char *, int)>()
+		, "push_ui16", &Args::push_ui16
 		, "push_ui32", &Args::push_ui32
 		, "push_i32", &Args::push_i32
 		, "push_string", &Args::push_string
 		, "pop_string", &Args::pop_string
+		, "pop_ui16", &Args::pop_ui16
 		, "pop_ui32", &Args::pop_ui32
 		, "pop_i32", &Args::pop_i32
-		, "pop_ui64", &Args::pop_ui64);
+		, "pop_ui64", &Args::pop_ui64
+		, "pop_block", &Args::pop_block
+		, "get_pos", &Args::get_pos);
 
 	_lua->state_.new_usertype<LuaProxyModule>("LuaProxyModule"
 		, "ldispatch", &LuaProxyModule::ldispatch

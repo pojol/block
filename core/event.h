@@ -104,10 +104,14 @@ namespace gsf
 #ifdef WATCH_PERF
 		std::string get_tick_info(uint32_t count, uint32_t tick_count)
 		{
-			auto c = tick_consume_ / 1000 / count;
+			auto c = static_cast<float>(tick_consume_ / 1000 / count);
 			char buf[20];
-			sprintf(buf, "%.3f", c);
+			snprintf(buf, sizeof(buf), "%.3f", c);
+#ifdef WIN32
+			sscanf_s(buf, "%f", &c);
+#else
 			sscanf(buf, "%f", &c);
+#endif
 
 			std::string _info = get_module_name() + ":" + (buf)+" ms\n";
 
@@ -154,7 +158,7 @@ namespace gsf
 			DispatchFunc event_func_;
 
 #ifdef WATCH_PERF
-			uint64_t calls_ = 0;
+			uint32_t calls_ = 0;
 
 #endif // WATCH_PERF
 		};

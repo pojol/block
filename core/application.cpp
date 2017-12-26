@@ -109,7 +109,7 @@ void gsf::Application::pop_frame()
 {
 	if (!halfway_frame_.empty()) {
 		auto itr = halfway_frame_.find(cur_frame_);
-		for (auto i = 0; i < halfway_frame_.count(cur_frame_); ++i, ++itr)
+		for (size_t i = 0; i < halfway_frame_.count(cur_frame_); ++i, ++itr)
 		{
 			int idx = std::get<0>(itr->second);
 			if (idx == 0) {
@@ -137,7 +137,7 @@ void gsf::Application::pop_frame()
 	if (!exit_list_.empty()) {
 
 		auto itr = exit_list_.find(cur_frame_);
-		for (auto i = 0; i < exit_list_.count(cur_frame_); ++i, ++itr)
+		for (size_t i = 0; i < exit_list_.count(cur_frame_); ++i, ++itr)
 		{
 			auto idx = itr->second.first;
 			if (idx == 0) {
@@ -187,7 +187,7 @@ void gsf::Application::run()
 		auto _ttime = time_point_cast<microseconds>(system_clock::now());
 
 #ifdef WATCH_PERF
-		double t1 = 0;
+		int64_t t1 = 0;
 #endif // WATCH_PERF
 		
 		auto _callback = [&](AppState state) {

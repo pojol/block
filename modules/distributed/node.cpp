@@ -144,8 +144,6 @@ gsf::ArgsPtr gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &arg
 		auto _module_len = args->pop_i32();
 		for (int i = 0; i < _module_len; ++i)
 		{
-			// �����
-			// todo 
 			ModuleInfo info;
 			info.moduleName = args->pop_string();
 			info.moduleID = args->pop_moduleid();
@@ -198,5 +196,6 @@ gsf::ArgsPtr gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &arg
 		return nullptr;
 	}
 
+	return nullptr;
 }
 
