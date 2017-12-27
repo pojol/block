@@ -1,4 +1,4 @@
-#ifndef _GSF_LUA_PROXY_HEADER_
+ï»¿#ifndef _GSF_LUA_PROXY_HEADER_
 #define _GSF_LUA_PROXY_HEADER_
 
 #include <sol.hpp>
@@ -56,7 +56,7 @@ namespace gsf
 		private:
 			//sol::variadic_args args
 
-			//´úÀíÏÂeventµÄdispatch ºÍ listen ½Ó¿Ú£¬ÒòÎªÒªÔÚÕâÀï¼¯ÖĞ²¶»ñÏÂlua²úÉúµÄÒì³£¡£
+			//ä»£ç†ä¸‹eventçš„dispatch å’Œ listen æ¥å£ï¼Œå› ä¸ºè¦åœ¨è¿™é‡Œé›†ä¸­æ•è·ä¸‹luaäº§ç”Ÿçš„å¼‚å¸¸ã€‚
 			std::string ldispatch(uint32_t lua_id, uint32_t target, uint32_t event, const std::string &buf);
 
 			int llisten(uint32_t lua_id, uint32_t self, uint32_t event, const sol::function &func);
