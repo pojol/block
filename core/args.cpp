@@ -544,6 +544,12 @@ void gsf::Args::flush()
 	pos_ = 0;
 }
 
+gsf::Args::~Args()
+{
+	free(buff_);
+	buff_ = write_ = tail_ = read_ = nullptr;
+	pos_ = size_ = 0;
+}
 
 //////////////////////////////////////////////////////////////////////////
 

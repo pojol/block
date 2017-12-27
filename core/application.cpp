@@ -1,4 +1,4 @@
-#include "application.h"
+ï»¿#include "application.h"
 
 #include <ctime>
 #include <algorithm>
@@ -89,7 +89,7 @@ void gsf::Application::unregist_module(gsf::ModuleID module_id)
 	
 		auto module_ptr = *itr;
 
-		exit_list_.insert(std::make_pair(cur_frame_, std::make_pair(0, module_ptr))); // ÔÚÑ­»·Íâ´¦ÀíÇåÀíÂß¼­
+		exit_list_.insert(std::make_pair(cur_frame_, std::make_pair(0, module_ptr))); // åœ¨å¾ªç¯å¤–å¤„ç†æ¸…ç†é€»è¾‘
 		exit_list_.insert(std::make_pair(cur_frame_ + 1, std::make_pair(1, module_ptr)));
 		exit_list_.insert(std::make_pair(cur_frame_ + 2, std::make_pair(2, module_ptr)));
 		exit_list_.insert(std::make_pair(cur_frame_ + 3, std::make_pair(3, module_ptr)));

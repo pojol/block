@@ -26,6 +26,8 @@ namespace gsf
 		Args(const char* block, int len);
 		Args(int size);
 
+		~Args();
+
 		void push(const uint8_t &val);
 		void push(const int8_t &val);
 
