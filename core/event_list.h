@@ -187,8 +187,13 @@ namespace eid
 		redis_avatar_offline,
 		redis_resume,
 
+		/*!
+			建立一个新的Mysql连接
+			参数: host, user, password, dbName, port
+			类型: dispatch
+		**/
 		mysql_connect,
-		mysql_update,
+
 		mysql_query,
 		mysql_execute,
 	};

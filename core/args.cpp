@@ -21,24 +21,49 @@ void gsf::Args::push(const uint8_t &val)
 {
 	push_impl(at_uint8);
 	push_impl(val);
+	size_++;
 }
 
 void gsf::Args::push_ui16(const uint16_t &val)
 {
 	push_impl(at_uint16);
 	push_impl(val);
+	size_++;
 }
 
 void gsf::Args::push_ui32(const uint32_t &val)
 {
 	push_impl(at_uint32);
 	push_impl(val);
+	size_++;
 }
 
 void gsf::Args::push_i32(const int32_t &val)
 {
 	push_impl(at_int32);
 	push_impl(val);
+	size_++;
+}
+
+void gsf::Args::push_i64(const int64_t &val)
+{
+	push_impl(at_int64);
+	push_impl(val);
+	size_++;
+}
+
+void gsf::Args::push_float(const float &val)
+{
+	push_impl(at_float);
+	push_impl(val);
+	size_++;
+}
+
+void gsf::Args::push_double(const double &val)
+{
+	push_impl(at_double);
+	push_impl(val);
+	size_++;
 }
 
 void gsf::Args::push_string(const std::string &val)
@@ -50,60 +75,70 @@ void gsf::Args::push(const int8_t &val)
 {
 	push_impl(at_int8);
 	push_impl(val);
+	size_++;
 }
 
 void gsf::Args::push(const uint16_t &val)
 {
 	push_impl(at_uint16);
 	push_impl(val);
+	size_++;
 }
 
 void gsf::Args::push(const int16_t &val)
 {
 	push_impl(at_int16);
 	push_impl(val);
+	size_++;
 }
 
 void gsf::Args::push(const uint32_t &val)
 {
 	push_impl(at_uint32);
 	push_impl(val);
+	size_++;
 }
 
 void gsf::Args::push(const int32_t & val)
 {
 	push_impl(at_int32);
 	push_impl(val);
+	size_++;
 }
 
 void gsf::Args::push(const uint64_t &val)
 {
 	push_impl(at_uint64);
 	push_impl(val);
+	size_++;
 }
 
 void gsf::Args::push(const int64_t &val)
 {
 	push_impl(at_uint64);
 	push_impl(val);
+	size_++;
 }
 
 void gsf::Args::push(const bool &val)
 {
 	push_impl(at_bool);
 	push_impl(val);
+	size_++;
 }
 
 void gsf::Args::push(const float &val)
 {
 	push_impl(at_float);
 	push_impl(val);
+	size_++;
 }
 
 void gsf::Args::push(const double &val)
 {
 	push_impl(at_double);
 	push_impl(val);
+	size_++;
 }
 
 void gsf::Args::push(const std::string &val)
@@ -122,6 +157,7 @@ void gsf::Args::push(std::list<T> &list)
 	{
 		push_impl(it);
 	}
+	size_++;
 }
 
 template <typename T>
@@ -135,6 +171,7 @@ void gsf::Args::push(std::vector<T> &vec)
 	{
 		push_impl(it);
 	}
+	size_++;
 }
 
 template <typename Key, typename Value>
@@ -149,6 +186,7 @@ void gsf::Args::push(std::map<Key, Value> &map)
 		push_impl(it.first);
 		push_impl(it.second);
 	}
+	size_++;
 }
 
 void gsf::Args::push(const char * val)
@@ -161,6 +199,7 @@ void gsf::Args::push(const char * val)
 	memcpy(write_, val, _len);
 	write_ += _len;
 
+	size_++;
 	pos_ += _len;
 }
 
@@ -187,6 +226,8 @@ uint8_t gsf::Args::pop_ui8()
 	auto _ui8 = *reinterpret_cast<uint8_t*>(read_);
 	read_ += sizeof(uint8_t);
 
+	size_--;
+
 	return _ui8;
 }
 
@@ -196,6 +237,8 @@ int8_t gsf::Args::pop_i8()
 
 	auto _val = *reinterpret_cast<int8_t*>(read_);
 	read_ += sizeof(int8_t);
+
+	size_--;
 
 	return _val;
 }
@@ -207,6 +250,8 @@ uint16_t gsf::Args::pop_ui16()
 	auto _val = *reinterpret_cast<uint16_t*>(read_);
 	read_ += sizeof(uint16_t);
 
+	size_--;
+
 	return _val;
 }
 
@@ -216,6 +261,8 @@ int16_t gsf::Args::pop_i16()
 
 	auto _val = *reinterpret_cast<int16_t*>(read_);
 	read_ += sizeof(int16_t);
+
+	size_--;
 
 	return _val;
 }
@@ -227,6 +274,8 @@ int32_t gsf::Args::pop_i32()
 	auto _i32 = *reinterpret_cast<int32_t*>(read_);
 	read_ += sizeof(int32_t);
 
+	size_--;
+
 	return _i32;
 }
 
@@ -236,6 +285,8 @@ uint64_t gsf::Args::pop_ui64()
 
 	auto _val = *reinterpret_cast<uint64_t*>(read_);
 	read_ += sizeof(uint64_t);
+
+	size_--;
 
 	return _val;
 }
@@ -247,6 +298,8 @@ int64_t gsf::Args::pop_i64()
 	auto _val = *reinterpret_cast<int64_t*>(read_);
 	read_ += sizeof(int64_t);
 
+	size_--;
+
 	return _val;
 }
 
@@ -256,6 +309,8 @@ bool gsf::Args::pop_bool()
 
 	auto _val = *reinterpret_cast<bool*>(read_);
 	read_ += sizeof(bool);
+
+	size_--;
 
 	return _val;
 }
@@ -267,6 +322,8 @@ float gsf::Args::pop_float()
 	auto _val = *reinterpret_cast<float*>(read_);
 	read_ += sizeof(float);
 
+	size_--;
+
 	return _val;
 }
 
@@ -277,6 +334,8 @@ double gsf::Args::pop_double()
 	auto _val = *reinterpret_cast<double*>(read_);
 	read_ += sizeof(double);
 
+	size_--;
+
 	return _val;
 }
 
@@ -286,6 +345,8 @@ uint32_t gsf::Args::pop_ui32()
 
 	auto _ui32 = *reinterpret_cast<uint32_t*>(read_);
 	read_ += sizeof(uint32_t);
+
+	size_--;
 
 	return _ui32;
 }
@@ -455,7 +516,7 @@ std::string gsf::Args::pop_block(int beg, int size)
 	return _str;
 }
 
-uint32_t gsf::Args::get_size() const
+uint32_t gsf::Args::get_params() const
 {
 	return size_;
 }
@@ -513,15 +574,15 @@ std::string gsf::Args::toString()
 gsf::Args::Args()
 {
 	buff_ = (char*)malloc(1024);
-	pos_ = size_ = 1024;
-	
+	pos_ = 1024;
+
 	flush();
 }
 
 gsf::Args::Args(const char* block, int len)
 {
 	buff_ = (char*)malloc(1024);
-	pos_ = size_ = 1024;
+	pos_ = 1024;
 
 	flush();
 
@@ -531,7 +592,7 @@ gsf::Args::Args(const char* block, int len)
 gsf::Args::Args(int size)
 {
 	buff_ = (char*)malloc(size);
-	pos_ = size_ = size;
+	pos_ = size;
 
 	flush();
 }

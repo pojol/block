@@ -6,6 +6,7 @@ if(WIN32)
             ${GSF_SOURCE_DIR}/
             ${GSF_SOURCE_DIR}/3rd/glog-0.3.4/src
 			${GSF_SOURCE_DIR}/3rd/redis-win-3.0.504/deps/hiredis
+			${GSF_SOURCE_DIR}/3rd/mysql_connect/include
     )
 
     #引用库目录

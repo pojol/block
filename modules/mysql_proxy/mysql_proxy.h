@@ -4,6 +4,8 @@
 #include <core/module.h>
 #include <core/event.h>
 
+#include "mysql_connect.h"
+
 namespace gsf
 {
 	namespace modules
@@ -37,6 +39,11 @@ namespace gsf
 			gsf::ArgsPtr query_event(const gsf::ArgsPtr &args);
 
 			gsf::ArgsPtr execute_event(const gsf::ArgsPtr &args);
+
+		private:
+			gsf::ModuleID log_m_ = gsf::ModuleNil;
+
+			MysqlConnect conn_;
 		};
 	}
 }
