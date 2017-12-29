@@ -65,7 +65,14 @@ namespace gsf
 		void push_ui16(const uint16_t &val);
 		void push_ui32(const uint32_t &val);
 		void push_i32(const int32_t &val);
+		void push_i64(const int64_t &val);
+		void push_float(const float &val);
+		void push_double(const double &val);
 		void push_string(const std::string &val);
+
+		uint8_t seek_tag();
+		void * seek(uint8_t type);
+		std::pair<void*, int> seekStr();
 
 		/////////////////////////////
 		uint8_t pop_tag();
@@ -110,6 +117,7 @@ namespace gsf
 		std::string pop_block(int beg, int end);
 
 		uint32_t get_pos() const;
+		uint32_t get_params() const;
 
 		std::string toString();
 
@@ -130,7 +138,6 @@ namespace gsf
 		void pop_impl(float &val);
 		void pop_impl(double &val);
 
-		uint32_t get_size() const;
 	private:
 
 		char *buff_;
@@ -139,7 +146,7 @@ namespace gsf
 		char *tail_;
 
 		uint32_t pos_;
-		uint32_t size_;
+		uint32_t size_ = 0;
 	};
 
 

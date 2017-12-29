@@ -16,11 +16,186 @@ namespace eid
 	{
 		app_id = 1,					//! 每个进程中application module 的id ，因为application的作用范围只在自身进程所以 id 可以是固定的。
 		get_app_name,
-		get_module,					//! 通过字符串获得module的id， 只能获取静态显示声明的module。
-		new_dynamic_module,			//! ͨ通过已经定义的module，创建多份实例。
+
+		/*!
+			通过字符串获得module的id， 只能获取静态显示声明的module。
+		**/
+		get_module,
+
+		/*!
+			通过已经定义的module，创建多份实例。
+		**/
+		new_dynamic_module,
+		
+		/*!
+			移除某个被注册的module
+		**/
 		delete_module,
+
 		module_init_succ,
 		module_shut_succ,
+	};
+
+	enum distributed
+	{
+		rpc_begin = 1001,
+
+		node_create,				// by cfg
+		node_create_succ,
+
+		coordinat_regist,
+		coordinat_unregit,
+		coordinat_adjust_weight,
+		coordinat_get,
+
+		login_server,
+		login_select_gate,
+		login_select_gate_cb,
+		login_logout,
+
+		rpc_end = 2000,
+	};
+
+	enum network
+	{
+		/*!
+			创建一个接收器
+			参数: module_id, ip, port
+			类型: dispatch
+		**/
+		make_acceptor = 2001,
+
+		/*!
+			创建一个连接器
+			参数: module_id, ip, port
+			类型: dispatch
+		**/
+		make_connector,
+
+		/*!
+			踢掉某个现有的连接
+			参数: fd
+			类型: dispatch
+		**/
+		kick_connect,
+
+		/*!
+			发送一条网络消息
+			参数: fd, msgid, block
+			类型: dispatch
+		**/
+		send,
+
+		/*!
+			接收到一条网络消息
+			参数: fd, msgid, block
+			类型: listen
+		**/
+		recv,
+		
+		/*!
+			接收到一个新的连接（适用于 acceptor
+			参数: fd
+			类型: listen
+		**/
+		new_connect,
+
+		/*!
+			连接被断开
+			参数: fd
+			类型: listen
+		**/
+		dis_connect,
+
+		/*!
+			连接失败（适用于 connector
+			参数: string
+			类型: listen
+		**/
+		fail_connect,
+	};
+
+	enum log
+	{
+		//const uint32_t init = 1001;	初始化改为在自己模块中实现，regist即初始化
+		print = 2101,
+	};
+
+	enum timer
+	{
+		/*!
+			延迟若干毫秒触发
+			参数: module_id, milliseconds
+			类型: dispatch
+		**/
+		delay_milliseconds = 2201,
+
+		/*!
+			延时一天触发， hour & minute 可以指定隔天的触发点
+			参数: module_id, hour, minute
+			类型: dispatch
+		**/
+		delay_day,
+
+		delay_week,
+
+		delay_month,
+
+		/*!
+			从定时器中移除
+			参数: timer_id
+			类型: dispatch
+		**/
+		remove_timer,
+
+		/*!
+			触发Timer
+			参数: timer_id
+			类型: listen
+		**/
+		timer_arrive,
+	};
+
+	enum lua_proxy
+	{
+		/*!
+			创建 Lua Script Module ,proxy会自动完成c++/lua的相关绑定 (userdata Args, interface : dispatch, listen, rpc)
+			参数: proxy module_id, script_dir, script_name
+			类型: dispatch
+		**/
+		create = 2301,
+
+		/*!
+			重新装载 Lua Script Module, 会走标准的退出和进入流程 init, shut 。即便持有状态也可以方便的热更
+			参数: module_id
+			类型: dispatch
+		**/
+		reload,
+
+		/*!
+			移除 Lua Script Module
+			参数: module_id
+			类型: dispatch
+		**/
+		destroy,
+	};
+
+	enum db_proxy
+	{
+		redis_connect = 2401,
+		redis_command,
+		redis_avatar_offline,
+		redis_resume,
+
+		/*!
+			建立一个新的Mysql连接
+			参数: host, user, password, dbName, port
+			类型: dispatch
+		**/
+		mysql_connect,
+
+		mysql_query,
+		mysql_execute,
 	};
 
 	enum error
@@ -34,87 +209,6 @@ namespace eid
 		err_event_timeout,
 		err_inet_pton,
 		err_distributed_node_repeat,
-	};
-
-	enum network
-	{
-		make_acceptor = 100,
-		make_connector,
-		kick_connect,
-		send,
-		recv,
-		//! result code
-		new_connect,
-		dis_connect,
-		fail_connect,
-	};
-
-	enum distributed
-	{
-		rpc_begin = 2001,
-
-		node_create,				// by cfg
-		node_create_succ,
-
-		coordinat_regist,			
-		coordinat_unregit,
-		coordinat_adjust_weight,	// args (i32 node_id, string module_name, i32 module_characteristic, i32 weight)
-		coordinat_get,				// args (string module_name, i32 module_characteristic)
-
-		login_server,
-		login_select_gate,
-		login_select_gate_cb,
-		login_logout,
-
-		rpc_end,
-	};
-
-	enum log
-	{
-		//const uint32_t init = 1001;	初始化改为在自己模块中实现，regist即初始化
-		print = 3000,
-	};
-
-	enum timer
-	{
-		//! args {"uint32_t":module_id，"uint32_t":milliseconds}
-		delay_milliseconds = 4000,
-
-		//! args {"uint32_t":module_id, "uint32_t":hour, "uint32_t":minute}
-		delay_day,
-
-		//! args {"uint32_t":module_id, "uint32_t":day, "uint32_t":hour}
-		delay_week,
-
-		//! args {"uint32_t":module_id, "uint32_t":day, "uint32_t":hour}
-		delay_month,
-
-		//! args {"uint32_t":module_id, "uint32_t":eid}
-		remove_timer,
-
-		timer_arrive,
-	};
-
-	enum lua_proxy
-	{
-		create = 5000,
-
-		reload,
-
-		destroy,
-	};
-
-	enum db_proxy
-	{
-		redis_connect = 6000,
-		redis_command,
-		redis_avatar_offline,
-		redis_resume,
-
-		mysql_connect,
-		mysql_update,
-		mysql_query,
-		mysql_execute,
 	};
 
 	enum sample

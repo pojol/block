@@ -6,19 +6,19 @@
 namespace gsf
 {
 	typedef int32_t ModuleID;
-	static const int32_t ModuleNil = 0;
+	static const int32_t ModuleNil = INT32_MAX;
 
 	typedef int32_t EventID;
-	static const int32_t EventNil = 0;
+	static const int32_t EventNil = INT32_MAX;
 
 	typedef uint64_t TimerID;
-	static const uint64_t TimerNil = 0;
+	static const uint64_t TimerNil = UINT64_MAX;
 
 	typedef uint16_t SessionID;
-	static const uint16_t SessionNil = 0;
+	static const uint16_t SessionNil = UINT16_MAX;
 
 	typedef int32_t MsgID;
-	static const int32_t MsgNil = 0;
+	static const int32_t MsgNil = INT32_MAX;
 	static const int32_t MsgMax = 65534;
 
 	static const uint16_t LogErr = 0;
@@ -26,12 +26,12 @@ namespace gsf
 	static const uint16_t LogInfo = 2;
 	
 	typedef int32_t ErrorID;
-	static const uint32_t ErrNil = 0;
+	static const int32_t ErrNil = INT32_MAX;
 
 	typedef int32_t MsgHeadLen;
 	static const int32_t MsgHeadLenNil = 0;
 
-	static const uint16_t ARGS_MAX_SIZE = 1024;				// �����趨 args_pool�� �Զ������args������
+	static const uint16_t ARGS_MAX_SIZE = 1024;				//
 
 	static const uint32_t NETWORK_CONNECT_MAX = 65534;		//
 	static const uint32_t SESSION_READ_BUFFER_SIZE = 0;		//
