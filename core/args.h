@@ -70,6 +70,10 @@ namespace gsf
 		void push_double(const double &val);
 		void push_string(const std::string &val);
 
+		uint8_t seek_tag();
+		void * seek(uint8_t type);
+		std::pair<void*, int> seekStr();
+
 		/////////////////////////////
 		uint8_t pop_tag();
 		uint8_t get_tag();

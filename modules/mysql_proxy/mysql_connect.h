@@ -10,6 +10,35 @@ namespace gsf
 {
 	namespace modules
 	{
+		struct SqlStmt
+		{
+			SqlStmt()
+				: result(nullptr)
+				, stmt(nullptr)
+			{}
+
+			~SqlStmt()
+			{
+				if (stmt) {
+					mysql_free_result(result);
+					mysql_stmt_close(stmt);
+				}
+			}
+
+			uint32_t params;
+			uint32_t columns;
+
+			bool is_query;
+			bool is_prepared;
+
+			std::string sql = "";
+
+			MYSQL_RES*		result;
+			MYSQL_STMT*		stmt;
+		};
+
+		typedef std::shared_ptr<SqlStmt> SqlStmtPtr;
+
 		class MysqlConnect
 		{
 		public:
@@ -25,12 +54,17 @@ namespace gsf
 
 			bool query(const std::string &sql);
 
+		private:
+
+			void perpare(const std::string &sql, SqlStmtPtr &stmtPtr);
+
 			void startThread();
 			void endThread();
 
 		private:
 			MYSQL *base = nullptr;
 
+			std::unordered_map<std::string, SqlStmtPtr> prepared_stmt_map;
 		};
 	}
 }

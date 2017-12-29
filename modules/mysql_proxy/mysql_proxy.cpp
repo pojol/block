@@ -65,7 +65,13 @@ gsf::ArgsPtr gsf::modules::MysqlProxyModule::init_event(const gsf::ArgsPtr &args
 
 gsf::ArgsPtr gsf::modules::MysqlProxyModule::query_event(const gsf::ArgsPtr &args)
 {
-	return nullptr;
+	std::string queryStr = args->pop_string();
+
+	if (conn_.query(queryStr)) {
+		return gsf::make_args(true);
+	}
+
+	return gsf::make_args(false);
 }
 
 gsf::ArgsPtr gsf::modules::MysqlProxyModule::execute_event(const gsf::ArgsPtr &args)

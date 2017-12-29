@@ -35,6 +35,60 @@ uint8_t ToValueType(enum_field_types mysqlType)
 	}
 }
 
+std::pair<enum_field_types, char> ToMySqlType(uint8_t cppType)
+{
+	std::pair<enum_field_types, char> ret(MYSQL_TYPE_NULL, 0);
+
+	switch (cppType)
+	{
+	case gsf::at_uint8:
+		ret.first = MYSQL_TYPE_TINY;
+		ret.second = 1;
+		break;
+	case gsf::at_int8:
+		ret.first = MYSQL_TYPE_TINY;
+		ret.second = 0;
+		break;
+	case gsf::at_uint16:
+		ret.first = MYSQL_TYPE_SHORT;
+		ret.second = 1;
+		break;
+	case gsf::at_int16:
+		ret.first = MYSQL_TYPE_SHORT;
+		ret.second = 0;
+		break;
+	case gsf::at_uint32:
+		ret.first = MYSQL_TYPE_LONG;
+		ret.second = 1;
+		break;
+	case gsf::at_int32:
+		ret.first = MYSQL_TYPE_LONG;
+		ret.second = 0;
+		break;
+	case gsf::at_uint64:
+		ret.first = MYSQL_TYPE_LONGLONG;
+		ret.second = 1;
+		break;
+	case gsf::at_int64:
+		ret.first = MYSQL_TYPE_LONGLONG;
+		ret.second = 0;
+		break;
+	case gsf::at_float:
+		ret.first = MYSQL_TYPE_FLOAT;
+		ret.second = 0;
+		break;
+	case gsf::at_double:
+		ret.first = MYSQL_TYPE_DOUBLE;
+		ret.second = 0;
+		break;
+	case gsf::at_string:
+		ret.first = MYSQL_TYPE_STRING;
+		ret.second = 0;
+		break;
+	}
+	return ret;
+}
+
 gsf::modules::MysqlConnect::MysqlConnect()
 {
 
@@ -64,7 +118,59 @@ bool gsf::modules::MysqlConnect::init(const std::string &host, int port, const s
 
 bool gsf::modules::MysqlConnect::execute(const std::string &order, const gsf::ArgsPtr &args)
 {
-	
+	SqlStmtPtr stmt;
+	perpare(order, stmt);
+
+	if (stmt->params != args->get_params())
+	{
+		std::cout << " enough params " << std::endl;
+		return false;
+	}
+
+	std::vector<MYSQL_BIND> mysqlBinds;
+	auto _tag = args->get_tag();
+	while (0 != _tag)
+	{
+		auto mt = ToMySqlType(_tag);
+		mysqlBinds.push_back(MYSQL_BIND());
+		auto& Param = mysqlBinds.back();
+		memset(&Param, 0, sizeof(MYSQL_BIND));
+		Param.buffer_type = mt.first;
+		Param.is_null = 0;
+		Param.is_unsigned = mt.second;
+		Param.length = 0;
+
+		if (_tag == gsf::at_int8 || _tag == gsf::at_uint8 || _tag == gsf::at_int16 || _tag == gsf::at_uint16 ||
+			_tag == gsf::at_int16 || _tag == gsf::at_int32 || _tag == gsf::at_uint32 || _tag == gsf::at_int64 ||
+			_tag == gsf::at_uint64 || _tag == gsf::at_float || _tag == gsf::at_double || _tag == gsf::at_bool)
+		{
+			Param.buffer = args->seek(_tag);
+			Param.buffer_length = (unsigned long)0;
+		}
+		else if (_tag == gsf::at_string) {
+			auto _pair = args->seekStr();
+			Param.buffer = _pair.first;
+			Param.buffer_length = _pair.second;
+		}
+		else {
+
+		}
+
+		_tag = args->get_tag();
+	}
+
+	// bind input arguments
+	if (mysql_stmt_bind_param(stmt->stmt, mysqlBinds.data()))
+	{
+		std::cout << mysql_stmt_error(stmt->stmt) << std::endl;
+		return false;
+	}
+
+	if (mysql_stmt_execute(stmt->stmt))
+	{
+		std::cout << mysql_stmt_error(stmt->stmt) << std::endl;
+		return false;
+	}
 
 	return true;
 }
@@ -145,6 +251,55 @@ bool gsf::modules::MysqlConnect::query(const std::string &sql)
 	}
 
 	return false;
+}
+
+void gsf::modules::MysqlConnect::perpare(const std::string &sql, SqlStmtPtr &stmtPtr)
+{
+	auto itr = prepared_stmt_map.find(sql);
+	if (itr != prepared_stmt_map.end()) {
+		stmtPtr = itr->second;
+		return;
+	}
+
+	do {
+		if (nullptr == base) {
+			std::cout << "mysql unuseable!" << std::endl;
+			break;
+		}
+
+		stmtPtr = std::make_shared<SqlStmt>();
+		stmtPtr->sql = sql;
+
+		stmtPtr->stmt = mysql_stmt_init(base);
+		if (nullptr == stmtPtr->stmt) {
+			std::cout << "stmt init fail" << std::endl;
+			break;
+		}
+
+		if (mysql_stmt_prepare(stmtPtr->stmt, sql.c_str(), (unsigned long)sql.size())) {
+			std::cout << mysql_stmt_error(stmtPtr->stmt) << std::endl;
+			break;
+		}
+
+		stmtPtr->params = mysql_stmt_param_count(stmtPtr->stmt);
+		stmtPtr->result = mysql_stmt_result_metadata(stmtPtr->stmt);
+
+		std::string sqlop = sql.substr(0, 6);
+		if (nullptr == stmtPtr->result && (strcmp(sqlop.c_str(), "SELECT") == 0 || strcmp(sqlop.c_str(), "select") == 0)) {
+			std::cout << mysql_stmt_error(stmtPtr->stmt) << std::endl;
+			break;
+		}
+
+		if (stmtPtr->result) {
+			stmtPtr->is_query = true;
+			stmtPtr->columns = mysql_num_fields(stmtPtr->result);
+		}
+		prepared_stmt_map.emplace(sql, stmtPtr);
+		return;
+
+	} while (0);
+
+	stmtPtr.reset();
 }
 
 void gsf::modules::MysqlConnect::startThread()

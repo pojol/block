@@ -219,6 +219,71 @@ uint8_t gsf::Args::get_tag()
 	return _ui8;
 }
 
+uint8_t gsf::Args::seek_tag()
+{
+	auto _tag = *reinterpret_cast<uint8_t*>(read_);
+	read_ += sizeof(uint8_t);
+	return _tag;
+}
+
+void * gsf::Args::seek(uint8_t type)
+{
+	assert(type == seek_tag());
+
+	void * sp = nullptr;
+	sp = (void*)read_;
+
+	if (type == gsf::at_int8) {
+		read_ += sizeof(int8_t);
+	}
+	if (type == gsf::at_uint8) {
+		read_ += sizeof(uint8_t);
+	}
+	if (type == gsf::at_int16) {
+		read_ += sizeof(int16_t);
+	}
+	if (type == gsf::at_uint16) {
+		read_ += sizeof(uint16_t);
+	}
+	if (type == gsf::at_int32) {
+		read_ += sizeof(int32_t);
+	}
+	if (type == gsf::at_uint32) {
+		read_ += sizeof(uint32_t);
+	}
+	if (type == gsf::at_int64) {
+		read_ += sizeof(int64_t);
+	}
+	if (type == gsf::at_uint64) {
+		read_ += sizeof(uint64_t);
+	}
+	if (type == gsf::at_float) {
+		read_ += sizeof(float);
+	}
+	if (type == gsf::at_double) {
+		read_ += sizeof(double);
+	}
+	if (type == gsf::at_bool) {
+		read_ += sizeof(bool);
+	}
+
+	return sp;
+}
+
+std::pair<void*, int> gsf::Args::seekStr()
+{
+	void *sp = nullptr;
+
+	assert(seek_tag() == at_string);
+
+	TypeLen _len = pop_typelen();
+	sp = (void*)read_;
+
+	read_ += _len;
+
+	return std::make_pair(sp, _len);
+}
+
 uint8_t gsf::Args::pop_ui8()
 {
 	assert(pop_tag() == at_uint8);
