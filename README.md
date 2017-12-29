@@ -23,7 +23,7 @@
 - [x] log
 - [x] lua_proxy
 - [x] reids_cache_proxy
-- [ ] mysql_proxy
+- [x] mysql_proxy
 
 
 ## depend
@@ -48,7 +48,9 @@
 - https://github.com/pojol/gsf_sample
 - [x] timer
 - [x] echo
+- [ ] db_proxy
 - [x] distributed
+
 	
 ## License
 	MIT
