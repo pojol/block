@@ -115,10 +115,10 @@ os.chdir(cur_path_)
 ################### mysql connector ###################
 os.system('wget -P ' + root_path + '/3rd https://cdn.mysql.com//Downloads/Connector-C/mysql-connector-c-6.1.11-linux-glibc2.12-x86_64.tar.gz')
 if platform.system() == 'Linux':
-    os.system('tar -xzvf ./mysql-connector-c-6.1.11-linux-glibc2.12-x86_64.tar.gz')
-    os.system('mkdir' + root_path + '/lib/mysql_connector')
-    os.system('mkdir' + root_path + '/lib/mysql_connector/include')
-    os.system('mkdir' + root_path + '/lib/mysql_connector/lib')
+    os.system('tar -xzvf ' + root_path + '/3rd/mysql-connector-c-6.1.11-linux-glibc2.12-x86_64.tar.gz')
+    os.system('mkdir ' + root_path + '/lib/mysql_connector')
+    os.system('mkdir ' + root_path + '/lib/mysql_connector/include')
+    os.system('mkdir ' + root_path + '/lib/mysql_connector/lib')
     os.system('cp -r ' + cur_path_ + '/mysql-connector-c-6.1.11-linux-glibc2.12-x86_64/include/*' + ' ' + root_path + '/lib/mysql_connector/include')
     os.system('cp -r ' + cur_path_ + '/mysql-connector-c-6.1.11-linux-glibc2.12-x86_64/lib/*' + ' ' + root_path + '/lib/mysql_connector/lib')
     pass
