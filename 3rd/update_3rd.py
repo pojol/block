@@ -109,7 +109,20 @@ if platform.system() == 'Linux':
     os.system('make linux')
     os.system('mkdir ' + root_path + '/lib/lua')
     os.system('cp -r ' + cur_path_ + '/lua-5.3.4/src/* ' + ' ' + root_path + '/lib/lua/')
-    os.chdir(cur_path_)
+
+os.chdir(cur_path_)
+
+################### mysql connector ###################
+os.system('wget -P ' + root_path + '/3rd https://cdn.mysql.com//Downloads/Connector-C/mysql-connector-c-6.1.11-linux-glibc2.12-x86_64.tar.gz')
+if platform.system() == 'Linux':
+    os.system('tar -xzvf ./mysql-connector-c-6.1.11-linux-glibc2.12-x86_64.tar.gz')
+    os.system('mkdir' + root_path + '/lib/mysql_connector')
+    os.system('mkdir' + root_path + '/lib/mysql_connector/include')
+    os.system('mkdir' + root_path + '/lib/mysql_connector/lib')
+    os.system('cp -r ' + cur_path_ + '/mysql-connector-c-6.1.11-linux-glibc2.12-x86_64/include/*' + ' ' + root_path + '/lib/mysql_connector/include')
+    os.system('cp -r ' + cur_path_ + '/mysql-connector-c-6.1.11-linux-glibc2.12-x86_64/lib/*' + ' ' + root_path + '/lib/mysql_connector/lib')
+    pass
+os.chdir(cur_path_)
 
 ########################fmtlib###########################
 print("download fmtlib version 4.0.0")
