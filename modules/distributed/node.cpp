@@ -135,9 +135,6 @@ gsf::ArgsPtr gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &arg
 		target_m_ = args->pop_moduleid();
 		type_ = args->pop_string();
 
-		acceptor_ip_ = args->pop_string();
-		acceptor_port_ = args->pop_i32();
-
 		root_ip_ = args->pop_string();
 		root_port_ = args->pop_i32();
 
@@ -161,8 +158,7 @@ gsf::ArgsPtr gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &arg
 
 			auto _args = gsf::ArgsPool::get_ref().get();
 			_args->push(type_);
-			_args->push(acceptor_ip_);
-			_args->push(acceptor_port_);
+			_args->push(id_);
 			_args->push(int32_t(modules_.size()));
 			for (auto &it : modules_)
 			{
@@ -178,7 +174,6 @@ gsf::ArgsPtr gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &arg
 
 			return nullptr;
 		});
-
 
 		listen(this, eid::base::module_init_succ, [&](const gsf::ArgsPtr &args) {
 			auto _module_id = args->pop_moduleid();

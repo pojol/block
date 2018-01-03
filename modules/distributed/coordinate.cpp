@@ -82,7 +82,6 @@ gsf::ArgsPtr gsf::modules::CoodinatorModule::event_get_light_module(const gsf::A
 gsf::ArgsPtr gsf::modules::CoodinatorModule::event_regist(const gsf::ArgsPtr &args)
 {
 	auto _type = args->pop_string();
-	auto _ip = args->pop_string();
 	auto _nod_id = args->pop_i32();
 
 	auto itr = node_id_map_.find(_nod_id);
@@ -92,7 +91,6 @@ gsf::ArgsPtr gsf::modules::CoodinatorModule::event_regist(const gsf::ArgsPtr &ar
 	}
 
 	auto nod = std::make_shared<CNodeInfo>();
-	nod->ip_ = _ip;
 	nod->nod_id = _nod_id;
 	nod->type_ = _type;
 
