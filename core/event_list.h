@@ -53,6 +53,10 @@ namespace eid
 		login_select_gate_cb,
 		login_logout,
 
+		db_create,
+		db_update,
+		db_sql,
+
 		rpc_end = 2000,
 	};
 
