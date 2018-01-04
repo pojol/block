@@ -17,7 +17,7 @@ void gsf::modules::CoodinatorModule::before_init()
 	listen(this, eid::distributed::coordinat_adjust_weight
 		, std::bind(&CoodinatorModule::event_adjust_module_weight, this, _1));
 
-	listen(this, eid::distributed::coordinat_get
+	listen(this, eid::distributed::coordinat_select
 		, std::bind(&CoodinatorModule::event_get_light_module, this, _1));
 }
 
@@ -41,7 +41,7 @@ gsf::ArgsPtr gsf::modules::CoodinatorModule::event_get_light_module(const gsf::A
 
 	auto _count = node_name_map_.count(_module_name);
 	if (_count == 0) {
-		return gsf::make_args(0);
+		return nullptr;
 	}
 	else {
 		NodePtr _ptr;
@@ -72,10 +72,10 @@ gsf::ArgsPtr gsf::modules::CoodinatorModule::event_get_light_module(const gsf::A
 		}
 
 		assert(_ptr->nod_id != 0);
-		return gsf::make_args(_ptr->nod_id);
+		return gsf::make_args(_ptr->nod_id, _ptr->type_, _ptr->weight_, _ptr->acceptor_ip_, _ptr->acceptor_port_);
 	}
 
-	return gsf::make_args(0);
+	return nullptr;
 }
 
 //const std::string &type, const std::string &ip, int32_t port
@@ -90,9 +90,14 @@ gsf::ArgsPtr gsf::modules::CoodinatorModule::event_regist(const gsf::ArgsPtr &ar
 		return gsf::make_args(false);
 	}
 
+	auto _acceptor_ip = args->pop_string();
+	auto _acceptor_port = args->pop_i32();
+
 	auto nod = std::make_shared<CNodeInfo>();
 	nod->nod_id = _nod_id;
 	nod->type_ = _type;
+	nod->acceptor_ip_ = _acceptor_ip;
+	nod->acceptor_port_ = _acceptor_port;
 
 	node_id_map_.insert(std::make_pair(_nod_id, nod));
 

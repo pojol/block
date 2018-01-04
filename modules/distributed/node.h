@@ -44,7 +44,7 @@ namespace gsf
 
 		protected:
 
-			void event_rpc(const std::string &module, int event, const gsf::ArgsPtr &args, gsf::RpcCallback callback);
+			void event_rpc(int event, const gsf::ArgsPtr &args, gsf::RpcCallback callback);
 
 			gsf::ArgsPtr event_create_node(const gsf::ArgsPtr &args);
 
