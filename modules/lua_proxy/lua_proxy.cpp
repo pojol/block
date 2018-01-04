@@ -153,12 +153,15 @@ int gsf::modules::LuaProxyModule::llisten(uint32_t lua_id, uint32_t self, uint32
 		listen(self, event, [=](const gsf::ArgsPtr &args)->gsf::ArgsPtr {
 
 			std::string _req = "";
-
+			std::string _res = "";
 			if (args) {
-				_req = args->pop_block(0, args->get_pos());
+				auto _pos = args->get_pos();
+				_req = args->pop_block(0, _pos);
+				_res = func(_req, _pos);
 			}
-
-			std::string _res = func(_req, args->get_pos());
+			else {
+				_res = func(nullptr, 0);
+			}
 
 			if (_res != "") {
 				auto _smartPtr = gsf::ArgsPool::get_ref().get();

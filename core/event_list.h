@@ -40,18 +40,34 @@ namespace eid
 	{
 		rpc_begin = 1001,
 
-		node_create,				// by cfg
+		node_create,
 		node_create_succ,
 
+		/*!
+			将Node绑定到Coordinator
+			参数: nodeType, nodeID, {[moduleName, moduleID, moduleFeature] ... }
+			类型: rpc
+		**/
 		coordinat_regist,
+		
+		/*!
+			将Node从Coordinator解除绑定
+		**/
 		coordinat_unregit,
-		coordinat_adjust_weight,
-		coordinat_get,
 
-		login_server,
-		login_select_gate,
-		login_select_gate_cb,
-		login_logout,
+		/*!
+			调整Node在Coordinator中的权重
+			参数: nodeID, moduleName, moduleFeature, moduleWeight
+			类型: rpc
+		**/
+		coordinat_adjust_weight,
+
+		/*!
+			通过ModuleName和ModuleFeature选取一个适合自己的Node
+			参数: moduleName, moduleFeature
+			类型: rpc
+		**/
+		coordinat_select,
 
 		rpc_end = 2000,
 	};

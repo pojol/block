@@ -40,7 +40,7 @@ void gsf::modules::NodeModule::before_init()
 	using namespace std::placeholders;
 	listen(this, eid::distributed::node_create, std::bind(&NodeModule::event_create_node, this, _1));
 
-	rpc_listen(std::bind(&NodeModule::event_rpc, this, _1, _2, _3, _4));
+	rpc_listen(std::bind(&NodeModule::event_rpc, this, _1, _2, _3));
 }
 
 void gsf::modules::NodeModule::init()
@@ -95,7 +95,7 @@ void gsf::modules::NodeModule::shut()
 
 }
 
-void gsf::modules::NodeModule::event_rpc(const std::string &module, int event, const gsf::ArgsPtr &args, gsf::RpcCallback callback)
+void gsf::modules::NodeModule::event_rpc(int event, const gsf::ArgsPtr &args, gsf::RpcCallback callback)
 {
 	auto _itr = callback_map_.find(event);
 	if (_itr != callback_map_.end()) {
@@ -118,7 +118,6 @@ void gsf::modules::NodeModule::event_rpc(const std::string &module, int event, c
 	if (args) {
 		auto argsPtr = gsf::ArgsPool::get_ref().get();
 		argsPtr->push(event);
-		argsPtr->push(module);
 		argsPtr->push_block(args->pop_block(0, args->get_pos()).c_str(), args->get_pos());
 
 		dispatch(connector_m_, eid::network::send, std::move(argsPtr));
@@ -161,6 +160,7 @@ gsf::ArgsPtr gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &arg
 
 			auto _args = gsf::ArgsPool::get_ref().get();
 			_args->push(type_);
+			_args->push(id_);
 			_args->push(acceptor_ip_);
 			_args->push(acceptor_port_);
 			_args->push(int32_t(modules_.size()));
@@ -170,7 +170,7 @@ gsf::ArgsPtr gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &arg
 				_args->push(it.moduleID);
 				_args->push(it.characteristic);
 			}
-			event_rpc("CoodinatorModule", eid::distributed::coordinat_regist, _args, [&](const gsf::ArgsPtr &args, bool result) {
+			event_rpc(eid::distributed::coordinat_regist, _args, [&](const gsf::ArgsPtr &args, bool result) {
 				if (result) {
 					dispatch(target_m_, eid::distributed::node_create_succ, nullptr);
 				}
@@ -178,7 +178,6 @@ gsf::ArgsPtr gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &arg
 
 			return nullptr;
 		});
-
 
 		listen(this, eid::base::module_init_succ, [&](const gsf::ArgsPtr &args) {
 			auto _module_id = args->pop_moduleid();

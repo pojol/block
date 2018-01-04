@@ -1,5 +1,4 @@
-#ifndef _GSF_TYPES_HEADER_
-#define _GSF_TYPES_HEADER_
+#pragma once
 
 #include <stdint.h>
 
@@ -16,6 +15,9 @@ namespace gsf
 
 	typedef uint16_t SessionID;
 	static const uint16_t SessionNil = UINT16_MAX;
+
+	typedef int32_t NodeID;
+	static const int32_t NodeNil = INT32_MAX;
 
 	typedef int32_t MsgID;
 	static const int32_t MsgNil = INT32_MAX;
@@ -58,5 +60,3 @@ namespace gsf
 	static const uint8_t at_map = 15;
 	static const uint8_t at_eof = 20;
 }
-
-#endif

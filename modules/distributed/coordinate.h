@@ -1,4 +1,4 @@
-#ifndef _COORDINATE_HEADER_
+ï»¿#ifndef _COORDINATE_HEADER_
 #define _COORDINATE_HEADER_
 
 #include <core/module.h>
@@ -24,18 +24,18 @@ namespace gsf
 		{
 			std::vector<CModuleInfo> modules;
 
-			std::string ip_ = "";
 			int32_t nod_id = 0;
-
 			std::string type_ = "";
-
 			uint32_t weight_ = 0;
+
+			std::string acceptor_ip_ = "";
+			int32_t acceptor_port_ = 0;
 		};
 		typedef std::shared_ptr<CNodeInfo> NodePtr;
 
 
 		/**
-		coodinator Ğ­µ÷¶à¸öÏàÍ¬ÒµÎñappÖ®¼äµÄ¸ºÔØ
+		coodinator åè°ƒå¤šä¸ªç›¸åŒä¸šåŠ¡appä¹‹é—´çš„è´Ÿè½½
 		*/
 		class CoodinatorModule
 			: public gsf::Module

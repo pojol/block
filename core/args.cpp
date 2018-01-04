@@ -15,6 +15,7 @@ void gsf::Args::push_block(const char *block, int len)
 {
 	memcpy(write_, block, len);
 	pos_ += len;
+	write_ += len;
 }
 
 void gsf::Args::push(const uint8_t &val)
