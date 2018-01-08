@@ -187,6 +187,50 @@ int gsf::modules::LuaProxyModule::llisten(uint32_t lua_id, uint32_t self, uint32
 	return 0;
 }
 
+void gsf::modules::LuaProxyModule::lrpc(uint32_t lua_id, uint32_t event, const std::string &buf, const sol::function &func)
+{
+	auto _smartPtr = gsf::ArgsPool::get_ref().get();
+	auto lua = find_lua(lua_id);
+
+	try {
+		_smartPtr->push_block(buf.c_str(), buf.size());
+		
+		auto _callback = [=](const ArgsPtr &cbArgs, bool bResult) {
+			
+			if (bResult) {
+				std::string _req = "";
+				auto _pos = cbArgs->get_pos();
+				_req = cbArgs->pop_block(0, _pos);
+
+				func(_req, _pos, bResult);
+			}
+			else {
+				func(nullptr, 0, bResult);
+			}
+			
+		};
+
+		if (sol::type::lua_nil == func.get_type()) {
+			rpc(event, _smartPtr, nullptr);
+		}
+		else {
+			rpc(event, _smartPtr, _callback);
+		}
+
+	}
+	catch (sol::error e)
+	{
+		std::string _err = e.what() + '\n';
+
+		auto lua = find_lua(lua_id);
+		if (lua) {
+			_err += Traceback(lua->state_.lua_state());
+		}
+
+		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
+	}
+}
+
 void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_name, std::string file_name)
 {
 	LuaProxy *_lua = new LuaProxy(module_id);
@@ -238,11 +282,13 @@ void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_na
 		, "pop_i32", &Args::pop_i32
 		, "pop_ui64", &Args::pop_ui64
 		, "pop_block", &Args::pop_block
-		, "get_pos", &Args::get_pos);
+		, "get_pos", &Args::get_pos
+		, "toString", &Args::toString);
 
 	_lua->state_.new_usertype<LuaProxyModule>("LuaProxyModule"
 		, "ldispatch", &LuaProxyModule::ldispatch
-		, "llisten", &LuaProxyModule::llisten);
+		, "llisten", &LuaProxyModule::llisten
+		, "lrpc", &LuaProxyModule::lrpc);
 	_lua->state_.set("event", this);
 	_lua->state_.set("module_id", module_id);
 
