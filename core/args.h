@@ -115,6 +115,7 @@ namespace gsf
 		/////////////////////////////
 
 		std::string pop_block(int beg, int end);
+		
 
 		uint32_t get_pos() const;
 		uint32_t get_params() const;

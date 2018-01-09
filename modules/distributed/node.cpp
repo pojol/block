@@ -38,7 +38,8 @@ void gsf::modules::NodeModule::before_init()
 	assert(timer_m_ != gsf::ModuleNil);
 
 	using namespace std::placeholders;
-	listen(this, eid::distributed::node_create, std::bind(&NodeModule::event_create_node, this, _1));
+	listen(this, eid::node::node_create, std::bind(&NodeModule::event_create_node, this, _1));
+	listen(this, eid::node::node_regist, std::bind(&NodeModule::event_regist_node, this, _1));
 
 	rpc_listen(std::bind(&NodeModule::event_rpc, this, _1, _2, _3));
 }
@@ -77,7 +78,7 @@ void gsf::modules::NodeModule::init()
 			timer_set_.erase(_itr);
 
 			auto _citr = callback_map_.find(_info->event_);
-			_info->callback(nullptr, false);
+			_info->callback(gsf::make_args("timeout"), false);
 			callback_map_.erase(_citr);
 		}
 
@@ -103,6 +104,19 @@ void gsf::modules::NodeModule::event_rpc(int event, const gsf::ArgsPtr &args, gs
 		return;
 	}
 
+	gsf::ModuleID _connector_m = gsf::ModuleNil;
+	auto itr = event_map_.find(event);
+	if (itr != event_map_.end()) {
+		_connector_m = itr->second.connecotr_m_;
+	}
+	else {
+		if (callback) {
+			std::string _errstr = "can't find event! you need to register first.";
+			callback(gsf::make_args(_errstr), false);
+		}
+		return;
+	}
+
 	if (callback) {
 		uint64_t _tid = dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::make_args(get_module_id(), rpc_delay_))->pop_timerid();
 
@@ -120,10 +134,46 @@ void gsf::modules::NodeModule::event_rpc(int event, const gsf::ArgsPtr &args, gs
 		argsPtr->push(event);
 		argsPtr->push_block(args->pop_block(0, args->get_pos()).c_str(), args->get_pos());
 
-		dispatch(connector_m_, eid::network::send, std::move(argsPtr));
+		dispatch(_connector_m, eid::network::send, std::move(argsPtr));
 	}
 	else {
-		dispatch(connector_m_, eid::network::send, gsf::make_args(event));
+		dispatch(_connector_m, eid::network::send, gsf::make_args(event));
+	}
+}
+
+void gsf::modules::NodeModule::regist_node(gsf::ModuleID base, int event, const std::string &ip, int port)
+{
+	bool bRes = false;
+	auto _moduleid = 0;
+
+	for (auto nod : event_map_)
+	{
+		if (nod.second.ip_ == ip && nod.second.port_ == port) {
+			bRes = true;
+			_moduleid = nod.second.connecotr_m_;
+			break;
+		}
+	}
+
+	auto itr = event_map_.find(event);
+	if (itr == event_map_.end()) {
+
+		gsf::ModuleID _connector_m = gsf::ModuleNil;
+
+		if (bRes) {
+			_connector_m = _moduleid;
+		}
+		else {
+			_connector_m = dispatch(eid::base::app_id, eid::base::new_dynamic_module, gsf::make_args("ConnectorModule"))->pop_moduleid();
+		}
+
+		auto _nod = NodeInfo();
+		_nod.connecotr_m_ = _connector_m;
+		_nod.event_ = event;
+		_nod.ip_ = ip;
+		_nod.port_ = port;
+		_nod.base_ = base;
+		event_map_.insert(std::make_pair(event, _nod));
 	}
 }
 
@@ -150,43 +200,53 @@ gsf::ArgsPtr gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &arg
 			modules_.push_back(info);
 		}
 
-		connector_m_ = dispatch(eid::base::app_id, eid::base::new_dynamic_module, gsf::make_args("ConnectorModule"))->pop_moduleid();
+		for (int i = eid::distributed::rpc_begin; i < eid::distributed::rpc_end; ++i)
+		{
+			regist_node(get_module_id(), i, root_ip_, root_port_);
+		}
 
 		listen(this, eid::network::new_connect, [&](const gsf::ArgsPtr &args) {
 			connector_fd_ = args->pop_fd();
 
-			dispatch(log_m_, eid::log::print, gsf::log_info("NodeModule", "distributed nod connect 2 root!"));
-			service_ = true;
+			if (!service_) {
+				dispatch(log_m_, eid::log::print, gsf::log_info("NodeModule", "distributed nod connect 2 root!"));
+				service_ = true;
 
-			auto _args = gsf::ArgsPool::get_ref().get();
-			_args->push(type_);
-			_args->push(id_);
-			_args->push(acceptor_ip_);
-			_args->push(acceptor_port_);
-			_args->push(int32_t(modules_.size()));
-			for (auto &it : modules_)
-			{
-				_args->push(it.moduleName);
-				_args->push(it.moduleID);
-				_args->push(it.characteristic);
-			}
-			event_rpc(eid::distributed::coordinat_regist, _args, [&](const gsf::ArgsPtr &args, bool result) {
-				if (result) {
-					dispatch(target_m_, eid::distributed::node_create_succ, nullptr);
+				auto _args = gsf::ArgsPool::get_ref().get();
+				_args->push(type_);
+				_args->push(id_);
+				_args->push(acceptor_ip_);
+				_args->push(acceptor_port_);
+				_args->push(int32_t(modules_.size()));
+				for (auto &it : modules_)
+				{
+					_args->push(it.moduleName);
+					_args->push(it.moduleID);
+					_args->push(it.characteristic);
 				}
-			});
-
+				event_rpc(eid::distributed::coordinat_regist, _args, [&](const gsf::ArgsPtr &args, bool result) {
+					if (result) {
+						dispatch(target_m_, eid::node::node_create_succ, nullptr);
+					}
+				});
+			}
+			
 			return nullptr;
 		});
 
 		listen(this, eid::base::module_init_succ, [&](const gsf::ArgsPtr &args) {
-			auto _module_id = args->pop_moduleid();
 
-			if (_module_id == connector_m_) {
-
-				dispatch(log_m_, eid::log::print, gsf::log_info("NodeModule", "distributed nod connector init success!"));
-
-				dispatch(connector_m_, eid::network::make_connector, gsf::make_args(get_module_id(), root_ip_, root_port_));
+			auto _t = gsf::ArgsPool::get_ref().get();
+			_t->push_block(args->pop_block(0, args->get_pos()).c_str(), args->get_pos());
+			auto _module_id = _t->pop_moduleid();
+			
+			for (auto nod : event_map_)
+			{
+				if (nod.second.connecotr_m_ == _module_id) {
+					dispatch(_module_id, eid::network::make_connector, gsf::make_args(get_module_id(), nod.second.ip_, nod.second.port_));
+					dispatch(nod.second.base_, eid::node::node_regist_succ, nullptr);
+					break;
+				}
 			}
 
 			return nullptr;
@@ -198,3 +258,14 @@ gsf::ArgsPtr gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &arg
 	return nullptr;
 }
 
+gsf::ArgsPtr gsf::modules::NodeModule::event_regist_node(const gsf::ArgsPtr &args)
+{
+	auto _base = args->pop_i32();
+	auto _event = args->pop_i32();
+	auto _ip = args->pop_string();
+	auto _port = args->pop_i32();
+
+	regist_node(_base, _event, _ip, _port);
+
+	return nullptr;
+}
