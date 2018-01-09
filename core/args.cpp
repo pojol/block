@@ -597,6 +597,7 @@ std::string gsf::Args::toString()
 	std::stringstream ss;
 
 	auto tag = get_tag();
+	ss << "for testing only" << std::endl;
 	while (tag != 0)
 	{
 		switch (tag)

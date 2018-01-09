@@ -28,6 +28,15 @@ namespace gsf
 			int32_t characteristic = 0;
 		};
 
+		struct NodeInfo
+		{
+			gsf::ModuleID connecotr_m_ = gsf::ModuleNil;
+			std::string ip_ = "";
+			int port_ = 0;
+			int event_ = 0;
+			gsf::ModuleID base_ = gsf::ModuleNil;
+		};
+
 		class NodeModule
 			: public gsf::Module
 			, public gsf::IEvent
@@ -46,13 +55,15 @@ namespace gsf
 
 			void event_rpc(int event, const gsf::ArgsPtr &args, gsf::RpcCallback callback);
 
+			void regist_node(gsf::ModuleID base, int event, const std::string &ip, int port);
+
 			gsf::ArgsPtr event_create_node(const gsf::ArgsPtr &args);
+			gsf::ArgsPtr event_regist_node(const gsf::ArgsPtr &args);
 
 		private:
 
 			gsf::ModuleID log_m_ = gsf::ModuleNil;
 			gsf::ModuleID timer_m_ = gsf::ModuleNil;
-			gsf::ModuleID connector_m_ = gsf::ModuleNil;
 			gsf::SessionID connector_fd_ = gsf::SessionNil;
 
 			std::string root_ip_ = "";
@@ -72,6 +83,8 @@ namespace gsf
 
 			std::map<uint32_t, CallbackPtr> callback_map_;
 			std::map<uint64_t, CallbackPtr> timer_set_;
+
+			std::map<int, NodeInfo> event_map_;
 		};
 
 	}

@@ -40,9 +40,6 @@ namespace eid
 	{
 		rpc_begin = 1001,
 
-		node_create,
-		node_create_succ,
-
 		/*!
 			将Node绑定到Coordinator
 			参数: nodeType, nodeID, {[moduleName, moduleID, moduleFeature] ... }
@@ -69,7 +66,7 @@ namespace eid
 		**/
 		coordinat_select,
 
-		rpc_end = 2000,
+		rpc_end,
 	};
 
 	enum network
@@ -212,6 +209,14 @@ namespace eid
 
 		mysql_query,
 		mysql_execute,
+	};
+
+	enum node
+	{
+		node_create = 2500,
+		node_create_succ,
+		node_regist,
+		node_regist_succ,
 	};
 
 	enum error
