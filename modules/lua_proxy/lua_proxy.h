@@ -61,7 +61,7 @@ namespace gsf
 
 			int llisten(uint32_t lua_id, uint32_t self, uint32_t event, const sol::function &func);
 
-			void lrpc(uint32_t lua_id, uint32_t event, const std::string &buf, const sol::function &func);
+			void lrpc(uint32_t lua_id, uint32_t event, int32_t moduleid, const std::string &buf, const sol::function &func);
 
 			gsf::ArgsPtr create_event(const gsf::ArgsPtr &args);
 			void create(uint32_t module_id, std::string dar_name, std::string file_name);

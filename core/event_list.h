@@ -207,8 +207,11 @@ namespace eid
 		**/
 		mysql_connect,
 
-		mysql_query,
+		mysql_update,
 		mysql_execute,
+
+		// local
+		mysql_callback,
 	};
 
 	enum node

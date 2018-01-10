@@ -25,12 +25,12 @@ void gsf::modules::MysqlProxyModule::init()
 		, std::bind(&MysqlProxyModule::init_event, this, std::placeholders::_1));
 
 	listen(this
-		, eid::db_proxy::mysql_query
-		, std::bind(&MysqlProxyModule::query_event, this, std::placeholders::_1));
-	
-	listen(this
 		, eid::db_proxy::mysql_execute
 		, std::bind(&MysqlProxyModule::execute_event, this, std::placeholders::_1));
+	
+	listen(this
+		, eid::db_proxy::mysql_update
+		, std::bind(&MysqlProxyModule::update_event, this, std::placeholders::_1));
 }
 
 void gsf::modules::MysqlProxyModule::execute()
@@ -63,26 +63,29 @@ gsf::ArgsPtr gsf::modules::MysqlProxyModule::init_event(const gsf::ArgsPtr &args
 	return gsf::make_args(false);
 }
 
-gsf::ArgsPtr gsf::modules::MysqlProxyModule::query_event(const gsf::ArgsPtr &args)
+gsf::ArgsPtr gsf::modules::MysqlProxyModule::execute_event(const gsf::ArgsPtr &args)
 {
+	auto _moduleid = args->pop_moduleid();
+	auto _remote = args->pop_moduleid();
 	std::string queryStr = args->pop_string();
 
-	if (conn_.query(queryStr)) {
-		return gsf::make_args(true);
-	}
+	using namespace std::placeholders;
+	conn_.execute(_moduleid, _remote, queryStr, std::bind(&MysqlProxyModule::event_callback, this, _1, _2));
 
-	return gsf::make_args(false);
+	return nullptr;
 }
 
-gsf::ArgsPtr gsf::modules::MysqlProxyModule::execute_event(const gsf::ArgsPtr &args)
+gsf::ArgsPtr gsf::modules::MysqlProxyModule::update_event(const gsf::ArgsPtr &args)
 {
 	auto _order = args->pop_string();
 
-	if (conn_.execute(_order, args)) {
-		return gsf::make_args(true);
-	}
-	else {
-		return gsf::make_args(false);
-	}
+	conn_.update(_order, args);
+
+	return nullptr;
+}
+
+void gsf::modules::MysqlProxyModule::event_callback(gsf::ModuleID target, const gsf::ArgsPtr &args)
+{
+	dispatch(target, eid::db_proxy::mysql_callback, args);
 }
 

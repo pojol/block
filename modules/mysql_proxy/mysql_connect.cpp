@@ -116,7 +116,7 @@ bool gsf::modules::MysqlConnect::init(const std::string &host, int port, const s
 	return true;
 }
 
-bool gsf::modules::MysqlConnect::execute(const std::string &order, const gsf::ArgsPtr &args)
+void gsf::modules::MysqlConnect::update(const std::string &order, const gsf::ArgsPtr &args)
 {
 	SqlStmtPtr stmt;
 	perpare(order, stmt);
@@ -124,7 +124,6 @@ bool gsf::modules::MysqlConnect::execute(const std::string &order, const gsf::Ar
 	if (stmt->params != args->get_params())
 	{
 		std::cout << " enough params " << std::endl;
-		return false;
 	}
 
 	std::vector<MYSQL_BIND> mysqlBinds;
@@ -163,38 +162,39 @@ bool gsf::modules::MysqlConnect::execute(const std::string &order, const gsf::Ar
 	if (mysql_stmt_bind_param(stmt->stmt, mysqlBinds.data()))
 	{
 		std::cout << mysql_stmt_error(stmt->stmt) << std::endl;
-		return false;
 	}
 
 	if (mysql_stmt_execute(stmt->stmt))
 	{
 		std::cout << mysql_stmt_error(stmt->stmt) << std::endl;
-		return false;
 	}
-
-	return true;
 }
 
-bool gsf::modules::MysqlConnect::query(const std::string &sql)
+void gsf::modules::MysqlConnect::execute(gsf::ModuleID target, gsf::ModuleID remote, const std::string &sql, std::function<void (gsf::ModuleID, const gsf::ArgsPtr & )> callback)
 {
 	MYSQL_RES *result = nullptr;
 	MYSQL_FIELD *fields = nullptr;
 
+	int _progress = 1;
+
+	auto errf = [&](const std::string &err) {
+		callback(target, gsf::make_args(remote, false, _progress, err));
+	};
+
 	if (mysql_query(base, sql.c_str())) {
-		std::cout << sql << " " << mysql_error(base) << std::endl;
-		return false;
+		errf(mysql_error(base));
+		return;
 	}
 
 	result = mysql_store_result(base);
 	if (nullptr == result) {
-		std::cout << sql << " " << mysql_error(base) << std::endl;
-		return false;
+		errf(mysql_error(base));
+		return;
 	}
 
 	uint64_t rowCount = mysql_affected_rows(base);
 	if (0 == rowCount) {
 		mysql_free_result(result);
-		std::cout << "row 0 " << std::endl;
 	}
 
 	uint32_t fieldCount = mysql_field_count(base);
@@ -214,6 +214,8 @@ bool gsf::modules::MysqlConnect::query(const std::string &sql)
 	while (nullptr != row)
 	{
 		auto argsPtr = gsf::ArgsPool::get_ref().get();
+		argsPtr->push(true);
+		argsPtr->push(_progress);
 
 		for (size_t col = 0; col < fieldCount; col++)
 		{
@@ -239,18 +241,20 @@ bool gsf::modules::MysqlConnect::query(const std::string &sql)
 			}
 		}
 
-		std::cout << argsPtr->toString() << std::endl;
-		std::cout << "---" << std::endl;
+		callback(target, argsPtr);
+
+		_progress++;
 
 		row = mysql_fetch_row(result);
 	}
+
+	// eof
+	callback(target, gsf::make_args(true, -1));
 
 	if (nullptr != result)
 	{
 		mysql_free_result(result);
 	}
-
-	return false;
 }
 
 void gsf::modules::MysqlConnect::perpare(const std::string &sql, SqlStmtPtr &stmtPtr)

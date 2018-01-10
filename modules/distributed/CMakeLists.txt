@@ -7,6 +7,7 @@ if(WIN32)
     INCLUDE_DIRECTORIES(
 		${GSF_SOURCE_DIR}/
 		${GSF_SOURCE_DIR}/3rd/libevent-2.0.22-stable/include
+		${GSF_SOURCE_DIR}/3rd/fmt
     )
 
     #引用库目录
@@ -18,6 +19,7 @@ if(UNIX)
     INCLUDE_DIRECTORIES(
             ${GSF_SOURCE_DIR}/
             ${GSF_SOURCE_DIR}/lib/libevent/include
+			${GSF_SOURCE_DIR}/lib/fmt/include
     )
 
     #引用库目录

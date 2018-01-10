@@ -30,8 +30,8 @@ namespace gsf
 	typedef std::function<ArgsPtr(const ArgsPtr &)> DispatchFunc;
 	typedef std::function<void (const ArgsPtr &, DispatchFunc)> EventFunc;
 
-	typedef std::function<void(const ArgsPtr &, bool)> RpcCallback;
-	typedef std::function<void(uint32_t, const gsf::ArgsPtr &, gsf::RpcCallback)> RpcFunc;
+	typedef std::function<void(const ArgsPtr &, int32_t, bool)> RpcCallback;
+	typedef std::function<void(uint32_t, int32_t, const gsf::ArgsPtr &, gsf::RpcCallback)> RpcFunc;
 
 	class Module;
 
@@ -61,7 +61,7 @@ namespace gsf
 			callback 存在，则异步等待callback  如果 result 返回false 则代表这次调用没有成功。 需要进入回滚逻辑
 			如果是业务层导致的事件执行失败，则在args中处理， result返回的成功、失败只代表框架层调用失败.
 		*/
-		virtual void rpc(uint32_t event, const ArgsPtr &args, RpcCallback callback = nullptr);
+		virtual void rpc(uint32_t event, int32_t moduleid, const ArgsPtr &args, RpcCallback callback = nullptr);
 
 		/**!
 			移除module在event层上的绑定.
@@ -96,7 +96,7 @@ namespace gsf
 		///
 
 		void bind_rpc(RpcFunc rpc_callback);
-		void dispatch_rpc(uint32_t event, const ArgsPtr &args, RpcCallback callback = nullptr);
+		void dispatch_rpc(uint32_t event, int32_t moduleid, const ArgsPtr &args, RpcCallback callback = nullptr);
 
 		void rmv_event(ModuleID module_id);
 		void rmv_event(ModuleID module_id, EventID event_id);
