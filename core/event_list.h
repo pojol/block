@@ -72,7 +72,13 @@ namespace eid
 		**/
 		coordinat_select,
 
-		mysql_update,
+		/**!
+			查询Mysql数据库
+			参数: moduleid, sql
+			类型: rpc
+		*/
+		mysql_query,
+		
 		mysql_execute,
 
 		rpc_end,

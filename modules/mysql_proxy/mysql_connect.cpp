@@ -116,7 +116,7 @@ bool gsf::modules::MysqlConnect::init(const std::string &host, int port, const s
 	return true;
 }
 
-void gsf::modules::MysqlConnect::update(const std::string &order, const gsf::ArgsPtr &args)
+void gsf::modules::MysqlConnect::execute(const std::string &order, const gsf::ArgsPtr &args)
 {
 	SqlStmtPtr stmt;
 	perpare(order, stmt);
@@ -170,7 +170,7 @@ void gsf::modules::MysqlConnect::update(const std::string &order, const gsf::Arg
 	}
 }
 
-void gsf::modules::MysqlConnect::execute(gsf::ModuleID target, gsf::ModuleID remote, const std::string &sql, std::function<void (gsf::ModuleID, const gsf::ArgsPtr & )> callback)
+void gsf::modules::MysqlConnect::query(gsf::ModuleID target, gsf::ModuleID remote, const std::string &sql, std::function<void (gsf::ModuleID, const gsf::ArgsPtr & )> callback)
 {
 	MYSQL_RES *result = nullptr;
 	MYSQL_FIELD *fields = nullptr;
