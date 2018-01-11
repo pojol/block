@@ -50,9 +50,9 @@ namespace gsf
 
 			bool init(const std::string &host, int port, const std::string &user, const std::string &pwd, const std::string &name);
 
-			void update(const std::string &order, const gsf::ArgsPtr &args);
+			void execute(const std::string &order, const gsf::ArgsPtr &args);
 
-			void execute(gsf::ModuleID target, gsf::ModuleID remote, const std::string &sql, std::function<void (gsf::ModuleID, const gsf::ArgsPtr &)> callback);
+			void query(gsf::ModuleID target, gsf::ModuleID remote, const std::string &sql, std::function<void (gsf::ModuleID, const gsf::ArgsPtr &)> callback);
 
 		private:
 
