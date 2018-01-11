@@ -143,6 +143,10 @@ std::string gsf::modules::LuaProxyModule::ldispatch(uint32_t lua_id, uint32_t ta
 
 		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
 	}
+	catch (...)
+	{
+		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", fmt::format("module={},event={}", target, event)));
+	}
 
 	return _res;
 }
@@ -182,6 +186,10 @@ int gsf::modules::LuaProxyModule::llisten(uint32_t lua_id, uint32_t self, uint32
 		}
 
 		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
+	}
+	catch (...)
+	{
+		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", fmt::format("module={},event={}", self, event)));
 	}
 
 	return 0;
@@ -224,6 +232,10 @@ void gsf::modules::LuaProxyModule::lrpc(uint32_t lua_id, uint32_t event, int32_t
 		}
 
 		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
+	}
+	catch (...)
+	{
+		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", fmt::format("module={},event={}", moduleid, event)));
 	}
 }
 
@@ -276,6 +288,7 @@ void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_na
 		, "pop_ui16", &Args::pop_ui16
 		, "pop_ui32", &Args::pop_ui32
 		, "pop_i32", &Args::pop_i32
+		, "pop_i64", &Args::pop_i64
 		, "pop_ui64", &Args::pop_ui64
 		, "pop_block", &Args::pop_block
 		, "get_pos", &Args::get_pos

@@ -27,6 +27,7 @@ namespace gsf
 		uint32_t pool_args_count = 1024 * 10;
 		bool is_watch_pref = false;
 		std::string name = "default";
+		int32_t machine_ = 0;
 	};
 
 	class Application
@@ -57,6 +58,9 @@ namespace gsf
 		//！ 临时先写在这里，未来如果支持分布式可能要放在其他地方生成，保证服务器集群唯一。
 		int32_t make_module_id();
 
+		uint64_t get_system_tick();
+		int64_t uuid();
+
 		//void unregist_dynamic_module(uint32_t module_id);
 
 		typedef std::tuple<uint32_t, std::function<void()>, std::function<void()>, std::function<void(Module*, bool)>, Module*> Frame;
@@ -65,6 +69,8 @@ namespace gsf
 
 	private:
 		AppState state_;
+		int sequence_ = 0;
+		uint64_t start_time_ = get_system_tick();
 
 		std::list<Module *> module_list_;
 		std::multimap<uint64_t, std::pair<uint16_t, Module*>> exit_list_;

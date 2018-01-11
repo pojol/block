@@ -25,11 +25,11 @@ void gsf::modules::MysqlProxyModule::init()
 		, std::bind(&MysqlProxyModule::init_event, this, std::placeholders::_1));
 
 	listen(this
-		, eid::db_proxy::mysql_execute
+		, eid::distributed::mysql_execute
 		, std::bind(&MysqlProxyModule::execute_event, this, std::placeholders::_1));
 	
 	listen(this
-		, eid::db_proxy::mysql_update
+		, eid::distributed::mysql_update
 		, std::bind(&MysqlProxyModule::update_event, this, std::placeholders::_1));
 }
 

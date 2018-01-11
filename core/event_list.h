@@ -34,8 +34,14 @@ namespace eid
 
 		module_init_succ,
 		module_shut_succ,
+
+		/*!
+			
+		**/
+		uuid,
 	};
 
+	//! 凡是gsf集群内使用rpc交互的消息都应该定义在distributed区块
 	enum distributed
 	{
 		rpc_begin = 1001,
@@ -65,6 +71,9 @@ namespace eid
 			类型: rpc
 		**/
 		coordinat_select,
+
+		mysql_update,
+		mysql_execute,
 
 		rpc_end,
 	};
@@ -206,9 +215,6 @@ namespace eid
 			类型: dispatch
 		**/
 		mysql_connect,
-
-		mysql_update,
-		mysql_execute,
 
 		// local
 		mysql_callback,

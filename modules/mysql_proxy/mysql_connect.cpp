@@ -178,7 +178,7 @@ void gsf::modules::MysqlConnect::execute(gsf::ModuleID target, gsf::ModuleID rem
 	int _progress = 1;
 
 	auto errf = [&](const std::string &err) {
-		callback(target, gsf::make_args(remote, false, _progress, err));
+		callback(target, gsf::make_args(remote, false, int32_t(-1), err));
 	};
 
 	if (mysql_query(base, sql.c_str())) {
@@ -188,7 +188,7 @@ void gsf::modules::MysqlConnect::execute(gsf::ModuleID target, gsf::ModuleID rem
 
 	result = mysql_store_result(base);
 	if (nullptr == result) {
-		errf(mysql_error(base));
+		callback(target, gsf::make_args(remote, true, int32_t(-1), "success!"));
 		return;
 	}
 
@@ -214,6 +214,7 @@ void gsf::modules::MysqlConnect::execute(gsf::ModuleID target, gsf::ModuleID rem
 	while (nullptr != row)
 	{
 		auto argsPtr = gsf::ArgsPool::get_ref().get();
+		argsPtr->push(remote);
 		argsPtr->push(true);
 		argsPtr->push(_progress);
 
@@ -240,7 +241,6 @@ void gsf::modules::MysqlConnect::execute(gsf::ModuleID target, gsf::ModuleID rem
 				break;
 			}
 		}
-
 		callback(target, argsPtr);
 
 		_progress++;
@@ -249,7 +249,7 @@ void gsf::modules::MysqlConnect::execute(gsf::ModuleID target, gsf::ModuleID rem
 	}
 
 	// eof
-	callback(target, gsf::make_args(true, -1));
+	callback(target, gsf::make_args(remote, true, -1));
 
 	if (nullptr != result)
 	{
