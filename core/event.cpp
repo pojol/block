@@ -88,10 +88,10 @@ void gsf::EventModule::bind_rpc(RpcFunc rpc_callback)
 	rpc_ = rpc_callback;
 }
 
-void gsf::EventModule::dispatch_rpc(uint32_t event, const ArgsPtr &args, RpcCallback callback /* = nullptr */)
+void gsf::EventModule::dispatch_rpc(uint32_t event, int32_t moduleid, const ArgsPtr &args, RpcCallback callback /* = nullptr */)
 {
 	assert(rpc_);
-	rpc_(event, args, callback);
+	rpc_(event, moduleid, args, callback);
 }
 
 void gsf::EventModule::rmv_event(ModuleID module_id)
@@ -155,9 +155,9 @@ void gsf::IEvent::boardcast(uint32_t event, const gsf::ArgsPtr &args)
 }
 
 
-void gsf::IEvent::rpc(uint32_t event, const ArgsPtr &args, RpcCallback callback /* = nullptr */)
+void gsf::IEvent::rpc(uint32_t event, int32_t moduleid, const ArgsPtr &args, RpcCallback callback /* = nullptr */)
 {
-	EventModule::get_ref().dispatch_rpc(event, args, callback);
+	EventModule::get_ref().dispatch_rpc(event, moduleid, args, callback);
 }
 
 void gsf::IEvent::wipeout(ModuleID self)

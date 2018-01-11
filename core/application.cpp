@@ -77,6 +77,10 @@ void gsf::Application::init_cfg(const gsf::AppConfig &cfg)
 
 		return nullptr;
 	});
+
+	listen(this, eid::base::uuid, [&](const gsf::ArgsPtr &args) {
+		return gsf::make_args(uuid());
+	});
 }
 
 void gsf::Application::unregist_module(gsf::ModuleID module_id)
@@ -277,6 +281,27 @@ int32_t gsf::Application::make_module_id()
 	}
 
 	return module_idx_++;
+}
+
+uint64_t gsf::Application::get_system_tick()
+{
+	return (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+}
+
+int64_t gsf::Application::uuid()
+{
+	int64_t _uuid = 0;
+	uint64_t _tick = get_system_tick() - start_time_;
+	
+	_uuid |= _tick << 22;
+	_uuid |= cfg_.machine_ & 0x3FF << 12;
+
+	_uuid |= sequence_++ & 0xFFF;
+	if (sequence_ == 0x1000) {
+		sequence_ = 0;
+	}
+
+	return _uuid;
 }
 
 /*

@@ -143,6 +143,10 @@ std::string gsf::modules::LuaProxyModule::ldispatch(uint32_t lua_id, uint32_t ta
 
 		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
 	}
+	catch (...)
+	{
+		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", fmt::format("module={},event={}", target, event)));
+	}
 
 	return _res;
 }
@@ -183,11 +187,15 @@ int gsf::modules::LuaProxyModule::llisten(uint32_t lua_id, uint32_t self, uint32
 
 		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
 	}
+	catch (...)
+	{
+		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", fmt::format("module={},event={}", self, event)));
+	}
 
 	return 0;
 }
 
-void gsf::modules::LuaProxyModule::lrpc(uint32_t lua_id, uint32_t event, const std::string &buf, const sol::function &func)
+void gsf::modules::LuaProxyModule::lrpc(uint32_t lua_id, uint32_t event, int32_t moduleid, const std::string &buf, const sol::function &func)
 {
 	auto _smartPtr = gsf::ArgsPool::get_ref().get();
 	auto lua = find_lua(lua_id);
@@ -195,26 +203,22 @@ void gsf::modules::LuaProxyModule::lrpc(uint32_t lua_id, uint32_t event, const s
 	try {
 		_smartPtr->push_block(buf.c_str(), buf.size());
 		
-		auto _callback = [=](const ArgsPtr &cbArgs, bool bResult) {
+		auto _callback = [=](const ArgsPtr &cbArgs, int32_t progress, bool bResult) {
 			
-			if (bResult) {
-				std::string _req = "";
-				auto _pos = cbArgs->get_pos();
-				_req = cbArgs->pop_block(0, _pos);
-
-				func(_req, _pos, bResult);
+			std::string _res = "";
+			auto _pos = 0;
+			if (nullptr != cbArgs) {
+				_pos = cbArgs->get_pos();
+				_res = cbArgs->pop_block(0, _pos);
 			}
-			else {
-				func(nullptr, 0, bResult);
-			}
-			
+			func(_res, _pos, progress, bResult);
 		};
 
 		if (sol::type::lua_nil == func.get_type()) {
-			rpc(event, _smartPtr, nullptr);
+			rpc(event, moduleid, _smartPtr, nullptr);
 		}
 		else {
-			rpc(event, _smartPtr, _callback);
+			rpc(event, moduleid, _smartPtr, _callback);
 		}
 
 	}
@@ -228,6 +232,10 @@ void gsf::modules::LuaProxyModule::lrpc(uint32_t lua_id, uint32_t event, const s
 		}
 
 		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
+	}
+	catch (...)
+	{
+		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", fmt::format("module={},event={}", moduleid, event)));
 	}
 }
 
@@ -280,6 +288,7 @@ void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_na
 		, "pop_ui16", &Args::pop_ui16
 		, "pop_ui32", &Args::pop_ui32
 		, "pop_i32", &Args::pop_i32
+		, "pop_i64", &Args::pop_i64
 		, "pop_ui64", &Args::pop_ui64
 		, "pop_block", &Args::pop_block
 		, "get_pos", &Args::get_pos

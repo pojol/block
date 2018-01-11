@@ -116,7 +116,7 @@ void gsf::Args::push(const uint64_t &val)
 
 void gsf::Args::push(const int64_t &val)
 {
-	push_impl(at_uint64);
+	push_impl(at_int64);
 	push_impl(val);
 	size_++;
 }
@@ -602,6 +602,9 @@ std::string gsf::Args::toString()
 	{
 		switch (tag)
 		{
+		case at_bool:
+			ss << "bool:" << pop_bool() << std::endl;
+			break;
 		case at_uint8:
 			ss << "uint8:" << pop_ui8() << std::endl;
 			break;

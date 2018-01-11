@@ -177,6 +177,7 @@ gsf::ArgsPtr gsf::network::AcceptorModule::send_msg(const gsf::ArgsPtr &args)
 	auto _msg = args->pop_msgid();
 	std::string _str = "";
 
+	//! 内部消息走的时Args流， 外部的是原始的二进制数据。 所以这里要分开处理下!
 	if (_msg > eid::distributed::rpc_begin && _msg < eid::distributed::rpc_end) {
 		auto _headlen = sizeof(gsf::SessionID) + 1 + sizeof(gsf::MsgID) + 1;
 		_str = args->pop_block(_headlen, args->get_pos());
