@@ -1,5 +1,6 @@
 # GSF
-[![Build Status](https://travis-ci.org/pojol/gsf.svg?branch=master)](https://travis-ci.org/pojol/gsf)  
+[![Build Status](https://travis-ci.org/pojol/gsf.svg?branch=master)](https://travis-ci.org/pojol/gsf)
+[![License](http://img.shields.io/badge/license-mit-blue.svg?style=flat-square)](https://raw.githubusercontent.com/labstack/echo/master/LICENSE)
 
 ## feature
 - 组件结构，模块访问隔离
@@ -44,16 +45,10 @@
     - cmake ..
     - make
 
+	
 ## sample
 - https://github.com/pojol/gsf_sample
 - [x] timer
 - [x] echo
-- [ ] db_proxy
+- [x] db_proxy
 - [x] distributed
-
-	
-## License
-	MIT
-	Copyright (c) 2016 pojol
-	
-	pojol@outlook.com
