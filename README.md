@@ -12,23 +12,18 @@
 
 ## modules
 | module        |       event           |             comment                  |    test case    |
-| --------      |:----:                 | :-----:                       | :-----:  |
+| :----      |:----:                 | :-----:                       | :-----:  |
 | core          | [core](#core)   | 提供框架基础的支撑服务        | |
 | network::acceptor      |      [network](#network)        |   基于libevent的接收器封装    | |
 | network::connector      |      [network](#network)       |    基于libevent的连接器封装   | |
-| distributed::coordinat_regist| [distributed](#distributed)| 将Node绑定到协调服务 | |
-| distributed::coordinat_unregit| [distributed](#distributed)| 将Node从协调服务中解除绑定| |
-|distributed::coordinat_adjust_weight| [distributed](#distributed)|调整Node在Coordinator中的权重| |
-|distributed::coordinat_select| [distributed](#distributed)|通过权重获取Node| |
-|distributed::mysql_query| [distributed](#distributed) | 执行一条mysql查询指令 |
-|lua_proxy::create| [lua_proxy](#lua) | 创建一个LuaModule（lua虚拟机 ||
-|lua_proxy::reload| [lua_proxy](#lua) | 重载一个LuaModule ||
-|lua_proxy::distory| [lua_proxy](#lua)| 销毁一个LuaModule| |
-|timer::delay_milliseconds| [timer](#timer)| 创建一个若干毫秒触发的定时器
-|timer::delay_day|[timer](#timer)| 创建一个若干天触发的定时器
-|timer::delay_week|[timer](#timer)| 创建一个若干周触发的定时器
-|timer::remove_timer|[timer](#timer)| 移除一个定时器
-|timer::timer_arrive|[timer](#timer)| 某个timer被触发
+| distributed::coordinat| [distributed](#distributed)| 处理集群中的协调服务 | |
+|distributed::node| [distributed](#distributed) | 处理集群中的远程分发和绑定相关服务 |
+|lua_proxy| [lua_proxy](#lua) | 管理LuaModule的状态以及和c++层的交互 ||
+|timer| [timer](#timer)| 定时器相关
+|mysql_proxy| [mysql_proxy](#mysql_proxy)| mysql封装 |
+|redis_proxy| [redis_proxy](#redis_proxy)| redis的封装目前主要作用于灾备和mysql更新优化 |
+|logger| [logger](#logger)| 基于glog的日志模块 |
+
 
 
 ## build & install 
@@ -194,6 +189,21 @@ enum distributed
 ```
 
 ## timer
+```c++
+
+```
+
+## mysql_proxy
+```c++
+
+```
+
+## redis_proxy
+```c++
+
+```
+
+## logger
 ```c++
 
 ```
