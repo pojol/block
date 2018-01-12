@@ -67,9 +67,6 @@ namespace gsf
 			gsf::ModuleID timer_m_ = gsf::ModuleNil;
 			gsf::SessionID connector_fd_ = gsf::SessionNil;
 
-			std::string root_ip_ = "";
-			int32_t root_port_ = 0;
-
 			std::string acceptor_ip_ = "";
 			int32_t acceptor_port_ = 0;
 
