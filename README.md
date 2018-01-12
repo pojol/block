@@ -176,7 +176,7 @@ enum distributed
 
 	/**!
 		comment: 查询Mysql数据库， args中存放单条查询信息， 如果返回的是数组 progress 则代表当前进度 -1 代表eof
-		args: moduleid, sql
+		args: int32_t module_id, string sql
 		type: rpc
 		res : stream args, int32_t progress, bool succ
 	*/
