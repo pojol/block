@@ -212,8 +212,8 @@ gsf::ArgsPtr gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &arg
 		acceptor_ip_ = args->pop_string();
 		acceptor_port_ = args->pop_i32();
 
-		root_ip_ = args->pop_string();
-		root_port_ = args->pop_i32();
+		auto _root_ip = args->pop_string();
+		auto _root_port = args->pop_i32();
 
 		auto _module_len = args->pop_i32();
 		for (int i = 0; i < _module_len; ++i)
@@ -226,10 +226,10 @@ gsf::ArgsPtr gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &arg
 		}
 
 		//! tmp
-		regist_node(get_module_id(), eid::distributed::coordinat_regist, root_ip_, root_port_);
-		regist_node(get_module_id(), eid::distributed::coordinat_unregit, root_ip_, root_port_);
-		regist_node(get_module_id(), eid::distributed::coordinat_adjust_weight, root_ip_, root_port_);
-		regist_node(get_module_id(), eid::distributed::coordinat_select, root_ip_, root_port_);
+		regist_node(get_module_id(), eid::distributed::coordinat_regist, _root_ip, _root_port);
+		regist_node(get_module_id(), eid::distributed::coordinat_unregit, _root_ip, _root_port);
+		regist_node(get_module_id(), eid::distributed::coordinat_adjust_weight, _root_ip, _root_port);
+		regist_node(get_module_id(), eid::distributed::coordinat_select, _root_ip, _root_port);
 		//
 
 		listen(this, eid::network::new_connect, [&](const gsf::ArgsPtr &args) {
