@@ -12,19 +12,19 @@
 
 
 ## modules
-- [x] core
-- [x] network
+- [x] core （提供框架基础的支撑服务
+- [x] network （基于libevent的网络层封装
     - [x] acceptor
     - [x] connector
-- [ ] distributed
+- [ ] distributed （分布式相关的支持
     - [x] node
     - [x] coordinate
     - [ ] election
-- [x] timer
-- [x] log
-- [x] lua_proxy
-- [x] reids_cache_proxy
-- [x] mysql_proxy
+- [x] timer （简单易用的时钟模块，支持按毫秒，天，周更新
+- [x] log （基于glog的封装
+- [x] lua_proxy（处理和Lua交互的模块基于sol2和gsf::core::Args
+- [x] reids_cache_proxy（灾备模块基于redis
+- [x] mysql_proxy（mysql模块
 
 
 ## depend
