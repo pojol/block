@@ -18,17 +18,26 @@ namespace eid
 		get_app_name,
 
 		/*!
-			通过字符串获得module的id， 只能获取静态显示声明的module。
+			comment: 通过字符串获得module的id， 只能获取静态显示声明的module。
+			args: string module_name
+			type: dispatch
+			res : int32_t module_id 
 		**/
 		get_module,
 
 		/*!
-			通过已经定义的module，创建多份实例。
+			comment: 运行过程中创建Module，需要通过 REGISTER_CLASS 提前进行类型定义。
+			args: string module_type
+			type: dispatch 
+			res : int32_t module_id
 		**/
 		new_dynamic_module,
 		
 		/*!
-			移除某个被注册的module
+			comment: 移除注册在App中的某个Module
+			args: int32_t module_id
+			type: dispatch
+			res : nil
 		**/
 		delete_module,
 
@@ -36,7 +45,10 @@ namespace eid
 		module_shut_succ,
 
 		/*!
-			
+			comment: 在集群中创建一个唯一ID，需要用户通过config.machine 为App做好区分。
+			args: nil
+			type: dispatch
+			res : int64_t uuid
 		**/
 		uuid,
 	};
@@ -47,35 +59,37 @@ namespace eid
 		rpc_begin = 1001,
 
 		/*!
-			将Node绑定到Coordinator
-			参数: nodeType, nodeID, {[moduleName, moduleID, moduleFeature] ... }
-			类型: rpc
+			comment: 将Node绑定到Coordinator
+			args: string node_type, int32_t node_id, string root_ip, int32_t root_port, [{string module_name, int32_t module_id, int32_t module_fature} ... ]
+			type: rpc
+			res : stream args, int32_t progress, bool succ
 		**/
 		coordinat_regist,
 		
-		/*!
-			将Node从Coordinator解除绑定
-		**/
+		/***/
 		coordinat_unregit,
 
 		/*!
-			调整Node在Coordinator中的权重
-			参数: nodeID, moduleName, moduleFeature, moduleWeight
-			类型: rpc
+			comment: 调整Node在Coordinator中的权重
+			args: int32_t node_id, string module_name, int32_t module_fature, int32_t +- weight 
+			type: rpc
+			res : stream args, int32_t progress, bool succ
 		**/
 		coordinat_adjust_weight,
 
 		/*!
-			通过ModuleName和ModuleFeature选取一个适合自己的Node
-			参数: moduleName, moduleFeature
-			类型: rpc
+			comment: 通过ModuleName和ModuleFeature选取一个集群中适合自己的Node
+			args: string module_name, int32_t module_fature
+			type: rpc
+			res : stream args, int32_t progress, bool succ
 		**/
 		coordinat_select,
 
 		/**!
-			查询Mysql数据库
-			参数: moduleid, sql
-			类型: rpc
+			comment: 查询Mysql数据库， args中存放单条查询信息， 如果返回的是数组 progress 则代表当前进度 -1 代表eof
+			args: moduleid, sql
+			type: rpc
+			res : stream args, int32_t progress, bool succ
 		*/
 		mysql_query,
 		
@@ -87,60 +101,60 @@ namespace eid
 	enum network
 	{
 		/*!
-			创建一个接收器
-			参数: module_id, ip, port
-			类型: dispatch
+			comment: 创建一个接收器
+			args: int32_t module_id, string ip, int32_t port
+			type: dispatch
+			res : bool succ or fail, string reason
 		**/
 		make_acceptor = 2001,
 
 		/*!
-			创建一个连接器
-			参数: module_id, ip, port
-			类型: dispatch
+			comment: 创建一个连接器
+			args: module_id, ip, port
+			type: dispatch
+			res : bool succ or fail, string reason
 		**/
 		make_connector,
 
 		/*!
-			踢掉某个现有的连接
-			参数: fd
-			类型: dispatch
+			comment: 踢掉某个现有的连接
+			args: int32_t fd
+			type: dispatch
+			res : bool succ or fail, string reason
 		**/
 		kick_connect,
 
 		/*!
-			发送一条网络消息
-			参数: fd, msgid, block
-			类型: dispatch
+			comment: 发送一条网络消息
+			args: int32_t fd, int32_t msgid, stream block
+			type: dispatch
+			res : nil
 		**/
 		send,
 
 		/*!
-			接收到一条网络消息
-			参数: fd, msgid, block
-			类型: listen
+			comment: 接收到一条网络消息
+			args: int32_t fd, int32_t msgid, stream block
+			type: listen
+			res : nil
 		**/
 		recv,
 		
 		/*!
-			接收到一个新的连接（适用于 acceptor
-			参数: fd
-			类型: listen
+			comment: 接收到一个新的连接（适用于 acceptor
+			args: int32_t fd
+			type: listen
+			res : nil
 		**/
 		new_connect,
 
 		/*!
-			连接被断开
-			参数: fd
-			类型: listen
+			comment: 连接被断开
+			args: int32_t fd
+			type: listen
+			res : int32_t fd, string reason
 		**/
 		dis_connect,
-
-		/*!
-			连接失败（适用于 connector
-			参数: string
-			类型: listen
-		**/
-		fail_connect,
 	};
 
 	enum log
