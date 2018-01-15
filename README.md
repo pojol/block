@@ -4,22 +4,27 @@
 
 ## feature
 - 组件结构，模块访问隔离
-- 基于命令（接口）编程
-- 有一定的内省能力（可以运行时开启资源，性能的使用报告
-- 支持使用c/c++, lua编写模块 (lua模块可在运行时重载
-- 支持分布式架构（可依据业务定制，建议多对数据进行分片，少同步
+- 支持c++，lua 模块，支持运行时添加移除模块
+- 支持分布式架构
 - 跨平台 （linux, windows
+
+## event
+|```c++  ```|```lua  ```|
+|:----:|:----:|
+|[listen](#listen)|[listen](#listen)|
+|[dispatch](#dispatch)| [dispatch](#dispatch)|
+|[rpc](#rpc)|[rpc](#rpc)|
 
 ## modules
 | module        |       event           |             comment                  |    test case    |
 | :----      |:----:                 | :-----:                       | :-----:  |
 | core          | [core](#core)   | 提供框架基础的支撑服务        | |
-| network::acceptor      |      [network](#network)        |   基于libevent的接收器封装    | |
-| network::connector      |      [network](#network)       |    基于libevent的连接器封装   | |
-| distributed::coordinat| [distributed](#distributed)| 处理集群中的协调服务 | |
-|distributed::node| [distributed](#distributed) | 处理集群中的远程分发和绑定相关服务 |
+| acceptor      |      [network](#network)        |   基于libevent的接收器封装    |gsf_sample/echo_server|
+| connector      |      [network](#network)       |    基于libevent的连接器封装   |gsf_sample/echo_client |
+| coordinat| [distributed](#distributed)| 处理集群中的协调服务 | |
+|node| [distributed](#distributed) | 处理集群中的远程分发和绑定相关服务 |
 |lua_proxy| [lua_proxy](#lua) | 管理LuaModule的状态以及和c++层的交互 ||
-|timer| [timer](#timer)| 定时器相关
+|timer| [timer](#timer)| 定时器相关|gsf_sample/timer|
 |mysql_proxy| [mysql_proxy](#mysql_proxy)| mysql封装 |
 |redis_proxy| [redis_proxy](#redis_proxy)| redis的封装目前主要作用于灾备和mysql更新优化 |
 |logger| [logger](#logger)| 基于glog的日志模块 |
@@ -29,7 +34,8 @@
 ## build & install 
 - supported compilers , gcc4.9+, vs2015+
 - depend cmake2.8+ 
-- build (linux
+- linux
+    - cd gsf
     - python 3rd/update_3rd.py
     - mkdir build
     - cd build
@@ -43,6 +49,80 @@
 - [x] echo
 - [x] db_proxy
 - [x] distributed
+
+# interface
+## listen
+### c++
+```c++
+listen(module_id, event_id, [&](const gsf::StreamPtr &args) {
+    auto _xx = args.pop_xx();
+    ...
+    
+	return nullptr;
+});
+```
+### lua
+```lua
+listen(module_id, event_id, function(buf, len) 
+    unpack = Stream.new(buf, len)
+    str = unpack:pop_string()
+    ...
+    
+	return ""
+end)
+```
+## dispatch
+### c++
+```c++
+retStream = dispatch(target_module_id, event_id, gsf::make_args(...))
+retStream->pop_xxx()
+...
+
+```
+### lua
+```lua
+local pack = Stream.new()
+pack:push_xxx(val)
+...
+
+buf, len = dispatch(target_module_id, event_id, pack:block())
+```
+## rpc
+### c++
+```c++
+rpc(rpc_event, module_id, gsf::make_args(values ... ), [&](const gsf::ArgsPtr &args, int32_t process, bool result) {
+    if (result) {
+    
+    	auto _ret = args->pop_xxx();
+        ...
+    }
+    else {
+        printf(args->pop_err())
+    }
+});
+```
+### lua
+```lua
+local pack = Stream.new()
+pack:push_xxx(val)
+...
+
+rpc(rpc_event, module_id, pack:block(), function(buf, len, progress, cbResult)
+
+    unpack = Stream.new(buf, len)
+
+    if cbResult == true then
+        retVal = unpack:pop_xxx()
+        ...
+        
+    else
+        logWarn("module_name", unpack:pop_err())
+    end
+
+end)
+```
+
+# events
 
 ## core
 ```c++
