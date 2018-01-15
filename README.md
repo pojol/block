@@ -9,11 +9,11 @@
 - 跨平台 （linux, windows
 
 ## event
-|```c++  ```|```lua  ```|
-|:----:|:----:|
-|[listen](#listen)|[listen](#listen)|
-|[dispatch](#dispatch)| [dispatch](#dispatch)|
-|[rpc](#rpc)|[rpc](#rpc)|
+|```c++  ```|```lua  ```|comment|
+|:----:|:----:|:----:|
+|[listen](#listen)|[listen](#listen)|监听某个模块发送的事件|
+|[dispatch](#dispatch)| [dispatch](#dispatch)|向某个模块发送一个事件|
+|[rpc](#rpc)|[rpc](#rpc)|发送一个跨进程的事件，如果有callback参数则必定会有异步返回|
 
 ## modules
 | module        |       event           |             comment                  |    test case    |
