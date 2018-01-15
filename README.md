@@ -199,17 +199,17 @@ enum network
 
 	/*!
 		comment: 接收到一条网络消息
-		args: int32_t fd, int32_t msgid, stream block
+		args: nil
 		type: listen
-		res : nil
+		res : int32_t fd, int32_t msgid, stream block
 	**/
 	recv,
 	
 	/*!
 		comment: 接收到一个新的连接（适用于 acceptor
-		args: int32_t fd
+		args: nil
 		type: listen
-		res : nil
+		res : int32_t fd
 	**/
 	new_connect,
 
@@ -265,17 +265,93 @@ enum distributed
 ```
 ## lua
 ```c++
+enum lua_proxy
+{
+	/*!
+		comment: 创建 Lua Script Module ,proxy会自动完成c++/lua的相关绑定 
+		args: int32_t module_id, string script_dir, string script_name
+		type: dispatch
+		res : bool succ
+	**/
+	create = 2301,
 
+	/*!
+		comment: 重新装载 Lua Script Module, 会走标准的退出和进入流程 init, shut 。即便持有状态也可以方便的热更
+		args: int32_t module_id
+		type: dispatch
+		res : bool succ
+	**/
+	reload,
+
+	/*!
+		comment: 移除 Lua Script Module
+		args: int32_t module_id
+		type: dispatch
+		res : bool succ
+	**/
+	destroy,
+};
 ```
 
 ## timer
 ```c++
+//timer module 插入删除复杂度O(log(n))，获取最小元素复杂度O(1)，触发时间 >= app.config.tick_count
+enum timer
+{
+	/*!
+		comment: 延迟若干毫秒触发
+		args: int32_t module_id, int32_t milliseconds
+		type: dispatch
+		res : int64_t timer_id
+	**/
+	delay_milliseconds = 2201,
 
+	/*!
+		comment: 隔天触发
+		args: int32_t module_id, int32_t hour, int32_t minute
+		type: dispatch
+		res : int64_t timer_id
+	**/
+	delay_day,
+
+	/*!
+		comment: 从定时器中移除某个timer
+		args: int64_t timer_id
+		type: dispatch
+		res : bool succ
+	**/
+	remove_timer,
+
+	/*!
+		comment: 触发Timer
+		args: nil
+		type: listen
+		res : int64_t timer_id
+	**/
+	timer_arrive,
+};
 ```
 
 ## mysql_proxy
 ```c++
+enum db_proxy
+{
+	/*!
+		comment: 建立一个新的Mysql连接
+		args: string host, string user, string password, string dbName, int32_t port
+		type: dispatch
+		res : bool succ
+	**/
+	mysql_connect,
 
+	/**!
+		comment: 查询Mysql数据库， args中存放单条查询信息， 如果返回的是数组 progress 则代表当前进度 -1 代表eof
+		args: moduleid, sql
+		type: rpc
+		res : stream args, int32_t progress, bool succ
+	*/
+	mysql_query,
+};
 ```
 
 ## redis_proxy
@@ -285,5 +361,15 @@ enum distributed
 
 ## logger
 ```c++
-
+// 如果需要单独部署logServer则可以在distributed加入rpc事件
+enum log
+{
+	/*!
+		comment: 输出日志
+		args: int32_t loglv, string title, string context
+		type: listen
+		res : nil 
+	**/
+	print = 2101,
+};
 ```
