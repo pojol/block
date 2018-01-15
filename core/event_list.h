@@ -2,8 +2,7 @@
 // Created by pojol on 2017/2/13.
 //
 
-#ifndef GSF_EVENT_LIST_H_H
-#define GSF_EVENT_LIST_H_H
+#pragma once
 
 #include "types.h"
 
@@ -159,23 +158,30 @@ namespace eid
 
 	enum log
 	{
-		//const uint32_t init = 1001;	初始化改为在自己模块中实现，regist即初始化
+		/*!
+			comment: 输出日志
+			args: int32_t loglv, string title, string context
+			type: listen
+			res : nil 
+		**/
 		print = 2101,
 	};
 
 	enum timer
 	{
 		/*!
-			延迟若干毫秒触发
-			参数: module_id, milliseconds
-			类型: dispatch
+			comment: 延迟若干毫秒触发
+			args: int32_t module_id, int32_t milliseconds
+			type: dispatch
+			res : int64_t timer_id
 		**/
 		delay_milliseconds = 2201,
 
 		/*!
-			延时一天触发， hour & minute 可以指定隔天的触发点
-			参数: module_id, hour, minute
-			类型: dispatch
+			comment: 隔天触发
+			args: int32_t module_id, int32_t hour, int32_t minute
+			type: dispatch
+			res : int64_t timer_id
 		**/
 		delay_day,
 
@@ -184,16 +190,18 @@ namespace eid
 		delay_month,
 
 		/*!
-			从定时器中移除
-			参数: timer_id
-			类型: dispatch
+			comment: 从定时器中移除某个timer
+			args: int64_t timer_id
+			type: dispatch
+			res : bool succ
 		**/
 		remove_timer,
 
 		/*!
-			触发Timer
-			参数: timer_id
-			类型: listen
+			comment: 触发Timer
+			args: nil
+			type: listen
+			res : int64_t timer_id
 		**/
 		timer_arrive,
 	};
@@ -201,23 +209,26 @@ namespace eid
 	enum lua_proxy
 	{
 		/*!
-			创建 Lua Script Module ,proxy会自动完成c++/lua的相关绑定 (userdata Args, interface : dispatch, listen, rpc)
-			参数: proxy module_id, script_dir, script_name
-			类型: dispatch
+			comment: 创建 Lua Script Module ,proxy会自动完成c++/lua的相关绑定 
+			args: int32_t module_id, string script_dir, string script_name
+			type: dispatch
+			res : bool succ
 		**/
 		create = 2301,
 
 		/*!
-			重新装载 Lua Script Module, 会走标准的退出和进入流程 init, shut 。即便持有状态也可以方便的热更
-			参数: module_id
-			类型: dispatch
+			comment: 重新装载 Lua Script Module, 会走标准的退出和进入流程 init, shut 。即便持有状态也可以方便的热更
+			args: int32_t module_id
+			type: dispatch
+			res : bool succ
 		**/
 		reload,
 
 		/*!
-			移除 Lua Script Module
-			参数: module_id
-			类型: dispatch
+			comment: 移除 Lua Script Module
+			args: int32_t module_id
+			type: dispatch
+			res : bool succ
 		**/
 		destroy,
 	};
@@ -230,9 +241,10 @@ namespace eid
 		redis_resume,
 
 		/*!
-			建立一个新的Mysql连接
-			参数: host, user, password, dbName, port
-			类型: dispatch
+			comment: 建立一个新的Mysql连接
+			args: string host, string user, string password, string dbName, int32_t port
+			type: dispatch
+			res : bool succ
 		**/
 		mysql_connect,
 
@@ -267,5 +279,3 @@ namespace eid
 		get_cfg,
 	};
 }
-
-#endif
