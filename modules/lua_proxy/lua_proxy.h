@@ -77,8 +77,7 @@ namespace gsf
 		private:
 			uint32_t log_m_ = 0;
 
-			typedef std::vector<std::pair<uint32_t, LuaProxy*>> StateMap;
-			StateMap lua_map_;
+			std::unordered_map<gsf::ModuleID, LuaProxy*> lua_map_;
 		};
 	}
 }
