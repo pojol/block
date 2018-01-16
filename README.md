@@ -10,14 +10,14 @@
 
 ## event
 |```c++  ```|```lua  ```|comment|
-|:----:|:----:|:----:|
+|:----:|:----:|:----|
 |[listen](#listen)|[listen](#listen)|监听某个模块发送的事件|
 |[dispatch](#dispatch)| [dispatch](#dispatch)|向某个模块发送一个事件|
 |[rpc](#rpc)|[rpc](#rpc)|发送一个跨进程的事件，如果有callback参数则必定会有异步返回|
 
 ## modules
 | module        |       event           |             comment                  |    test case    |
-| :----      |:----:                 | :-----:                       | :-----:  |
+| :----      |:----                 | :-----                       | :-----  |
 | core          | [core](#core)   | 提供框架基础的支撑服务        |nil|
 | acceptor      |      [network](#network)        |   基于libevent的接收器封装    |gsf_sample/echo_server|
 | connector      |      [network](#network)       |    基于libevent的连接器封装   |gsf_sample/echo_client |
