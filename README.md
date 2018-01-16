@@ -18,16 +18,16 @@
 ## modules
 | module        |       event           |             comment                  |    test case    |
 | :----      |:----:                 | :-----:                       | :-----:  |
-| core          | [core](#core)   | 提供框架基础的支撑服务        | |
+| core          | [core](#core)   | 提供框架基础的支撑服务        |nil|
 | acceptor      |      [network](#network)        |   基于libevent的接收器封装    |gsf_sample/echo_server|
 | connector      |      [network](#network)       |    基于libevent的连接器封装   |gsf_sample/echo_client |
-| coordinat| [distributed](#distributed)| 处理集群中的协调服务 | |
-|node| [distributed](#distributed) | 处理集群中的远程分发和绑定相关服务 |
-|lua_proxy| [lua_proxy](#lua) | 管理LuaModule的状态以及和c++层的交互 ||
+| coordinat| [distributed](#distributed)| 处理集群中的协调服务 | gsf_sample/distributed|
+|node| [distributed](#distributed) | 处理集群中的远程分发和绑定相关服务 |gsf_sample/distributed|
+|lua_proxy| [lua_proxy](#lua) | 管理LuaModule的状态以及和c++层的交互 |nil|
 |timer| [timer](#timer)| 定时器相关|gsf_sample/timer|
-|mysql_proxy| [mysql_proxy](#mysql_proxy)| mysql封装 |
-|redis_proxy| [redis_proxy](#redis_proxy)| redis的封装目前主要作用于灾备和mysql更新优化 |
-|logger| [logger](#logger)| 基于glog的日志模块 |
+|mysql_proxy| [mysql_proxy](#mysql_proxy)| mysql封装 |gsf_sample/db|
+|redis_proxy| [redis_proxy](#redis_proxy)| redis的封装目前主要作用于灾备和mysql更新优化 |nil|
+|logger| [logger](#logger)| 基于glog的日志模块 |nil|
 
 
 
