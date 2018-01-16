@@ -63,12 +63,10 @@ listen(module_id, event_id, [&](const gsf::StreamPtr &args) {
 ```
 ### lua
 ```lua
-listen(module_id, event_id, function(buf, len) 
-    unpack = Stream.new(buf, len)
-    str = unpack:pop_string()
-    ...
+-- resArgs = { ... }
+listen(module_id, event_id, function(resArgs) 
     
-	return ""
+    return ""
 end)
 ```
 ## dispatch
@@ -81,11 +79,7 @@ retStream->pop_xxx()
 ```
 ### lua
 ```lua
-local pack = Stream.new()
-pack:push_xxx(val)
-...
-
-buf, len = dispatch(target_module_id, event_id, pack:block())
+resArgs = dispatch(target_module_id, event_id, { reqArgs ... })
 ```
 ## rpc
 ### c++
@@ -103,20 +97,13 @@ rpc(rpc_event, module_id, gsf::make_args(values ... ), [&](const gsf::ArgsPtr &a
 ```
 ### lua
 ```lua
-local pack = Stream.new()
-pack:push_xxx(val)
-...
+rpc(rpc_event, module_id, { reqArgs ... }, function(resArgs, progress, succ)
 
-rpc(rpc_event, module_id, pack:block(), function(buf, len, progress, cbResult)
+    if succ == true then
+	dump(resArgs)
 
-    unpack = Stream.new(buf, len)
-
-    if cbResult == true then
-        retVal = unpack:pop_xxx()
-        ...
-        
     else
-        logWarn("module_name", unpack:pop_err())
+	logWarn("module_name", resArgs[1])
     end
 
 end)
