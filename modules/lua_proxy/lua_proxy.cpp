@@ -291,6 +291,7 @@ void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_na
 		, "pop_ui64", &Args::pop_ui64
 		, "pop_block", &Args::pop_block
 		, "get_pos", &Args::get_pos
+		, "get_tag", &Args::get_tag
 		, "toString", &Args::toString);
 
 	_lua->state_.new_usertype<LuaProxyModule>("LuaProxyModule"
