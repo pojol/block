@@ -1,4 +1,4 @@
-#ifndef _GSF_ARGS_HEALDER_
+﻿#ifndef _GSF_ARGS_HEALDER_
 #define _GSF_ARGS_HEALDER_
 
 #include <string>
@@ -17,33 +17,138 @@
 
 namespace gsf
 {
+	class out_of_bound : public std::exception
+	{
+	public:
+		out_of_bound()
+			: err_("Out of bound")
+		{}
+		out_of_bound(const char *desc)
+		{
+			err_ = desc;
+		}
+
+		~out_of_bound() throw()
+		{
+
+		}
+
+		virtual const char * what() const throw()
+		{
+			return err_.c_str();
+		}
+
+	private:
+		std::string err_;
+	};
+
+	struct Bytes
+	{
+		Bytes(size_t total = 64)
+			: total_(total)
+			, size_(0)
+		{
+			assert(total != 0);
+			assert(total < 1024 * 1024 * 100);
+
+			buff_ = static_cast<char*>(calloc(1, total));
+		}
+
+		Bytes(const char *buf, size_t len)
+			: total_(64)
+		{
+			assert(len != 0);
+			assert(len < 1024 * 1024 * 100);
+
+			if (total_ <= len) {
+				size_t _double_size = total_;
+				while (_double_size < len) {
+					_double_size <<= 1;
+				}
+				total_ = _double_size;
+			}
+
+			buff_ = static_cast<char*>(calloc(1, total_));
+			memcpy(buff_, buf, len);
+		}
+
+		virtual ~Bytes()
+		{
+			if (buff_) {
+				free(buff_);
+				buff_ = nullptr;
+			}
+		}
+
+		void flush()
+		{
+			memset(buff_, 0, size_);
+			size_ = 0;
+		}
+
+		bool inc(size_t len)
+		{
+			size_t _tmp = size_ + len;
+			if (_tmp < size_) {
+				throw out_of_bound();
+			}
+
+			if (_tmp <= total_) {
+				size_ = _tmp;
+				return false;
+			}
+
+			size_t _double_size = total_;
+			while (_double_size < _tmp) {
+				_double_size <<= 1;
+			}
+
+			char *_tmp_buf = static_cast<char *>(calloc(1, _double_size));
+			memcpy(_tmp_buf, buff_, size_);
+			free(buff_);
+
+			buff_ = _tmp_buf;
+			size_ = _tmp;
+			total_ = _double_size;
+
+			return true;
+		}
+
+		char *buff_;
+		size_t size_;
+		size_t total_;
+	};
+
+	typedef std::shared_ptr<Bytes> BytesPtr;
+
+	/*
+	int          string          list
+	+---+-------+---+---+-------+---+---+-------+-----------+ small cache = 128
+	|tag|content|tag|len|content|tag|len|content|000000000... resize cache = original * 2 [256, 512 ...]
+	+---+-------+---+---+-------+---+---+-------+-----------+
+	*/
+
 	struct Args
 	{
 		using TypeLen = uint16_t;
 		using TypeTag = uint8_t;
 
 		Args();
-		Args(const char* block, int len);
-		Args(int size);
-
+		Args(const char *buf, size_t len);
 		~Args();
 
+		//////////////////////////////// push //////////////////////////////////////
 		void push(const uint8_t &val);
 		void push(const int8_t &val);
-
 		void push(const uint16_t &val);
 		void push(const int16_t &val);
-
 		void push(const uint32_t &val);
 		void push(const int32_t &val);
-
 		void push(const uint64_t &val);
 		void push(const int64_t &val);
-
 		void push(const bool &val);
 		void push(const float &val);
 		void push(const double &val);
-
 		void push(const char *val);
 		void push(const std::string &val);
 
@@ -61,7 +166,7 @@ namespace gsf
 
 		void push_block(const char *block, int len);
 
-		////////////////lua/////////////////////
+		// lua
 		void push_ui16(const uint16_t &val);
 		void push_ui32(const uint32_t &val);
 		void push_i32(const int32_t &val);
@@ -70,63 +175,7 @@ namespace gsf
 		void push_double(const double &val);
 		void push_string(const std::string &val);
 
-		uint8_t seek_tag();
-		void * seek(uint8_t type);
-		std::pair<void*, int> seekStr();
-
-		/////////////////////////////
-		uint8_t pop_tag();
-		uint8_t get_tag();
-
-		uint8_t pop_ui8();
-		int8_t pop_i8();
-
-		uint16_t pop_ui16();
-		int16_t pop_i16();
-
-		uint32_t pop_ui32();
-		int32_t pop_i32();
-
-		uint64_t pop_ui64();
-		int64_t pop_i64();
-
-		bool pop_bool();
-		float pop_float();
-		double pop_double();
-
-		TypeLen pop_typelen();
-
-		gsf::SessionID pop_fd();
-		gsf::MsgID pop_msgid();
-		gsf::ModuleID pop_moduleid();
-		gsf::TimerID pop_timerid();
-
-		std::string pop_string();
-
-		template<typename T>
-		std::list<T> pop_list();
-
-		template <typename T>
-		std::vector<T> pop_vec();
-
-		template <typename Key, typename Value>
-		std::map<Key, Value> pop_map();
-
-		/////////////////////////////
-
-		std::string pop_block(int beg, int end);
-		
-
-		uint32_t get_pos() const;
-		uint32_t get_params() const;
-
-		std::string toString();
-
-		void flush();
-	private:
-		template <typename T>
-		void pop(T &val);
-
+		///////////////////////////////// pop //////////////////////////////////
 		void pop_impl(uint8_t &val);
 		void pop_impl(int8_t &val);
 		void pop_impl(uint16_t &val);
@@ -139,29 +188,82 @@ namespace gsf
 		void pop_impl(float &val);
 		void pop_impl(double &val);
 
+		TypeLen pop_typelen();
+
+		std::string pop_string();
+
+		template<typename T>
+		std::list<T> pop_list();
+
+		template <typename T>
+		std::vector<T> pop_vec();
+
+		template <typename Key, typename Value>
+		std::map<Key, Value> pop_map();
+
+		std::string pop_block(int beg, int end);
+
+		template <typename T>
+		void pop(T &val);
+
+		// lua
+		uint8_t pop_tag();
+		uint8_t pop_ui8();
+		int8_t pop_i8();
+		uint16_t pop_ui16();
+		int16_t pop_i16();
+		uint32_t pop_ui32();
+		int32_t pop_i32();
+		uint64_t pop_ui64();
+		int64_t pop_i64();
+		bool pop_bool();
+		float pop_float();
+		double pop_double();
+
+		gsf::SessionID pop_fd();
+		gsf::MsgID pop_msgid();
+		gsf::ModuleID pop_moduleid();
+		gsf::TimerID pop_timerid();
+
+		/////////////////////////////////get//////////////////////////////////////
+		uint8_t get_tag();
+		uint32_t get_size() const;
+		uint32_t get_params_count() const;
+
+		//! debug
+		std::string to_string() const;
+		///////////////////////////////peek///////////////////////////////////////
+		uint8_t peek_tag();
+		void * peek(uint8_t type);
+		std::pair<void*, int> peek_str();
+
+		//////////////////////////////////////////////////////////////////////////
+
+		//! private
+		void flush();
+
 	private:
 
-		char *buff_;
-		char *read_;
-		char *write_;
-		char *tail_;
+		BytesPtr bytes_ = nullptr;
+		char *write_ = nullptr;
+		char *read_ = nullptr;
 
-		uint32_t pos_;
-		uint32_t size_ = 0;
+		const char *tail_ = nullptr;
+		size_t params_ = 0;
 	};
-
-
 
 	using deleter_type = std::function<void(Args*)>;
 	using ArgsPtr = std::unique_ptr<Args, deleter_type>;
 
-	struct ArgsPool : public utils::Singleton<ArgsPool>
+	struct ArgsPool : public gsf::utils::Singleton<ArgsPool>
 	{
 		std::unique_ptr<Args, deleter_type> get()
 		{
 #ifdef WATCH_PERF
 			count_++;
 #endif // WATCH_PERF
+			pool_use_++;
+			resize();
 
 			std::unique_ptr<Args, deleter_type> _ptr(pool_.back().release(), [this](Args *args) {
 				args->flush();
@@ -178,6 +280,8 @@ namespace gsf
 			{
 				pool_.push_back(std::make_unique<Args>());
 			}
+
+			pool_size_ += size;
 		}
 
 		void reenter()
@@ -185,6 +289,7 @@ namespace gsf
 			for (auto it : dirty_vec_)
 			{
 				pool_.push_back(std::unique_ptr<Args>(it));
+				pool_use_--;
 			}
 			dirty_vec_.clear();
 #ifdef WATCH_PERF
@@ -208,19 +313,24 @@ namespace gsf
 		uint32_t maximun_ = 0;
 #endif
 
-	private:
+	protected:
+		//! 当池子不够的时候申请更多的空间
+		void resize()
+		{
+			size_t _expanSize = static_cast<size_t>(pool_size_ * 0.7);
+			if (pool_use_ > _expanSize) {
+				make(pool_size_ * 2);
+			}
+		}
 
+	private:
 		std::vector<std::unique_ptr<Args>> pool_;
+		int32_t pool_size_ = 0;
+		uint32_t pool_use_ = 0;
+
 		std::vector<Args *> dirty_vec_;
 	};
 
-	/*! 
-		auto args = make_args(11, "22");
-
-		args->pop_i32();
-		args->pop_string();
-
-	*/
 
 	template <typename P0, typename ...P>
 	static void pushArg(ArgsPtr &args, P0 &&p0, P &&... p)

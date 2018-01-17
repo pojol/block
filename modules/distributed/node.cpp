@@ -59,12 +59,12 @@ void gsf::modules::NodeModule::init()
 			auto _progress = args->pop_i32();
 
 			auto _off = sizeof(gsf::SessionID) + 1 + sizeof(int32_t) + 1 + sizeof(int64_t) + 1 + sizeof(bool) + 1 + sizeof(int32_t) + 1;
-			auto _block = args->pop_block(_off, args->get_pos());
+			auto _block = args->pop_block(_off, args->get_size());
 
 			auto _info = _itr->second;
 
 			auto _res = gsf::ArgsPool::get_ref().get();
-			_res->push_block(_block.c_str(), args->get_pos() - _off);
+			_res->push_block(_block.c_str(), args->get_size() - _off);
 			_info->callback(_res, _progress, _state);
 
 			auto _titr = timer_set_.find(_info->timer_);
@@ -157,7 +157,7 @@ void gsf::modules::NodeModule::event_rpc(int event, gsf::ModuleID moduleid, cons
 		auto argsPtr = gsf::ArgsPool::get_ref().get();
 		argsPtr->push(event);
 		argsPtr->push(_callbackid);
-		argsPtr->push_block(args->pop_block(0, args->get_pos()).c_str(), args->get_pos());
+		argsPtr->push_block(args->pop_block(0, args->get_size()).c_str(), args->get_size());
 
 		dispatch(_connector_m, eid::network::send, std::move(argsPtr));
 	}
@@ -264,7 +264,7 @@ gsf::ArgsPtr gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &arg
 		listen(this, eid::base::module_init_succ, [&](const gsf::ArgsPtr &args) {
 
 			auto _t = gsf::ArgsPool::get_ref().get();
-			_t->push_block(args->pop_block(0, args->get_pos()).c_str(), args->get_pos());
+			_t->push_block(args->pop_block(0, args->get_size()).c_str(), args->get_size());
 			auto _module_id = _t->pop_moduleid();
 			
 			for (auto nod : event_map_)

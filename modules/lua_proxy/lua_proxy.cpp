@@ -135,7 +135,7 @@ std::string gsf::modules::LuaProxyModule::ldispatch(uint32_t lua_id, uint32_t ta
 
 		auto args = dispatch(target, event, _smartPtr);
 		if (args) {
-			_res = args->pop_block(0, args->get_pos());
+			_res = args->pop_block(0, args->get_size());
 		}
 	}
 	catch (sol::error e) {
@@ -159,7 +159,7 @@ int gsf::modules::LuaProxyModule::llisten(uint32_t lua_id, uint32_t self, uint32
 				std::string _req = "";
 				std::string _res = "";
 				if (args) {
-					auto _pos = args->get_pos();
+					auto _pos = args->get_size();
 					_req = args->pop_block(0, _pos);
 					_res = func(_req, _pos);
 				}
@@ -208,7 +208,7 @@ void gsf::modules::LuaProxyModule::lrpc(uint32_t lua_id, uint32_t event, int32_t
 				std::string _res = "";
 				auto _pos = 0;
 				if (nullptr != cbArgs) {
-					_pos = cbArgs->get_pos();
+					_pos = cbArgs->get_size();
 					_res = cbArgs->pop_block(0, _pos);
 				}
 				func(_res, _pos, progress, bResult);
@@ -290,9 +290,9 @@ void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_na
 		, "pop_i64", &Args::pop_i64
 		, "pop_ui64", &Args::pop_ui64
 		, "pop_block", &Args::pop_block
-		, "get_pos", &Args::get_pos
+		, "get_size", &Args::get_size
 		, "get_tag", &Args::get_tag
-		, "toString", &Args::toString);
+		, "to_string", &Args::to_string);
 
 	_lua->state_.new_usertype<LuaProxyModule>("LuaProxyModule"
 		, "ldispatch", &LuaProxyModule::ldispatch
