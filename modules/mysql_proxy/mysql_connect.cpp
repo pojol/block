@@ -121,7 +121,7 @@ void gsf::modules::MysqlConnect::execute(const std::string &order, const gsf::Ar
 	SqlStmtPtr stmt;
 	perpare(order, stmt);
 
-	if (stmt->params != args->get_params())
+	if (stmt->params != args->get_params_count())
 	{
 		std::cout << " enough params " << std::endl;
 	}
@@ -143,11 +143,11 @@ void gsf::modules::MysqlConnect::execute(const std::string &order, const gsf::Ar
 			_tag == gsf::at_int16 || _tag == gsf::at_int32 || _tag == gsf::at_uint32 || _tag == gsf::at_int64 ||
 			_tag == gsf::at_uint64 || _tag == gsf::at_float || _tag == gsf::at_double || _tag == gsf::at_bool)
 		{
-			Param.buffer = args->seek(_tag);
+			Param.buffer = args->peek(_tag);
 			Param.buffer_length = (unsigned long)0;
 		}
 		else if (_tag == gsf::at_string) {
-			auto _pair = args->seekStr();
+			auto _pair = args->peek_str();
 			Param.buffer = _pair.first;
 			Param.buffer_length = _pair.second;
 		}
