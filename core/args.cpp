@@ -32,13 +32,23 @@ void gsf::Args::flush()
 
 	params_ = 0;
 }
+
+void gsf::Args::inc(size_t len)
+{
+	if (bytes_->inc(len)) {
+		write_ = bytes_->buff_ + bytes_->size_ - len;
+		read_ = bytes_->buff_;
+		tail_ = bytes_->buff_ + bytes_->total_;
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////
 template <typename T>
 void gsf::Args::push_impl(const T &val)
 {
 	size_t _size = sizeof(T);
 
-	bytes_->inc(_size);
+	inc(_size);
 
 	*reinterpret_cast<T*>(write_) = val;
 	write_ += _size;
@@ -46,7 +56,7 @@ void gsf::Args::push_impl(const T &val)
 
 void gsf::Args::push_block(const char *block, int len)
 {
-	bytes_->inc(len);
+	inc(len);
 
 	memcpy(write_, block, len);
 	write_ += len;
@@ -231,7 +241,7 @@ void gsf::Args::push(const char * val)
 
 	push_impl(_len);
 
-	bytes_->inc(_len);
+	inc(_len);
 	memcpy(write_, val, _len);
 	write_ += _len;
 
@@ -689,5 +699,5 @@ gsf::ArgsPtr gsf::log_warring(const std::string &module, const std::string &cont
 
 gsf::ArgsPtr gsf::log_error(const std::string &module, const std::string &content)
 {
-	return std::move(make_args(gsf::LogErr, module, content));
+	return make_args(gsf::LogErr, module, content);
 }

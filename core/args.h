@@ -242,6 +242,8 @@ namespace gsf
 		//! private
 		void flush();
 
+		void inc(size_t len);
+
 	private:
 
 		BytesPtr bytes_ = nullptr;

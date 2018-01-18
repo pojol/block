@@ -91,6 +91,7 @@ void gsf::modules::LogModule::init_impl(const std::string &exe_name)
 
 gsf::ArgsPtr gsf::modules::LogModule::log_print(const gsf::ArgsPtr &args)
 {
+	//std::cout << args->to_string() << std::endl;
 	auto _lv = args->pop_ui16();
 	auto _title = args->pop_string();
 
