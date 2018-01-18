@@ -202,7 +202,7 @@ void gsf::Args::push(std::list<T> &list)
 	{
 		push_impl(it);
 	}
-	size_++;
+	params_++;
 }
 
 template <typename T>
@@ -216,7 +216,7 @@ void gsf::Args::push(std::vector<T> &vec)
 	{
 		push_impl(it);
 	}
-	size_++;
+	params_++;
 }
 
 template <typename Key, typename Value>
@@ -231,7 +231,7 @@ void gsf::Args::push(std::map<Key, Value> &map)
 		push_impl(it.first);
 		push_impl(it.second);
 	}
-	size_++;
+	params_++;
 }
 
 void gsf::Args::push(const char * val)
