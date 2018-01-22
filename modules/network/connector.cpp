@@ -7,6 +7,7 @@
 #include <event2/buffer.h>
 #include <event2/listener.h>
 
+#include <core/application.h>
 
 #ifdef WIN32
 #include <winsock2.h>
@@ -51,7 +52,7 @@ void gsf::network::ConnectorModule::before_init()
 			, std::placeholders::_1));
 	
 
-	log_m_ = dispatch(eid::app_id, eid::get_module, gsf::make_args("LogModule"))->pop_moduleid();
+	log_m_ = APP.get_module("LogModule");
 	assert(log_m_ != gsf::ModuleNil);
 }
 

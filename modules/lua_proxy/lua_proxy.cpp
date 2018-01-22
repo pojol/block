@@ -1,6 +1,8 @@
 ﻿
 #include "lua_proxy.h"
 
+#include <core/application.h>
+
 #include <algorithm>
 #include <iostream>
 #include <fmt/format.h>
@@ -34,8 +36,8 @@ std::string Traceback(lua_State * _state)
 }
 
 void gsf::modules::LuaProxyModule::before_init()
-{
-	log_m_ = dispatch(eid::app_id, eid::get_module, gsf::make_args("LogModule"))->pop_i32();
+{	
+	log_m_ = APP.get_module("LogModule");
 	assert(log_m_ != gsf::ModuleNil);
 }
 
@@ -300,6 +302,13 @@ void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_na
 		, "lrpc", &LuaProxyModule::lrpc);
 	_lua->state_.set("event", this);
 	_lua->state_.set("module_id", module_id);
+
+	_lua->state_.new_usertype<gsf::Application>("Application"
+		, "get_module", &Application::get_module
+		, "get_app_name", &Application::get_app_name
+		, "get_machine", &Application::get_machine
+		, "get_uuid", &Application::get_uuid);
+	_lua->state_.set("APP", gsf::Application::get_ptr());
 
 	_lua->call_list_[LuaAppState::BEFORE_INIT] = [&](sol::table t) {
 		t.get<std::function<void(std::string)>>("before_init")(dir_name + "/script/");

@@ -13,43 +13,21 @@ namespace eid
 {
 	enum base
 	{
-		app_id = 1,					//! 每个进程中application module 的id ，因为application的作用范围只在自身进程所以 id 可以是固定的。
-		get_app_name,
-
 		/*!
-			comment: 通过字符串获得module的id， 只能获取静态显示声明的module。
-			args: string module_name
-			type: dispatch
-			res : int32_t module_id 
-		**/
-		get_module,
-
-		/*!
-			comment: 运行过程中创建Module，需要通过 REGISTER_CLASS 提前进行类型定义。
-			args: string module_type
-			type: dispatch 
+			comment: Module初始化成功
+			args: nil
+			type: boardcast
 			res : int32_t module_id
 		**/
-		new_dynamic_module,
-		
-		/*!
-			comment: 移除注册在App中的某个Module
-			args: int32_t module_id
-			type: dispatch
-			res : nil
-		**/
-		delete_module,
-
 		module_init_succ,
-		module_shut_succ,
 
 		/*!
-			comment: 在集群中创建一个唯一ID，需要用户通过config.machine 为App做好区分。
+			comment: Module退出成功
 			args: nil
-			type: dispatch
-			res : int64_t uuid
+			type: boardcast
+			res : int32_t module_id
 		**/
-		uuid,
+		module_shut_succ,
 	};
 
 	//! 凡是gsf集群内使用rpc交互的消息都应该定义在distributed区块

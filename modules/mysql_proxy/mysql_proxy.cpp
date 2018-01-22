@@ -1,6 +1,8 @@
 
 #include "mysql_proxy.h"
 
+#include <core/application.h>
+
 gsf::modules::MysqlProxyModule::MysqlProxyModule()
 	: Module("MysqlProxyModule")
 {
@@ -15,7 +17,7 @@ gsf::modules::MysqlProxyModule::~MysqlProxyModule()
 
 void gsf::modules::MysqlProxyModule::before_init()
 {
-	log_m_ = dispatch(eid::app_id, eid::get_module, gsf::make_args("LogModule"))->pop_moduleid();
+	log_m_ = APP.get_module("LogModule");
 }
 
 void gsf::modules::MysqlProxyModule::init()

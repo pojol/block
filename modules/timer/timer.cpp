@@ -1,5 +1,7 @@
 #include "timer.h"
 
+#include <core/application.h>
+
 #include <assert.h>
 #include <fmt/format.h>
 
@@ -15,7 +17,7 @@ gsf::modules::TimerModule::TimerModule()
 
 void gsf::modules::TimerModule::before_init()
 {
-	log_m_ = dispatch(eid::app_id, eid::get_module, gsf::make_args("LogModule"))->pop_moduleid();
+	log_m_ = APP.get_module("LogModule");
 	assert(log_m_ != gsf::ModuleNil);
 }
 
