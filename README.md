@@ -39,8 +39,9 @@
 
 ## Performance testing
 > * qps = 并发数 / 平均每秒响应时间 (req->res)
+
 |event| performance test | qps(1) | qps(1000) | qps(10000) |
-|:---- |:---- |:----|
+|:---- |:---- |:----|:----|:----|
 |mysql::query|||nil|nil|
 |mysql::update|||nil|nil|
 |logger::print|||nil|nil|
