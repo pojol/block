@@ -32,11 +32,11 @@
 ## Unit testing
 > * https://github.com/pojol/gsf_sample
 
-|module| unit test | status |
-|:---- |:---- |:----|
+|module| unit test | status(c++) |status(lua)|
+|:---- |:---- |:----:|:----:|
 |network|gsf_sample / echo|
 |distributed | gsf_sample / distributed |
-|timer | gsf_sample/ timer
+|timer | gsf_sample/ timer| pass | pass|
 |mysql_proxy | gsf_sample / db |
 
 ## Performance testing
