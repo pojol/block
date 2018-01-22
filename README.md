@@ -2,36 +2,57 @@
 [![Build Status](https://travis-ci.org/pojol/gsf.svg?branch=master)](https://travis-ci.org/pojol/gsf)
 [![License](http://img.shields.io/badge/license-mit-blue.svg?style=flat-square)](https://raw.githubusercontent.com/labstack/echo/master/LICENSE)
 
-## feature
+## Feature
 - 组件结构，模块访问隔离
 - 支持c++，lua 模块，支持运行时添加移除模块
 - 支持分布式架构
 - 跨平台 （linux, windows
 
-## event
+## Event
 |```c++  ```|```lua  ```|comment|
 |:----:|:----:|:----|
 |[listen](#listen)|[listen](#listen)|监听某个模块发送的事件|
 |[dispatch](#dispatch)| [dispatch](#dispatch)|向某个模块发送一个事件|
 |[rpc](#rpc)|[rpc](#rpc)|发送一个跨进程的事件，如果有callback参数则必定会有异步返回|
 
-## modules
-| module        |       event           |             comment                  |    test case    |
-| :----      |:----                 | :-----                       | :-----  |
-| core          | [core](#core)   | 提供框架基础的支撑服务        |nil|
-| acceptor      |      [network](#network)        |   基于libevent的接收器封装    |gsf_sample/echo_server|
-| connector      |      [network](#network)       |    基于libevent的连接器封装   |gsf_sample/echo_client |
-| coordinat| [distributed](#distributed)| 处理集群中的协调服务 | gsf_sample/distributed|
-|node| [distributed](#distributed) | 处理集群中的远程分发和绑定相关服务 |gsf_sample/distributed|
-|lua_proxy| [lua_proxy](#lua) | 管理LuaModule的状态以及和c++层的交互 |nil|
-|timer| [timer](#timer)| 定时器相关|gsf_sample/timer|
-|mysql_proxy| [mysql_proxy](#mysql_proxy)| mysql封装 |gsf_sample/db|
-|redis_proxy| [redis_proxy](#redis_proxy)| redis的封装目前主要作用于灾备和mysql更新优化 |nil|
-|logger| [logger](#logger)| 基于glog的日志模块 |nil|
+## Modules
+| module        |       event           |             comment                  |
+| :----      |:----                 | :-----                       |
+| core          | [core](#core)   | 提供框架基础的支撑服务        |
+| acceptor      |      [network](#network)        |   基于libevent的接收器封装    
+| connector      |      [network](#network)       |    基于libevent的连接器封装   
+| coordinat| [distributed](#distributed)| 处理集群中的协调服务 
+|node| [distributed](#distributed) | 处理集群中的远程分发和绑定相关服务 
+|lua_proxy| [lua_proxy](#lua) | 管理LuaModule的状态以及和c++层的交互 
+|timer| [timer](#timer)| 定时器相关|
+|mysql_proxy| [mysql_proxy](#mysql_proxy)| mysql封装 |
+|redis_proxy| [redis_proxy](#redis_proxy)| redis的封装目前主要作用于灾备和mysql更新优化 |
+|logger| [logger](#logger)| 基于glog的日志模块 |
+
+## Unit testing
+|module| unit test | status |
+|:---- |:---- |:----|
+|network|gsf_sample / echo|
+|distributed | gsf_sample / distributed |
+|timer | gsf_sample/ timer
+|mysql_proxy | gsf_sample / db |
+
+## Performance testing
+> * qps = 并发数 / 平均每秒响应时间 (req->res)
+|event| performance test | qps(1) | qps(1000) | qps(10000) |
+|:---- |:---- |:----|
+|mysql::query|||nil|nil|
+|mysql::update|||nil|nil|
+|logger::print|||nil|nil|
+|timer::delay_milliseconds||||nil|
+|network::send|||
+|network::recv|||
+|core::rpc||||nil|
+|core::dispatch||||nil|
 
 
 
-## build & install 
+## Build & Install 
 - supported compilers , gcc4.9+, vs2015+
 - depend cmake2.8+ 
 - linux
@@ -43,15 +64,15 @@
     - make
 
 	
-## sample
+## Sample
 - https://github.com/pojol/gsf_sample
 - [x] timer
 - [x] echo
 - [x] db_proxy
 - [x] distributed
 
-# interface
-## listen
+# Interface
+## Listen
 ### c++
 ```c++
 listen(module_id, event_id, [&](const gsf::StreamPtr &args) {
@@ -109,7 +130,7 @@ rpc(rpc_event, module_id, { reqArgs ... }, function(resArgs, progress, succ)
 end)
 ```
 
-# events
+# Events
 
 ## core
 ```c++
