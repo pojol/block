@@ -5,13 +5,17 @@
 #endif // WIN32
 
 #include <fmt/format.h>
+#include <core/application.h>
 
 void gsf::modules::RedisCacheProxyModule::before_init()
 {
 	using namespace std::placeholders;
 
-	timer_m_ = dispatch(eid::app_id, eid::get_module, gsf::make_args("TimerModule"))->pop_moduleid();
-	log_m_ = dispatch(eid::app_id, eid::get_module, gsf::make_args("LogModule"))->pop_moduleid();
+	timer_m_ = APP.get_module("TimerModule");
+	assert(timer_m_ != gsf::ModuleNil);
+	
+	log_m_ = APP.get_module("LogModule");
+	assert(log_m_ != gsf::ModuleNil);
 
 	listen(this, eid::db_proxy::redis_connect
 		, std::bind(&RedisCacheProxyModule::event_redis_connect, this, _1));
