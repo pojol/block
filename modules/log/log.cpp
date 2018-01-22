@@ -7,6 +7,8 @@
 #define GOOGLE_GLOG_DLL_DECL
 #include <glog/logging.h>
 
+#include <core/application.h>
+
 #ifdef WIN32
 #include <windows.h>
 #else
@@ -52,7 +54,7 @@ void gsf::modules::LogModule::before_init()
 
 	listen(this, eid::log::print, std::bind(&LogModule::log_print, this, _1));
 
-	auto exeName = dispatch(eid::app_id, eid::base::get_app_name, nullptr)->pop_string();
+	auto exeName = APP.get_app_name();
 	init_impl(exeName);
 }
 

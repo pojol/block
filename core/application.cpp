@@ -15,18 +15,20 @@
 
 
 gsf::Application::Application()
-	: Module("Application")
-	, shutdown_(false)
+	: shutdown_(false)
 	, module_idx_(2)
 	, state_(AppState::BEFORE_INIT)
 	, cur_frame_(0)
 {
-	module_id_ = eid::app_id;
-
 #ifdef WATCH_PERF
 	tick_len_ = 200;
 	last_tick_ = -1;
 #endif
+}
+
+std::string gsf::Application::get_app_name() const
+{
+	return cfg_.name;
 }
 
 void gsf::Application::init_cfg(const gsf::AppConfig &cfg)
@@ -36,51 +38,24 @@ void gsf::Application::init_cfg(const gsf::AppConfig &cfg)
 	new gsf::EventModule;
 	new gsf::ArgsPool;
 	gsf::ArgsPool::get_ref().make(cfg.pool_args_count);
+}
 
+gsf::ModuleID gsf::Application::create_dynamic_module(const std::string &moduleType)
+{
+	gsf::Module *_module_ptr = static_cast<gsf::Module*>(DynamicModuleFactory::create(moduleType));
+	_module_ptr->set_id(make_module_id());
 
-	listen(this, eid::get_module, [=](const gsf::ArgsPtr &args) {
+	push_frame(cur_frame_ + 1, std::make_tuple(0, std::bind(&Module::before_init, _module_ptr), nullptr, nullptr, _module_ptr));
+	push_frame(cur_frame_ + 2, std::make_tuple(1, nullptr, std::bind(&Module::init, _module_ptr), nullptr, _module_ptr));
+	push_frame(cur_frame_ + 3, std::make_tuple(2, nullptr, nullptr
+		, std::bind(&Application::regist_module<Module>, this, std::placeholders::_1, std::placeholders::_2), _module_ptr));
 
-		std::string _name = args->pop_string();
+	return _module_ptr->get_module_id();
+}
 
-		auto itr = module_name_map_.find(_name);
-		if (itr != module_name_map_.end()) {
-			return gsf::make_args(itr->second);
-		}
-		else {
-			return gsf::make_args(gsf::ModuleNil);
-		}
-
-	});
-
-	listen(this, eid::get_app_name, [=](const gsf::ArgsPtr &args){
-		return gsf::make_args(cfg_.name);
-	});
-
-	listen(this, eid::new_dynamic_module, [=](const gsf::ArgsPtr &args) {
-
-		std::string _name = args->pop_string();
-
-		gsf::Module *_module_ptr = static_cast<gsf::Module*>(DynamicModuleFactory::create(_name));
-		_module_ptr->set_id(make_module_id());
-
-		push_frame(cur_frame_ + 1, std::make_tuple(0, std::bind(&Module::before_init, _module_ptr), nullptr, nullptr, _module_ptr));
-		push_frame(cur_frame_ + 2, std::make_tuple(1, nullptr, std::bind(&Module::init, _module_ptr), nullptr, _module_ptr));
-		push_frame(cur_frame_ + 3, std::make_tuple(2, nullptr, nullptr
-			, std::bind(&Application::regist_module<Module>, this, std::placeholders::_1, std::placeholders::_2), _module_ptr));
-
-		return gsf::make_args(_module_ptr->get_module_id());
-	});
-
-	listen(this, eid::delete_module, [=](const gsf::ArgsPtr &args) {
-		uint32_t _module_id = args->pop_moduleid();
-		unregist_module(_module_id);
-
-		return nullptr;
-	});
-
-	listen(this, eid::base::uuid, [&](const gsf::ArgsPtr &args) {
-		return gsf::make_args(uuid());
-	});
+void gsf::Application::delete_module(gsf::ModuleID moduleID)
+{
+	unregist_module(moduleID);
 }
 
 void gsf::Application::unregist_module(gsf::ModuleID module_id)
@@ -102,6 +77,27 @@ void gsf::Application::unregist_module(gsf::ModuleID module_id)
 	else {
 		std::cout << "unregist_module not find module " << module_id << std::endl;
 	}
+}
+
+gsf::ModuleID gsf::Application::get_module(const std::string &modulName) const
+{
+	auto itr = module_name_map_.find(modulName);
+	if (itr != module_name_map_.end()) {
+		return itr->second;
+	}
+	else {
+		return gsf::ModuleNil;
+	}
+}
+
+uint32_t gsf::Application::get_machine() const
+{
+	return cfg_.machine_;
+}
+
+int64_t gsf::Application::get_uuid()
+{
+	return uuid();
 }
 
 void gsf::Application::push_frame(uint64_t index, Frame frame)
@@ -271,6 +267,11 @@ void gsf::Application::run()
 
 		}
 	}
+
+}
+
+void gsf::Application::exit()
+{
 
 }
 

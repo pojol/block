@@ -4,6 +4,7 @@
 #include <modules/network/connector.h>
 
 #include <core/dynamic_module_factory.h>
+#include <core/application.h>
 
 #include <algorithm>
 #include <iostream>
@@ -31,8 +32,8 @@ gsf::modules::NodeModule::~NodeModule()
 
 void gsf::modules::NodeModule::before_init()
 {
-	log_m_ = dispatch(eid::base::app_id, eid::get_module, gsf::make_args("LogModule"))->pop_moduleid();
-	timer_m_ = dispatch(eid::base::app_id, eid::get_module, gsf::make_args("TimerModule"))->pop_moduleid();
+	log_m_ = APP.get_module("LogModule");
+	timer_m_ = APP.get_module("TimerModule");
 
 	assert(log_m_ != gsf::ModuleNil);
 	assert(timer_m_ != gsf::ModuleNil);
@@ -133,7 +134,7 @@ void gsf::modules::NodeModule::event_rpc(int event, gsf::ModuleID moduleid, cons
 	}
 
 	if (callback) {
-		_callbackid = dispatch(eid::app_id, eid::base::uuid, nullptr)->pop_i64();
+		_callbackid = APP.get_uuid();
 
 		auto _itr = callback_map_.find(_callbackid);
 		if (_itr != callback_map_.end()) {
@@ -189,7 +190,7 @@ void gsf::modules::NodeModule::regist_node(gsf::ModuleID base, int event, const 
 			_connector_m = _moduleid;
 		}
 		else {
-			_connector_m = dispatch(eid::base::app_id, eid::base::new_dynamic_module, gsf::make_args("ConnectorModule"))->pop_moduleid();
+			_connector_m = APP.create_dynamic_module("ConnectorModule");
 		}
 
 		auto _nod = NodeInfo();
