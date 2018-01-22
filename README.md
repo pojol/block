@@ -30,6 +30,8 @@
 |logger| [logger](#logger)| 基于glog的日志模块 |
 
 ## Unit testing
+> * https://github.com/pojol/gsf_sample
+
 |module| unit test | status |
 |:---- |:---- |:----|
 |network|gsf_sample / echo|
@@ -63,14 +65,6 @@
     - cd build
     - cmake ..
     - make
-
-	
-## Sample
-- https://github.com/pojol/gsf_sample
-- [x] timer
-- [x] echo
-- [x] db_proxy
-- [x] distributed
 
 # Interface
 ## Listen
