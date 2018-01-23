@@ -34,10 +34,10 @@
 
 |module| unit test | status(c++) |status(lua)|
 |:---- |:---- |:----:|:----:|
-|network|gsf_sample / echo|
-|distributed | gsf_sample / distributed |
+|network|gsf_sample / echo|pass|pass|
+|distributed | gsf_sample / distributed |pass|pass|
 |timer | gsf_sample/ timer| pass | pass|
-|mysql_proxy | gsf_sample / db |
+|mysql_proxy | gsf_sample / db |pass|pass|
 
 ## Performance testing
 > * qps = 并发数 / 平均每秒响应时间 (req->res)
