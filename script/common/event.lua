@@ -1,3 +1,4 @@
+require "event_list"
 
 function dump ( t )  
     local print_r_cache={}
@@ -52,31 +53,58 @@ local at_eof = 20
 
 -- 后续自动生成
 _type_map = {
-    [3] = {"string"},
-    [1005] = {"string", "int32_t"},
-    [1006] = {"int32_t", "string"},
-    [2201] = {"int32_t", "int32_t"},
-    [2502] = {"int32_t", "int32_t", "string", "int32_t"},
-    [10001] = {"string", "int32_t", "int32_t"}
+    [eid.distributed.coordinat_select] = function(args) 
+        local pack = Args.new()
+        pack:push_string(args[1])
+        pack:push_i32(args[2])
+        return pack:pop_block(0, pack:get_size())
+    end, 
+    [eid.distributed.mysql_query] = function(args)
+        local pack = Args.new()
+        pack:push_i32(args[1])
+        pack:push_string(args[2])
+        return pack:pop_block(0, pack:get_size())
+    end, 
+    [eid.distributed.mysql_update] = function(args) 
+        local pack = Args.new()
+        pack:push_string(args[1])
+        pack:push_i32(args[2])
+        pack:push_string(args[3])
+        pack:push_i32(args[4])
+        return pack:pop_block(0, pack:get_size())
+    end,
+    [eid.timer.delay_milliseconds] = function(args)
+        local pack = Args.new()
+        pack:push_i32(args[1])
+        pack:push_i32(args[2])
+        return pack:pop_block(0, pack:get_size())
+    end, 
+    [eid.node.node_regist] = function(args) 
+        local pack = Args.new()
+        pack:push_i32(args[1])
+        pack:push_i32(args[2])
+        pack:push_string(args[3])
+        pack:push_i32(args[4])
+        return pack:pop_block(0, pack:get_size())
+    end, 
+    [10001] = function(args) 
+        local pack = Args.new()
+        pack:push_string(args[1])
+        pack:push_i32(args[2])
+        pack:push_i32(args[3])
+        return pack:pop_block(0, pack:get_size())
+    end, 
+    [10002] = function(args) 
+        local pack = Args.new()
+        pack:push_ui16(args[1])
+        pack:push_i32(args[2])
+        pack:push_string(args[3])
+        return pack:pop_block(0, pack:get_size())
+    end,
 }
 
 function __pack(event_id, args)
-
-    local pack = Args.new()
-    local _idx = 1
-
-    _types = _type_map[event_id]
-    for key, val in ipairs(_types) do
-        if val == 'string' then
-            pack:push_string(args[_idx])
-        elseif val == 'int32_t' then
-            pack:push_i32(args[_idx])
-        end
-
-        _idx = _idx + 1
-    end
-
-    return pack:pop_block(0, pack:get_size())
+    return _type_map[event_id](args)
 end
 
 function __unpack(buf, len)
@@ -112,7 +140,11 @@ function dispatch(target, eventID, args)
     reqBuf = __pack(eventID, args)
 
     resBuf = event:ldispatch(module_id, target, eventID, reqBuf)
-    return __unpack(resBuf, #resBuf)
+    if #resBuf == 0 then
+        return nil
+    else
+        return __unpack(resBuf, #resBuf)
+    end
 end
 
 function __dispatch(target, eventID, args, func)
@@ -131,8 +163,12 @@ function rpc(event_id, module_id, args, callback)
     end
 
     reqBuf = __pack(event_id, args)
-    event:lrpc(module_id, event_id, module_id, reqBuf, _callback)
-
+    
+    if callback ~= nil then
+        event:lrpc(module_id, event_id, module_id, reqBuf, _callback)
+    else
+        event:lrpc(module_id, event_id, module_id, reqBuf, nil)
+    end
 end
 
 function logInfo(moduleName, info)
