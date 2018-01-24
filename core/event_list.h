@@ -69,8 +69,8 @@ namespace eid
 			res : stream args, int32_t progress, bool succ
 		*/
 		mysql_query,
-		
-		mysql_execute,
+
+		mysql_update,
 
 		rpc_end,
 	};

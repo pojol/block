@@ -178,7 +178,9 @@ void gsf::modules::MysqlConnect::query(gsf::ModuleID target, gsf::ModuleID remot
 	int _progress = 1;
 
 	auto errf = [&](const std::string &err) {
-		callback(target, gsf::make_args(remote, false, int32_t(-1), err));
+		if (callback) {
+			callback(target, gsf::make_args(remote, false, int32_t(-1), err));
+		}
 	};
 
 	if (mysql_query(base, sql.c_str())) {
@@ -188,8 +190,22 @@ void gsf::modules::MysqlConnect::query(gsf::ModuleID target, gsf::ModuleID remot
 
 	result = mysql_store_result(base);
 	if (nullptr == result) {
-		callback(target, gsf::make_args(remote, true, int32_t(-1), "success!"));
-		return;
+		std::string sqlop = sql.substr(0, 6);
+		if (strcmp(sqlop.c_str(), "INSERT") == 0 || strcmp(sqlop.c_str(), "insert") == 0) {
+			
+			if (mysql_query(base, "select last_insert_id()")) {
+				errf(mysql_error(base));
+				return;
+			}
+
+			result = mysql_store_result(base);
+		}
+		else {
+			if (callback) {
+				callback(target, gsf::make_args(remote, true, int32_t(-1), "success!"));
+			}
+			return;
+		}
 	}
 
 	uint64_t rowCount = mysql_affected_rows(base);

@@ -30,9 +30,14 @@ void gsf::modules::MysqlProxyModule::init()
 		, eid::distributed::mysql_query
 		, std::bind(&MysqlProxyModule::query_event, this, std::placeholders::_1));
 	
+	/*
 	listen(this
 		, eid::distributed::mysql_execute
 		, std::bind(&MysqlProxyModule::execute_event, this, std::placeholders::_1));
+	*/
+
+	listen(this, eid::distributed::mysql_update
+		, std::bind(&MysqlProxyModule::update, this, std::placeholders::_1));
 }
 
 void gsf::modules::MysqlProxyModule::execute()
@@ -77,6 +82,7 @@ gsf::ArgsPtr gsf::modules::MysqlProxyModule::query_event(const gsf::ArgsPtr &arg
 	return nullptr;
 }
 
+/*
 gsf::ArgsPtr gsf::modules::MysqlProxyModule::execute_event(const gsf::ArgsPtr &args)
 {
 	auto _order = args->pop_string();
@@ -85,9 +91,58 @@ gsf::ArgsPtr gsf::modules::MysqlProxyModule::execute_event(const gsf::ArgsPtr &a
 
 	return nullptr;
 }
+*/
 
 void gsf::modules::MysqlProxyModule::event_callback(gsf::ModuleID target, const gsf::ArgsPtr &args)
 {
 	dispatch(target, eid::db_proxy::mysql_callback, args);
+}
+
+gsf::ArgsPtr gsf::modules::MysqlProxyModule::update(const gsf::ArgsPtr &args)
+{
+	auto _table = args->pop_string();
+	auto _key = args->pop_i32();
+
+	auto _getkey = [&]()->std::string {
+		return args->pop_string();
+	};
+
+	auto _getval = [&](int32_t tag)->std::string {
+		switch (tag) {
+		case gsf::at_int8: return std::to_string(args->pop_i8());
+		case gsf::at_uint8: return std::to_string(args->pop_ui8());
+		case gsf::at_int16: return std::to_string(args->pop_i16());
+		case gsf::at_uint16: return std::to_string(args->pop_ui16());
+		case gsf::at_int32: return std::to_string(args->pop_i32());
+		case gsf::at_uint32: return std::to_string(args->pop_ui32());
+		case gsf::at_int64: return std::to_string(args->pop_i64());
+		case gsf::at_uint64: return std::to_string(args->pop_ui64());
+		}
+
+		return "0";
+	};
+	// update tbl_Account set sm_accountName="fdsafsad" where id=123;
+	std::string _sql = "update " + _table + " set ";
+	std::string _context = "";
+
+	auto _tag = args->get_tag();
+	while (_tag != 0)
+	{
+		auto _key = _getkey();
+		auto _val = _getval(args->get_tag());
+
+		_context += _key + "=" + _val + ',';
+
+		_tag = args->get_tag();
+	}
+
+	if (_context.at(_context.size() - 1) == ',')
+		_context.erase(_context.size() - 1);
+
+	_sql += _context;
+
+	_sql += " where id=" + std::to_string(_key);
+	conn_.query(0, 0, _sql, nullptr);
+	return nullptr;
 }
 
