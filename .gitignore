@@ -63,12 +63,10 @@ lib/
 *.zip
 3rd/glog-master
 3rd/hiredis-0.13.3
-3rd/lua-5.3.4
 3rd/pbc-proto_v3
 3rd/protobuf-3.2.0
 3rd/protobuf
 3rd/redis-win-3.0.504
 3rd/sol2-2.16.0
-3rd/lua-5.3.4.tar.gz
 3rd/glog/
 3rd/pbc/
