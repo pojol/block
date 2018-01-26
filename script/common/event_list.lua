@@ -1,9 +1,5 @@
 
 eid = {
-	app_id = 1,
-	get_module = 3,
-	new_dynamic_module = 102,
-	delete_dynamic_module = 103,
 	
 	distributed = {
 		rpc_begin = 1001,
@@ -14,7 +10,7 @@ eid = {
 		coordinat_select = 1005,
 
 		mysql_query = 1006,
-		mysql_execute = 1007,
+		mysql_update = 1007,
 
 		rpc_end = 2000,
 	},

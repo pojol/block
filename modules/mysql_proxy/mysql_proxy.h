@@ -38,9 +38,11 @@ namespace gsf
 
 			gsf::ArgsPtr query_event(const gsf::ArgsPtr &args);
 
-			gsf::ArgsPtr execute_event(const gsf::ArgsPtr &args);
+			//gsf::ArgsPtr execute_event(const gsf::ArgsPtr &args);
 
 			void event_callback(gsf::ModuleID target, const gsf::ArgsPtr &args);
+
+			gsf::ArgsPtr update(const gsf::ArgsPtr &args);
 
 		private:
 			gsf::ModuleID log_m_ = gsf::ModuleNil;
