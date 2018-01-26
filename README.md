@@ -95,7 +95,7 @@ retStream->pop_xxx()
 ```
 ### lua
 ```lua
-resArgs = dispatch(target_module_id, event_id, { reqArgs ... })
+resArgs = dispatch(target_module_id, event_id, evpack:xxx( ... ))
 ```
 ## rpc
 ### c++
@@ -113,13 +113,13 @@ rpc(rpc_event, module_id, gsf::make_args(values ... ), [&](const gsf::ArgsPtr &a
 ```
 ### lua
 ```lua
-rpc(rpc_event, module_id, { reqArgs ... }, function(resArgs, progress, succ)
+rpc(rpc_event, module_id, evpack:xxx( ... ), function(res, progress, succ)
 
     if succ == true then
-	dump(resArgs)
+	dump(res)	-- 展示下结构
 
     else
-	logWarn("module_name", resArgs[1])
+	logWarn("module_name", res[1])
     end
 
 end)
