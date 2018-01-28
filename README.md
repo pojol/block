@@ -54,17 +54,9 @@
 |core::dispatch||||nil|
 
 
+## Doc
+> * https://github.com/pojol/gsf/wiki
 
-## Build & Install 
-- supported compilers , gcc4.9+, vs2015+
-- depend cmake2.8+ 
-- linux
-    - cd gsf
-    - python 3rd/update_3rd.py
-    - mkdir build
-    - cd build
-    - cmake ..
-    - make
 
 # Interface
 ## Listen
