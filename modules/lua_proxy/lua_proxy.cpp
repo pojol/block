@@ -59,7 +59,7 @@ std::string getPath()
 	int cnt = readlink("/proc/self/exe", _path, 512);
 	if (cnt < 0 || cnt >= 512) {
 		std::cout << "read path err" << std::endl;
-		return;
+		return "";
 	}
 	for (int i = cnt; i >= 0; --i)
 	{
