@@ -7,6 +7,12 @@
 #include <iostream>
 #include <fmt/format.h>
 
+#ifdef WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif // WIN32
+
 //int luaopen_protobuf_c(lua_State *L);
 
 std::string Traceback(lua_State * _state)
@@ -34,6 +40,39 @@ std::string Traceback(lua_State * _state)
 	}
 	return outputTraceback;
 }
+
+std::string getPath()
+{
+	char _path[512];
+
+#ifdef WIN32
+	GetModuleFileName(NULL, _path, 512);
+	for (int i = strlen(_path); i >= 0; i--)
+	{
+		if (_path[i] == '\\')
+		{
+			_path[i] = '\0';
+			break;
+		}
+	}
+#else
+	int cnt = readlink("/proc/self/exe", _path, 512);
+	if (cnt < 0 || cnt >= 512) {
+		std::cout << "read path err" << std::endl;
+		return;
+	}
+	for (int i = cnt; i >= 0; --i)
+	{
+		if (_path[i] == '/') {
+			_path[i + 1] = '\0';
+			break;
+		}
+	}
+#endif // WIN32
+
+	return _path;
+}
+
 
 void gsf::modules::LuaProxyModule::before_init()
 {	
@@ -118,7 +157,7 @@ void gsf::modules::LuaProxyModule::shut()
 gsf::ArgsPtr gsf::modules::LuaProxyModule::create_event(const gsf::ArgsPtr &args)
 {
 	uint32_t _module_id = args->pop_i32();
-	std::string _dir_name = args->pop_string();
+	std::string _dir_name = getPath();
 	std::string _file_name = args->pop_string();
 
 	create(_module_id, _dir_name, _file_name);
