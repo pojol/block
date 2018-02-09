@@ -329,6 +329,7 @@ void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_na
 		, "pop_i32", &Args::pop_i32
 		, "pop_i64", &Args::pop_i64
 		, "pop_ui64", &Args::pop_ui64
+		, "pop_bool", &Args::pop_bool
 		, "pop_block", &Args::pop_block
 		, "get_size", &Args::get_size
 		, "get_tag", &Args::get_tag
