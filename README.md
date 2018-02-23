@@ -10,13 +10,3 @@
 
 ## Doc
 > * https://github.com/pojol/gsf/wiki
-
-## Unit testing		
-> * https://github.com/pojol/gsf_sample		
-		
-|module| unit test | status(c++) |status(lua)|		
-|:---- |:---- |:----:|:----:|		
-|network|gsf_sample / echo|pass|pass|		
-|distributed | gsf_sample / distributed |pass|pass|		
-|timer | gsf_sample/ timer| pass | pass|		
-|mysql_proxy | gsf_sample / db |pass|pass|
