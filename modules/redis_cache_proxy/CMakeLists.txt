@@ -4,7 +4,8 @@ if(WIN32)
     #引用头文件目录
     INCLUDE_DIRECTORIES(
             ${GSF_SOURCE_DIR}/
-            ${GSF_SOURCE_DIR}/3rd/glog-0.3.4/src
+			${GSF_SOURCE_DIR}/3rd/fmt
+            ${GSF_SOURCE_DIR}/3rd/glog/src
 			${GSF_SOURCE_DIR}/3rd/redis-win-3.0.504/deps/hiredis
     )
 

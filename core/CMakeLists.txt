@@ -2,6 +2,7 @@ PROJECT(gsf_core)
 
 #引用头文件目录
 INCLUDE_DIRECTORIES(
+	${GSF_SOURCE_DIR}/3rd/fmt
 )
 
 #引用库目录
