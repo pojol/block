@@ -186,7 +186,7 @@ void gsf::modules::RedisCacheProxyModule::cmd_handler()
 	for (int i = 0; i < redis_command_count_; ++i)
 	{
 		if (REDIS_OK != redisGetReply(redis_context_, (void**)&_replay_ptr)) {
-			APP.ERR_LOG("RedisCacheProxyModule", "redisGetReply fail!")
+			APP.ERR_LOG("RedisCacheProxyModule", "redisGetReply fail!");
 		}
 
 		freeReplyObject(_replay_ptr);
