@@ -6,6 +6,7 @@ if(WIN32)
     #引用头文件目录
     INCLUDE_DIRECTORIES(
             ${GSF_SOURCE_DIR}/
+			${GSF_SOURCE_DIR}/3rd/fmt
             ${GSF_SOURCE_DIR}/3rd/glog/src
     )
 
@@ -18,6 +19,7 @@ if(UNIX)
     INCLUDE_DIRECTORIES(
             ${GSF_SOURCE_DIR}/
             ${GSF_SOURCE_DIR}/lib/glog/include
+			${GSF_SOURCE_DIR}/lib/fmt/include
     )
 
     #引用库目录

@@ -4,12 +4,14 @@ PROJECT(network)
 if(WIN32)
     INCLUDE_DIRECTORIES(
             ${GSF_SOURCE_DIR}/3rd/Libevent/include
+			${GSF_SOURCE_DIR}/3rd/fmt
             ${GSF_SOURCE_DIR}/
     )
 endif()
 if(UNIX)
     INCLUDE_DIRECTORIES(
             ${GSF_SOURCE_DIR}/lib/libevent/include
+			${GSF_SOURCE_DIR}/lib/fmt/include
             ${GSF_SOURCE_DIR}/
 			)
 endif()
