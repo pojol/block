@@ -185,7 +185,7 @@ std::string gsf::modules::LuaProxyModule::ldispatch(uint32_t lua_id, uint32_t ta
 	}
 	catch (...)
 	{
-		APP.ERR_LOG("LuaProxy", "unknown err by ldispatch", "{}\n{}\n", target, event);
+		APP.ERR_LOG("LuaProxy", "unknown err by ldispatch", " {} {}", target, event);
 	}
 
 	return _res;
@@ -229,7 +229,7 @@ int gsf::modules::LuaProxyModule::llisten(uint32_t lua_id, uint32_t self, uint32
 	}
 	catch (...)
 	{
-		APP.ERR_LOG("LuaProxy", "unknown err by llisten", "{}\n{}\n", self, event);
+		APP.ERR_LOG("LuaProxy", "unknown err by llisten", " {} {}", self, event);
 	}
 	return 0;
 }
@@ -273,7 +273,7 @@ void gsf::modules::LuaProxyModule::lrpc(uint32_t lua_id, uint32_t event, int32_t
 	}
 	catch (...)
 	{
-		APP.ERR_LOG("LuaProxy", "unknown err by llisten", "{}\n{}\n", moduleid, event);
+		APP.ERR_LOG("LuaProxy", "unknown err by llisten", " {} {}", moduleid, event);
 	}
 }
 
