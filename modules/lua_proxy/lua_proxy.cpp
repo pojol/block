@@ -122,7 +122,7 @@ void gsf::modules::LuaProxyModule::execute()
 		}
 		catch (sol::error e) {
 			std::string _err = e.what() + '\n' + Traceback(_lua->state_);
-			dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
+			APP.ERR_LOG("LuaProxy", "err");
 
 			if (_lua->app_state_ == LuaAppState::INIT) {
 				destroy(_lua->lua_id_);
@@ -181,11 +181,11 @@ std::string gsf::modules::LuaProxyModule::ldispatch(uint32_t lua_id, uint32_t ta
 	}
 	catch (sol::error e) {
 		std::string _err = e.what() + '\n' + Traceback(find_lua(lua_id)->state_);
-		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
+		APP.ERR_LOG("LuaProxy", _err);
 	}
 	catch (...)
 	{
-		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", fmt::format("module={},event={}", target, event)));
+		APP.ERR_LOG("LuaProxy", "unknown err by ldispatch", "{}\n{}\n", target, event);
 	}
 
 	return _res;
@@ -218,19 +218,18 @@ int gsf::modules::LuaProxyModule::llisten(uint32_t lua_id, uint32_t self, uint32
 			}
 			catch (sol::error e) {
 				std::string _err = e.what() + '\n' + Traceback(find_lua(lua_id)->state_);
-				dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
-
+				APP.ERR_LOG("LuaProxy", _err);
 				return nullptr;
 			}
 		});
 	}
 	catch (sol::error e) {
 		std::string _err = e.what() + '\n' + Traceback(find_lua(lua_id)->state_);
-		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
+		APP.ERR_LOG("LuaProxy", _err);
 	}
 	catch (...)
 	{
-		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", fmt::format("module={},event={}", self, event)));
+		APP.ERR_LOG("LuaProxy", "unknown err by llisten", "{}\n{}\n", self, event);
 	}
 	return 0;
 }
@@ -255,7 +254,7 @@ void gsf::modules::LuaProxyModule::lrpc(uint32_t lua_id, uint32_t event, int32_t
 			}
 			catch (sol::error e) {
 				std::string _err = e.what() + '\n' + Traceback(find_lua(lua_id)->state_);
-				dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
+				APP.ERR_LOG("LuaProxy", _err);
 			}
 		};
 
@@ -270,11 +269,11 @@ void gsf::modules::LuaProxyModule::lrpc(uint32_t lua_id, uint32_t event, int32_t
 	catch (sol::error e)
 	{
 		std::string _err = e.what() + '\n' + Traceback(find_lua(lua_id)->state_);
-		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
+		APP.ERR_LOG("LuaProxy", _err);
 	}
 	catch (...)
 	{
-		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", fmt::format("module={},event={}", moduleid, event)));
+		APP.ERR_LOG("LuaProxy", "unknown err by llisten", "{}\n{}\n", moduleid, event);
 	}
 }
 
@@ -305,7 +304,7 @@ void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_na
 			std::string _err = Traceback(_lua->state_.lua_state()) + " build err " 
 				+ _path + '\t' + lua_tostring(_lua->state_.lua_state(), _ret.stack_index()) + "\n";
 
-			dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
+			APP.ERR_LOG("LuaProxy", _err);
 			return;
 		}
 	}
@@ -314,7 +313,7 @@ void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_na
 		std::string _err = e.what() + '\n';
 		_err += Traceback(_lua->state_.lua_state());
 
-		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
+		APP.ERR_LOG("LuaProxy", _err);
 	}
 
 	_lua->state_.new_usertype<gsf::Args>("Args"
@@ -373,7 +372,7 @@ void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_na
 	catch (sol::error e) {
 		std::string _err = e.what() + '\n';
 		_err += Traceback(_lua->state_.lua_state());
-		dispatch(log_m_, eid::log::print, gsf::log_error("LuaProxy", _err));
+		APP.ERR_LOG("LuaProxy", _err);
 
 		//! 清除此lua模块相关的事件
 		wipeout(_lua->lua_id_);

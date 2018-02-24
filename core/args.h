@@ -355,12 +355,6 @@ namespace gsf
 
 		return args;
 	}
-
-	ArgsPtr log_info(const std::string &module, const std::string &content);
-
-	ArgsPtr log_warring(const std::string &module, const std::string &content);
-
-	ArgsPtr log_error(const std::string &module, const std::string &content);
 }
 
 #endif

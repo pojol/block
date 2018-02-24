@@ -54,6 +54,8 @@ void gsf::modules::LogModule::before_init()
 
 	listen(this, eid::log::print, std::bind(&LogModule::log_print, this, _1));
 
+	listen(this, eid::log::nodebug, std::bind(&LogModule::changeFlag, this, _1));
+
 	auto exeName = APP.get_app_name();
 	init_impl(exeName);
 }
@@ -82,6 +84,7 @@ void gsf::modules::LogModule::init_impl(const std::string &exe_name)
 	FLAGS_colorlogtostderr	= true;		//设置记录到标准输出的颜色消息（如果终端支持）
 	FLAGS_max_log_size		= 10;		//设置最大日志文件大小（以MB为单位）
 	FLAGS_logbufsecs		= 0;		//立即写入到日志
+	//FLAGS_stderrthreshold = google::GLOG_INFO;
 
 	google::SetLogDestination(google::GLOG_INFO, (_path + "/" + exe_name + ".info_").c_str());
 	google::SetLogDestination(google::GLOG_WARNING, (_path + "/" + exe_name + ".warning_").c_str());
@@ -95,21 +98,37 @@ gsf::ArgsPtr gsf::modules::LogModule::log_print(const gsf::ArgsPtr &args)
 {
 	//std::cout << args->to_string() << std::endl;
 	auto _lv = args->pop_ui16();
-	auto _title = args->pop_string();
-
 	auto _context = args->pop_string();
 
 	switch (_lv)
 	{
+	case gsf::LogDebug:
+		if (!ndebug) {
+			DLOG(INFO) << _context;
+		}
+		break;
 	case gsf::LogInfo:
-		LOG(INFO) << "[INFO] " << _title << " " << _context;
+		LOG(INFO) << _context;
 		break;
 	case gsf::LogWarning:
-		LOG(WARNING) << "[WARNING] " << _title << " " << _context;
+		LOG(WARNING) << _context;
 		break;
 	case gsf::LogErr:
-		LOG(ERROR) << "[ERROR] " << _title << " " << _context;
+		LOG(ERROR) << _context;
 		break;
+	}
+
+	return nullptr;
+}
+
+gsf::ArgsPtr gsf::modules::LogModule::changeFlag(const gsf::ArgsPtr &args)
+{
+	auto _flag = args->pop_i32();
+	if (0 == _flag) {
+		ndebug = false;
+	}
+	else if (1 == _flag) {
+		ndebug = true;
 	}
 
 	return nullptr;

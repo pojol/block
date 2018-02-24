@@ -2,21 +2,54 @@
 [![Build Status](https://travis-ci.org/pojol/gsf.svg?branch=master)](https://travis-ci.org/pojol/gsf)
 [![License](http://img.shields.io/badge/license-mit-blue.svg?style=flat-square)](https://raw.githubusercontent.com/labstack/echo/master/LICENSE)
 
-## Feature
-- 组件结构，模块访问隔离
-- 支持c++，lua 模块，支持运行时添加移除模块
-- 支持分布式架构
-- 跨平台 （linux, windows
+> *gsf* 是一个 **模块化的跨平台服务器框架** ，通过不同的组织方式可以适应大多数的架构方式。通常您只需要使用 *lua* 就能完成大部分的游戏逻辑编写，但是您也可以使用 *c++* 来完成一些高密度计算的逻辑。
 
-## Doc
-> * https://github.com/pojol/gsf/wiki
+> 在 *gsf* 中 *Module* 是一个非常重要的概念，理论上所有的逻辑都应该被包装在 *Module* 之中，但是如何权衡 *Module* 的粒度需要用户自己抉择，比较简单的概括来说就是尽量做好数据的分片工作，尽可能的减少 *Module* 之间的交互。
 
-## Unit testing		
-> * https://github.com/pojol/gsf_sample		
-		
-|module| unit test | status(c++) |status(lua)|		
-|:---- |:---- |:----:|:----:|		
-|network|gsf_sample / echo|pass|pass|		
-|distributed | gsf_sample / distributed |pass|pass|		
-|timer | gsf_sample/ timer| pass | pass|		
-|mysql_proxy | gsf_sample / db |pass|pass|
+> 在使用 *gsf* 之前推荐阅读所有标记 ✦ 的接口和用例，这有助于您全面的理解框架的设计意图。
+
+***
+
+# Args (iostream
+> 在框架中所有的事件交互参数类型都是 ✦[Args](https://github.com/pojol/gsf/wiki/Core_Args)，Args由[ArgsPool](https://github.com/pojol/gsf/wiki/Core_ArgsPool)进行分配和回收。
+***
+
+# Event
+> 在框架中所有模块✦[Module](https://github.com/pojol/gsf/wiki/Core_Module)之间的交互都必须使用Event
+
+✦ [listen](https://github.com/pojol/gsf/wiki/Core_Events) <br/>
+✦ [dispatch](https://github.com/pojol/gsf/wiki/Core_Events) <br/>
+✦ [rpc](https://github.com/pojol/gsf/wiki/Core_Events) <br/>
+<br/>
+
+getEv
+> 通过这个接口可以获得本进程内的 *event* 实例（函数指针），在需要高频调用的时候可以使用这个接口优化掉事件过程中的损耗（但这个接口会一定程度侵入Module），在性能遇到性能瓶颈并且没有其他优化方案可选之前不太推荐使用。 在使用 *event* 实例时一定要注意所在模块销毁后**解除依赖的引用**
+
+***
+
+# App
+> 每个✦[App](https://github.com/pojol/gsf/wiki/Core_Application)代理一个进程，管理所有模块的创建，销毁，还有状态变化。
+***
+
+# Modules
+* [network](https://github.com/pojol/gsf/wiki/Modules_Network_TCP)
+* [distributed](https://github.com/pojol/gsf/wiki/Modules_Distributed)
+* [luaProxy](https://github.com/pojol/gsf/wiki/Modules_LuaProxy)
+* [timer](https://github.com/pojol/gsf/wiki/Modules_Timer)
+* mysqlProxy
+* redisProxy
+* logger
+
+***
+
+✦ [接口手册](https://github.com/pojol/gsf/wiki/Events) <br/>
+✦ [开发指南](https://github.com/pojol/gsf/wiki/Guide) <br/>
+<br/>
+[FAQ](https://github.com/pojol/gsf/wiki/FAQ) <br/>
+[开发日志](https://github.com/pojol/gsf/wiki/DevLog) <br/>
+
+
+***
+
+# Information
+* [Change Log](https://github.com/pojol/gsf/wiki/ChangeLog)
