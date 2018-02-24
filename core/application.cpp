@@ -305,6 +305,52 @@ int64_t gsf::Application::uuid()
 	return _uuid;
 }
 
+
+void gsf::Application::WARN_LOG(std::string module_name, std::string reason)
+{
+	std::string _str = "";
+	_str.append("[module] ");
+	_str.append(module_name);
+	_str.append(" [reason] ");
+	_str.append(reason);
+	_str.append("\n");
+	dispatch(get_module("LogModule"), eid::log::print, gsf::make_args(gsf::LogWarning, _str));
+}
+
+
+void gsf::Application::ERR_LOG(std::string module_name, std::string reason)
+{
+	std::string _str = "";
+	_str.append("[module] ");
+	_str.append(module_name);
+	_str.append(" [reason] ");
+	_str.append(reason);
+	_str.append("\n");
+	dispatch(get_module("LogModule"), eid::log::print, gsf::make_args(gsf::LogErr, _str));
+}
+
+void gsf::Application::INFO_LOG(std::string module_name, std::string reason)
+{
+	std::string _str = "";
+	_str.append("[module] ");
+	_str.append(module_name);
+	_str.append(" [reason] ");
+	_str.append(reason);
+	_str.append("\n");
+	dispatch(get_module("LogModule"), eid::log::print, gsf::make_args(gsf::LogInfo, _str));
+}
+
+void gsf::Application::DEBUG_LOG(std::string module_name, std::string reason)
+{
+	std::string _str = "";
+	_str.append("[module] ");
+	_str.append(module_name);
+	_str.append(" [reason] ");
+	_str.append(reason);
+	_str.append("\n");
+	dispatch(get_module("LogModule"), eid::log::print, gsf::make_args(gsf::LogDebug, _str));
+}
+
 /*
 void gsf::Application::unregist_dynamic_module(uint32_t module_id)
 {

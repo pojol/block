@@ -138,11 +138,19 @@ namespace eid
 	{
 		/*!
 			comment: 输出日志
-			args: int32_t loglv, string title, string context
-			type: listen
+			args: int32_t loglv, string log
+			type: dispatch
 			res : nil 
 		**/
 		print = 2101,
+
+		/*!
+			comment: 关闭/打开调试日志
+			args: int32_t flag (1 close, 0 open)
+			type: dispatch
+			res : nil
+		*/
+		nodebug,
 	};
 
 	enum timer
