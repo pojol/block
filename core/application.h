@@ -11,6 +11,7 @@
 #include <array>
 #include <chrono>
 
+#include <fmt/format.h>
 
 namespace gsf
 {
