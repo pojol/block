@@ -23,9 +23,10 @@ namespace gsf
 	static const int32_t MsgNil = INT32_MAX;
 	static const int32_t MsgMax = 65534;
 
-	static const uint16_t LogErr = 0;
-	static const uint16_t LogWarning = 1;
-	static const uint16_t LogInfo = 2;
+	static const uint16_t LogErr = 3;
+	static const uint16_t LogWarning = 2;
+	static const uint16_t LogInfo = 1;
+	static const uint16_t LogDebug = 0;
 	
 	typedef int32_t ErrorID;
 	static const int32_t ErrNil = INT32_MAX;

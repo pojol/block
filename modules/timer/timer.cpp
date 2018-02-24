@@ -149,7 +149,7 @@ gsf::ArgsPtr gsf::modules::TimerModule::remove_timer(const gsf::ArgsPtr &args)
 		return gsf::make_args(true);
 	}
 	else {
-		dispatch(log_m_, eid::log::print, gsf::log_warring("TimerModule", fmt::format("remove timer not find {}", _timer_id)));
+		APP.WARN_LOG("TimerModule", "can't find remove timer", "{}\n", _timer_id);
 	}
 
 	return gsf::make_args(false);

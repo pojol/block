@@ -82,7 +82,7 @@ void gsf::modules::NodeModule::init()
 			}
 		}
 		else {
-			dispatch(log_m_, eid::log::print, gsf::log_warring("node", fmt::format("can't find rpc callback id = {}", _callbackid)));
+			APP.WARN_LOG("Node", "can't find rpc callback", "{}\n", _callbackid);
 		}
 
 		return nullptr;
@@ -237,7 +237,7 @@ gsf::ArgsPtr gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &arg
 			connector_fd_ = args->pop_fd();
 
 			if (!service_) {
-				dispatch(log_m_, eid::log::print, gsf::log_info("NodeModule", "distributed nod connect 2 root!"));
+				APP.INFO_LOG("Node", "connect root succ!");
 				service_ = true;
 
 				auto _args = gsf::ArgsPool::get_ref().get();

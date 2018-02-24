@@ -31,9 +31,10 @@ namespace gsf
 			void init_impl(const std::string &exe_name);
 
 			gsf::ArgsPtr log_print(const gsf::ArgsPtr &args);
+			gsf::ArgsPtr changeFlag(const gsf::ArgsPtr &args);
 
 		private:
-			
+			bool ndebug = false;
 			char path_[512];
 		};
 	}
