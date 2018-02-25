@@ -38,7 +38,7 @@ getEv
 * [timer](https://github.com/pojol/gsf/wiki/Modules_Timer)
 * mysqlProxy
 * redisProxy
-* logger
+* [logger](https://github.com/pojol/gsf/wiki/Module_Logger)
 
 ***
 
