@@ -11,13 +11,8 @@
 
 ***
 
-## Args
-> 在框架中所有的事件交互参数类型都是 ✦[Args](https://github.com/pojol/gsf/wiki/Core_Args)，Args由[ArgsPool](https://github.com/pojol/gsf/wiki/Core_ArgsPool)进行分配和回收。
-***
-
 ## Event
-> 在框架中所有模块✦[Module](https://github.com/pojol/gsf/wiki/Core_Module)之间的交互都必须使用Event
-
+> 使用✦[Event](https://github.com/pojol/gsf/wiki/Core_Events)来进行 *gsf* 中 *module* 之间的交互，这种方式可以保证 *module* 之间的天然独立性。这种独立性，能显著的降低编码的复杂度和对数据分片的处理难度。
 ✦ [listen](https://github.com/pojol/gsf/wiki/Core_Events) <br/>
 ✦ [dispatch](https://github.com/pojol/gsf/wiki/Core_Events) <br/>
 ✦ [rpc](https://github.com/pojol/gsf/wiki/Core_Events) <br/>
@@ -28,8 +23,13 @@ getEv
 
 ***
 
+## Args
+> 用于包装 *event* 的内容，✦[Args](https://github.com/pojol/gsf/wiki/Core_Args)由[ArgsPool](https://github.com/pojol/gsf/wiki/Core_ArgsPool)进行分配和回收。
+***
+
+
 ## App
-> 每个✦[App](https://github.com/pojol/gsf/wiki/Core_Application)代理一个进程，管理所有模块的创建，销毁，还有状态变化。
+> 每个✦[App](https://github.com/pojol/gsf/wiki/Core_Application)代理一个进程，管理所有 *Module* 的创建，销毁，还有状态变化。
 ***
 
 ## Modules
