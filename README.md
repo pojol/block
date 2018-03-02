@@ -12,7 +12,7 @@
 ***
 
 ## Event
-> 使用✦[Event](https://github.com/pojol/gsf/wiki/Core_Events)来处理 *gsf* 中 *module* 之间的交互，这种方式可以保证 *module* 之间的天然独立性。这种独立性，能显著的降低编码的复杂度和对数据分片的处理难度。
+> 使用✦[Event](https://github.com/pojol/gsf/wiki/Core_Events)来处理 *gsf* 中 ✦[Module](https://github.com/pojol/gsf/wiki/Core_Module) 之间的交互，这种方式可以保证 *module* 之间的天然独立性。这种独立性，能显著的降低编码的复杂度和对数据分片的处理难度。
 
 ✦ [listen](https://github.com/pojol/gsf/wiki/Core_Events) <br/>
 ✦ [dispatch](https://github.com/pojol/gsf/wiki/Core_Events) <br/>
