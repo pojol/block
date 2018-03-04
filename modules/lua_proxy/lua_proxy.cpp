@@ -165,6 +165,36 @@ gsf::ArgsPtr gsf::modules::LuaProxyModule::create_event(const gsf::ArgsPtr &args
 	return gsf::make_args(true);
 }
 
+void gsf::modules::LuaProxyModule::ldispatch(gsf::ModuleID lua_id, gsf::ModuleID target, gsf::EventID event,
+											 const std::string &buf, gsf::LuaCallbackFunc callback = nullptr)
+{
+	auto _smartPtr = gsf::ArgsPool::get_ref().get();
+	auto _luaVirtual = find_lua(lua_id);
+
+	auto _callback = [callback](const gsf::ArgsPtr &cptr) {
+		callback("");
+	};
+
+	try {
+		_smartPtr->push_block(buf.c_str(), buf.size());
+		if (callback){
+			dispatch(target, event, _smartPtr, _callback);
+		}
+		else {
+			dispatch(target, event, _smartPtr);
+		}
+
+	}
+	catch (sol::error e) {
+		std::string _err = e.what() + '\n' + Traceback(find_lua(lua_id)->state_);
+		APP.ERR_LOG("LuaProxy", _err);
+	}
+	catch (...)
+	{
+		APP.ERR_LOG("LuaProxy", "unknown err by ldispatch", " {} {}", target, event);
+	}
+}
+
 std::string gsf::modules::LuaProxyModule::ldispatch(uint32_t lua_id, uint32_t target, uint32_t event, const std::string &buf)
 {
 	auto _smartPtr = gsf::ArgsPool::get_ref().get();

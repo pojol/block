@@ -27,7 +27,8 @@ namespace gsf
 {
 	typedef std::pair<uint32_t, uint32_t> EventPair;
 	typedef std::function<void(const ArgsPtr &)> CallbackFunc;
-	typedef std::function<ArgsPtr(const ArgsPtr &)> DispatchFunc;
+	typedef std::function<void(const std::string &)> LuaCallbackFunc;
+	typedef std::function<ArgsPtr(const ArgsPtr &, CallbackFunc)> DispatchFunc;
 	typedef std::function<void (const ArgsPtr &, DispatchFunc)> EventFunc;
 
 	typedef std::function<void(const ArgsPtr &, int32_t, bool)> RpcCallback;
@@ -45,13 +46,14 @@ namespace gsf
 		/**!
 			用于侦听模块之间的消息
 		*/
-		virtual void listen(Module *self, uint32_t event, DispatchFunc func);
-		virtual void listen(ModuleID self, uint32_t event, DispatchFunc func);
+		virtual void listen(Module *self, gsf::EventID event, DispatchFunc func);
+		virtual void listen(ModuleID self, gsf::EventID event, DispatchFunc func);
 
 		/**!
 			用于将事件发往不同模块
 		*/
 		virtual gsf::ArgsPtr dispatch(uint32_t target, uint32_t event, const ArgsPtr &args);
+		virtual void dispatch(gsf::ModuleID target, gsf::EventID event, const ArgsPtr &args, CallbackFunc callback = nullptr);
 
 		virtual void boardcast(uint32_t event, const ArgsPtr &args);
 
@@ -91,7 +93,8 @@ namespace gsf
 
 		void bind_event(uint32_t module_id, uint32_t event, DispatchFunc func);
 
-		ArgsPtr dispatch(uint32_t module_id, uint32_t event, const ArgsPtr &args);
+		void dispatch(uint32_t module_id, uint32_t event, const ArgsPtr &args);
+
 		void boardcast(uint32_t event, const ArgsPtr &args);
 		///
 
@@ -157,16 +160,26 @@ namespace gsf
 			EventID event_id_;
 			DispatchFunc event_func_;
 
+            bool effective_ = true;
 #ifdef WATCH_PERF
 			uint32_t calls_ = 0;
 
 #endif // WATCH_PERF
 		};
 
+        struct EventInfo
+        {
+            gsf::EventID event_;
+            gsf::ModuleID target_;
+            gsf::ArgsPtr ptr_;
+        };
+
 		typedef std::vector<ModuleIterfaceObj> MIList;
-		typedef std::unordered_map<uint32_t, MIList> ModuleEventMap;
+		typedef std::unordered_map<gsf::ModuleID , MIList> ModuleEventMap;
+        typedef std::list<EventInfo> EventQueue;
 
 		ModuleEventMap type_map_;
+        EventQueue event_queue_;
 
 		RpcFunc rpc_;
 	};

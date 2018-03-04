@@ -1,10 +1,37 @@
 #include "event.h"
+#include "application.h"
 #include <algorithm>
 
 
 void gsf::EventModule::execute()
 {
+	while (!event_queue_.empty())
+	{
+		auto _info = event_queue_.front();
 
+		auto _reg = type_map_.find(_info.target_);
+		if (_reg != type_map_.end()){
+			auto _regList = _reg->second;
+			auto _findItr = std::find_if(_regList.begin(), _regList.end(), [&](MIList::value_type it) {
+				return (it.event_id_ == _info.event_);
+			});
+
+			if (_findItr != _regList.end()){
+#ifdef WATCH_PERF
+				_findItr->calls_++;
+#endif
+                _findItr->event_func_()
+			}
+			else {
+				APP.WARN_LOG("EventCenter", "Did not find the event from module", " {} {}", _info.event_, _info.target_);
+			}
+		}
+		else {
+			APP.WARN_LOG("EventCenter", "Did not find the module", " {}", _info.target_);
+		}
+
+		event_queue_.pop_front();
+	}
 }
 
 gsf::EventModule::EventModule()
@@ -49,30 +76,13 @@ void gsf::EventModule::bind_event(uint32_t module_id, uint32_t event, DispatchFu
 	}
 }
 
-gsf::ArgsPtr gsf::EventModule::dispatch(uint32_t module_id, uint32_t event, const ArgsPtr &args)
+void gsf::EventModule::dispatch(uint32_t module_id, uint32_t event, const ArgsPtr &args)
 {
-	auto tItr = type_map_.find(module_id);
-	if (tItr != type_map_.end()) {
-
-		auto listItr = tItr->second;
-		auto fItr = std::find_if(listItr.begin(), listItr.end(), [&](MIList::value_type it) {
-			return (it.event_id_ == event);
-		});
-
-		if (fItr != listItr.end()) {
-
-#ifdef WATCH_PERF
-			fItr->calls_++;
-#endif // WATCH_PERF
-
-			return fItr->event_func_(args);
-		}
-	}
-	else { // 如果没有在本地找到事件（服务），则看下当前的app是否有注册转发的服务，如果存在则将这个event转交到转发服务。
-		
-	}
-
-	return nullptr;
+	EventInfo _einfo;
+	_einfo.event_ = event;
+	_einfo.target_ = module_id;
+	_einfo.ptr_ = std::move(args);
+	event_queue_.push_back(_einfo);
 }
 
 void gsf::EventModule::boardcast(uint32_t event, const ArgsPtr &args)
