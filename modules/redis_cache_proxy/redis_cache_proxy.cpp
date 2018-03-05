@@ -72,7 +72,8 @@ void gsf::modules::RedisCacheProxyModule::event_redis_connect(gsf::ArgsPtr args,
 void gsf::modules::RedisCacheProxyModule::event_redis_avatar_offline(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	if (!check_connect()) {
-		return gsf::make_args(false);
+		APP.WARN_LOG("RedisProxy", "connect fail!");
+		return;
 	}
 
 	auto _field = args->pop_string();
@@ -100,7 +101,7 @@ void gsf::modules::RedisCacheProxyModule::event_redis_command(gsf::ArgsPtr args,
 
 	if (REDIS_OK != redisAppendCommand(redis_context_, "hset %s %s %s", _field.c_str(), _key.c_str(), _block.c_str())) {
 		APP.ERR_LOG("RedisCacheProxyModule", "redisAppendCommand fail");
-		return gsf::make_args(false);
+		return;
 	}
 
 	redis_command_count_++;
