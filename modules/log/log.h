@@ -30,8 +30,8 @@ namespace gsf
 
 			void init_impl(const std::string &exe_name);
 
-			gsf::ArgsPtr log_print(const gsf::ArgsPtr &args);
-			gsf::ArgsPtr changeFlag(const gsf::ArgsPtr &args);
+			void event_print(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void event_change_flag(gsf::ArgsPtr args, gsf::CallbackFunc callback =nullptr);
 
 		private:
 			bool ndebug = false;

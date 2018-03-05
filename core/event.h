@@ -28,7 +28,7 @@ namespace gsf
 	typedef std::pair<uint32_t, uint32_t> EventPair;
 	typedef std::function<void(ArgsPtr)> CallbackFunc;
 	typedef std::function<void(const std::string &)> LuaCallbackFunc;
-	typedef std::function<ArgsPtr(ArgsPtr, CallbackFunc)> DispatchFunc;
+	typedef std::function<void (ArgsPtr, CallbackFunc)> DispatchFunc;
 	typedef std::function<void (ArgsPtr, DispatchFunc)> EventFunc;
 
 	typedef std::function<void(const ArgsPtr &, int32_t, bool)> RpcCallback;

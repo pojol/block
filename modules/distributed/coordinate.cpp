@@ -1,5 +1,6 @@
 
 #include "coordinate.h"
+#include <core/application.h>
 
 gsf::modules::CoodinatorModule::CoodinatorModule()
 	: Module("CoodinatorModule")
@@ -11,18 +12,18 @@ void gsf::modules::CoodinatorModule::before_init()
 {
 	using namespace std::placeholders;
 
-	listen(this, eid::distributed::coordinat_regist, std::bind(&CoodinatorModule::event_regist, this, _1));
-	listen(this, eid::distributed::coordinat_unregit, std::bind(&CoodinatorModule::event_unregist, this, _1));
+	listen(this, eid::distributed::coordinat_regist, std::bind(&CoodinatorModule::event_regist, this, _1, _2));
+	listen(this, eid::distributed::coordinat_unregit, std::bind(&CoodinatorModule::event_unregist, this, _1, _2));
 
 	listen(this, eid::distributed::coordinat_adjust_weight
-		, std::bind(&CoodinatorModule::event_adjust_module_weight, this, _1));
+		, std::bind(&CoodinatorModule::event_adjust_module_weight, this, _1, _2));
 
 	listen(this, eid::distributed::coordinat_select
-		, std::bind(&CoodinatorModule::event_get_light_module, this, _1));
+		, std::bind(&CoodinatorModule::event_get_light_module, this, _1, _2));
 }
 
 //int32_t port, const std::string &module, gsf::ModuleID module_id, int32_t weight
-gsf::ArgsPtr gsf::modules::CoodinatorModule::event_adjust_module_weight(const gsf::ArgsPtr &args)
+void gsf::modules::CoodinatorModule::event_adjust_module_weight(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	auto _nod_id = args->pop_i32();
 	auto _module = args->pop_string();
@@ -30,18 +31,17 @@ gsf::ArgsPtr gsf::modules::CoodinatorModule::event_adjust_module_weight(const gs
 	auto _weight = args->pop_i32();
 
 	adjust_module_weight(_nod_id, _module, 0, _characteristic, _weight);
-
-	return nullptr;
 }
 
-gsf::ArgsPtr gsf::modules::CoodinatorModule::event_get_light_module(const gsf::ArgsPtr &args)
+void gsf::modules::CoodinatorModule::event_get_light_module(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	auto _module_name = args->pop_string();
 	auto _module_characteristic = args->pop_i32();
 
 	auto _count = node_name_map_.count(_module_name);
 	if (_count == 0) {
-		return nullptr;
+		APP.ERR_LOG("Coodinator", "Did not find the module ", " {}", _module_name);
+		return ;
 	}
 	else {
 		NodePtr _ptr;
@@ -72,22 +72,21 @@ gsf::ArgsPtr gsf::modules::CoodinatorModule::event_get_light_module(const gsf::A
 		}
 
 		assert(_ptr->nod_id != 0);
-		return gsf::make_args(_ptr->nod_id, _ptr->type_, _ptr->weight_, _ptr->acceptor_ip_, _ptr->acceptor_port_);
+		assert(callback);
+		callback(gsf::make_args(_ptr->nod_id, _ptr->type_, _ptr->weight_, _ptr->acceptor_ip_, _ptr->acceptor_port_));
 	}
-
-	return nullptr;
 }
 
 //const std::string &type, const std::string &ip, int32_t port
-gsf::ArgsPtr gsf::modules::CoodinatorModule::event_regist(const gsf::ArgsPtr &args)
+void gsf::modules::CoodinatorModule::event_regist(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	auto _type = args->pop_string();
 	auto _nod_id = args->pop_i32();
 
 	auto itr = node_id_map_.find(_nod_id);
 	if (itr != node_id_map_.end()) {
-		printf("coordnate regist app repeat! %d \n", _nod_id);
-		return gsf::make_args(false);
+		APP.ERR_LOG("Coodinator", "regist app repeat!", " {}", _nod_id);
+		return;
 	}
 
 	auto _acceptor_ip = args->pop_string();
@@ -110,22 +109,18 @@ gsf::ArgsPtr gsf::modules::CoodinatorModule::event_regist(const gsf::ArgsPtr &ar
 
 		adjust_module_weight(_nod_id, _module_name, _module_id, _module_characteristic, 0);
 	}
-
-	return gsf::make_args(true);
 }
 
-gsf::ArgsPtr gsf::modules::CoodinatorModule::event_unregist(const gsf::ArgsPtr &args)
+void gsf::modules::CoodinatorModule::event_unregist(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	auto _port = args->pop_i32();
-
-	return nullptr;
 }
 
 void gsf::modules::CoodinatorModule::adjust_module_weight(int32_t nod_id, const std::string &module_name, gsf::ModuleID module_id, int32_t characteristic, int32_t weight)
 {
 	auto _itr = node_id_map_.find(nod_id);
 	if (_itr == node_id_map_.end()) {
-		printf("adjust module weight fail, unregist! \n");
+		APP.WARN_LOG("Coodinator", "adjust module weight fail, unregist!", " node = {}", nod_id);
 		return;
 	}
 

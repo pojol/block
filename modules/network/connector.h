@@ -38,11 +38,10 @@ namespace gsf
 			void after_shut() override;
 
 		private:
-			gsf::ArgsPtr make_connector(const gsf::ArgsPtr &args);
-			
-			void need_close_session(int fd);
+			void event_make_connector(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void event_send_msg(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
 
-			gsf::ArgsPtr send_msg(const gsf::ArgsPtr &args);
+			void need_close_session(int fd);
 
 		private:
 

@@ -44,12 +44,12 @@ void gsf::network::ConnectorModule::before_init()
 	event_base_ptr_ = event_base_new();
 
 	listen(this, eid::network::make_connector
-		, std::bind(&ConnectorModule::make_connector, this
-			, std::placeholders::_1));
+		, std::bind(&ConnectorModule::event_make_connector, this
+			, std::placeholders::_1, std::placeholders::_2));
 
 	listen(this, eid::network::send
-		, std::bind(&ConnectorModule::send_msg, this
-			, std::placeholders::_1));
+		, std::bind(&ConnectorModule::event_send_msg, this
+			, std::placeholders::_1, std::placeholders::_2));
 	
 
 	log_m_ = APP.get_module("LogModule");
@@ -90,7 +90,7 @@ void gsf::network::ConnectorModule::after_shut()
 	boardcast(eid::module_shut_succ, gsf::make_args(get_module_id()));
 }
 
-gsf::ArgsPtr gsf::network::ConnectorModule::make_connector(const gsf::ArgsPtr &args)
+void gsf::network::ConnectorModule::event_make_connector(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	uint32_t _module_id = args->pop_i32();
 	std::string _ip = args->pop_string();
@@ -138,8 +138,6 @@ gsf::ArgsPtr gsf::network::ConnectorModule::make_connector(const gsf::ArgsPtr &a
 
 		session_ptr_->set_log_module(log_m_);
 	}
-
-	return gsf::make_args(true);
 }
 
 
@@ -162,7 +160,7 @@ void gsf::network::ConnectorModule::need_close_session(int fd)
 }
 
 
-gsf::ArgsPtr gsf::network::ConnectorModule::send_msg(const gsf::ArgsPtr &args)
+void gsf::network::ConnectorModule::event_send_msg(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	auto _msg = args->pop_msgid();
 	std::string _str = "";
@@ -178,6 +176,4 @@ gsf::ArgsPtr gsf::network::ConnectorModule::send_msg(const gsf::ArgsPtr &args)
 
 	auto _block = std::make_shared<gsf::Block>(session_ptr_->get_id(), _msg, _str);
 	session_ptr_->write(_msg, _block);
-
-	return nullptr;
 }

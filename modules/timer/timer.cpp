@@ -26,13 +26,13 @@ void gsf::modules::TimerModule::init()
 	using namespace std::placeholders;
 
 	listen(this, eid::timer::delay_milliseconds	
-		, std::bind(&TimerModule::delay_milliseconds, this, _1));
+		, std::bind(&TimerModule::evnet_delay_milliseconds, this, _1, _2));
 	
 	listen(this, eid::timer::delay_day
-		, std::bind(&TimerModule::delay_day, this, _1));
+		, std::bind(&TimerModule::event_delay_day, this, _1, _2));
 	
 	listen(this, eid::timer::remove_timer
-		, std::bind(&TimerModule::remove_timer, this, _1));
+		, std::bind(&TimerModule::event_remove_timer, this, _1, _2));
 
 	boardcast(eid::module_init_succ, gsf::make_args(get_module_id()));
 }
@@ -81,7 +81,7 @@ uint64_t gsf::modules::TimerModule::make_timer_id(uint64_t delay)
 	return _tick;
 }
 
-gsf::ArgsPtr gsf::modules::TimerModule::delay_milliseconds(const gsf::ArgsPtr &args)
+void gsf::modules::TimerModule::evnet_delay_milliseconds(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	uint32_t _sender = args->pop_i32();
 	uint32_t _milliseconds = args->pop_i32();
@@ -95,11 +95,16 @@ gsf::ArgsPtr gsf::modules::TimerModule::delay_milliseconds(const gsf::ArgsPtr &a
 	assert(map_.find(_tid) == map_.end());
 	map_.insert(std::make_pair(_tid, _event));
 
-	return gsf::make_args(_tid);
+	if (callback) {
+		callback(gsf::make_args(_tid));
+	}
+	else {
+		APP.WARN_LOG("Timer", "callback is nil !");
+	}
 }
 
 
-gsf::ArgsPtr gsf::modules::TimerModule::delay_day(const gsf::ArgsPtr &args)
+void gsf::modules::TimerModule::event_delay_day(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	using namespace std::chrono;
 
@@ -133,11 +138,16 @@ gsf::ArgsPtr gsf::modules::TimerModule::delay_day(const gsf::ArgsPtr &args)
 
 	map_.insert(std::make_pair(_tid, _event));
 
-	return gsf::make_args(_tid);
+	if (callback) {
+		callback(gsf::make_args(_tid));
+	}
+	else {
+		APP.WARN_LOG("Timer", "callback is nil !");
+	}
 }
 
 
-gsf::ArgsPtr gsf::modules::TimerModule::remove_timer(const gsf::ArgsPtr &args)
+void gsf::modules::TimerModule::event_remove_timer(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	uint32_t _sender = args->pop_i32();
 	uint64_t _timer_id = args->pop_ui64();
@@ -145,12 +155,8 @@ gsf::ArgsPtr gsf::modules::TimerModule::remove_timer(const gsf::ArgsPtr &args)
 	auto itr = map_.find(_timer_id);
 	if (itr != map_.end()) {
 		map_.erase(itr);
-
-		return gsf::make_args(true);
 	}
 	else {
 		APP.WARN_LOG("TimerModule", "can't find remove timer", "{}\n", _timer_id);
 	}
-
-	return gsf::make_args(false);
 }

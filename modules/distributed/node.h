@@ -54,12 +54,12 @@ namespace gsf
 
 		protected:
 
-			void event_rpc(int event, gsf::ModuleID moduleid, const gsf::ArgsPtr &args, gsf::RpcCallback callback);
+			void event_rpc(gsf::EventID event, gsf::ModuleID moduleid, const gsf::ArgsPtr &args, gsf::RpcCallback callback);
 
 			void regist_node(gsf::ModuleID base, int event, const std::string &ip, int port);
 
-			gsf::ArgsPtr event_create_node(const gsf::ArgsPtr &args);
-			gsf::ArgsPtr event_regist_node(const gsf::ArgsPtr &args);
+			void event_create_node(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void event_regist_node(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
 
 		private:
 

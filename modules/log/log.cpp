@@ -52,9 +52,9 @@ void gsf::modules::LogModule::before_init()
 
 	using namespace std::placeholders;
 
-	listen(this, eid::log::print, std::bind(&LogModule::log_print, this, _1));
+	listen(this, eid::log::print, std::bind(&LogModule::event_print, this, _1, _2));
 
-	listen(this, eid::log::nodebug, std::bind(&LogModule::changeFlag, this, _1));
+	listen(this, eid::log::nodebug, std::bind(&LogModule::event_change_flag, this, _1, _2));
 
 	auto exeName = APP.get_app_name();
 	init_impl(exeName);
@@ -94,7 +94,7 @@ void gsf::modules::LogModule::init_impl(const std::string &exe_name)
 }
 
 
-gsf::ArgsPtr gsf::modules::LogModule::log_print(const gsf::ArgsPtr &args)
+void gsf::modules::LogModule::event_print(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	//std::cout << args->to_string() << std::endl;
 	auto _lv = args->pop_ui16();
@@ -117,11 +117,9 @@ gsf::ArgsPtr gsf::modules::LogModule::log_print(const gsf::ArgsPtr &args)
 		LOG(ERROR) << _context;
 		break;
 	}
-
-	return nullptr;
 }
 
-gsf::ArgsPtr gsf::modules::LogModule::changeFlag(const gsf::ArgsPtr &args)
+void gsf::modules::LogModule::event_change_flag(gsf::ArgsPtr args, gsf::CallbackFunc callback /* =nullptr */)
 {
 	auto _flag = args->pop_i32();
 	if (0 == _flag) {
@@ -130,7 +128,5 @@ gsf::ArgsPtr gsf::modules::LogModule::changeFlag(const gsf::ArgsPtr &args)
 	else if (1 == _flag) {
 		ndebug = true;
 	}
-
-	return nullptr;
 }
 

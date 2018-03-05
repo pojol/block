@@ -117,7 +117,7 @@ void gsf::network::Session::read(::bufferevent *bev)
 				args_ptr->push(_msg_id);
 				args_ptr->push_block(_block->buf_ + _block->get_head_size(), _block->get_body_size());
 				
-				dispatch(module_id_, eid::network::recv, args_ptr);
+				dispatch(module_id_, eid::network::recv, std::move(args_ptr));
 			}
 			else {
 				if (!_block->check()) { //! 先这样检查下block中的内容是否合法，后面肯定不能这样明文传输

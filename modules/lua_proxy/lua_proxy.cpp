@@ -83,16 +83,16 @@ void gsf::modules::LuaProxyModule::before_init()
 void gsf::modules::LuaProxyModule::init()
 {
 	listen(this, eid::lua_proxy::create
-		, std::bind(&LuaProxyModule::create_event, this
-			, std::placeholders::_1));
+		, std::bind(&LuaProxyModule::event_create, this
+			, std::placeholders::_1, std::placeholders::_2));
 
 	listen(this, eid::lua_proxy::destroy
-		, std::bind(&LuaProxyModule::destroy_event, this
-			, std::placeholders::_1));
+		, std::bind(&LuaProxyModule::event_distory, this
+			, std::placeholders::_1, std::placeholders::_2));
 
 	listen(this, eid::lua_proxy::reload
-		, std::bind(&LuaProxyModule::reload_event, this
-			, std::placeholders::_1));
+		, std::bind(&LuaProxyModule::event_reload, this
+			, std::placeholders::_1, std::placeholders::_2));
 }
 
 void gsf::modules::LuaProxyModule::execute()
@@ -154,34 +154,31 @@ void gsf::modules::LuaProxyModule::shut()
 	lua_map_.clear();
 }
 
-gsf::ArgsPtr gsf::modules::LuaProxyModule::create_event(const gsf::ArgsPtr &args)
+void gsf::modules::LuaProxyModule::event_create(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	uint32_t _module_id = args->pop_i32();
 	std::string _dir_name = getPath();
 	std::string _file_name = args->pop_string();
 
 	create(_module_id, _dir_name, _file_name);
-
-	return gsf::make_args(true);
 }
 
-void gsf::modules::LuaProxyModule::ldispatch(gsf::ModuleID lua_id, gsf::ModuleID target, gsf::EventID event,
-											 const std::string &buf, gsf::LuaCallbackFunc callback = nullptr)
+void gsf::modules::LuaProxyModule::ldispatch(gsf::ModuleID lua_id, gsf::ModuleID target, gsf::EventID event, const std::string &buf, const sol::function &func)
 {
 	auto _smartPtr = gsf::ArgsPool::get_ref().get();
 	auto _luaVirtual = find_lua(lua_id);
 
-	auto _callback = [callback](const gsf::ArgsPtr &cptr) {
-		callback("");
+	auto _callback = [func](gsf::ArgsPtr cptr) {
+		func("");
 	};
 
 	try {
 		_smartPtr->push_block(buf.c_str(), buf.size());
-		if (callback){
-			dispatch(target, event, _smartPtr, _callback);
+		if (func) {
+			dispatch(target, event, std::move(_smartPtr), _callback);
 		}
 		else {
-			dispatch(target, event, _smartPtr);
+			dispatch(target, event, std::move(_smartPtr));
 		}
 
 	}
@@ -193,38 +190,12 @@ void gsf::modules::LuaProxyModule::ldispatch(gsf::ModuleID lua_id, gsf::ModuleID
 	{
 		APP.ERR_LOG("LuaProxy", "unknown err by ldispatch", " {} {}", target, event);
 	}
-}
-
-std::string gsf::modules::LuaProxyModule::ldispatch(uint32_t lua_id, uint32_t target, uint32_t event, const std::string &buf)
-{
-	auto _smartPtr = gsf::ArgsPool::get_ref().get();
-	auto lua = find_lua(lua_id);
-	std::string _res = "";
-
-	try {
-		_smartPtr->push_block(buf.c_str(), buf.size());
-
-		auto args = dispatch(target, event, _smartPtr);
-		if (args) {
-			_res = args->pop_block(0, args->get_size());
-		}
-	}
-	catch (sol::error e) {
-		std::string _err = e.what() + '\n' + Traceback(find_lua(lua_id)->state_);
-		APP.ERR_LOG("LuaProxy", _err);
-	}
-	catch (...)
-	{
-		APP.ERR_LOG("LuaProxy", "unknown err by ldispatch", " {} {}", target, event);
-	}
-
-	return _res;
 }
 
 int gsf::modules::LuaProxyModule::llisten(uint32_t lua_id, uint32_t self, uint32_t event, const sol::function &func)
 {
 	try {
-		listen(self, event, [=](const gsf::ArgsPtr &args)->gsf::ArgsPtr {
+		listen(self, event, [=](gsf::ArgsPtr args, gsf::CallbackFunc callback)->void {
 			try {
 				std::string _req = "";
 				std::string _res = "";
@@ -238,18 +209,17 @@ int gsf::modules::LuaProxyModule::llisten(uint32_t lua_id, uint32_t self, uint32
 				}
 
 				if (_res != "") {
-					auto _smartPtr = gsf::ArgsPool::get_ref().get();
-					_smartPtr->push_block(_res.c_str(), _res.size());
-					return _smartPtr;
+					//auto _smartPtr = gsf::ArgsPool::get_ref().get();
+					//_smartPtr->push_block(_res.c_str(), _res.size());
+					//return _smartPtr;
 				}
 				else {
-					return nullptr;
+					//return nullptr;
 				}
 			}
 			catch (sol::error e) {
 				std::string _err = e.what() + '\n' + Traceback(find_lua(lua_id)->state_);
 				APP.ERR_LOG("LuaProxy", _err);
-				return nullptr;
 			}
 		});
 	}
@@ -289,10 +259,10 @@ void gsf::modules::LuaProxyModule::lrpc(uint32_t lua_id, uint32_t event, int32_t
 		};
 
 		if (sol::type::lua_nil == func.get_type()) {
-			rpc(event, moduleid, _smartPtr, nullptr);
+			rpc(event, moduleid, std::move(_smartPtr), nullptr);
 		}
 		else {
-			rpc(event, moduleid, _smartPtr, _callback);
+			rpc(event, moduleid, std::move(_smartPtr), _callback);
 		}
 
 	}
@@ -416,19 +386,19 @@ void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_na
 	lua_map_.insert(std::make_pair(module_id, _lua));
 }
 
-gsf::ArgsPtr gsf::modules::LuaProxyModule::destroy_event(const gsf::ArgsPtr &args)
+void gsf::modules::LuaProxyModule::event_distory(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	uint32_t _module_id = args->pop_i32();
 	
 	auto _itr = lua_map_.find(_module_id);
 	if (_itr == lua_map_.end()) {
-		return gsf::make_args(false);
+		
+		APP.ERR_LOG("LuaProxy", "distory Did not find the module", " {}", _module_id);
+		return;
 	}
 
 	LuaProxy *_lua = _itr->second;
 	_lua->app_state_ = LuaAppState::AFTER_SHUT;
-
-	return gsf::make_args(true);
 }
 
 int gsf::modules::LuaProxyModule::destroy(uint32_t module_id)
@@ -453,25 +423,25 @@ int gsf::modules::LuaProxyModule::destroy(uint32_t module_id)
 	return 0;
 }
 
-gsf::ArgsPtr gsf::modules::LuaProxyModule::reload_event(const gsf::ArgsPtr &args)
+void gsf::modules::LuaProxyModule::event_reload(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	uint32_t _module_id = args->pop_i32();
 
 	auto _itr = lua_map_.find(_module_id);
 	if (_itr == lua_map_.end()) {
-		return gsf::make_args(false);
+		APP.ERR_LOG("LuaProxy", "reload Did not find the module", " {}", _module_id);
+		return;
 	}
 
 	std::string _dir_name = _itr->second->dir_name_;
 	std::string _file_name = _itr->second->file_name_;
 
 	if (destroy(_module_id) != 0) {
-		return gsf::make_args(false);
+		APP.ERR_LOG("LuaProxy", "reload destory module fail!");
+		return;
 	}
 
 	create(_module_id, _dir_name, _file_name);
-
-	return gsf::make_args(true);
 }
 
 gsf::modules::LuaProxy * gsf::modules::LuaProxyModule::find_lua(uint32_t id)

@@ -49,12 +49,12 @@ void gsf::network::AcceptorModule::before_init()
 void gsf::network::AcceptorModule::init()
 {
 	listen(this, eid::network::make_acceptor
-		, std::bind(&AcceptorModule::make_acceptor, this
-		, std::placeholders::_1));
+		, std::bind(&AcceptorModule::event_make_acceptor, this
+		, std::placeholders::_1, std::placeholders::_2));
 
 	listen(this, eid::network::send
-		, std::bind(&AcceptorModule::send_msg, this
-		, std::placeholders::_1));
+		, std::bind(&AcceptorModule::event_send_msg, this
+		, std::placeholders::_1, std::placeholders::_2));
 
 	boardcast(eid::base::module_init_succ, gsf::make_args(get_module_id()));
 }
@@ -89,7 +89,7 @@ void gsf::network::AcceptorModule::after_shut()
 	}
 }
 
-gsf::ArgsPtr gsf::network::AcceptorModule::make_acceptor(const gsf::ArgsPtr &args)
+void gsf::network::AcceptorModule::event_make_acceptor(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	uint32_t _module_id = args->pop_i32();
 	std::string _ip = args->pop_string();
@@ -97,8 +97,6 @@ gsf::ArgsPtr gsf::network::AcceptorModule::make_acceptor(const gsf::ArgsPtr &arg
 
 	module_id_ = _module_id;	//! 绑定代理Module的id
 	accept_bind(_ip, _port);
-
-	return gsf::make_args(true);
 }
 
 /*
@@ -171,7 +169,7 @@ void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, 
 	}
 }
 
-gsf::ArgsPtr gsf::network::AcceptorModule::send_msg(const gsf::ArgsPtr &args)
+void gsf::network::AcceptorModule::event_send_msg(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	auto _fd = args->pop_fd();
 	auto _msg = args->pop_msgid();
@@ -191,7 +189,5 @@ gsf::ArgsPtr gsf::network::AcceptorModule::send_msg(const gsf::ArgsPtr &args)
 		auto _block = std::make_shared<gsf::Block>(_fd, _msg, _str);
 		_session_ptr->write(_msg, _block);
 	}
-
-	return nullptr;
 }
 

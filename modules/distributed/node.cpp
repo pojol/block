@@ -39,15 +39,15 @@ void gsf::modules::NodeModule::before_init()
 	assert(timer_m_ != gsf::ModuleNil);
 
 	using namespace std::placeholders;
-	listen(this, eid::node::node_create, std::bind(&NodeModule::event_create_node, this, _1));
-	listen(this, eid::node::node_regist, std::bind(&NodeModule::event_regist_node, this, _1));
+	listen(this, eid::node::node_create, std::bind(&NodeModule::event_create_node, this, _1, _2));
+	listen(this, eid::node::node_regist, std::bind(&NodeModule::event_regist_node, this, _1, _2));
 
 	rpc_listen(std::bind(&NodeModule::event_rpc, this, _1, _2, _3, _4));
 }
 
 void gsf::modules::NodeModule::init()
 {
-	listen(this, eid::network::recv, [&](const gsf::ArgsPtr &args) {
+	listen(this, eid::network::recv, [&](gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr) {
 	
 		auto _fd = args->pop_fd();
 		auto _msgid = args->pop_msgid();
@@ -76,9 +76,10 @@ void gsf::modules::NodeModule::init()
 				callback_map_.erase(_itr);
 			}
 			else { //reset timer
-				uint64_t _tid = dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::make_args(get_module_id(), rpc_delay_))->pop_timerid();
-				_info->timer_ = _tid;
-				timer_set_.insert(std::make_pair(_tid, _info));
+				dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::make_args(get_module_id(), rpc_delay_), [&](gsf::ArgsPtr args) {
+					_info->timer_ = args->pop_timerid();
+					timer_set_.insert(std::make_pair(_info->timer_, _info));
+				});
 			}
 		}
 		else {
@@ -88,7 +89,7 @@ void gsf::modules::NodeModule::init()
 		return nullptr;
 	});
 
-	listen(this, eid::timer::timer_arrive, [&](const gsf::ArgsPtr &args) {
+	listen(this, eid::timer::timer_arrive, [&](gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr) {
 		auto _tid = args->pop_ui64();
 
 		auto _itr = timer_set_.find(_tid);
@@ -101,8 +102,6 @@ void gsf::modules::NodeModule::init()
 			_info->callback(gsf::make_args(fmt::format("{} rpc callback timeout", _info->id_)), -1, false);
 			callback_map_.erase(_citr);
 		}
-
-		return nullptr;
 	});
 }
 
@@ -116,7 +115,7 @@ void gsf::modules::NodeModule::shut()
 
 }
 
-void gsf::modules::NodeModule::event_rpc(int event, gsf::ModuleID moduleid, const gsf::ArgsPtr &args, gsf::RpcCallback callback)
+void gsf::modules::NodeModule::event_rpc(gsf::EventID event, gsf::ModuleID moduleid, const gsf::ArgsPtr &args, gsf::RpcCallback callback)
 {
 	int64_t _callbackid = 0;
 
@@ -142,16 +141,16 @@ void gsf::modules::NodeModule::event_rpc(int event, gsf::ModuleID moduleid, cons
 			return;
 		}
 
-		uint64_t _tid = dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::make_args(get_module_id(), rpc_delay_))->pop_timerid();
+		dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::make_args(get_module_id(), rpc_delay_), [&](gsf::ArgsPtr args) {
+			auto _callbackPtr = std::make_shared<CallbackInfo>();
+			_callbackPtr->callback = callback;
+			_callbackPtr->timer_ = args->pop_timerid();
+			_callbackPtr->event_ = event;
+			_callbackPtr->id_ = _callbackid;
 
-		auto _callbackPtr = std::make_shared<CallbackInfo>();
-		_callbackPtr->callback = callback;
-		_callbackPtr->timer_ = _tid;
-		_callbackPtr->event_ = event;
-		_callbackPtr->id_ = _callbackid;
-
-		callback_map_.insert(std::make_pair(_callbackid, _callbackPtr));
-		timer_set_.insert(std::make_pair(_tid, _callbackPtr));
+			callback_map_.insert(std::make_pair(_callbackid, _callbackPtr));
+			timer_set_.insert(std::make_pair(_callbackPtr->timer_, _callbackPtr));
+		});	
 	}
 
 	if (args) {
@@ -203,7 +202,7 @@ void gsf::modules::NodeModule::regist_node(gsf::ModuleID base, int event, const 
 	}
 }
 
-gsf::ArgsPtr gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &args)
+void gsf::modules::NodeModule::event_create_node(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	if (!service_) {
 		id_ = args->pop_i32();
@@ -233,7 +232,7 @@ gsf::ArgsPtr gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &arg
 		regist_node(get_module_id(), eid::distributed::coordinat_select, _root_ip, _root_port);
 		//
 
-		listen(this, eid::network::new_connect, [&](const gsf::ArgsPtr &args) {
+		listen(this, eid::network::new_connect, [&](gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr) {
 			connector_fd_ = args->pop_fd();
 
 			if (!service_) {
@@ -258,11 +257,9 @@ gsf::ArgsPtr gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &arg
 					}
 				});
 			}
-			
-			return nullptr;
 		});
 
-		listen(this, eid::base::module_init_succ, [&](const gsf::ArgsPtr &args) {
+		listen(this, eid::base::module_init_succ, [&](gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr) {
 
 			auto _t = gsf::ArgsPool::get_ref().get();
 			_t->push_block(args->pop_block(0, args->get_size()).c_str(), args->get_size());
@@ -276,17 +273,12 @@ gsf::ArgsPtr gsf::modules::NodeModule::event_create_node(const gsf::ArgsPtr &arg
 					break;
 				}
 			}
-
-			return nullptr;
 		});
 
-		return nullptr;
 	}
-
-	return nullptr;
 }
 
-gsf::ArgsPtr gsf::modules::NodeModule::event_regist_node(const gsf::ArgsPtr &args)
+void gsf::modules::NodeModule::event_regist_node(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	auto _base = args->pop_i32();
 	auto _event = args->pop_i32();
@@ -294,6 +286,4 @@ gsf::ArgsPtr gsf::modules::NodeModule::event_regist_node(const gsf::ArgsPtr &arg
 	auto _port = args->pop_i32();
 
 	regist_node(_base, _event, _ip, _port);
-
-	return nullptr;
 }
