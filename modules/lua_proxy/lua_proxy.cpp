@@ -169,12 +169,23 @@ void gsf::modules::LuaProxyModule::ldispatch(gsf::ModuleID lua_id, gsf::ModuleID
 	auto _luaVirtual = find_lua(lua_id);
 
 	auto _callback = [func](gsf::ArgsPtr cptr) {
-		func("");
+		try {
+			auto _pos = cptr->get_size();
+			auto _req = cptr->pop_block(0, _pos);
+			func(_req, _pos);
+		}
+		catch (sol::error e) {
+			APP.ERR_LOG("LuaProxy", "unknown err by ldispatch _callback");
+		}
+		catch (...)
+		{
+			APP.ERR_LOG("LuaProxy", "unknown err by ldispatch _callback");
+		}
 	};
 
 	try {
 		_smartPtr->push_block(buf.c_str(), buf.size());
-		if (func) {
+		if (func.valid()) {
 			dispatch(target, event, std::move(_smartPtr), _callback);
 		}
 		else {

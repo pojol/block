@@ -34,7 +34,6 @@ void gsf::modules::TimerModule::init()
 	listen(this, eid::timer::remove_timer
 		, std::bind(&TimerModule::event_remove_timer, this, _1, _2));
 
-	boardcast(eid::module_init_succ, gsf::make_args(get_module_id()));
 }
 
 void gsf::modules::TimerModule::execute()
@@ -99,7 +98,7 @@ void gsf::modules::TimerModule::evnet_delay_milliseconds(gsf::ArgsPtr args, gsf:
 		callback(gsf::make_args(_tid));
 	}
 	else {
-		APP.WARN_LOG("Timer", "callback is nil !");
+		APP.WARN_LOG("Timer", "evnet_delay_milliseconds callback is nil !");
 	}
 }
 
@@ -142,7 +141,7 @@ void gsf::modules::TimerModule::event_delay_day(gsf::ArgsPtr args, gsf::Callback
 		callback(gsf::make_args(_tid));
 	}
 	else {
-		APP.WARN_LOG("Timer", "callback is nil !");
+		APP.WARN_LOG("Timer", "event_delay_day callback is nil !");
 	}
 }
 
@@ -157,6 +156,6 @@ void gsf::modules::TimerModule::event_remove_timer(gsf::ArgsPtr args, gsf::Callb
 		map_.erase(itr);
 	}
 	else {
-		APP.WARN_LOG("TimerModule", "can't find remove timer", "{}\n", _timer_id);
+		APP.WARN_LOG("TimerModule", "event_remove_timer can't find remove timer", "{}\n", _timer_id);
 	}
 }

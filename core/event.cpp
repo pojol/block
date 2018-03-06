@@ -23,11 +23,11 @@ void gsf::EventModule::execute()
 				_findItr->event_func_(std::move(_infoPtr->ptr_), _infoPtr->callback_);
 			}
 			else {
-				APP.WARN_LOG("EventCenter", "Did not find the ", "event {} from module {} !", _infoPtr->event_, _infoPtr->target_);
+				APP.WARN_LOG("EventCenter", "execute Did not find the ", "event {} from module {} !", _infoPtr->event_, _infoPtr->target_);
 			}
 		}
 		else {
-			APP.WARN_LOG("EventCenter", "Did not find the module", " {}", _infoPtr->target_);
+			APP.WARN_LOG("EventCenter", "execute Did not find the module", " {}", _infoPtr->target_);
 		}
 
 		delete _infoPtr;
@@ -65,7 +65,7 @@ void gsf::EventModule::bind_event(uint32_t module_id, uint32_t event, DispatchFu
 		});
 
 		if (fItr != listItr.end()) {
-			printf("repeated event!\n");
+			APP.WARN_LOG("EventCenter", "bind_event repeated event", " {}", event);
 			return;
 		}
 
@@ -84,6 +84,10 @@ void gsf::EventModule::dispatch(uint32_t module_id, uint32_t event, ArgsPtr args
 	EventInfo *_einfo = new EventInfo();
 	_einfo->event_ = event;
 	_einfo->target_ = module_id;
+
+	if (callback) {
+		_einfo->callback_ = callback;
+	}
 
 	_einfo->ptr_ = std::move(args);
 	event_queue_.push(_einfo);
@@ -160,7 +164,7 @@ void gsf::IEvent::listen(ModuleID self, gsf::EventID event, DispatchFunc func)
 
 void gsf::IEvent::dispatch(gsf::ModuleID target, gsf::EventID event, ArgsPtr args, CallbackFunc callback /* = nullptr */)
 {
-	EventModule::get_ref().dispatch(target, event, std::move(args));
+	EventModule::get_ref().dispatch(target, event, std::move(args), callback);
 }
 
 void gsf::IEvent::boardcast(uint32_t event, gsf::ArgsPtr args)
