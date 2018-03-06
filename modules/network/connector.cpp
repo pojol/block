@@ -60,7 +60,7 @@ void gsf::network::ConnectorModule::init()
 {
 	// todo ...
 	
-	boardcast(eid::module_init_succ, gsf::make_args(get_module_id()));
+	//boardcast(eid::module_init_succ, gsf::make_args(get_module_id()));
 }
 
 void gsf::network::ConnectorModule::execute()

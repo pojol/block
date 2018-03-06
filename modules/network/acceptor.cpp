@@ -56,7 +56,7 @@ void gsf::network::AcceptorModule::init()
 		, std::bind(&AcceptorModule::event_send_msg, this
 		, std::placeholders::_1, std::placeholders::_2));
 
-	boardcast(eid::base::module_init_succ, gsf::make_args(get_module_id()));
+	//boardcast(eid::base::module_init_succ, gsf::make_args(get_module_id()));
 }
 
 void gsf::network::AcceptorModule::execute()
