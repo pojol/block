@@ -41,6 +41,7 @@ namespace gsf
 
 			void event_send_msg(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
 
+			void event_kick(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
 
 			void accept_bind(const std::string &ip, int port);
 			static void accept_listen_cb(::evconnlistener *listener

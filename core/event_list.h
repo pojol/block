@@ -126,7 +126,7 @@ namespace eid
 		new_connect,
 
 		/*!
-			comment: 连接被断开
+			comment: 连接被断开, 只有连接错误才会收到这条事件（服务器主动kick不会
 			args: int32_t fd
 			type: listen
 			res : int32_t fd, string reason

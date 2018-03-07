@@ -6,10 +6,11 @@
 
 #include <iostream>
 
-gsf::network::Session::Session(int fd, int module_id, MsgBinder *binder, std::function<void (int)> disconnect_callback)
+gsf::network::Session::Session(int fd, int eid, MsgBinder *binder, std::function<void (int)> disconnect_callback, ::bufferevent *bev)
     : fd_(fd)
-	, module_id_(module_id)
+	, module_id_(eid)
 	, binder_(binder)
+	, bev_(bev)
 {
 	disconnect_callback_ = disconnect_callback;
 
@@ -32,6 +33,10 @@ gsf::network::Session::~Session()
 	
 	if (out_buf_) {
 		evbuffer_free(out_buf_); 
+	}
+
+	if (bev_) {
+		bufferevent_free(bev_);
 	}
 }
 
@@ -75,8 +80,6 @@ void gsf::network::Session::event_cb(::bufferevent *bev, short what, void *ctx)
 	if (0 != _result) {
 		Session * _session_ptr = static_cast<Session *>(ctx);
 		_session_ptr->dis_connect(_result);
-
-		bufferevent_free(bev);
 	}
 }
 

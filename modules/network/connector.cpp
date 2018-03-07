@@ -132,7 +132,7 @@ void gsf::network::ConnectorModule::event_make_connector(gsf::ArgsPtr args, gsf:
 
 
 	if (_ret == 0) {
-		session_ptr_ = std::make_shared<Session>(_fd, _module_id, binder_, std::bind(&ConnectorModule::need_close_session, this, std::placeholders::_1));
+		session_ptr_ = std::make_shared<Session>(_fd, _module_id, binder_, std::bind(&ConnectorModule::need_close_session, this, std::placeholders::_1), buffer_event_ptr_);
 		bufferevent_setcb(buffer_event_ptr_, Session::read_cb, NULL, Session::event_cb, session_ptr_.get());
 		bufferevent_enable(buffer_event_ptr_, EV_READ | EV_WRITE);
 

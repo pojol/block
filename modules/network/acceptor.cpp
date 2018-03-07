@@ -56,6 +56,10 @@ void gsf::network::AcceptorModule::init()
 		, std::bind(&AcceptorModule::event_send_msg, this
 		, std::placeholders::_1, std::placeholders::_2));
 
+	listen(this, eid::network::kick_connect
+		, std::bind(&AcceptorModule::event_kick, this
+		, std::placeholders::_1, std::placeholders::_2));
+
 	//boardcast(eid::base::module_init_succ, gsf::make_args(get_module_id()));
 }
 
@@ -161,7 +165,7 @@ void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, 
 	} while (0);
 
 	if (0 == _ret) {
-		auto _session_ptr = network_ptr_->session_mgr_->make_session(fd, network_ptr_->module_id_, network_ptr_->binder_);
+		auto _session_ptr = network_ptr_->session_mgr_->make_session(fd, network_ptr_->module_id_, network_ptr_->binder_, bev);
 		bufferevent_setcb(bev, Session::read_cb, NULL, Session::event_cb, _session_ptr.get());
 		bufferevent_enable(bev, EV_READ | EV_WRITE);
 
@@ -189,5 +193,12 @@ void gsf::network::AcceptorModule::event_send_msg(gsf::ArgsPtr args, gsf::Callba
 		auto _block = std::make_shared<gsf::Block>(_fd, _msg, _str);
 		_session_ptr->write(_msg, _block);
 	}
+}
+
+void gsf::network::AcceptorModule::event_kick(gsf::ArgsPtr args, gsf::CallbackFunc callback /*= nullptr*/)
+{
+	auto _fd = args->pop_fd();
+
+	session_mgr_->set_need_close(_fd);
 }
 

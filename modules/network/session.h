@@ -23,7 +23,7 @@ namespace gsf
 			: public gsf::IEvent
 		{
 		public:
-			Session(int fd, int eid, MsgBinder *binder, std::function<void (int)> disconnect_callback);
+			Session(int fd, int eid, MsgBinder *binder, std::function<void (int)> disconnect_callback, ::bufferevent *bev);
 			~Session();
 
 			static void read_cb(::bufferevent *bev, void *ctx);
@@ -47,12 +47,14 @@ namespace gsf
 			gsf::ModuleID module_id_ = gsf::ModuleNil;
 
 			gsf::ModuleID log_module_ = gsf::ModuleNil;
-			MsgBinder *binder_;
+			MsgBinder *binder_ = nullptr;
 
 			std::function<void(int)> disconnect_callback_;
 
-			::evbuffer *in_buf_;
-			::evbuffer *out_buf_;
+			::evbuffer *in_buf_ = nullptr;
+			::evbuffer *out_buf_ = nullptr;
+
+			::bufferevent *bev_ = nullptr;
 		};
 	}
 	

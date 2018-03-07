@@ -12,9 +12,9 @@ gsf::network::SessionMgr::~SessionMgr()
 
 }
 
-gsf::network::SessionPtr gsf::network::SessionMgr::make_session(int fd, int module_id, MsgBinder *binder)
+gsf::network::SessionPtr gsf::network::SessionMgr::make_session(int fd, int module_id, MsgBinder *binder, ::bufferevent *bev)
 {
-	auto _session_ptr = std::make_shared<Session>(fd, module_id, binder, std::bind(&SessionMgr::set_need_close, this, std::placeholders::_1));
+	auto _session_ptr = std::make_shared<Session>(fd, module_id, binder, std::bind(&SessionMgr::set_need_close, this, std::placeholders::_1), bev);
 	session_queue_.insert(std::make_pair(fd, _session_ptr));
 	session_queue_bymodule_.insert(std::make_pair(module_id, _session_ptr));
 
