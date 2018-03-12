@@ -17,11 +17,10 @@ def rmtree(top):
             os.rmdir(os.path.join(root, name))
     os.rmdir(top)
 
-
-###################libevent###################################
-print("download Libevent version release-2.0.22-stable")
-
 os.chdir(cur_path_)
+###################libevent###################################
+'''
+print("download Libevent version release-2.0.22-stable")
 
 if os.path.exists(cur_path_ + "/Libevent"):
     rmtree(cur_path_ + "/Libevent")
@@ -29,14 +28,24 @@ if os.path.exists(cur_path_ + "/Libevent"):
 os.system('git clone https://github.com/nmathewson/Libevent.git')
 os.chdir(cur_path_ + "/Libevent")
 os.system('git checkout release-2.0.22-stable')
+
 if platform.system() == 'Linux':
     os.system('./autogen.sh')
     os.system('./configure --prefix=/' + root_path + '/lib/libevent')
     os.system('make')
     os.system('make install')
+elif platform.system() == 'Darwin':
+    print("darwin")
+    #usr/local/Cellar/openssl/1.0.2j/include
+    os.system('./autogen.sh')
+    os.system('./configure --prefix=/' + root_path + '/lib/libevent' + " CPPFLAGS=-I/usr/local/Cellar/openssl/1.0.2j/include LDFLAGS=-I/usr/local/Cellar/openssl/1.0.2j/lib")
+    os.system('make')
+    os.system('make install')
 else:
     pass
 os.chdir(cur_path_)
+'''
+'''
 #################glog####################################
 print("download glog version 0.3.4")
 
@@ -123,7 +132,7 @@ if platform.system() == 'Linux':
     os.system('cp -r ' + cur_path_ + '/mysql-connector-c-6.1.11-linux-glibc2.12-x86_64/lib/*' + ' ' + root_path + '/lib/mysql_connector/lib')
     pass
 os.chdir(cur_path_)
-
+'''
 ########################fmtlib###########################
 print("download fmtlib version 4.0.0")
 if os.path.exists(cur_path_ + "/fmt"):
@@ -134,7 +143,7 @@ if os.path.exists(root_path + "/lib/fmt"):
 os.system('git clone https://github.com/fmtlib/fmt.git')
 os.chdir(cur_path_ + '/fmt')
 os.system('git checkout 4.0.0')
-if platform.system() == 'Linux':
+if platform.system() == 'Linux' or platform.system() == 'Darwin':
     os.system('mkdir build')
     os.chdir(cur_path_ + '/fmt/build')
     os.system('cmake ..')

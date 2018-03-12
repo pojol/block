@@ -104,7 +104,7 @@ namespace gsf
 		void rmv_event(ModuleID module_id, EventID event_id);
 
 #ifdef WATCH_PERF
-		std::string get_tick_info(uint32_t count, uint32_t tick_count)
+		std::string get_tick_info(uint32_t count, uint32_t tick_count) override
 		{
 			auto c = static_cast<float>(tick_consume_ / 1000 / count);
 			char buf[20];

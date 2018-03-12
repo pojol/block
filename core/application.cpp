@@ -243,10 +243,10 @@ void gsf::Application::run()
 		else if (state_ == AppState::EXECUTE) {
 
 		}
-		else if (state_ = AppState::SHUT) {
+		else if (state_ == AppState::SHUT) {
 			state_ = AppState::AFTER_SHUT;
 		}
-		else if (state_ = AppState::AFTER_SHUT) {
+		else if (state_ == AppState::AFTER_SHUT) {
 			//exit();
 		}
 
