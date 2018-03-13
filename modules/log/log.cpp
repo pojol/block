@@ -52,12 +52,12 @@ void gsf::modules::LogModule::before_init()
 
 	using namespace std::placeholders;
 
-	listen(this, eid::log::print, std::bind(&LogModule::log_print, this, _1));
+	listen(this, eid::log::print, std::bind(&LogModule::ePrint, this, _1, _2));
 
-	listen(this, eid::log::nodebug, std::bind(&LogModule::changeFlag, this, _1));
+	listen(this, eid::log::nodebug, std::bind(&LogModule::eChangeFlag, this, _1, _2));
 
-	auto exeName = APP.get_app_name();
-	init_impl(exeName);
+	auto exeName = APP.getAppName();
+	initImpl(exeName);
 }
 
 void gsf::modules::LogModule::init()
@@ -75,7 +75,7 @@ void gsf::modules::LogModule::shut()
 	google::ShutdownGoogleLogging();
 }
 
-void gsf::modules::LogModule::init_impl(const std::string &exe_name)
+void gsf::modules::LogModule::initImpl(const std::string &exe_name)
 {
 	std::string _path = std::string(path_) + "/log";
 
@@ -94,7 +94,7 @@ void gsf::modules::LogModule::init_impl(const std::string &exe_name)
 }
 
 
-gsf::ArgsPtr gsf::modules::LogModule::log_print(const gsf::ArgsPtr &args)
+void gsf::modules::LogModule::ePrint(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	//std::cout << args->to_string() << std::endl;
 	auto _lv = args->pop_ui16();
@@ -103,7 +103,7 @@ gsf::ArgsPtr gsf::modules::LogModule::log_print(const gsf::ArgsPtr &args)
 	switch (_lv)
 	{
 	case gsf::LogDebug:
-		if (!ndebug) {
+		if (!ndebug_) {
 			DLOG(INFO) << _context;
 		}
 		break;
@@ -117,20 +117,16 @@ gsf::ArgsPtr gsf::modules::LogModule::log_print(const gsf::ArgsPtr &args)
 		LOG(ERROR) << _context;
 		break;
 	}
-
-	return nullptr;
 }
 
-gsf::ArgsPtr gsf::modules::LogModule::changeFlag(const gsf::ArgsPtr &args)
+void gsf::modules::LogModule::eChangeFlag(gsf::ArgsPtr args, gsf::CallbackFunc callback /* =nullptr */)
 {
 	auto _flag = args->pop_i32();
 	if (0 == _flag) {
-		ndebug = false;
+		ndebug_ = false;
 	}
 	else if (1 == _flag) {
-		ndebug = true;
+		ndebug_ = true;
 	}
-
-	return nullptr;
 }
 

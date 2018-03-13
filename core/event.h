@@ -8,14 +8,13 @@
 #pragma warning(disable:4819)
 
 #include "module.h"
-#include "event_handler.h"
 #include "event_list.h"
 #include "types.h"
 
 #include <functional>
 #include <algorithm>
 #include <tuple>
-#include <list>
+#include <queue>
 #include <vector>
 #include <unordered_map>
 
@@ -26,12 +25,13 @@
 namespace gsf
 {
 	typedef std::pair<uint32_t, uint32_t> EventPair;
-	typedef std::function<void(const ArgsPtr &)> CallbackFunc;
-	typedef std::function<ArgsPtr(const ArgsPtr &)> DispatchFunc;
-	typedef std::function<void (const ArgsPtr &, DispatchFunc)> EventFunc;
+	typedef std::function<void(ArgsPtr)> CallbackFunc;
+	typedef std::function<void(const std::string &)> LuaCallbackFunc;
+	typedef std::function<void (ArgsPtr, CallbackFunc)> DispatchFunc;
+	typedef std::function<void (ArgsPtr, DispatchFunc)> EventFunc;
 
 	typedef std::function<void(const ArgsPtr &, int32_t, bool)> RpcCallback;
-	typedef std::function<void(uint32_t, int32_t, const gsf::ArgsPtr &, gsf::RpcCallback)> RpcFunc;
+	typedef std::function<void(uint32_t, int32_t, gsf::ArgsPtr, gsf::RpcCallback)> RpcFunc;
 
 	class Module;
 
@@ -45,15 +45,15 @@ namespace gsf
 		/**!
 			用于侦听模块之间的消息
 		*/
-		virtual void listen(Module *self, uint32_t event, DispatchFunc func);
-		virtual void listen(ModuleID self, uint32_t event, DispatchFunc func);
+		virtual void listen(Module *self, gsf::EventID event, DispatchFunc func);
+		virtual void listen(ModuleID self, gsf::EventID event, DispatchFunc func);
 
 		/**!
 			用于将事件发往不同模块
 		*/
-		virtual gsf::ArgsPtr dispatch(uint32_t target, uint32_t event, const ArgsPtr &args);
+		virtual void dispatch(gsf::ModuleID target, gsf::EventID event, ArgsPtr args, CallbackFunc callback = nullptr);
 
-		virtual void boardcast(uint32_t event, const ArgsPtr &args);
+		virtual void boardcast(uint32_t event, ArgsPtr args);
 
 		/**!
 			rpc call ， 在分布式架构中需要远程调用的接口，依赖 NodeModule。
@@ -61,20 +61,20 @@ namespace gsf
 			callback 存在，则异步等待callback  如果 result 返回false 则代表这次调用没有成功。 需要进入回滚逻辑
 			如果是业务层导致的事件执行失败，则在args中处理， result返回的成功、失败只代表框架层调用失败.
 		*/
-		virtual void rpc(uint32_t event, int32_t moduleid, const ArgsPtr &args, RpcCallback callback = nullptr);
+		virtual void rpc(uint32_t event, int32_t moduleid, ArgsPtr args, RpcCallback callback = nullptr);
 
 		/**!
 			移除module在event层上的绑定.
 		*/
 		virtual void wipeout(ModuleID self);
-		virtual void wipeout(ModuleID self, EventID event_id);
+		virtual void wipeout(ModuleID self, EventID eventID);
 
 		virtual void wipeout(Module *self);
-		virtual void wipeout(Module *self, EventID event_id);
+		virtual void wipeout(Module *self, EventID eventID);
 
 
 		// private - -
-		virtual void rpc_listen(RpcFunc rpc_callback);
+		virtual void listenRpc(RpcFunc callbackRpc);
 	};
 
 	class EventModule
@@ -89,20 +89,21 @@ namespace gsf
 	protected:
 		void execute() override;
 
-		void bind_event(uint32_t module_id, uint32_t event, DispatchFunc func);
+		void bindEvent(uint32_t module_id, uint32_t event, DispatchFunc func);
 
-		ArgsPtr dispatch(uint32_t module_id, uint32_t event, const ArgsPtr &args);
-		void boardcast(uint32_t event, const ArgsPtr &args);
+		void dispatch(uint32_t module_id, uint32_t event, ArgsPtr args, CallbackFunc callback = nullptr);
+
+		void boardcast(uint32_t event, ArgsPtr args);
 		///
 
-		void bind_rpc(RpcFunc rpc_callback);
-		void dispatch_rpc(uint32_t event, int32_t moduleid, const ArgsPtr &args, RpcCallback callback = nullptr);
+		void bindRpc(RpcFunc rpc_callback);
+		void dispatchRpc(uint32_t event, int32_t moduleid, ArgsPtr args, RpcCallback callback = nullptr);
 
-		void rmv_event(ModuleID module_id);
-		void rmv_event(ModuleID module_id, EventID event_id);
+		void rmvEvent(ModuleID module_id);
+		void rmvEvent(ModuleID module_id, EventID event_id);
 
 #ifdef WATCH_PERF
-		std::string get_tick_info(uint32_t count, uint32_t tick_count)
+		std::string get_tick_info(uint32_t count, uint32_t tick_count) override
 		{
 			auto c = static_cast<float>(tick_consume_ / 1000 / count);
 			char buf[20];
@@ -113,17 +114,17 @@ namespace gsf
 			sscanf(buf, "%f", &c);
 #endif
 
-			std::string _info = get_module_name() + ":" + (buf)+" ms\n";
+			std::string _info = getModuleName() + ":" + (buf)+" ms\n";
 
 			typedef std::vector<std::pair<int, std::string>> PFList;
 			std::vector<std::pair<int, std::string>> _pf_list;
 
-			for (auto &itr : type_map_)
+			for (auto &itr : typeMap_)
 			{
 				for (MIList::iterator militr = itr.second.begin(); militr != itr.second.end(); ++militr)
 				{
 					_pf_list.push_back(std::make_pair(militr->calls_, "module " + std::to_string(itr.first) 
-						+ "\t event " + std::to_string(militr->event_id_) 
+						+ "\t event " + std::to_string(militr->eventID_) 
 						+ "\t calls " + std::to_string(militr->calls_) + "\n"));
 					militr->calls_ = 0;
 				}
@@ -154,19 +155,30 @@ namespace gsf
 
 		struct ModuleIterfaceObj
 		{
-			EventID event_id_;
-			DispatchFunc event_func_;
+			EventID eventID_;
+			DispatchFunc eventFunc_;
 
+            bool effective_ = true;
 #ifdef WATCH_PERF
 			uint32_t calls_ = 0;
 
 #endif // WATCH_PERF
 		};
 
-		typedef std::vector<ModuleIterfaceObj> MIList;
-		typedef std::unordered_map<uint32_t, MIList> ModuleEventMap;
+        struct EventInfo
+        {
+            gsf::EventID eventID_;
+            gsf::ModuleID target_;
+            gsf::ArgsPtr ptr_;
+			CallbackFunc callback_;
+        };
 
-		ModuleEventMap type_map_;
+		typedef std::vector<ModuleIterfaceObj> MIList;
+		typedef std::unordered_map<gsf::ModuleID , MIList> ModuleEventMap;
+        typedef std::queue<EventInfo*> EventQueue;
+
+		ModuleEventMap typeMap_;
+        EventQueue eventQueue_;
 
 		RpcFunc rpc_;
 	};

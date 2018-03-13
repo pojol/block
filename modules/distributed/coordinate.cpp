@@ -1,5 +1,6 @@
 
 #include "coordinate.h"
+#include <core/application.h>
 
 gsf::modules::CoodinatorModule::CoodinatorModule()
 	: Module("CoodinatorModule")
@@ -11,44 +12,43 @@ void gsf::modules::CoodinatorModule::before_init()
 {
 	using namespace std::placeholders;
 
-	listen(this, eid::distributed::coordinat_regist, std::bind(&CoodinatorModule::event_regist, this, _1));
-	listen(this, eid::distributed::coordinat_unregit, std::bind(&CoodinatorModule::event_unregist, this, _1));
+	listen(this, eid::distributed::coordinat_regist, std::bind(&CoodinatorModule::eCoordinatRegist, this, _1, _2));
+	listen(this, eid::distributed::coordinat_unregit, std::bind(&CoodinatorModule::eCoordinatUnregist, this, _1, _2));
 
 	listen(this, eid::distributed::coordinat_adjust_weight
-		, std::bind(&CoodinatorModule::event_adjust_module_weight, this, _1));
+		, std::bind(&CoodinatorModule::eCoordinatAdjustWeight, this, _1, _2));
 
 	listen(this, eid::distributed::coordinat_select
-		, std::bind(&CoodinatorModule::event_get_light_module, this, _1));
+		, std::bind(&CoodinatorModule::eCoordinatSelect, this, _1, _2));
 }
 
 //int32_t port, const std::string &module, gsf::ModuleID module_id, int32_t weight
-gsf::ArgsPtr gsf::modules::CoodinatorModule::event_adjust_module_weight(const gsf::ArgsPtr &args)
+void gsf::modules::CoodinatorModule::eCoordinatAdjustWeight(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	auto _nod_id = args->pop_i32();
 	auto _module = args->pop_string();
 	auto _characteristic = args->pop_i32();
 	auto _weight = args->pop_i32();
 
-	adjust_module_weight(_nod_id, _module, 0, _characteristic, _weight);
-
-	return nullptr;
+	adjustModuleWeight(_nod_id, _module, 0, _characteristic, _weight);
 }
 
-gsf::ArgsPtr gsf::modules::CoodinatorModule::event_get_light_module(const gsf::ArgsPtr &args)
+void gsf::modules::CoodinatorModule::eCoordinatSelect(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	auto _module_name = args->pop_string();
 	auto _module_characteristic = args->pop_i32();
 
-	auto _count = node_name_map_.count(_module_name);
+	auto _count = nodeNameMap_.count(_module_name);
 	if (_count == 0) {
-		return nullptr;
+		APP.ERR_LOG("Coodinator", "Did not find the module ", " {}", _module_name);
+		return ;
 	}
 	else {
 		NodePtr _ptr;
 
 		int32_t _light_port = 0;
 		int32_t _weight = 0;
-		auto _itr = node_name_map_.find(_module_name);
+		auto _itr = nodeNameMap_.find(_module_name);
 		for (size_t i = 0; i < _count; ++i, ++_itr)
 		{
 			auto _modules = _itr->second->modules;
@@ -72,22 +72,21 @@ gsf::ArgsPtr gsf::modules::CoodinatorModule::event_get_light_module(const gsf::A
 		}
 
 		assert(_ptr->nod_id != 0);
-		return gsf::make_args(_ptr->nod_id, _ptr->type_, _ptr->weight_, _ptr->acceptor_ip_, _ptr->acceptor_port_);
+		assert(callback);
+		callback(gsf::makeArgs(_ptr->nod_id, _ptr->type_, _ptr->weight_, _ptr->acceptor_ip_, _ptr->acceptor_port_));
 	}
-
-	return nullptr;
 }
 
 //const std::string &type, const std::string &ip, int32_t port
-gsf::ArgsPtr gsf::modules::CoodinatorModule::event_regist(const gsf::ArgsPtr &args)
+void gsf::modules::CoodinatorModule::eCoordinatRegist(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	auto _type = args->pop_string();
 	auto _nod_id = args->pop_i32();
 
-	auto itr = node_id_map_.find(_nod_id);
-	if (itr != node_id_map_.end()) {
-		printf("coordnate regist app repeat! %d \n", _nod_id);
-		return gsf::make_args(false);
+	auto itr = nodeIDMap_.find(_nod_id);
+	if (itr != nodeIDMap_.end()) {
+		APP.ERR_LOG("Coodinator", "regist app repeat!", " {}", _nod_id);
+		return;
 	}
 
 	auto _acceptor_ip = args->pop_string();
@@ -99,7 +98,7 @@ gsf::ArgsPtr gsf::modules::CoodinatorModule::event_regist(const gsf::ArgsPtr &ar
 	nod->acceptor_ip_ = _acceptor_ip;
 	nod->acceptor_port_ = _acceptor_port;
 
-	node_id_map_.insert(std::make_pair(_nod_id, nod));
+	nodeIDMap_.insert(std::make_pair(_nod_id, nod));
 
 	auto _count = args->pop_i32();
 	for (int i = 0; i < _count; ++i)
@@ -108,24 +107,20 @@ gsf::ArgsPtr gsf::modules::CoodinatorModule::event_regist(const gsf::ArgsPtr &ar
 		auto _module_id = args->pop_moduleid();
 		auto _module_characteristic = args->pop_i32();
 
-		adjust_module_weight(_nod_id, _module_name, _module_id, _module_characteristic, 0);
+		adjustModuleWeight(_nod_id, _module_name, _module_id, _module_characteristic, 0);
 	}
-
-	return gsf::make_args(true);
 }
 
-gsf::ArgsPtr gsf::modules::CoodinatorModule::event_unregist(const gsf::ArgsPtr &args)
+void gsf::modules::CoodinatorModule::eCoordinatUnregist(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	auto _port = args->pop_i32();
-
-	return nullptr;
 }
 
-void gsf::modules::CoodinatorModule::adjust_module_weight(int32_t nod_id, const std::string &module_name, gsf::ModuleID module_id, int32_t characteristic, int32_t weight)
+void gsf::modules::CoodinatorModule::adjustModuleWeight(int32_t nod_id, const std::string &module_name, gsf::ModuleID module_id, int32_t characteristic, int32_t weight)
 {
-	auto _itr = node_id_map_.find(nod_id);
-	if (_itr == node_id_map_.end()) {
-		printf("adjust module weight fail, unregist! \n");
+	auto _itr = nodeIDMap_.find(nod_id);
+	if (_itr == nodeIDMap_.end()) {
+		APP.WARN_LOG("Coodinator", "adjust module weight fail, unregist!", " node = {}", nod_id);
 		return;
 	}
 
@@ -136,10 +131,10 @@ void gsf::modules::CoodinatorModule::adjust_module_weight(int32_t nod_id, const 
 		_itr->second->weight_ += weight;
 	}
 
-	auto _count = node_name_map_.count(module_name);
+	auto _count = nodeNameMap_.count(module_name);
 	auto _flag = false;
 	if (_count > 0) {
-		auto _mitr = node_name_map_.find(module_name);
+		auto _mitr = nodeNameMap_.find(module_name);
 		for (size_t i = 0; i < _count; ++i, ++_mitr)
 		{
 			if (_mitr->second->nod_id == nod_id) {
@@ -164,7 +159,7 @@ void gsf::modules::CoodinatorModule::adjust_module_weight(int32_t nod_id, const 
 		_info.module_characteristic_ = characteristic;
 
 		_itr->second->modules.push_back(_info);
-		node_name_map_.insert(std::make_pair(module_name, _itr->second));
+		nodeNameMap_.insert(std::make_pair(module_name, _itr->second));
 	}
 }
 

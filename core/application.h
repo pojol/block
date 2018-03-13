@@ -43,43 +43,43 @@ namespace gsf
 		/*!
 			获得进程的名称
 		**/
-		std::string get_app_name() const;
+		std::string getAppName() const;
 
 		/*!
 			通过名字获取某个Module的实例ID， 仅支持静态创建的Module。
 		**/
-		gsf::ModuleID get_module(const std::string &modulName) const;
+		gsf::ModuleID getModule(const std::string &modulName) const;
 
 		/*!
 			获取进程的机器ID
 		**/
-		uint32_t get_machine() const;
+		uint32_t getMachine() const;
 
 		/*!
 			获得在集群内产生的唯一ID
 		**/
-		int64_t get_uuid();
+		int64_t getUUID();
 
 		/*!
 			初始化进程
 		**/
-		void init_cfg(const gsf::AppConfig &cfg);
+		void initCfg(const gsf::AppConfig &cfg);
 
 		/*!
 			创建一个Module
 		**/
 		template <typename T>
-		void create_module(T *module);
+		void createModule(T *module);
 
 		/*!
 			动态创建一个Module
 		**/
-		gsf::ModuleID create_dynamic_module(const std::string &moduleType);
+		gsf::ModuleID createDynamicModule(const std::string &moduleType);
 
 		/*!
 			删除一个Module 
 		**/
-		void delete_module(gsf::ModuleID moduleID);
+		void deleteModule(gsf::ModuleID moduleID);
 
 		/*!
 			进程的主循环
@@ -119,26 +119,26 @@ namespace gsf
 		void tick();
 
 		template <typename T>
-		void regist_module(T *module, bool dynamic = false);
+		void registModule(T *module, bool dynamic = false);
 
-		void unregist_module(gsf::ModuleID module_id);
+		void unregistModule(gsf::ModuleID module_id);
 
 		//！ 临时先写在这里，未来如果支持分布式可能要放在其他地方生成，保证服务器集群唯一。
-		int32_t make_module_id();
+		int32_t makeModuleID();
 
-		uint64_t get_system_tick();
+		uint64_t getSystemTick();
 		int64_t uuid();
 
 		//void unregist_dynamic_module(uint32_t module_id);
 
 		typedef std::tuple<uint32_t, std::function<void()>, std::function<void()>, std::function<void(Module*, bool)>, Module*> Frame;
-		void push_frame(uint64_t index, Frame frame);
-		void pop_frame();
+		void pushFrame(uint64_t index, Frame frame);
+		void popFrame();
 
 	private:
 		AppState state_;
 		int sequence_ = 0;
-		uint64_t start_time_ = get_system_tick();
+		uint64_t start_time_ = getSystemTick();
 
 		std::list<Module *> module_list_;
 		std::multimap<uint64_t, std::pair<uint16_t, Module*>> exit_list_;
@@ -172,7 +172,7 @@ namespace gsf
 		_str.append(",time:");
 		_str.append(std::to_string(time));
 		_str.append(fmt::format(_fmt, std::forward<P>(values)...));
-		dispatch(get_module("LogModule"), eid::log::print, gsf::make_args(gsf::LogInfo, _str));
+		dispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogInfo, _str));
 	}
 
 	template <typename ...P>
@@ -185,7 +185,7 @@ namespace gsf
 		_str.append(reason);
 		_str.append("\n");
 		_str.append(fmt::format(_fmt, std::forward<P>(values)...));
-		dispatch(get_module("LogModule"), eid::log::print, gsf::make_args(gsf::LogWarning, _str));
+		dispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogWarning, _str));
 	}
 
 
@@ -199,7 +199,7 @@ namespace gsf
 		_str.append(reason);
 		_str.append("\n");
 		_str.append(fmt::format(_fmt, std::forward<P>(values)...));
-		dispatch(get_module("LogModule"), eid::log::print, gsf::make_args(gsf::LogErr, _str));
+		dispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogErr, _str));
 	}
 
 
@@ -213,7 +213,7 @@ namespace gsf
 		_str.append(reason);
 		_str.append("\n");
 		_str.append(fmt::format(_fmt, std::forward<P>(values)...));
-		dispatch(get_module("LogModule"), eid::log::print, gsf::make_args(gsf::LogInfo, _str));
+		dispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogInfo, _str));
 	}
 
 
@@ -228,22 +228,22 @@ namespace gsf
 		_str.append(reason);
 		_str.append("\n");
 		_str.append(fmt::format(_fmt, std::forward<P>(values)...));
-		dispatch(get_module("LogModule"), eid::log::print, gsf::make_args(gsf::LogDebug, _str));
+		dispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogDebug, _str));
 	}
 
 	template <typename T>
-	void gsf::Application::create_module(T *module)
+	void gsf::Application::createModule(T *module)
 	{
-		regist_module(module);
+		registModule(module);
 	}
 
 	template <typename T>
-	void gsf::Application::regist_module(T *module, bool dynamic /* = false */)
+	void gsf::Application::registModule(T *module, bool dynamic /* = false */)
 	{
 		module_list_.push_back(module);
 		
 		if (!dynamic) {
-			module->set_id(make_module_id());
+			module->setID(makeModuleID());
 			//auto _type_id = typeid(T).hash_code();
 			//auto _id_itr = module_id_map_.find(_type_id);
 			//if (_id_itr != module_id_map_.end()) {
@@ -252,7 +252,7 @@ namespace gsf
 			//}
 
 			//module_id_map_.insert(std::make_pair(_type_id, module->get_module_id()));
-			module_name_map_.insert(std::make_pair(module->get_module_name(), module->get_module_id()));
+			module_name_map_.insert(std::make_pair(module->getModuleName(), module->getModuleID()));
 		}
 	}
 

@@ -37,7 +37,11 @@ namespace gsf
 
 		private:
 
-			gsf::ArgsPtr make_acceptor(const gsf::ArgsPtr &args);
+			void eMakeAcceptor(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+
+			void eSendMsg(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+
+			void eKick(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
 
 			void accept_bind(const std::string &ip, int port);
 			static void accept_listen_cb(::evconnlistener *listener
@@ -46,18 +50,17 @@ namespace gsf
 				, int socklen
 				, void *arg);
 
-			gsf::ArgsPtr send_msg(const gsf::ArgsPtr &args);
-
 		private:
 
-			uint32_t module_id_;
+			uint32_t moduleID_;
 
-			SessionMgr *session_mgr_;
-			MsgBinder *binder_;
+			SessionMgr *sessionMgr_ = nullptr;
 
-			event_base *event_base_ptr_;
+			MsgBinder *binder_ = nullptr;
 
-			::evconnlistener *accept_listener_;
+			event_base *eventBasePtr_ = nullptr;
+
+			::evconnlistener *acceptListenerPtr_ = nullptr;
 		};
 
 	}

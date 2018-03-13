@@ -38,26 +38,21 @@ namespace gsf
 			void after_shut() override;
 
 		private:
-			gsf::ArgsPtr make_connector(const gsf::ArgsPtr &args);
-			
-			void need_close_session(int fd);
+			void eMakeConncetor(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eSendMsg(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
 
-			gsf::ArgsPtr send_msg(const gsf::ArgsPtr &args);
+			void needCloseSession(int fd);
 
 		private:
 
-			uint32_t module_id_;
+			uint32_t moduleID_;
 
-			uint32_t log_m_;
+			event_base *eventBasePtr_ = nullptr;
 
-			event_base *event_base_ptr_;
+			SessionPtr sessionPtr_ = nullptr;
+			MsgBinder *binderPtr_ = nullptr;
 
-			SessionPtr session_ptr_;
-			MsgBinder *binder_;
-
-			::bufferevent *buffer_event_ptr_;
-
-			std::vector<int> disconnect_vec_;
+			::bufferevent *bufferEventPtr_ = nullptr;
 		};
 	}
 }

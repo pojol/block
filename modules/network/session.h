@@ -5,7 +5,7 @@
 #include <event2/buffer.h>
 
 #include <core/event.h>
-#include "msg_block.h"
+#include "msgBlock.h"
 
 #include <map>
 #include <memory>
@@ -23,36 +23,35 @@ namespace gsf
 			: public gsf::IEvent
 		{
 		public:
-			Session(int fd, int eid, MsgBinder *binder, std::function<void (int)> disconnect_callback);
+			Session(int fd, int eid, MsgBinder *binder, std::function<void (int)> disconnect_callback, ::bufferevent *bev);
 			~Session();
 
-			static void read_cb(::bufferevent *bev, void *ctx);
-			static void event_cb(::bufferevent *bev, short what, void *ctx);
+			static void readCB(::bufferevent *bev, void *ctx);
+			static void eventCB(::bufferevent *bev, short what, void *ctx);
 
 			int write(uint32_t msg_id, BlockPtr blockptr);
 			void read(::bufferevent *bev);
 
-			void dis_connect(int32_t err);
-			void new_connect();
+			void disConnect(int32_t err);
+			void newConnect();
 
-			gsf::SessionID get_id() const { return fd_; }
-			gsf::ModuleID get_module_id() const { return module_id_; }
-
-			void set_log_module(uint32_t log_module) { log_module_ = log_module; }
+			gsf::SessionID getID() const { return fd_; }
+			gsf::ModuleID getModuleID() const { return targetM_; }
 
 		protected:
 
 		private:
 			gsf::SessionID fd_ = gsf::SessionNil;
-			gsf::ModuleID module_id_ = gsf::ModuleNil;
+			gsf::ModuleID targetM_ = gsf::ModuleNil;
 
-			gsf::ModuleID log_module_ = gsf::ModuleNil;
-			MsgBinder *binder_;
+			MsgBinder *binder_ = nullptr;
 
-			std::function<void(int)> disconnect_callback_;
+			std::function<void(int)> disconnCallback_;
 
-			::evbuffer *in_buf_;
-			::evbuffer *out_buf_;
+			::evbuffer *inBufPtr_ = nullptr;
+			::evbuffer *outBufPtr_ = nullptr;
+
+			::bufferevent *bufEvtPtr_ = nullptr;
 		};
 	}
 	

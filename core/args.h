@@ -347,7 +347,7 @@ namespace gsf
 	}
 
 	template <typename ...P>
-	ArgsPtr make_args(P&& ...upvalues)
+	ArgsPtr makeArgs(P&& ...upvalues)
 	{
 		auto args = ArgsPool::get_ref().get();
 

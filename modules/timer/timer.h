@@ -47,13 +47,13 @@ namespace gsf
             void execute() override;
 
 		private:
-
-			gsf::ArgsPtr delay_milliseconds(const gsf::ArgsPtr &args);
-			gsf::ArgsPtr delay_day(const gsf::ArgsPtr &args);
+			
+			void eDelayMilliseconds(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eDelayDay(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
 			//void delay_week(std::tuple<gsf::utils::Any> args, gsf::EventHandlerPtr callback);
 			//void delay_month(std::tuple<gsf::utils::Any> args, gsf::EventHandlerPtr callback);
 
-			gsf::ArgsPtr remove_timer(const gsf::ArgsPtr &args);
+			void event_remove_timer(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
 		private:
 	
 			uint64_t get_system_tick();
@@ -66,8 +66,6 @@ namespace gsf
 			uint64_t sequence_mask_ = (uint64_t)pow(2, sequence_bit_) - 1;
 
 		private:
-
-			gsf::ModuleID log_m_ = gsf::ModuleNil;
 
 			typedef std::map<uint64_t, TimerEventPtr> TimerMap;
 			TimerMap map_;

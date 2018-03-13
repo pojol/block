@@ -1,8 +1,8 @@
 ﻿#include "connector.h"
 
-#include "session_mgr.h"
+#include "sessionMgr.h"
 #include "session.h"
-#include "msg_binder.h"
+#include "msgBinder.h"
 
 #include <event2/buffer.h>
 #include <event2/listener.h>
@@ -39,36 +39,32 @@ gsf::network::ConnectorModule::~ConnectorModule()
 
 void gsf::network::ConnectorModule::before_init()
 {
-	binder_ = new MsgBinder();
+	binderPtr_ = new MsgBinder();
 
-	event_base_ptr_ = event_base_new();
+	eventBasePtr_ = event_base_new();
 
 	listen(this, eid::network::make_connector
-		, std::bind(&ConnectorModule::make_connector, this
-			, std::placeholders::_1));
+		, std::bind(&ConnectorModule::eMakeConncetor, this
+			, std::placeholders::_1, std::placeholders::_2));
 
 	listen(this, eid::network::send
-		, std::bind(&ConnectorModule::send_msg, this
-			, std::placeholders::_1));
-	
-
-	log_m_ = APP.get_module("LogModule");
-	assert(log_m_ != gsf::ModuleNil);
+		, std::bind(&ConnectorModule::eSendMsg, this
+			, std::placeholders::_1, std::placeholders::_2));
 }
 
 void gsf::network::ConnectorModule::init()
 {
 	// todo ...
 	
-	boardcast(eid::module_init_succ, gsf::make_args(get_module_id()));
+	//boardcast(eid::module_init_succ, gsf::makeArgs(get_module_id()));
 }
 
 void gsf::network::ConnectorModule::execute()
 {
 	//! 先处理断连
 
-	if (event_base_ptr_) {
-		event_base_loop(event_base_ptr_, EVLOOP_ONCE | EVLOOP_NONBLOCK);
+	if (eventBasePtr_) {
+		event_base_loop(eventBasePtr_, EVLOOP_ONCE | EVLOOP_NONBLOCK);
 	}
 }
 
@@ -76,21 +72,21 @@ void gsf::network::ConnectorModule::shut()
 {
 	wipeout(this);
 
-	bufferevent_free(buffer_event_ptr_);
-	event_base_free(event_base_ptr_);
+	bufferevent_free(bufferEventPtr_);
+	event_base_free(eventBasePtr_);
 }
 
 void gsf::network::ConnectorModule::after_shut()
 {
-	if (binder_) {
-		delete binder_;
-		binder_ = nullptr;
+	if (binderPtr_) {
+		delete binderPtr_;
+		binderPtr_ = nullptr;
 	}
 
-	boardcast(eid::module_shut_succ, gsf::make_args(get_module_id()));
+	boardcast(eid::module_shut_succ, gsf::makeArgs(getModuleID()));
 }
 
-gsf::ArgsPtr gsf::network::ConnectorModule::make_connector(const gsf::ArgsPtr &args)
+void gsf::network::ConnectorModule::eMakeConncetor(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	uint32_t _module_id = args->pop_i32();
 	std::string _ip = args->pop_string();
@@ -98,71 +94,50 @@ gsf::ArgsPtr gsf::network::ConnectorModule::make_connector(const gsf::ArgsPtr &a
 
 	module_id_ = _module_id;
 
-	int32_t _ret = 0;
 	int _fd = 0;
 
-	do {
-		buffer_event_ptr_ = bufferevent_socket_new(event_base_ptr_, -1, BEV_OPT_CLOSE_ON_FREE);
-		if (!buffer_event_ptr_) {
-			_ret = eid::error::err_socket_new;
-			break;
-		}
-
-		struct sockaddr_in _sin;
-
-		memset(&_sin, 0, sizeof(_sin));
-		_sin.sin_family = AF_INET;
-		_sin.sin_port = htons(_port);
-
-		if (evutil_inet_pton(AF_INET, _ip.c_str(), &_sin.sin_addr) <= 0)
-		{
-			_ret = eid::error::err_inet_pton;
-			break;
-		}
-
-		int _ret = bufferevent_socket_connect(buffer_event_ptr_, (sockaddr*)&_sin, sizeof(sockaddr_in));
-		if (_ret != 0) {
-			_ret = eid::error::err_socket_connect;
-			break;
-		}
-		else {
-			_fd = bufferevent_getfd(buffer_event_ptr_);
-		}
-	} while (0);
-
-
-	if (_ret == 0) {
-		session_ptr_ = std::make_shared<Session>(_fd, _module_id, binder_, std::bind(&ConnectorModule::need_close_session, this, std::placeholders::_1));
-		bufferevent_setcb(buffer_event_ptr_, Session::read_cb, NULL, Session::event_cb, session_ptr_.get());
-		bufferevent_enable(buffer_event_ptr_, EV_READ | EV_WRITE);
-
-		session_ptr_->set_log_module(log_m_);
+	bufferEventPtr_ = bufferevent_socket_new(eventBasePtr_, -1, BEV_OPT_CLOSE_ON_FREE);
+	if (!bufferEventPtr_) {
+		APP.ERR_LOG("Connector", "bufferevent socket new fail!");
+		return;
 	}
 
-	return gsf::make_args(true);
+	struct sockaddr_in _sin;
+
+	memset(&_sin, 0, sizeof(_sin));
+	_sin.sin_family = AF_INET;
+	_sin.sin_port = htons(_port);
+
+	if (evutil_inet_pton(AF_INET, _ip.c_str(), &_sin.sin_addr) <= 0)
+	{
+		APP.ERR_LOG("Connector", "err_inet_pton fail!");
+		return;
+	}
+
+	int _ret = bufferevent_socket_connect(bufferEventPtr_, (sockaddr*)&_sin, sizeof(sockaddr_in));
+	if (_ret != 0) {
+		APP.ERR_LOG("Connector", "bufferevent socket connect fail!");
+		return;
+	}
+	else {
+		_fd = bufferevent_getfd(bufferEventPtr_);
+	}
+
+	sessionPtr_ = std::make_shared<Session>(_fd, _module_id, binderPtr_, std::bind(&ConnectorModule::needCloseSession, this, std::placeholders::_1), bufferEventPtr_);
+	bufferevent_setcb(bufferEventPtr_, Session::readCB, NULL, Session::eventCB, sessionPtr_.get());
+	bufferevent_enable(bufferEventPtr_, EV_READ | EV_WRITE);
+
+	APP.INFO_LOG("Connector", "make connector success!");
 }
 
 
-/*
-void gsf::network::ConnectorModule::bind_remote(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
-{
-	uint32_t _module_id = args->pop_i32();
-	uint32_t _msg_id = args->pop_i32();
-
-	auto _info_ptr = std::make_shared<RemoteInfo>(_module_id, _msg_id, callback);
-	binder_->regist(_info_ptr);
-}
-*/
-
-
-void gsf::network::ConnectorModule::need_close_session(int fd)
+void gsf::network::ConnectorModule::needCloseSession(int fd)
 {
 	// 
-	disconnect_vec_.push_back(fd);
 }
 
 
-gsf::ArgsPtr gsf::network::ConnectorModule::send_msg(const gsf::ArgsPtr &args)
+void gsf::network::ConnectorModule::eSendMsg(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	auto _msg = args->pop_msgid();
 	std::string _str = "";
@@ -176,8 +151,6 @@ gsf::ArgsPtr gsf::network::ConnectorModule::send_msg(const gsf::ArgsPtr &args)
 		_str = args->pop_string();
 	}
 
-	auto _block = std::make_shared<gsf::Block>(session_ptr_->get_id(), _msg, _str);
-	session_ptr_->write(_msg, _block);
-
-	return nullptr;
+	auto _block = std::make_shared<gsf::Block>(sessionPtr_->getID(), _msg, _str);
+	sessionPtr_->write(_msg, _block);
 }

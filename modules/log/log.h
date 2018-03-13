@@ -28,13 +28,13 @@ namespace gsf
 
 		private:
 
-			void init_impl(const std::string &exe_name);
+			void initImpl(const std::string &exe_name);
 
-			gsf::ArgsPtr log_print(const gsf::ArgsPtr &args);
-			gsf::ArgsPtr changeFlag(const gsf::ArgsPtr &args);
+			void ePrint(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eChangeFlag(gsf::ArgsPtr args, gsf::CallbackFunc callback =nullptr);
 
 		private:
-			bool ndebug = false;
+			bool ndebug_ = false;
 			char path_[512];
 		};
 	}

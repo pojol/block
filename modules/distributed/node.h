@@ -54,35 +54,35 @@ namespace gsf
 
 		protected:
 
-			void event_rpc(int event, gsf::ModuleID moduleid, const gsf::ArgsPtr &args, gsf::RpcCallback callback);
+			void eventRpc(gsf::EventID event, gsf::ModuleID moduleID, const gsf::ArgsPtr &args, gsf::RpcCallback callback);
 
-			void regist_node(gsf::ModuleID base, int event, const std::string &ip, int port);
+			void registNode(gsf::ModuleID base, int event, const std::string &ip, int port);
 
-			gsf::ArgsPtr event_create_node(const gsf::ArgsPtr &args);
-			gsf::ArgsPtr event_regist_node(const gsf::ArgsPtr &args);
+			void eCreateNode(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eRegistNode(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
 
 		private:
 
-			gsf::ModuleID log_m_ = gsf::ModuleNil;
-			gsf::ModuleID timer_m_ = gsf::ModuleNil;
-			gsf::SessionID connector_fd_ = gsf::SessionNil;
+			gsf::ModuleID logM_ = gsf::ModuleNil;
+			gsf::ModuleID timerM_ = gsf::ModuleNil;
+			gsf::SessionID connectorFD_ = gsf::SessionNil;
 
-			std::string acceptor_ip_ = "";
-			int32_t acceptor_port_ = 0;
+			std::string acceptorIP_ = "";
+			int32_t acceptorPort_ = 0;
 
 			int32_t id_ = 0;
 			std::string type_ = "";
 
-			int32_t rpc_delay_ = 10000;
+			int32_t rpcDelay_ = 10000;
 			bool service_ = false;
-			gsf::ModuleID target_m_ = gsf::ModuleNil;
+			gsf::ModuleID targetM_ = gsf::ModuleNil;
 
 			std::vector<ModuleInfo> modules_;
 
-			std::map<int64_t, CallbackPtr> callback_map_;
-			std::map<uint64_t, CallbackPtr> timer_set_;
+			std::map<int64_t, CallbackPtr> callbackMap_;
+			std::map<uint64_t, CallbackPtr> timerSet_;
 
-			std::map<int, NodeInfo> event_map_;
+			std::map<int, NodeInfo> eventMap_;
 		};
 
 	}

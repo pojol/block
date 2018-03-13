@@ -1,4 +1,4 @@
-PROJECT(gsf_core)
+PROJECT(core)
 
 #引用头文件目录
 INCLUDE_DIRECTORIES(
@@ -10,7 +10,7 @@ LINK_DIRECTORIES(
 )
 
 FILE(GLOB_RECURSE SRC "*.cpp" "*.h")
-ADD_LIBRARY(gsf_core STATIC ${SRC})
+ADD_LIBRARY(core STATIC ${SRC})
 
 if(MSVC)     
     # Use the static C library for all build types

@@ -1,6 +1,7 @@
-#include "mysql_connect.h"
+#include "mysqlConnect.h"
 
 #include <iostream>
+#include <core/application.h>
 
 uint8_t ToValueType(enum_field_types mysqlType)
 {
@@ -103,13 +104,14 @@ bool gsf::modules::MysqlConnect::init(const std::string &host, int port, const s
 {
 	auto init = mysql_init(nullptr);
 	if (nullptr == init) {
-		std::cout << "err" << std::endl;
+		APP.ERR_LOG("MysqlConnect", "init fail!");
 		return false;
 	}
 	
-	base = mysql_real_connect(init, host.c_str(), user.c_str(), pwd.c_str(), name.c_str(), port, nullptr, 0);
-	if (nullptr == base) {
-		mysql_close(base);
+	basePtr_ = mysql_real_connect(init, host.c_str(), user.c_str(), pwd.c_str(), name.c_str(), port, nullptr, 0);
+	if (nullptr == basePtr_) {
+		APP.ERR_LOG("MysqlConnect", "connect fail!");
+		//mysql_close(base);
 		return false;
 	}
 
@@ -170,7 +172,7 @@ void gsf::modules::MysqlConnect::execute(const std::string &order, const gsf::Ar
 	}
 }
 
-void gsf::modules::MysqlConnect::query(gsf::ModuleID target, gsf::ModuleID remote, const std::string &sql, std::function<void (gsf::ModuleID, const gsf::ArgsPtr & )> callback)
+void gsf::modules::MysqlConnect::query(gsf::ModuleID target, gsf::ModuleID remote, const std::string &sql, std::function<void (gsf::ModuleID, gsf::ArgsPtr)> callback)
 {
 	MYSQL_RES *result = nullptr;
 	MYSQL_FIELD *fields = nullptr;
@@ -179,41 +181,41 @@ void gsf::modules::MysqlConnect::query(gsf::ModuleID target, gsf::ModuleID remot
 
 	auto errf = [&](const std::string &err) {
 		if (callback) {
-			callback(target, gsf::make_args(remote, false, int32_t(-1), err));
+			callback(target, gsf::makeArgs(remote, false, int32_t(-1), err));
 		}
 	};
 
-	if (mysql_query(base, sql.c_str())) {
-		errf(mysql_error(base));
+	if (mysql_query(basePtr_, sql.c_str())) {
+		errf(mysql_error(basePtr_));
 		return;
 	}
 
-	result = mysql_store_result(base);
+	result = mysql_store_result(basePtr_);
 	if (nullptr == result) {
 		std::string sqlop = sql.substr(0, 6);
 		if (strcmp(sqlop.c_str(), "INSERT") == 0 || strcmp(sqlop.c_str(), "insert") == 0) {
 			
-			if (mysql_query(base, "select last_insert_id()")) {
-				errf(mysql_error(base));
+			if (mysql_query(basePtr_, "select last_insert_id()")) {
+				errf(mysql_error(basePtr_));
 				return;
 			}
 
-			result = mysql_store_result(base);
+			result = mysql_store_result(basePtr_);
 		}
 		else {
 			if (callback) {
-				callback(target, gsf::make_args(remote, true, int32_t(-1), "success!"));
+				callback(target, gsf::makeArgs(remote, true, int32_t(-1), "success!"));
 			}
 			return;
 		}
 	}
 
-	uint64_t rowCount = mysql_affected_rows(base);
+	uint64_t rowCount = mysql_affected_rows(basePtr_);
 	if (0 == rowCount) {
 		mysql_free_result(result);
 	}
 
-	uint32_t fieldCount = mysql_field_count(base);
+	uint32_t fieldCount = mysql_field_count(basePtr_);
 	fields = mysql_fetch_fields(result);
 
 	std::vector<std::pair<std::string, uint8_t>> col_tags;
@@ -257,7 +259,7 @@ void gsf::modules::MysqlConnect::query(gsf::ModuleID target, gsf::ModuleID remot
 				break;
 			}
 		}
-		callback(target, argsPtr);
+		callback(target, std::move(argsPtr));
 
 		_progress++;
 
@@ -265,7 +267,7 @@ void gsf::modules::MysqlConnect::query(gsf::ModuleID target, gsf::ModuleID remot
 	}
 
 	// eof
-	callback(target, gsf::make_args(remote, true, -1));
+	callback(target, gsf::makeArgs(remote, true, -1));
 
 	if (nullptr != result)
 	{
@@ -275,6 +277,7 @@ void gsf::modules::MysqlConnect::query(gsf::ModuleID target, gsf::ModuleID remot
 
 void gsf::modules::MysqlConnect::perpare(const std::string &sql, SqlStmtPtr &stmtPtr)
 {
+	/*
 	auto itr = prepared_stmt_map.find(sql);
 	if (itr != prepared_stmt_map.end()) {
 		stmtPtr = itr->second;
@@ -320,18 +323,21 @@ void gsf::modules::MysqlConnect::perpare(const std::string &sql, SqlStmtPtr &stm
 	} while (0);
 
 	stmtPtr.reset();
+	*/
 }
+
 
 void gsf::modules::MysqlConnect::startThread()
 {
-	if (nullptr != base) {
+	if (nullptr != basePtr_) {
 		mysql_thread_init();
 	}	
 }
 
+
 void gsf::modules::MysqlConnect::endThread()
 {
-	if (nullptr != base) {
+	if (nullptr != basePtr_) {
 		mysql_thread_end();
 	}
 }

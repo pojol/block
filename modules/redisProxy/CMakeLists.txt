@@ -1,4 +1,4 @@
-PROJECT(mysql_proxy)
+PROJECT(redisProxy)
 
 if(WIN32)
     #引用头文件目录
@@ -7,7 +7,6 @@ if(WIN32)
 			${GSF_SOURCE_DIR}/3rd/fmt
             ${GSF_SOURCE_DIR}/3rd/glog/src
 			${GSF_SOURCE_DIR}/3rd/redis-win-3.0.504/deps/hiredis
-			${GSF_SOURCE_DIR}/3rd/mysql_connect/include
     )
 
     #引用库目录
@@ -19,8 +18,9 @@ if(UNIX)
     #引用头文件目录
     INCLUDE_DIRECTORIES(
             ${GSF_SOURCE_DIR}/
-			${GSF_SOURCE_DIR}/lib/fmt/include
-            ${GSF_SOURCE_DIR}/lib/mysql_connector/include
+            ${GSF_SOURCE_DIR}/lib/hiredis
+            ${GSF_SOURCE_DIR}/lib/glog/include
+            ${GSF_SOURCE_DIR}/lib/fmt/include
     )
 
     #引用库目录
@@ -31,7 +31,7 @@ endif()
 
 
 FILE(GLOB_RECURSE SRC "*.cpp" "*.h" "*.hpp")
-ADD_LIBRARY(mysql_proxy STATIC ${SRC})
+ADD_LIBRARY(redisProxy STATIC ${SRC})
 
 if(MSVC)     
     # Use the static C library for all build types
