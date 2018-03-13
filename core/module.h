@@ -18,8 +18,8 @@ namespace gsf
 		Module(const std::string &name);
 		virtual ~Module();
 
-		gsf::ModuleID get_module_id() { return module_id_; }
-		std::string & get_module_name() { return name_; }
+		gsf::ModuleID getModuleID() { return module_id_; }
+		std::string & getModuleName() { return name_; }
 
 	protected:
 		virtual void before_init();
@@ -31,7 +31,7 @@ namespace gsf
 		virtual void after_shut();
 
 	protected:
-		void set_id(gsf::ModuleID id) { module_id_ = id; }
+		void setID(gsf::ModuleID id) { module_id_ = id; }
 		gsf::ModuleID module_id_ = gsf::ModuleNil;
 		std::string name_;
 
@@ -49,7 +49,7 @@ namespace gsf
 #else
 			sscanf(buf, "%f", &c);
 #endif
-			std::string _info = get_module_name() + ":" + (buf) + " ms\t";
+			std::string _info = getModuleName() + ":" + (buf) + " ms\t";
 			tick_consume_ = 0;
 			return _info;
 		}

@@ -4,7 +4,8 @@
 #include <core/module.h>
 #include <core/event.h>
 
-#include "mysql_connect.h"
+#include "mysqlConnect.h"
+#include <queue>
 
 namespace gsf
 {
@@ -34,18 +35,21 @@ namespace gsf
 
 		private:
 			
-			void event_init(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
-
-			void event_query(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
-
-			void event_update(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
-			//gsf::ArgsPtr execute_event(const gsf::ArgsPtr &args);
-
-			// 03-05
-			//void event_callback(gsf::ModuleID target, const gsf::ArgsPtr &args);
+			void eInit(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eQuery(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eUpdate(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
 
 		private:
-			gsf::ModuleID log_m_ = gsf::ModuleNil;
+
+			struct CallbackInfo
+			{
+				gsf::ModuleID target_;
+				gsf::ArgsPtr ptr_;
+			};
+			typedef std::queue<CallbackInfo*> CallbackQueue;
+
+			CallbackQueue queue_;
+			gsf::ModuleID logM_ = gsf::ModuleNil;
 
 			MysqlConnect conn_;
 		};

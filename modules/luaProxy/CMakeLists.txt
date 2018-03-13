@@ -1,12 +1,13 @@
-PROJECT(redis_cache_proxy)
+PROJECT(luaProxy)
 
 if(WIN32)
     #引用头文件目录
     INCLUDE_DIRECTORIES(
             ${GSF_SOURCE_DIR}/
+            ${GSF_SOURCE_DIR}/3rd/glog-0.3.4/src
+            ${GSF_SOURCE_DIR}/3rd/lua-5.3.4/src
+            ${GSF_SOURCE_DIR}/3rd/sol2
 			${GSF_SOURCE_DIR}/3rd/fmt
-            ${GSF_SOURCE_DIR}/3rd/glog/src
-			${GSF_SOURCE_DIR}/3rd/redis-win-3.0.504/deps/hiredis
     )
 
     #引用库目录
@@ -18,8 +19,9 @@ if(UNIX)
     #引用头文件目录
     INCLUDE_DIRECTORIES(
             ${GSF_SOURCE_DIR}/
-            ${GSF_SOURCE_DIR}/lib/hiredis
             ${GSF_SOURCE_DIR}/lib/glog/include
+            ${GSF_SOURCE_DIR}/lib/lua
+            ${GSF_SOURCE_DIR}/3rd/sol2
             ${GSF_SOURCE_DIR}/lib/fmt/include
     )
 
@@ -30,8 +32,8 @@ if(UNIX)
 endif()
 
 
-FILE(GLOB_RECURSE SRC "*.cpp" "*.h" "*.hpp")
-ADD_LIBRARY(redis_cache_proxy STATIC ${SRC})
+FILE(GLOB_RECURSE SRC "*.cpp" "*.h" ".hpp")
+ADD_LIBRARY(luaProxy STATIC ${SRC})
 
 if(MSVC)     
     # Use the static C library for all build types
@@ -48,7 +50,7 @@ if(MSVC)
     
     SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/win)
 elseif(UNIX)
-	SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/)
+	SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib)
 elseif(APPLE)
 endif()
 

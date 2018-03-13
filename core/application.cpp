@@ -26,12 +26,12 @@ gsf::Application::Application()
 #endif
 }
 
-std::string gsf::Application::get_app_name() const
+std::string gsf::Application::getAppName() const
 {
 	return cfg_.name;
 }
 
-void gsf::Application::init_cfg(const gsf::AppConfig &cfg)
+void gsf::Application::initCfg(const gsf::AppConfig &cfg)
 {
 	cfg_ = cfg;
 
@@ -40,28 +40,28 @@ void gsf::Application::init_cfg(const gsf::AppConfig &cfg)
 	gsf::ArgsPool::get_ref().make(cfg.pool_args_count);
 }
 
-gsf::ModuleID gsf::Application::create_dynamic_module(const std::string &moduleType)
+gsf::ModuleID gsf::Application::createDynamicModule(const std::string &moduleType)
 {
 	gsf::Module *_module_ptr = static_cast<gsf::Module*>(DynamicModuleFactory::create(moduleType));
-	_module_ptr->set_id(make_module_id());
+	_module_ptr->setID(makeModuleID());
 
-	push_frame(cur_frame_ + 1, std::make_tuple(0, std::bind(&Module::before_init, _module_ptr), nullptr, nullptr, _module_ptr));
-	push_frame(cur_frame_ + 2, std::make_tuple(1, nullptr, std::bind(&Module::init, _module_ptr), nullptr, _module_ptr));
-	push_frame(cur_frame_ + 3, std::make_tuple(2, nullptr, nullptr
-		, std::bind(&Application::regist_module<Module>, this, std::placeholders::_1, std::placeholders::_2), _module_ptr));
+	pushFrame(cur_frame_ + 1, std::make_tuple(0, std::bind(&Module::before_init, _module_ptr), nullptr, nullptr, _module_ptr));
+	pushFrame(cur_frame_ + 2, std::make_tuple(1, nullptr, std::bind(&Module::init, _module_ptr), nullptr, _module_ptr));
+	pushFrame(cur_frame_ + 3, std::make_tuple(2, nullptr, nullptr
+		, std::bind(&Application::registModule<Module>, this, std::placeholders::_1, std::placeholders::_2), _module_ptr));
 
-	return _module_ptr->get_module_id();
+	return _module_ptr->getModuleID();
 }
 
-void gsf::Application::delete_module(gsf::ModuleID moduleID)
+void gsf::Application::deleteModule(gsf::ModuleID moduleID)
 {
-	unregist_module(moduleID);
+	unregistModule(moduleID);
 }
 
-void gsf::Application::unregist_module(gsf::ModuleID module_id)
+void gsf::Application::unregistModule(gsf::ModuleID module_id)
 {
 	auto itr = std::find_if(module_list_.begin(), module_list_.end(), [&](std::list<Module *>::value_type it) {
-		return (it->get_module_id() == module_id);
+		return (it->getModuleID() == module_id);
 	});
 
 	if (itr != module_list_.end()) {
@@ -79,7 +79,7 @@ void gsf::Application::unregist_module(gsf::ModuleID module_id)
 	}
 }
 
-gsf::ModuleID gsf::Application::get_module(const std::string &modulName) const
+gsf::ModuleID gsf::Application::getModule(const std::string &modulName) const
 {
 	auto itr = module_name_map_.find(modulName);
 	if (itr != module_name_map_.end()) {
@@ -90,22 +90,22 @@ gsf::ModuleID gsf::Application::get_module(const std::string &modulName) const
 	}
 }
 
-uint32_t gsf::Application::get_machine() const
+uint32_t gsf::Application::getMachine() const
 {
 	return cfg_.machine_;
 }
 
-int64_t gsf::Application::get_uuid()
+int64_t gsf::Application::getUUID()
 {
 	return uuid();
 }
 
-void gsf::Application::push_frame(uint64_t index, Frame frame)
+void gsf::Application::pushFrame(uint64_t index, Frame frame)
 {
 	halfway_frame_.insert(std::make_pair(index, frame));
 }
 
-void gsf::Application::pop_frame()
+void gsf::Application::popFrame()
 {
 	if (!halfway_frame_.empty()) {
 		auto itr = halfway_frame_.find(cur_frame_);
@@ -142,10 +142,10 @@ void gsf::Application::pop_frame()
 			auto idx = itr->second.first;
 			if (idx == 0) {
 
-				auto _module_id = (itr->second.second)->get_module_id();
-				auto _module_name = (itr->second.second)->get_module_name();
+				auto _module_id = (itr->second.second)->getModuleID();
+				auto _module_name = (itr->second.second)->getModuleName();
 				auto litr = std::find_if(module_list_.begin(), module_list_.end(), [&](std::list<Module *>::value_type it) {
-					return (it->get_module_id() == _module_id);
+					return (it->getModuleID() == _module_id);
 				});
 
 				if (litr != module_list_.end()) {
@@ -218,7 +218,7 @@ void gsf::Application::run()
 				}
 			}
 
-			pop_frame();
+			popFrame();
 			//while (!unregist_list_.empty()) {
 			//	auto itr = unregist_list_.front();
 			//	unregist_dynamic_module(itr);
@@ -275,7 +275,7 @@ void gsf::Application::exit()
 
 }
 
-int32_t gsf::Application::make_module_id()
+int32_t gsf::Application::makeModuleID()
 {
 	if (module_idx_ == INT32_MAX) {
 		module_idx_ = 2;
@@ -284,7 +284,7 @@ int32_t gsf::Application::make_module_id()
 	return module_idx_++;
 }
 
-uint64_t gsf::Application::get_system_tick()
+uint64_t gsf::Application::getSystemTick()
 {
 	return (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
@@ -292,7 +292,7 @@ uint64_t gsf::Application::get_system_tick()
 int64_t gsf::Application::uuid()
 {
 	int64_t _uuid = 0;
-	uint64_t _tick = get_system_tick() - start_time_;
+	uint64_t _tick = getSystemTick() - start_time_;
 	
 	_uuid |= _tick << 22;
 	_uuid |= cfg_.machine_ & 0x3FF << 12;
@@ -314,7 +314,7 @@ void gsf::Application::WARN_LOG(std::string module_name, std::string reason)
 	_str.append(" [reason] ");
 	_str.append(reason);
 	_str.append("\n");
-	dispatch(get_module("LogModule"), eid::log::print, gsf::make_args(gsf::LogWarning, _str));
+	dispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogWarning, _str));
 }
 
 
@@ -326,7 +326,7 @@ void gsf::Application::ERR_LOG(std::string module_name, std::string reason)
 	_str.append(" [reason] ");
 	_str.append(reason);
 	_str.append("\n");
-	dispatch(get_module("LogModule"), eid::log::print, gsf::make_args(gsf::LogErr, _str));
+	dispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogErr, _str));
 }
 
 void gsf::Application::INFO_LOG(std::string module_name, std::string reason)
@@ -337,7 +337,7 @@ void gsf::Application::INFO_LOG(std::string module_name, std::string reason)
 	_str.append(" [reason] ");
 	_str.append(reason);
 	_str.append("\n");
-	dispatch(get_module("LogModule"), eid::log::print, gsf::make_args(gsf::LogInfo, _str));
+	dispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogInfo, _str));
 }
 
 void gsf::Application::DEBUG_LOG(std::string module_name, std::string reason)
@@ -348,7 +348,7 @@ void gsf::Application::DEBUG_LOG(std::string module_name, std::string reason)
 	_str.append(" [reason] ");
 	_str.append(reason);
 	_str.append("\n");
-	dispatch(get_module("LogModule"), eid::log::print, gsf::make_args(gsf::LogDebug, _str));
+	dispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogDebug, _str));
 }
 
 /*

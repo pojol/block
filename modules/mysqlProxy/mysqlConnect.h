@@ -52,7 +52,7 @@ namespace gsf
 
 			void execute(const std::string &order, const gsf::ArgsPtr &args);
 
-			void query(gsf::ModuleID target, gsf::ModuleID remote, const std::string &sql, std::function<void (gsf::ModuleID, const gsf::ArgsPtr &)> callback);
+			void query(gsf::ModuleID target, gsf::ModuleID remote, const std::string &sql, std::function<void (gsf::ModuleID, gsf::ArgsPtr)> callback);
 
 		private:
 
@@ -62,9 +62,9 @@ namespace gsf
 			void endThread();
 
 		private:
-			MYSQL *base = nullptr;
+			MYSQL *basePtr_ = nullptr;
 
-			std::unordered_map<std::string, SqlStmtPtr> prepared_stmt_map;
+			//std::unordered_map<std::string, SqlStmtPtr> prepared_stmt_map;
 		};
 	}
 }

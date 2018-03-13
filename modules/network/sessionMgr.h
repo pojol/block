@@ -29,26 +29,26 @@ namespace gsf
 			~SessionMgr();
 			SessionMgr();
 
-			void set_need_close(int fd);
+			void setNeedClose(int fd);
 
 			void close();
 
 			SessionPtr find(int fd);
-			SessionPtr find_byModule(uint32_t module_id);
+			SessionPtr findByModule(uint32_t module_id);
 
-			SessionPtr make_session(int fd, int module_id, MsgBinder *binder, ::bufferevent *bev);
+			SessionPtr makeSession(int fd, int module_id, MsgBinder *binder, ::bufferevent *bev);
 
-			int cur_max_connet() const;
+			int curMaxConnect() const;
 
 		private:
 
 			typedef std::unordered_map<int32_t, SessionPtr> SessionQueue;
-			SessionQueue session_queue_;
-			SessionQueue session_queue_bymodule_;
+			SessionQueue sessionQueue_;
+			SessionQueue sessionQueueByModule_;
 
-			std::vector<int> disconnect_vec_;
+			std::vector<int> disconnectVec_;
 
-			uint32_t session_index_;
+			uint32_t sessionIndex_;
 		};
 	}
 }

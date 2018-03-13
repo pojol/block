@@ -17,8 +17,6 @@ gsf::modules::TimerModule::TimerModule()
 
 void gsf::modules::TimerModule::before_init()
 {
-	log_m_ = APP.get_module("LogModule");
-	assert(log_m_ != gsf::ModuleNil);
 }
 
 void gsf::modules::TimerModule::init()
@@ -26,10 +24,10 @@ void gsf::modules::TimerModule::init()
 	using namespace std::placeholders;
 
 	listen(this, eid::timer::delay_milliseconds	
-		, std::bind(&TimerModule::evnet_delay_milliseconds, this, _1, _2));
+		, std::bind(&TimerModule::eDelayMilliseconds, this, _1, _2));
 	
 	listen(this, eid::timer::delay_day
-		, std::bind(&TimerModule::event_delay_day, this, _1, _2));
+		, std::bind(&TimerModule::eDelayDay, this, _1, _2));
 	
 	listen(this, eid::timer::remove_timer
 		, std::bind(&TimerModule::event_remove_timer, this, _1, _2));
@@ -48,7 +46,7 @@ void gsf::modules::TimerModule::execute()
 
 		while ((_time_id >> sequence_bit_) < _now)
 		{
-			dispatch(itr->second->target_, eid::timer::timer_arrive, gsf::make_args(itr->second->timerid_));
+			dispatch(itr->second->target_, eid::timer::timer_arrive, gsf::makeArgs(itr->second->timerid_));
 			map_.erase(itr);
 
 			if (!map_.empty()) {
@@ -80,7 +78,7 @@ uint64_t gsf::modules::TimerModule::make_timer_id(uint64_t delay)
 	return _tick;
 }
 
-void gsf::modules::TimerModule::evnet_delay_milliseconds(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
+void gsf::modules::TimerModule::eDelayMilliseconds(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	uint32_t _sender = args->pop_i32();
 	uint32_t _milliseconds = args->pop_i32();
@@ -95,7 +93,7 @@ void gsf::modules::TimerModule::evnet_delay_milliseconds(gsf::ArgsPtr args, gsf:
 	map_.insert(std::make_pair(_tid, _event));
 
 	if (callback) {
-		callback(gsf::make_args(_tid));
+		callback(gsf::makeArgs(_tid));
 	}
 	else {
 		APP.WARN_LOG("Timer", "evnet_delay_milliseconds callback is nil !");
@@ -103,7 +101,7 @@ void gsf::modules::TimerModule::evnet_delay_milliseconds(gsf::ArgsPtr args, gsf:
 }
 
 
-void gsf::modules::TimerModule::event_delay_day(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
+void gsf::modules::TimerModule::eDelayDay(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	using namespace std::chrono;
 
@@ -138,7 +136,7 @@ void gsf::modules::TimerModule::event_delay_day(gsf::ArgsPtr args, gsf::Callback
 	map_.insert(std::make_pair(_tid, _event));
 
 	if (callback) {
-		callback(gsf::make_args(_tid));
+		callback(gsf::makeArgs(_tid));
 	}
 	else {
 		APP.WARN_LOG("Timer", "event_delay_day callback is nil !");

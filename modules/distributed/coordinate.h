@@ -50,18 +50,17 @@ namespace gsf
 
 
 		private:
-			void event_adjust_module_weight(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
-			void event_get_light_module(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eCoordinatAdjustWeight(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eCoordinatSelect(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eCoordinatRegist(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eCoordinatUnregist(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
 
-			void event_regist(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
-			void event_unregist(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
-
-			void adjust_module_weight(int32_t nod_id, const std::string &module_name, gsf::ModuleID module_id, int32_t characteristic, int32_t weight);
+			void adjustModuleWeight(int32_t nod_id, const std::string &module_name, gsf::ModuleID module_id, int32_t characteristic, int32_t weight);
 
 		private:
 
-			std::map<gsf::SessionID, NodePtr> node_id_map_;
-			std::multimap<std::string, NodePtr> node_name_map_;
+			std::map<gsf::SessionID, NodePtr> nodeIDMap_;
+			std::multimap<std::string, NodePtr> nodeNameMap_;
 		};
 	}
 }

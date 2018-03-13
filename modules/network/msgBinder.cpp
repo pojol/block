@@ -1,5 +1,5 @@
 
-#include "msg_binder.h"
+#include "msgBinder.h"
 #include <assert.h>
 
 void gsf::network::MsgBinder::regist(RemoteInfoPtr info_ptr)

@@ -1,6 +1,6 @@
 #include "session.h"
-#include "session_mgr.h"
-#include "msg_binder.h"
+#include "sessionMgr.h"
+#include "msgBinder.h"
 
 #include <core/args.h>
 
@@ -8,39 +8,39 @@
 
 gsf::network::Session::Session(int fd, int eid, MsgBinder *binder, std::function<void (int)> disconnect_callback, ::bufferevent *bev)
     : fd_(fd)
-	, module_id_(eid)
+	, targetM_(eid)
 	, binder_(binder)
-	, bev_(bev)
+	, bufEvtPtr_(bev)
 {
-	disconnect_callback_ = disconnect_callback;
+	disconnCallback_ = disconnect_callback;
 
-	in_buf_ = evbuffer_new();
+	inBufPtr_ = evbuffer_new();
 	if (0 != gsf::SESSION_READ_BUFFER_SIZE) {
-		evbuffer_expand(in_buf_, gsf::SESSION_READ_BUFFER_SIZE);
+		evbuffer_expand(inBufPtr_, gsf::SESSION_READ_BUFFER_SIZE);
 	}
 
-	out_buf_ = evbuffer_new();
+	outBufPtr_ = evbuffer_new();
 	if (0 != gsf::SESSION_WRITE_BUFFER_SIZE) {
-		evbuffer_expand(out_buf_, gsf::SESSION_WRITE_BUFFER_SIZE);
+		evbuffer_expand(outBufPtr_, gsf::SESSION_WRITE_BUFFER_SIZE);
 	}
 }
 
 gsf::network::Session::~Session()
 {
-	if (in_buf_) {
-		evbuffer_free(in_buf_);
+	if (inBufPtr_) {
+		evbuffer_free(inBufPtr_);
 	}
 	
-	if (out_buf_) {
-		evbuffer_free(out_buf_); 
+	if (outBufPtr_) {
+		evbuffer_free(outBufPtr_);
 	}
 
-	if (bev_) {
-		bufferevent_free(bev_);
+	if (bufEvtPtr_) {
+		bufferevent_free(bufEvtPtr_);
 	}
 }
 
-void gsf::network::Session::read_cb(::bufferevent *bev, void *ctx)
+void gsf::network::Session::readCB(::bufferevent *bev, void *ctx)
 {
 	Session *_session_ptr = static_cast<Session*>(ctx);
 
@@ -49,7 +49,7 @@ void gsf::network::Session::read_cb(::bufferevent *bev, void *ctx)
 	//evbuffer_add_buffer()
 }
 
-void gsf::network::Session::event_cb(::bufferevent *bev, short what, void *ctx)
+void gsf::network::Session::eventCB(::bufferevent *bev, short what, void *ctx)
 {
 	int32_t _result = 0;
 
@@ -71,7 +71,7 @@ void gsf::network::Session::event_cb(::bufferevent *bev, short what, void *ctx)
 
 		if (what & BEV_EVENT_CONNECTED) {
 			Session * _session_ptr = static_cast<Session *>(ctx);
-			_session_ptr->new_connect();
+			_session_ptr->newConnect();
 			break;
 		}
 
@@ -79,29 +79,29 @@ void gsf::network::Session::event_cb(::bufferevent *bev, short what, void *ctx)
 
 	if (0 != _result) {
 		Session * _session_ptr = static_cast<Session *>(ctx);
-		_session_ptr->dis_connect(_result);
+		_session_ptr->disConnect(_result);
 	}
 }
 
 int gsf::network::Session::write(uint32_t msg_id, BlockPtr blockptr)
 {
 
-	int _ret = evbuffer_add(out_buf_, blockptr->buf_, blockptr->size_);
-	evbuffer_write(out_buf_, fd_);
+	int _ret = evbuffer_add(outBufPtr_, blockptr->buf_, blockptr->size_);
+	evbuffer_write(outBufPtr_, fd_);
 
 	return 0;
 }
 
 void gsf::network::Session::read(::bufferevent *bev)
 {
-	bufferevent_read_buffer(bev, in_buf_);
+	bufferevent_read_buffer(bev, inBufPtr_);
 
-	uint32_t _buf_len = evbuffer_get_length(in_buf_);
+	uint32_t _buf_len = evbuffer_get_length(inBufPtr_);
 
 	uint32_t _msgheadlen = sizeof(MsgHeadLen);
 
 	char * _head = (char*)malloc(_msgheadlen);
-	evbuffer_copyout(in_buf_, _head, _msgheadlen);
+	evbuffer_copyout(inBufPtr_, _head, _msgheadlen);
 
 	uint32_t _msg_size = *reinterpret_cast<uint32_t*>(_head);
 
@@ -110,7 +110,7 @@ void gsf::network::Session::read(::bufferevent *bev)
 		while (_buf_len >= _msg_size)
 		{
 			auto _block = std::make_shared<Block>(_msg_size);
-			evbuffer_remove(in_buf_, _block->buf_, _msg_size);	//! 将数据流拷贝到msg block中
+			evbuffer_remove(inBufPtr_, _block->buf_, _msg_size);	//! 将数据流拷贝到msg block中
 
 			MsgID _msg_id = _block->get_msg_id();
 
@@ -120,7 +120,7 @@ void gsf::network::Session::read(::bufferevent *bev)
 				args_ptr->push(_msg_id);
 				args_ptr->push_block(_block->buf_ + _block->get_head_size(), _block->get_body_size());
 				
-				dispatch(module_id_, eid::network::recv, std::move(args_ptr));
+				dispatch(targetM_, eid::network::recv, std::move(args_ptr));
 			}
 			else {
 				if (!_block->check()) { //! 先这样检查下block中的内容是否合法，后面肯定不能这样明文传输
@@ -128,12 +128,12 @@ void gsf::network::Session::read(::bufferevent *bev)
 				}
 
 				std::string _str(_block->buf_ + _block->get_head_size(), _block->get_body_size());	//tmp
-				dispatch(module_id_, eid::network::recv, gsf::make_args(fd_, _msg_id, std::move(_str)));
+				dispatch(targetM_, eid::network::recv, gsf::makeArgs(fd_, _msg_id, std::move(_str)));
 			}
 
-			_buf_len = evbuffer_get_length(in_buf_);
+			_buf_len = evbuffer_get_length(inBufPtr_);
 			if (_buf_len > _msgheadlen) {
-				evbuffer_copyout(in_buf_, _head, _msgheadlen);
+				evbuffer_copyout(inBufPtr_, _head, _msgheadlen);
 				_msg_size = *reinterpret_cast<uint32_t*>(_head);
 			}
 			else {
@@ -144,14 +144,14 @@ void gsf::network::Session::read(::bufferevent *bev)
 	}
 }
 
-void gsf::network::Session::dis_connect(int32_t err)
+void gsf::network::Session::disConnect(int32_t err)
 {
-	disconnect_callback_(fd_);
+	disconnCallback_(fd_);
 
-	dispatch(module_id_, eid::network::dis_connect, gsf::make_args(fd_, err));
+	dispatch(targetM_, eid::network::dis_connect, gsf::makeArgs(fd_, err));
 }
 
-void gsf::network::Session::new_connect()
+void gsf::network::Session::newConnect()
 {
-	dispatch(module_id_, eid::network::new_connect, gsf::make_args(fd_));
+	dispatch(targetM_, eid::network::new_connect, gsf::makeArgs(fd_));
 }

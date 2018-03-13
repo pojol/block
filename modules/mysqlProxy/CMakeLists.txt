@@ -1,13 +1,13 @@
-PROJECT(lua_proxy)
+PROJECT(mysqlProxy)
 
 if(WIN32)
     #引用头文件目录
     INCLUDE_DIRECTORIES(
             ${GSF_SOURCE_DIR}/
-            ${GSF_SOURCE_DIR}/3rd/glog-0.3.4/src
-            ${GSF_SOURCE_DIR}/3rd/lua-5.3.4/src
-            ${GSF_SOURCE_DIR}/3rd/sol2
 			${GSF_SOURCE_DIR}/3rd/fmt
+            ${GSF_SOURCE_DIR}/3rd/glog/src
+			${GSF_SOURCE_DIR}/3rd/redis-win-3.0.504/deps/hiredis
+			${GSF_SOURCE_DIR}/3rd/mysql_connect/include
     )
 
     #引用库目录
@@ -19,10 +19,8 @@ if(UNIX)
     #引用头文件目录
     INCLUDE_DIRECTORIES(
             ${GSF_SOURCE_DIR}/
-            ${GSF_SOURCE_DIR}/lib/glog/include
-            ${GSF_SOURCE_DIR}/lib/lua
-            ${GSF_SOURCE_DIR}/3rd/sol2
-            ${GSF_SOURCE_DIR}/lib/fmt/include
+			${GSF_SOURCE_DIR}/lib/fmt/include
+            ${GSF_SOURCE_DIR}/lib/mysql_connector/include
     )
 
     #引用库目录
@@ -32,8 +30,8 @@ if(UNIX)
 endif()
 
 
-FILE(GLOB_RECURSE SRC "*.cpp" "*.h" ".hpp")
-ADD_LIBRARY(lua_proxy STATIC ${SRC})
+FILE(GLOB_RECURSE SRC "*.cpp" "*.h" "*.hpp")
+ADD_LIBRARY(mysqlProxy STATIC ${SRC})
 
 if(MSVC)     
     # Use the static C library for all build types
@@ -50,7 +48,7 @@ if(MSVC)
     
     SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/win)
 elseif(UNIX)
-	SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib)
+	SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/)
 elseif(APPLE)
 endif()
 

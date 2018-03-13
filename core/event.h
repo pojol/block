@@ -8,7 +8,6 @@
 #pragma warning(disable:4819)
 
 #include "module.h"
-#include "event_handler.h"
 #include "event_list.h"
 #include "types.h"
 
@@ -68,14 +67,14 @@ namespace gsf
 			移除module在event层上的绑定.
 		*/
 		virtual void wipeout(ModuleID self);
-		virtual void wipeout(ModuleID self, EventID event_id);
+		virtual void wipeout(ModuleID self, EventID eventID);
 
 		virtual void wipeout(Module *self);
-		virtual void wipeout(Module *self, EventID event_id);
+		virtual void wipeout(Module *self, EventID eventID);
 
 
 		// private - -
-		virtual void rpc_listen(RpcFunc rpc_callback);
+		virtual void listenRpc(RpcFunc callbackRpc);
 	};
 
 	class EventModule
@@ -90,18 +89,18 @@ namespace gsf
 	protected:
 		void execute() override;
 
-		void bind_event(uint32_t module_id, uint32_t event, DispatchFunc func);
+		void bindEvent(uint32_t module_id, uint32_t event, DispatchFunc func);
 
 		void dispatch(uint32_t module_id, uint32_t event, ArgsPtr args, CallbackFunc callback = nullptr);
 
 		void boardcast(uint32_t event, ArgsPtr args);
 		///
 
-		void bind_rpc(RpcFunc rpc_callback);
-		void dispatch_rpc(uint32_t event, int32_t moduleid, ArgsPtr args, RpcCallback callback = nullptr);
+		void bindRpc(RpcFunc rpc_callback);
+		void dispatchRpc(uint32_t event, int32_t moduleid, ArgsPtr args, RpcCallback callback = nullptr);
 
-		void rmv_event(ModuleID module_id);
-		void rmv_event(ModuleID module_id, EventID event_id);
+		void rmvEvent(ModuleID module_id);
+		void rmvEvent(ModuleID module_id, EventID event_id);
 
 #ifdef WATCH_PERF
 		std::string get_tick_info(uint32_t count, uint32_t tick_count) override
@@ -115,17 +114,17 @@ namespace gsf
 			sscanf(buf, "%f", &c);
 #endif
 
-			std::string _info = get_module_name() + ":" + (buf)+" ms\n";
+			std::string _info = getModuleName() + ":" + (buf)+" ms\n";
 
 			typedef std::vector<std::pair<int, std::string>> PFList;
 			std::vector<std::pair<int, std::string>> _pf_list;
 
-			for (auto &itr : type_map_)
+			for (auto &itr : typeMap_)
 			{
 				for (MIList::iterator militr = itr.second.begin(); militr != itr.second.end(); ++militr)
 				{
 					_pf_list.push_back(std::make_pair(militr->calls_, "module " + std::to_string(itr.first) 
-						+ "\t event " + std::to_string(militr->event_id_) 
+						+ "\t event " + std::to_string(militr->eventID_) 
 						+ "\t calls " + std::to_string(militr->calls_) + "\n"));
 					militr->calls_ = 0;
 				}
@@ -156,8 +155,8 @@ namespace gsf
 
 		struct ModuleIterfaceObj
 		{
-			EventID event_id_;
-			DispatchFunc event_func_;
+			EventID eventID_;
+			DispatchFunc eventFunc_;
 
             bool effective_ = true;
 #ifdef WATCH_PERF
@@ -168,7 +167,7 @@ namespace gsf
 
         struct EventInfo
         {
-            gsf::EventID event_;
+            gsf::EventID eventID_;
             gsf::ModuleID target_;
             gsf::ArgsPtr ptr_;
 			CallbackFunc callback_;
@@ -178,8 +177,8 @@ namespace gsf
 		typedef std::unordered_map<gsf::ModuleID , MIList> ModuleEventMap;
         typedef std::queue<EventInfo*> EventQueue;
 
-		ModuleEventMap type_map_;
-        EventQueue event_queue_;
+		ModuleEventMap typeMap_;
+        EventQueue eventQueue_;
 
 		RpcFunc rpc_;
 	};

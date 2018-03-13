@@ -64,20 +64,20 @@ namespace gsf
 			void lrpc(uint32_t lua_id, uint32_t event, int32_t moduleid, const std::string &buf, const sol::function &func);
 
 
-			void event_create(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
-			void event_distory(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
-			void event_reload(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eCreate(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eDistory(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eReload(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
 
 			void create(uint32_t module_id, std::string dar_name, std::string file_name);
 
 			int destroy(uint32_t module_id);
 		private:
-			LuaProxy * find_lua(uint32_t id);
+			LuaProxy * findLua(uint32_t id);
 
 		private:
-			uint32_t log_m_ = 0;
+			uint32_t logM_ = 0;
 
-			std::unordered_map<gsf::ModuleID, LuaProxy*> lua_map_;
+			std::unordered_map<gsf::ModuleID, LuaProxy*> luaMap_;
 		};
 	}
 }

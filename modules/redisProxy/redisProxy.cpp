@@ -1,4 +1,4 @@
-#include "redis_cache_proxy.h"
+#include "redisProxy.h"
 
 #ifdef WIN32
 #include <winsock.h>
@@ -11,10 +11,10 @@ void gsf::modules::RedisCacheProxyModule::before_init()
 {
 	using namespace std::placeholders;
 
-	timer_m_ = APP.get_module("TimerModule");
+	timer_m_ = APP.getModule("TimerModule");
 	assert(timer_m_ != gsf::ModuleNil);
 	
-	log_m_ = APP.get_module("LogModule");
+	log_m_ = APP.getModule("LogModule");
 	assert(log_m_ != gsf::ModuleNil);
 
 	listen(this, eid::db_proxy::redis_connect
@@ -62,7 +62,7 @@ void gsf::modules::RedisCacheProxyModule::event_redis_connect(gsf::ArgsPtr args,
 		listen(this, eid::db_proxy::redis_avatar_offline
 			, std::bind(&RedisCacheProxyModule::event_redis_avatar_offline, this, _1, _2));
 
-		boardcast(eid::module_init_succ, gsf::make_args(get_module_id()));
+		boardcast(eid::module_init_succ, gsf::makeArgs(getModuleID()));
 	}
 	else {
 		APP.ERR_LOG("RedisCacheProxyModule", "event_redis_connect err");
@@ -117,7 +117,7 @@ void gsf::modules::RedisCacheProxyModule::start_update_redis_timer(gsf::ArgsPtr 
 		if (_tid == cmd_timer_id_) {
 			cmd_handler();
 		
-			dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::make_args(get_module_id(), redis_delay_time_), [&](gsf::ArgsPtr args) {
+			dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::makeArgs(getModuleID(), redis_delay_time_), [&](gsf::ArgsPtr args) {
 				cmd_timer_id_ = args->pop_moduleid();
 			});
 		}
@@ -125,7 +125,7 @@ void gsf::modules::RedisCacheProxyModule::start_update_redis_timer(gsf::ArgsPtr 
 		if (_tid == rewrite_timer_id_) {
 			rewrite_handler();
 
-			dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::make_args(get_module_id(), redis_rewrite_time_), [&](gsf::ArgsPtr args) {
+			dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::makeArgs(getModuleID(), redis_rewrite_time_), [&](gsf::ArgsPtr args) {
 				 rewrite_timer_id_ = args->pop_moduleid();
 			});
 		}
@@ -134,11 +134,11 @@ void gsf::modules::RedisCacheProxyModule::start_update_redis_timer(gsf::ArgsPtr 
 
 	if (_module_id == timer_m_) {
 
-		dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::make_args(get_module_id(), redis_delay_time_), [&](gsf::ArgsPtr args) {
+		dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::makeArgs(getModuleID(), redis_delay_time_), [&](gsf::ArgsPtr args) {
 			cmd_timer_id_ = args->pop_moduleid();
 		});
 
-		dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::make_args(get_module_id(), redis_rewrite_time_), [&](gsf::ArgsPtr args) {
+		dispatch(timer_m_, eid::timer::delay_milliseconds, gsf::makeArgs(getModuleID(), redis_rewrite_time_), [&](gsf::ArgsPtr args) {
 			rewrite_timer_id_ = args->pop_moduleid();
 		});
 	}
@@ -228,7 +228,7 @@ void gsf::modules::RedisCacheProxyModule::resume_redis_handler()
 			auto key_ = _replay_ptr->element[i]->str;
 			auto val_ = _replay_ptr->element[i + 1]->str;
 
-			boardcast(eid::db_proxy::redis_resume, gsf::make_args(it, key_, val_));
+			boardcast(eid::db_proxy::redis_resume, gsf::makeArgs(it, key_, val_));
 		}
 
 		freeReplyObject(_replay_ptr);
