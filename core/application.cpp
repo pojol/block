@@ -100,6 +100,11 @@ int64_t gsf::Application::getUUID()
 	return uuid();
 }
 
+std::string gsf::Application::getScriptPath() const
+{
+	return cfg_.scriptPath_;
+}
+
 void gsf::Application::pushFrame(uint64_t index, Frame frame)
 {
 	halfway_frame_.insert(std::make_pair(index, frame));

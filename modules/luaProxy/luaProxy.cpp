@@ -40,7 +40,7 @@ std::string Traceback(lua_State * _state)
 	}
 	return outputTraceback;
 }
-
+/*
 std::string getPath()
 {
 	char _path[512];
@@ -72,7 +72,7 @@ std::string getPath()
 
 	return _path;
 }
-
+*/
 
 void gsf::modules::LuaProxyModule::before_init()
 {	
@@ -157,7 +157,7 @@ void gsf::modules::LuaProxyModule::shut()
 void gsf::modules::LuaProxyModule::eCreate(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	uint32_t _module_id = args->pop_i32();
-	std::string _dir_name = getPath();
+	std::string _dir_name = APP.getScriptPath();
 	std::string _file_name = args->pop_string();
 
 	create(_module_id, _dir_name, _file_name);
@@ -303,7 +303,7 @@ void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_na
 	_lua->dir_name_ = dir_name;
 	_lua->file_name_ = file_name;
 
-	auto _path = dir_name + "/script/" + file_name;
+	auto _path = dir_name + "/" + file_name;
 
 	try
 	{
@@ -360,7 +360,7 @@ void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_na
 	_lua->state_.set("APP", gsf::Application::get_ptr());
 
 	_lua->call_list_[LuaAppState::BEFORE_INIT] = [&](sol::table t) {
-		t.get<std::function<void(std::string)>>("before_init")(dir_name + "/script/");
+		t.get<std::function<void(std::string)>>("before_init")(dir_name + "/");
 	};
 	_lua->call_list_[LuaAppState::INIT] = [&](sol::table t) {
 		t.get<std::function<void()>>("init")();
