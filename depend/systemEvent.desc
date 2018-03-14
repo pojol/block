@@ -1,0 +1,16 @@
+{
+	"distributed": [
+	{
+		"rpc_begin": {}
+	},
+	{
+		"eCoordinatRegist":{
+			"args":["string", "int", "string", "int", {"array":{"table":["string", "int", "int"]}}],
+			"usable":"true",
+			"desc":"½«Node°ó¶¨µ½Coordinator"
+		}
+	},
+	{
+		"rpc_end": {}
+	}]
+}

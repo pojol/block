@@ -70,3 +70,5 @@ lib/
 3rd/sol2-2.16.0
 3rd/glog/
 3rd/pbc/
+Win32/Debug/ZERO_CHECK/ZERO_CHECK.log
+.vscode/settings.json

@@ -1,11 +1,7 @@
 import os
 import stat
 import platform
-
-cur_path_ = os.getcwd() + '/3rd'
-root_path = cur_path_[:cur_path_.rfind('/')]
-print("root path ", root_path)
-print("cur path", cur_path_)
+import shutil
 
 def rmtree(top):
     for root, dirs, files in os.walk(top, topdown=False):
@@ -17,15 +13,24 @@ def rmtree(top):
             os.rmdir(os.path.join(root, name))
     os.rmdir(top)
 
+if os.path.exists(os.getcwd() + '/3rd'):
+	shutil.rmtree(os.getcwd() + '/3rd')
+
+os.system('mkdir 3rd')
+
+cur_path_ = os.getcwd() + '/3rd'
+root_path = cur_path_[:cur_path_.rfind('/')]
+print("root path ", root_path)
+print("cur path", cur_path_)
+
 os.chdir(cur_path_)
 ###################libevent###################################
-'''
 print("download Libevent version release-2.0.22-stable")
 
 if os.path.exists(cur_path_ + "/Libevent"):
     rmtree(cur_path_ + "/Libevent")
 
-os.system('git clone https://github.com/nmathewson/Libevent.git')
+os.system('git clone https://gitee.com/pojol/Libevent.git')
 os.chdir(cur_path_ + "/Libevent")
 os.system('git checkout release-2.0.22-stable')
 
@@ -37,7 +42,6 @@ if platform.system() == 'Linux':
 elif platform.system() == 'Darwin':
     print("darwin")
     #usr/local/Cellar/openssl/1.0.2j/include
-    os.system('./autogen.sh')
     os.system('./configure --prefix=/' + root_path + '/lib/libevent' + " CPPFLAGS=-I/usr/local/Cellar/openssl/1.0.2j/include LDFLAGS=-I/usr/local/Cellar/openssl/1.0.2j/lib")
     os.system('make')
     os.system('make install')
@@ -52,7 +56,7 @@ print("download glog version 0.3.4")
 if os.path.exists(cur_path_ + "/glog"):
     rmtree(cur_path_ + "/glog")
 
-os.system('git clone https://github.com/google/glog.git')
+os.system('git clone https://gitee.com/pojol/glog.git')
 os.chdir(cur_path_ + "/glog")
 os.system('git checkout v0.3.4')
 if platform.system() == 'Linux':
@@ -63,29 +67,14 @@ else:
     pass
 os.chdir(cur_path_)
 ###################protobuf############################
-print("download protobuf version 3.2.0")
 
-if os.path.exists(cur_path_ + "/protobuf"):
-    rmtree(cur_path_ + "/protobuf")
-
-os.system('git clone https://github.com/google/protobuf.git')
-os.chdir(cur_path_ + '/protobuf')
-os.system('git checkout v3.2.0')
-if platform.system() == 'Linux':
-    os.system('./autogen.sh')
-    os.system('./configure --prefix=/' + root_path + '/lib/protobuf')
-    os.system('make')
-    os.system('make install')
-else:
-    pass
-os.chdir(cur_path_)
 ##################sol##############################
 print("download sol2 version 2.16.0")
 
 if os.path.exists(cur_path_ + "/sol2"):
     rmtree(cur_path_ + "/sol2")
 
-os.system('git clone https://github.com/ThePhD/sol2.git')
+os.system('git clone https://gitee.com/pojol/sol2.git')
 os.chdir(cur_path_ + '/sol2')
 os.system('git checkout v2.16.0')
 os.chdir(cur_path_)
@@ -96,7 +85,7 @@ print("download hiredis version 0.13.3")
 
 if os.path.exists(cur_path_ + "/hiredis"):
     rmtree(cur_path_ + "/hiredis")
-os.system('git clone https://github.com/redis/hiredis.git')
+os.system('git clone https://gitee.com/pojol/hiredis.git')
 os.chdir(cur_path_ + '/hiredis')
 os.system('git checkout v0.13.3')
 if platform.system() == 'Linux':
@@ -132,7 +121,6 @@ if platform.system() == 'Linux':
     os.system('cp -r ' + cur_path_ + '/mysql-connector-c-6.1.11-linux-glibc2.12-x86_64/lib/*' + ' ' + root_path + '/lib/mysql_connector/lib')
     pass
 os.chdir(cur_path_)
-'''
 ########################fmtlib###########################
 print("download fmtlib version 4.0.0")
 if os.path.exists(cur_path_ + "/fmt"):
@@ -140,7 +128,7 @@ if os.path.exists(cur_path_ + "/fmt"):
 if os.path.exists(root_path + "/lib/fmt"):
     rmtree(root_path + "/lib/fmt")
 
-os.system('git clone https://github.com/fmtlib/fmt.git')
+os.system('git clone https://gitee.com/pojol/fmt.git')
 os.chdir(cur_path_ + '/fmt')
 os.system('git checkout 4.0.0')
 if platform.system() == 'Linux' or platform.system() == 'Darwin':

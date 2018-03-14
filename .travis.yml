@@ -33,7 +33,7 @@ install:
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then  sudo apt-get install -qq curl; fi
 
 before_script:
-  - python 3rd/update_3rd.py
+  - python install.py
 
 script:
   - cmake --version
