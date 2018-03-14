@@ -60,7 +60,7 @@ eid = {
 		node_regist_succ = 2503,
 	},
 
-	sample = {
+	entity_sample = {
 		create_node_succ = 10001,
 	}
 }
