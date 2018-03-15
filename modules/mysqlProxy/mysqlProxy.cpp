@@ -17,7 +17,6 @@ gsf::modules::MysqlProxyModule::~MysqlProxyModule()
 
 void gsf::modules::MysqlProxyModule::before_init()
 {
-	logM_ = APP.getModule("LogModule");
 }
 
 void gsf::modules::MysqlProxyModule::init()
@@ -44,6 +43,8 @@ void gsf::modules::MysqlProxyModule::execute()
 
 		delete _callbackPtr;
 		_callbackPtr = nullptr;
+
+		queue_.pop();
 	}
 }
 
@@ -65,9 +66,7 @@ void gsf::modules::MysqlProxyModule::eInit(gsf::ArgsPtr args, gsf::CallbackFunc 
 	auto _dbName = args->pop_string(); //database
 	auto _port = args->pop_i32();	//port
 
-	if (!conn_.init(_host, _port, _user, _password, _dbName)) {
-		APP.ERR_LOG("MysqlProxy", "init fail!");
-	}
+	conn_.init(_host, _port, _user, _password, _dbName);
 }
 
 void gsf::modules::MysqlProxyModule::eQuery(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)

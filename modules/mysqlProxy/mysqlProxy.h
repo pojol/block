@@ -49,7 +49,6 @@ namespace gsf
 			typedef std::queue<CallbackInfo*> CallbackQueue;
 
 			CallbackQueue queue_;
-			gsf::ModuleID logM_ = gsf::ModuleNil;
 
 			MysqlConnect conn_;
 		};

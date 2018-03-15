@@ -115,6 +115,8 @@ bool gsf::modules::MysqlConnect::init(const std::string &host, int port, const s
 		return false;
 	}
 
+	APP.INFO_LOG("MysqlConnect", "init success!");
+
 	return true;
 }
 
