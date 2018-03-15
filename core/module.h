@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <istream>
 #include <vector>
+#include <queue>
 #include <string>
 #include "types.h"
 
@@ -11,6 +12,29 @@
 
 namespace gsf
 {
+	struct MailBox
+	{
+		typedef std::function<void(gsf::ArgsPtr, gsf::CallbackFunc)> ListenFunc;
+		typedef std::vector<std::pair<gsf::EventID, ListenFunc>> ListenVec;
+
+		void listen(gsf::EventID event,  ListenFunc func);
+		void dispatch(gsf::ModuleID target, gsf::EventID event, gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+
+	private:
+
+		struct TaskInfo
+		{
+			gsf::ModuleID target_;
+			gsf::EventID event_;
+			gsf::ArgsPtr args_;
+		};
+
+		typedef std::queue<TaskInfo> TaskQueue;
+
+		ListenVec listenVec_;
+		TaskQueue taskQueue_;
+	};
+
 	class Module
 	{
 		friend class Application;
