@@ -39,7 +39,7 @@ getEv
 * [distributed](https://github.com/pojol/gsf/wiki/Modules_Distributed)
 * [luaProxy](https://github.com/pojol/gsf/wiki/Modules_LuaProxy)
 * [timer](https://github.com/pojol/gsf/wiki/Modules_Timer)
-* mysqlProxy
+* [mysqlProxy](https://github.com/pojol/gsf/wiki/Guide_Mysql)
 * redisProxy
 * [logger](https://github.com/pojol/gsf/wiki/Module_Logger)
 
