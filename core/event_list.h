@@ -226,16 +226,54 @@ namespace eid
 		redis_avatar_offline,
 		redis_resume,
 
-		/*!
-			comment: 建立一个新的Mysql连接
-			args: string host, string user, string password, string dbName, int32_t port
-			type: dispatch
-			res : bool succ
-		**/
+		
 		mysql_connect,
 
 		// local
 		mysql_callback,
+	};
+
+	enum dbProxy
+	{
+		/*!
+			comment: 建立一个新的Mysql连接
+			args: string host, string user, string password, string dbName, int32_t port, bool useCache
+			type: dispatch
+			res : bool succ
+		**/
+		connect = 2401,
+
+		/*!
+			comment: 执行一条sql语句
+			args: int32_t moduleID, string sql
+			type: dispatch
+			res : nil
+		**/
+		query,	
+
+		/*!
+			comment: 创建一个实例
+			args: string tableName, table entityInfo
+			type: dispatch
+			res : entityInfo
+		**/
+		insert,
+
+		/*!
+			comment: 获取一个实例
+			args: int32_t moduleID, int32_t entityID
+			type: dispatch
+			res : entityInfo
+		**/
+		select,
+		
+		/*!
+			comment: 更新一个实例
+			args: string tableName, int32_t entityID, table entityDirty
+			type: dispatch
+			res : nil
+		**/
+		update,
 	};
 
 	enum node

@@ -25,57 +25,50 @@ namespace gsf
 		//    #auto - aof - rewrite - min - size 64mb 关闭自动rewrite
 
 
-		class RedisCacheProxyModule
-			: public gsf::Module
-			, public gsf::IEvent
+		class RedisProxy
+			: public gsf::IEvent
 		{
 		public:
 
-			void before_init() override;
+			bool init();
+			void uninit();
 
-			void init() override;
+			void command(const std::string &field, const std::string &key, const std::string &block);
 
-			void shut() override;
-
-		private:
-
-			void event_redis_connect(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
-			void event_redis_command(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
 			void event_redis_avatar_offline(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
-
-			void start_update_redis_timer(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
 			
-			bool check_connect();
+			/*!
+				检查连接是否存在，如果断开则尝试重连。
+			**/
+			bool checkConnect();
 			
-			void cmd_handler();
-			void rewrite_handler();
+			void execCommand();
+			void execRewrite();
 
 			// 服务器异常关闭时恢复数据到内存
 			void resume_redis_handler();
 			// 服务器正常退出时调用
 			void flush_redis_handler();
 
-			uint32_t timer_m_;
-			uint32_t log_m_;
+			uint32_t timerM_;
 
 		private:
 
-			std::string ip_ = "";
-			uint32_t port_ = 0;
+			std::string ip_ = "127.0.0.1";
+			uint32_t port_ = 3306;
 
 			bool is_open_ = false;
-
-			gsf::TimerID cmd_timer_id_ = 0;
-			const uint32_t redis_delay_time_ = 1000;	//ms
-			gsf::TimerID rewrite_timer_id_ = 0;
-			const uint32_t redis_rewrite_time_ = 1000 * 60 * 10;
 
 			redisContext *redis_context_;
 			uint32_t redis_command_count_ = 0;
 
+			//! 模块的集合
 			std::set<std::string> field_set_;
 		};
+
+		typedef std::shared_ptr<RedisProxy> RedisPtr;
 	}
+	
 }
 
 #endif

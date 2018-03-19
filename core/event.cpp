@@ -1,4 +1,4 @@
-#include "event.h"
+ï»¿#include "event.h"
 #include "application.h"
 #include <algorithm>
 
@@ -83,7 +83,7 @@ void gsf::EventModule::bindEvent(uint32_t module_id, uint32_t event, DispatchFun
 
 void gsf::EventModule::dispatch(uint32_t module_id, uint32_t event, ArgsPtr args, CallbackFunc callback /* = nullptr */)
 {
-	/* ÕâÀï½«À´ÓÃactorÄ£Ê½×öÓÅ»¯£¬ÔÝÊ±ÓÃÍ¬²½µÄ·½Ê½´¦ÀíÏÈ±£Ö¤Âß¼­¿ÉÓÃ¡£
+	/* è¿™é‡Œå°†æ¥ç”¨actoræ¨¡å¼åšä¼˜åŒ–ï¼Œæš‚æ—¶ç”¨åŒæ­¥çš„æ–¹å¼å¤„ç†å…ˆä¿è¯é€»è¾‘å¯ç”¨ã€‚
 		EventInfo *_einfo = new EventInfo();
 		_einfo->eventID_ = event;
 		_einfo->target_ = module_id;

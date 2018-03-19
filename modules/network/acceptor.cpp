@@ -97,7 +97,7 @@ void gsf::network::AcceptorModule::after_shut()
 
 void gsf::network::AcceptorModule::eMakeAcceptor(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
-	if (nullptr != acceptListenerPtr_) {
+	if (nullptr == acceptListenerPtr_) {
 		uint32_t _module_id = args->pop_i32();
 		std::string _ip = args->pop_string();
 		uint32_t _port = args->pop_i32();
