@@ -52,7 +52,7 @@ namespace gsf
 
 			void execute(const std::string &order, const gsf::ArgsPtr &args);
 
-			void query(gsf::ModuleID target, gsf::ModuleID remote, const std::string &sql, std::function<void (gsf::ModuleID, gsf::ArgsPtr)> callback);
+			void query(gsf::ModuleID target, const std::string &sql, std::function<void (gsf::ModuleID, gsf::ArgsPtr)> callback);
 
 		private:
 

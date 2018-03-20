@@ -62,16 +62,6 @@ namespace eid
 		**/
 		coordinat_select,
 
-		/**!
-			comment: 查询Mysql数据库， args中存放单条查询信息， 如果返回的是数组 progress 则代表当前进度 -1 代表eof
-			args: moduleid, sql
-			type: rpc
-			res : stream args, int32_t progress, bool succ
-		*/
-		mysql_query,
-
-		mysql_update,
-
 		rpc_end,
 	};
 
@@ -219,20 +209,6 @@ namespace eid
 		destroy,
 	};
 
-	enum db_proxy
-	{
-		redis_connect = 2401,
-		redis_command,
-		redis_avatar_offline,
-		redis_resume,
-
-		
-		mysql_connect,
-
-		// local
-		mysql_callback,
-	};
-
 	enum dbProxy
 	{
 		/*!
@@ -274,6 +250,8 @@ namespace eid
 			res : nil
 		**/
 		update,
+
+		callback,
 	};
 
 	enum node

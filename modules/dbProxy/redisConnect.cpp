@@ -157,7 +157,7 @@ void gsf::modules::RedisProxy::resume_redis_handler()
 			auto key_ = _replay_ptr->element[i]->str;
 			auto val_ = _replay_ptr->element[i + 1]->str;
 
-			boardcast(eid::db_proxy::redis_resume, gsf::makeArgs(it, key_, val_));
+			//boardcast(eid::db_proxy::redis_resume, gsf::makeArgs(it, key_, val_));
 		}
 
 		freeReplyObject(_replay_ptr);

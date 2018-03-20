@@ -50,6 +50,7 @@ namespace gsf
 				更新一个实例
 			**/
 			void eUpdate(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+
 			/*!
 				执行一条sql语句
 			**/

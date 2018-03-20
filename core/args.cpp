@@ -116,6 +116,11 @@ void gsf::Args::push_string(const std::string &val)
 	push(val.c_str());
 }
 
+void gsf::Args::push_bool(const bool &val)
+{
+	push(val);
+}
+
 void gsf::Args::push(const int8_t &val)
 {
 	push_impl(at_int8);
@@ -621,7 +626,7 @@ std::pair<void*, int> gsf::Args::peek_str()
 }
 
 //////////////////////////////////////////////////////////////////////////
-uint8_t gsf::Args::get_tag()
+int gsf::Args::get_tag()
 {
 	auto _ui8 = *reinterpret_cast<uint8_t*>(read_);
 	return _ui8;

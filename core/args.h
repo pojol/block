@@ -174,6 +174,7 @@ namespace gsf
 		void push_float(const float &val);
 		void push_double(const double &val);
 		void push_string(const std::string &val);
+		void push_bool(const bool &val);
 
 		///////////////////////////////// pop //////////////////////////////////
 		void pop_impl(uint8_t &val);
@@ -226,7 +227,7 @@ namespace gsf
 		gsf::TimerID pop_timerid();
 
 		/////////////////////////////////get//////////////////////////////////////
-		uint8_t get_tag();
+		int get_tag();
 		uint32_t get_size() const;
 		uint32_t get_params_count() const;
 

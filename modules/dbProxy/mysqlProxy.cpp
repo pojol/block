@@ -23,14 +23,18 @@ void gsf::modules::MysqlProxyModule::before_init()
 void gsf::modules::MysqlProxyModule::init()
 {
 	listen(this
-		, eid::db_proxy::mysql_connect
+		, eid::dbProxy::connect
 		, std::bind(&MysqlProxyModule::eInit, this, std::placeholders::_1, std::placeholders::_2));
 
 	listen(this
-		, eid::distributed::mysql_query
+		, eid::dbProxy::query
 		, std::bind(&MysqlProxyModule::eQuery, this, std::placeholders::_1, std::placeholders::_2));
 
-	listen(this, eid::distributed::mysql_update
+	listen(this
+		, eid::dbProxy::insert
+		, std::bind(&MysqlProxyModule::eInsert, this, std::placeholders::_1, std::placeholders::_2));
+
+	listen(this, eid::dbProxy::update
 		, std::bind(&MysqlProxyModule::eUpdate, this, std::placeholders::_1, std::placeholders::_2));
 }
 
@@ -40,10 +44,12 @@ void gsf::modules::MysqlProxyModule::execute()
 
 		auto _callbackPtr = queue_.front();
 
-		dispatch(_callbackPtr->target_, eid::db_proxy::mysql_callback, std::move(_callbackPtr->ptr_));
+		dispatch(_callbackPtr->target_, eid::dbProxy::callback, std::move(_callbackPtr->ptr_));
 
 		delete _callbackPtr;
 		_callbackPtr = nullptr;
+
+		queue_.pop();
 	}
 }
 
@@ -96,14 +102,73 @@ void gsf::modules::MysqlProxyModule::eInit(gsf::ArgsPtr args, gsf::CallbackFunc 
 
 void gsf::modules::MysqlProxyModule::eSelect(gsf::ArgsPtr args, gsf::CallbackFunc callback /*= nullptr*/)
 {
+	auto _table = args->pop_string();
 
 }
+/*
+_sql = string.format("insert into Entity (id,name,hp,lv,loginTime) values (%d,%s,%d,%d,%d);"
+, self.property.id
+, self.property.name
+, self.property.hp
+, self.property.lv
+, os.time())
+*/
+
+#include <iostream>
 
 void gsf::modules::MysqlProxyModule::eInsert(gsf::ArgsPtr args, gsf::CallbackFunc callback /*= nullptr*/)
 {
+	std::cout << args->to_string() << std::endl;
+
+	auto _target = args->pop_moduleid();
 	auto _table = args->pop_string();
 
+	auto _getval = [&](int32_t tag)->std::string {
+		switch (tag) {
+		case gsf::at_int8: return std::to_string(args->pop_i8());
+		case gsf::at_uint8: return std::to_string(args->pop_ui8());
+		case gsf::at_int16: return std::to_string(args->pop_i16());
+		case gsf::at_uint16: return std::to_string(args->pop_ui16());
+		case gsf::at_int32: return std::to_string(args->pop_i32());
+		case gsf::at_uint32: return std::to_string(args->pop_ui32());
+		case gsf::at_int64: return std::to_string(args->pop_i64());
+		case gsf::at_uint64: return std::to_string(args->pop_ui64());
+		case gsf::at_string: return args->pop_string();
+		}
 
+		return "0";
+	};
+
+	if (useCache_) {
+
+	}
+	else {
+		std::string _keys = "";
+		std::string _values = "";
+
+		auto _tag = args->get_tag();
+		while (_tag > 0)
+		{
+			auto _key = args->pop_string();
+			auto _tag = args->get_tag();
+			auto _val = _getval(_tag);
+
+			_keys += _key + ",";
+			_values += _val + ",";
+
+			_tag = args->get_tag();
+		}
+		if (_keys.at(_keys.size() - 1) == ',') {
+			_keys.erase(_keys.size() - 1);
+		}
+
+		if (_values.at(_values.size() - 1) == ',') {
+			_values.erase(_values.size() - 1);
+		}
+
+		std::string _sql = "insert into " + _table + " (" + _keys + ")" + " values (" + _values + ");";
+		conn_.query(0, _sql, nullptr);
+	}
 }
 
 void gsf::modules::MysqlProxyModule::eUpdate(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
@@ -111,20 +176,17 @@ void gsf::modules::MysqlProxyModule::eUpdate(gsf::ArgsPtr args, gsf::CallbackFun
 	auto _table = args->pop_string();
 	auto _key = args->pop_i32();
 
-	auto _getkey = [&]()->std::string {
-		return args->pop_string();
-	};
-
 	auto _getval = [&](int32_t tag)->std::string {
 		switch (tag) {
-		case gsf::at_int8:		return std::to_string(args->pop_i8());
-		case gsf::at_uint8:		return std::to_string(args->pop_ui8());
-		case gsf::at_int16:		return std::to_string(args->pop_i16());
-		case gsf::at_uint16:	return std::to_string(args->pop_ui16());
-		case gsf::at_int32:		return std::to_string(args->pop_i32());
-		case gsf::at_uint32:	return std::to_string(args->pop_ui32());
-		case gsf::at_int64:		return std::to_string(args->pop_i64());
-		case gsf::at_uint64:	return std::to_string(args->pop_ui64());
+		case gsf::at_int8: return std::to_string(args->pop_i8());
+		case gsf::at_uint8: return std::to_string(args->pop_ui8());
+		case gsf::at_int16: return std::to_string(args->pop_i16());
+		case gsf::at_uint16: return std::to_string(args->pop_ui16());
+		case gsf::at_int32: return std::to_string(args->pop_i32());
+		case gsf::at_uint32: return std::to_string(args->pop_ui32());
+		case gsf::at_int64: return std::to_string(args->pop_i64());
+		case gsf::at_uint64: return std::to_string(args->pop_ui64());
+		case gsf::at_string: return args->pop_string();
 		}
 
 		return "0";
@@ -135,43 +197,41 @@ void gsf::modules::MysqlProxyModule::eUpdate(gsf::ArgsPtr args, gsf::CallbackFun
 
 	}
 	else {
+		// update tbl_Account set sm_accountName="fdsafsad" where id=123;
+		std::string _sql = "update " + _table + " set ";
+		std::string _context = "";
 
+		auto _tag = args->get_tag();
+		while (0 != _tag)
+		{
+			auto _key = args->pop_string();
+			auto _tag = args->get_tag();
+			auto _val = _getval(_tag);
+
+			_context += _key + "=" + _val + ',';
+
+			_tag = args->get_tag();
+		}
+
+		if (_context.at(_context.size() - 1) == ',')
+			_context.erase(_context.size() - 1);
+
+		_sql += _context;
+
+		_sql += " where id=" + std::to_string(_key);
+		conn_.query(0, _sql, nullptr);
 	}
-
-
-	// update tbl_Account set sm_accountName="fdsafsad" where id=123;
-	std::string _sql = "update " + _table + " set ";
-	std::string _context = "";
-
-	auto _tag = args->get_tag();
-	while (_tag != 0)
-	{
-		auto _key = _getkey();
-		auto _val = _getval(args->get_tag());
-
-		_context += _key + "=" + _val + ',';
-
-		_tag = args->get_tag();
-	}
-
-	if (_context.at(_context.size() - 1) == ',')
-		_context.erase(_context.size() - 1);
-
-	_sql += _context;
-
-	_sql += " where id=" + std::to_string(_key);
-	conn_.query(0, 0, _sql, nullptr);
 }
 
 
 void gsf::modules::MysqlProxyModule::eQuery(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	auto _moduleid = args->pop_moduleid();
-	auto _remote = args->pop_moduleid();
 	std::string queryStr = args->pop_string();
 
 	using namespace std::placeholders;
-	conn_.query(_moduleid, _remote, queryStr, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
+
+	conn_.query(_moduleid, queryStr, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
 		auto _callbackPtr = new CallbackInfo();
 		_callbackPtr->ptr_ = std::move(args);
 		_callbackPtr->target_ = target;
