@@ -174,7 +174,7 @@ void gsf::modules::MysqlConnect::execute(const std::string &order, const gsf::Ar
 	}
 }
 
-void gsf::modules::MysqlConnect::query(gsf::ModuleID target, gsf::ModuleID remote, const std::string &sql, std::function<void (gsf::ModuleID, gsf::ArgsPtr)> callback)
+void gsf::modules::MysqlConnect::query(gsf::ModuleID target, const std::string &sql, std::function<void (gsf::ModuleID, gsf::ArgsPtr)> callback)
 {
 	MYSQL_RES *result = nullptr;
 	MYSQL_FIELD *fields = nullptr;
@@ -183,7 +183,10 @@ void gsf::modules::MysqlConnect::query(gsf::ModuleID target, gsf::ModuleID remot
 
 	auto errf = [&](const std::string &err) {
 		if (callback) {
-			callback(target, gsf::makeArgs(remote, false, int32_t(-1), err));
+			callback(target, gsf::makeArgs(false, int32_t(-1), err));
+		}
+		else {
+			APP.ERR_LOG("dbProxy", "query", " {}", err);
 		}
 	};
 
@@ -194,22 +197,10 @@ void gsf::modules::MysqlConnect::query(gsf::ModuleID target, gsf::ModuleID remot
 
 	result = mysql_store_result(basePtr_);
 	if (nullptr == result) {
-		std::string sqlop = sql.substr(0, 6);
-		if (strcmp(sqlop.c_str(), "INSERT") == 0 || strcmp(sqlop.c_str(), "insert") == 0) {
-			
-			if (mysql_query(basePtr_, "select last_insert_id()")) {
-				errf(mysql_error(basePtr_));
-				return;
-			}
-
-			result = mysql_store_result(basePtr_);
+		if (callback) {
+			callback(target, gsf::makeArgs(true, int32_t(-1), "success!"));
 		}
-		else {
-			if (callback) {
-				callback(target, gsf::makeArgs(remote, true, int32_t(-1), "success!"));
-			}
-			return;
-		}
+		return;
 	}
 
 	uint64_t rowCount = mysql_affected_rows(basePtr_);
@@ -234,7 +225,6 @@ void gsf::modules::MysqlConnect::query(gsf::ModuleID target, gsf::ModuleID remot
 	while (nullptr != row)
 	{
 		auto argsPtr = gsf::ArgsPool::get_ref().get();
-		argsPtr->push(remote);
 		argsPtr->push(true);
 		argsPtr->push(_progress);
 
@@ -269,7 +259,7 @@ void gsf::modules::MysqlConnect::query(gsf::ModuleID target, gsf::ModuleID remot
 	}
 
 	// eof
-	callback(target, gsf::makeArgs(remote, true, -1));
+	callback(target, gsf::makeArgs(true, -1));
 
 	if (nullptr != result)
 	{

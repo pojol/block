@@ -3,14 +3,57 @@
 
 #include <stdint.h>
 #include <istream>
+
+#include <functional>
 #include <vector>
+#include <queue>
 #include <string>
+
+#include "args.h"
 #include "types.h"
 
 #define WATCH_PERF
 
 namespace gsf
 {
+	/*
+	typedef std::function<void(ArgsPtr)> CallbackFunc;
+	typedef std::function<void(gsf::ArgsPtr, gsf::CallbackFunc)> ListenFunc;
+	typedef std::vector<std::pair<gsf::EventID, ListenFunc>> ListenVec;
+	typedef std::function<void(ArgsPtr, int32_t, bool)> RpcCallback;
+	*/
+	struct MailBox
+	{
+		/*!
+			
+		**/
+		//void listen(gsf::EventID event,  ListenFunc func);
+		
+		/*!
+		
+		**/
+		//void dispatch(gsf::ModuleID target, gsf::EventID event, gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+		
+		/*!
+			
+		**/
+		//void rpc(gsf::EventID event, ArgsPtr args, RpcCallback callback = nullptr);
+
+	private:
+
+		struct TaskInfo
+		{
+			gsf::ModuleID target_;
+			gsf::EventID event_;
+			gsf::ArgsPtr args_;
+		};
+
+		typedef std::queue<TaskInfo> TaskQueue;
+
+		//ListenVec listenVec_;
+		//TaskQueue taskQueue_;
+	};
+
 	class Module
 	{
 		friend class Application;
@@ -55,6 +98,8 @@ namespace gsf
 		}
 #endif // WATCH_PERF
 
+		//! 
+		//MailBox mailbox_;
 	};
 }
 

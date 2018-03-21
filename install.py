@@ -30,7 +30,8 @@ print("download Libevent version release-2.0.22-stable")
 if os.path.exists(cur_path_ + "/Libevent"):
     rmtree(cur_path_ + "/Libevent")
 
-os.system('git clone https://gitee.com/pojol/Libevent.git')
+#os.system('git clone https://gitee.com/pojol/Libevent.git')
+os.system('git clone https://github.com/nmathewson/Libevent.git')
 os.chdir(cur_path_ + "/Libevent")
 os.system('git checkout release-2.0.22-stable')
 
@@ -56,7 +57,8 @@ print("download glog version 0.3.4")
 if os.path.exists(cur_path_ + "/glog"):
     rmtree(cur_path_ + "/glog")
 
-os.system('git clone https://gitee.com/pojol/glog.git')
+#os.system('git clone https://gitee.com/pojol/glog.git')
+os.system('git clone https://github.com/google/glog.git')
 os.chdir(cur_path_ + "/glog")
 os.system('git checkout v0.3.4')
 if platform.system() == 'Linux':
@@ -74,7 +76,8 @@ print("download sol2 version 2.16.0")
 if os.path.exists(cur_path_ + "/sol2"):
     rmtree(cur_path_ + "/sol2")
 
-os.system('git clone https://gitee.com/pojol/sol2.git')
+os.system('git clone https://github.com/ThePhD/sol2.git')
+#os.system('git clone https://gitee.com/pojol/sol2.git')
 os.chdir(cur_path_ + '/sol2')
 os.system('git checkout v2.16.0')
 os.chdir(cur_path_)
@@ -85,7 +88,8 @@ print("download hiredis version 0.13.3")
 
 if os.path.exists(cur_path_ + "/hiredis"):
     rmtree(cur_path_ + "/hiredis")
-os.system('git clone https://gitee.com/pojol/hiredis.git')
+os.system('git clone https://github.com/redis/hiredis.git')
+#os.system('git clone https://gitee.com/pojol/hiredis.git')
 os.chdir(cur_path_ + '/hiredis')
 os.system('git checkout v0.13.3')
 if platform.system() == 'Linux':
@@ -128,7 +132,8 @@ if os.path.exists(cur_path_ + "/fmt"):
 if os.path.exists(root_path + "/lib/fmt"):
     rmtree(root_path + "/lib/fmt")
 
-os.system('git clone https://gitee.com/pojol/fmt.git')
+os.system('git clone https://github.com/fmtlib/fmt.git')
+#os.system('git clone https://gitee.com/pojol/fmt.git')
 os.chdir(cur_path_ + '/fmt')
 os.system('git checkout 4.0.0')
 if platform.system() == 'Linux' or platform.system() == 'Darwin':

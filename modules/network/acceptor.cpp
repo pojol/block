@@ -97,12 +97,17 @@ void gsf::network::AcceptorModule::after_shut()
 
 void gsf::network::AcceptorModule::eMakeAcceptor(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
-	uint32_t _module_id = args->pop_i32();
-	std::string _ip = args->pop_string();
-	uint32_t _port = args->pop_i32();
+	if (nullptr == acceptListenerPtr_) {
+		uint32_t _module_id = args->pop_i32();
+		std::string _ip = args->pop_string();
+		uint32_t _port = args->pop_i32();
 
-	module_id_ = _module_id;	//! 绑定代理Module的id
-	accept_bind(_ip, _port);
+		module_id_ = _module_id;	//! 绑定代理Module的id
+		accept_bind(_ip, _port);
+	}
+	else {
+		APP.INFO_LOG("Acceptor Module", "repeat make acceptor");
+	}
 }
 
 /*
@@ -130,7 +135,7 @@ void gsf::network::AcceptorModule::accept_bind(const std::string &ip, int port)
 		, (sockaddr*)&sin
 		, sizeof(sockaddr_in));
 
-	if (!acceptListenerPtr_) {
+	if (nullptr == acceptListenerPtr_) {
 		APP.ERR_LOG("Acceptor", "accept listen err!");
 	}
 	else {
@@ -177,6 +182,8 @@ void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, 
 
 void gsf::network::AcceptorModule::eSendMsg(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
+	assert(nullptr != acceptListenerPtr_);
+
 	auto _fd = args->pop_fd();
 	auto _msg = args->pop_msgid();
 	std::string _str = "";

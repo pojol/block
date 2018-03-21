@@ -122,7 +122,7 @@ void gsf::modules::LuaProxyModule::execute()
 		}
 		catch (sol::error e) {
 			std::string _err = e.what() + '\n' + Traceback(_lua->state_);
-			APP.ERR_LOG("LuaProxy", "err");
+			APP.ERR_LOG("LuaProxy", _err);
 
 			if (_lua->app_state_ == LuaAppState::INIT) {
 				destroy(_lua->lua_id_);
@@ -333,6 +333,7 @@ void gsf::modules::LuaProxyModule::create(uint32_t module_id, std::string dir_na
 		, "push_ui32", &Args::push_ui32
 		, "push_i32", &Args::push_i32
 		, "push_string", &Args::push_string
+		, "push_bool", &Args::push_bool
 		, "pop_string", &Args::pop_string
 		, "pop_ui16", &Args::pop_ui16
 		, "pop_ui32", &Args::pop_ui32

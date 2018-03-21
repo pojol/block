@@ -1,10 +1,11 @@
-#include "event.h"
+﻿#include "event.h"
 #include "application.h"
 #include <algorithm>
 
 
 void gsf::EventModule::execute()
 {
+	/*
 	while (!eventQueue_.empty())
 	{
 		EventInfo *_infoPtr = eventQueue_.front();
@@ -35,6 +36,7 @@ void gsf::EventModule::execute()
 
 		eventQueue_.pop();
 	}
+	*/
 }
 
 gsf::EventModule::EventModule()
@@ -81,16 +83,39 @@ void gsf::EventModule::bindEvent(uint32_t module_id, uint32_t event, DispatchFun
 
 void gsf::EventModule::dispatch(uint32_t module_id, uint32_t event, ArgsPtr args, CallbackFunc callback /* = nullptr */)
 {
-	EventInfo *_einfo = new EventInfo();
-	_einfo->eventID_ = event;
-	_einfo->target_ = module_id;
+	/* 这里将来用actor模式做优化，暂时用同步的方式处理先保证逻辑可用。
+		EventInfo *_einfo = new EventInfo();
+		_einfo->eventID_ = event;
+		_einfo->target_ = module_id;
 
-	if (callback) {
-		_einfo->callback_ = callback;
+		if (callback) {
+			_einfo->callback_ = callback;
+		}
+
+		_einfo->ptr_ = std::move(args);
+		eventQueue_.push(_einfo);
+	*/
+
+	auto _reg = typeMap_.find(module_id);
+	if (_reg != typeMap_.end()) {
+		auto _regList = _reg->second;
+		auto _findItr = std::find_if(_regList.begin(), _regList.end(), [&](MIList::value_type it) {
+			return (it.eventID_ == event);
+		});
+
+		if (_findItr != _regList.end()) {
+#ifdef WATCH_PERF
+			_findItr->calls_++;
+#endif
+			_findItr->eventFunc_(std::move(args), callback);
+		}
+		else {
+			APP.WARN_LOG("EventCenter", "execute Did not find the ", "event {} from module {} !", event, module_id);
+		}
 	}
-
-	_einfo->ptr_ = std::move(args);
-	eventQueue_.push(_einfo);
+	else {
+		APP.WARN_LOG("EventCenter", "execute Did not find the module", " {}", module_id);
+	}
 }
 
 void gsf::EventModule::boardcast(uint32_t event, ArgsPtr args)

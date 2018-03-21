@@ -377,6 +377,7 @@ void gsf::Application::unregist_dynamic_module(uint32_t module_id)
 
 void gsf::Application::tick()
 {
+	/*
 	if (cfg_.is_watch_pref){
 		int _t = (last_tick_ + 1) % tick_len_;
 
@@ -393,5 +394,5 @@ void gsf::Application::tick()
 
 		last_tick_ = _t;
 	}
-
+	*/
 }

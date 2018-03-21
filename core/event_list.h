@@ -62,16 +62,6 @@ namespace eid
 		**/
 		coordinat_select,
 
-		/**!
-			comment: 查询Mysql数据库， args中存放单条查询信息， 如果返回的是数组 progress 则代表当前进度 -1 代表eof
-			args: moduleid, sql
-			type: rpc
-			res : stream args, int32_t progress, bool succ
-		*/
-		mysql_query,
-
-		mysql_update,
-
 		rpc_end,
 	};
 
@@ -219,23 +209,49 @@ namespace eid
 		destroy,
 	};
 
-	enum db_proxy
+	enum dbProxy
 	{
-		redis_connect = 2401,
-		redis_command,
-		redis_avatar_offline,
-		redis_resume,
-
 		/*!
 			comment: 建立一个新的Mysql连接
-			args: string host, string user, string password, string dbName, int32_t port
+			args: string host, string user, string password, string dbName, int32_t port, bool useCache
 			type: dispatch
 			res : bool succ
 		**/
-		mysql_connect,
+		connect = 2401,
 
-		// local
-		mysql_callback,
+		/*!
+			comment: 执行一条sql语句
+			args: int32_t moduleID, string sql
+			type: dispatch
+			res : nil
+		**/
+		query,	
+
+		/*!
+			comment: 创建一个实例
+			args: string tableName, table entityInfo
+			type: dispatch
+			res : entityInfo
+		**/
+		insert,
+
+		/*!
+			comment: 获取一个实例
+			args: int32_t moduleID, int32_t entityID
+			type: dispatch
+			res : entityInfo
+		**/
+		select,
+		
+		/*!
+			comment: 更新一个实例
+			args: string tableName, int32_t entityID, table entityDirty
+			type: dispatch
+			res : nil
+		**/
+		update,
+
+		callback,
 	};
 
 	enum node
