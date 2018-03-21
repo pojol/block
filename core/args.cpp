@@ -648,7 +648,7 @@ std::string gsf::Args::to_string() const
 	std::stringstream ss;
 
 	auto tag = _args.get_tag();
-	ss << "for testing only" << std::endl;
+	ss << "test->" << std::endl;
 	while (tag != 0)
 	{
 		switch (tag)
@@ -687,5 +687,6 @@ std::string gsf::Args::to_string() const
 		tag = _args.get_tag();
 	}
 
+	ss << "<-end" << std::endl;
 	return ss.str();
 }

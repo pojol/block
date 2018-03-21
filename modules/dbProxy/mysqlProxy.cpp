@@ -114,14 +114,14 @@ _sql = string.format("insert into Entity (id,name,hp,lv,loginTime) values (%d,%s
 , os.time())
 */
 
-#include <iostream>
-
 void gsf::modules::MysqlProxyModule::eInsert(gsf::ArgsPtr args, gsf::CallbackFunc callback /*= nullptr*/)
 {
-	std::cout << args->to_string() << std::endl;
-
 	auto _target = args->pop_moduleid();
 	auto _table = args->pop_string();
+
+	auto _getkey = [&]()->std::string {
+		return args->pop_string();
+	};
 
 	auto _getval = [&](int32_t tag)->std::string {
 		switch (tag) {
@@ -147,11 +147,10 @@ void gsf::modules::MysqlProxyModule::eInsert(gsf::ArgsPtr args, gsf::CallbackFun
 		std::string _values = "";
 
 		auto _tag = args->get_tag();
-		while (_tag > 0)
+		while (_tag != 0)
 		{
-			auto _key = args->pop_string();
-			auto _tag = args->get_tag();
-			auto _val = _getval(_tag);
+			auto _key = _getkey();
+			auto _val = _getval(args->get_tag());
 
 			_keys += _key + ",";
 			_values += _val + ",";
@@ -168,6 +167,15 @@ void gsf::modules::MysqlProxyModule::eInsert(gsf::ArgsPtr args, gsf::CallbackFun
 
 		std::string _sql = "insert into " + _table + " (" + _keys + ")" + " values (" + _values + ");";
 		conn_.query(0, _sql, nullptr);
+
+		/* 这里要先设计下各个接口的返回样式
+		conn_.query(_target, "select last_insert_id()", [&](gsf::ModuleID target, gsf::ArgsPtr args) {
+			auto _callbackPtr = new CallbackInfo();
+			_callbackPtr->ptr_ = std::move(args);
+			_callbackPtr->target_ = target;
+			queue_.push(_callbackPtr);
+		});
+		*/
 	}
 }
 
@@ -175,6 +183,10 @@ void gsf::modules::MysqlProxyModule::eUpdate(gsf::ArgsPtr args, gsf::CallbackFun
 {
 	auto _table = args->pop_string();
 	auto _key = args->pop_i32();
+
+	auto _getkey = [&]()->std::string {
+		return args->pop_string();
+	};
 
 	auto _getval = [&](int32_t tag)->std::string {
 		switch (tag) {
@@ -204,9 +216,8 @@ void gsf::modules::MysqlProxyModule::eUpdate(gsf::ArgsPtr args, gsf::CallbackFun
 		auto _tag = args->get_tag();
 		while (0 != _tag)
 		{
-			auto _key = args->pop_string();
-			auto _tag = args->get_tag();
-			auto _val = _getval(_tag);
+			auto _key = _getkey();
+			auto _val = _getval(args->get_tag());
 
 			_context += _key + "=" + _val + ',';
 

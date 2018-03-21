@@ -183,6 +183,9 @@ void gsf::modules::MysqlConnect::query(gsf::ModuleID target, const std::string &
 		if (callback) {
 			callback(target, gsf::makeArgs(false, int32_t(-1), err));
 		}
+		else {
+			APP.ERR_LOG("dbProxy", "query", " {}", err);
+		}
 	};
 
 	if (mysql_query(basePtr_, sql.c_str())) {
@@ -192,22 +195,10 @@ void gsf::modules::MysqlConnect::query(gsf::ModuleID target, const std::string &
 
 	result = mysql_store_result(basePtr_);
 	if (nullptr == result) {
-		std::string sqlop = sql.substr(0, 6);
-		if (strcmp(sqlop.c_str(), "INSERT") == 0 || strcmp(sqlop.c_str(), "insert") == 0) {
-			
-			if (mysql_query(basePtr_, "select last_insert_id()")) {
-				errf(mysql_error(basePtr_));
-				return;
-			}
-
-			result = mysql_store_result(basePtr_);
+		if (callback) {
+			callback(target, gsf::makeArgs(true, int32_t(-1), "success!"));
 		}
-		else {
-			if (callback) {
-				callback(target, gsf::makeArgs(true, int32_t(-1), "success!"));
-			}
-			return;
-		}
+		return;
 	}
 
 	uint64_t rowCount = mysql_affected_rows(basePtr_);
