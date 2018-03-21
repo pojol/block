@@ -104,14 +104,6 @@ void gsf::modules::MysqlProxyModule::eSelect(gsf::ArgsPtr args, gsf::CallbackFun
 	auto _table = args->pop_string();
 
 }
-/*
-_sql = string.format("insert into Entity (id,name,hp,lv,loginTime) values (%d,%s,%d,%d,%d);"
-, self.property.id
-, self.property.name
-, self.property.hp
-, self.property.lv
-, os.time())
-*/
 
 void gsf::modules::MysqlProxyModule::eInsert(gsf::ArgsPtr args, gsf::CallbackFunc callback /*= nullptr*/)
 {
@@ -137,6 +129,8 @@ void gsf::modules::MysqlProxyModule::eInsert(gsf::ArgsPtr args, gsf::CallbackFun
 
 		return "0";
 	};
+
+	auto _uuid = APP.getUUID();
 
 	if (useCache_) {
 
@@ -165,16 +159,19 @@ void gsf::modules::MysqlProxyModule::eInsert(gsf::ArgsPtr args, gsf::CallbackFun
 		}
 
 		std::string _sql = "insert into " + _table + " (" + _keys + ")" + " values (" + _values + ");";
-		conn_.query(0, _sql, nullptr);
+		conn_.query(0, _uuid, _sql, nullptr);
 
-		/* 这里要先设计下各个接口的返回样式
-		conn_.query(_target, "select last_insert_id()", [&](gsf::ModuleID target, gsf::ArgsPtr args) {
+		// 这里要先设计下各个接口的返回样式
+		conn_.query(_target, _uuid, "select last_insert_id()", [&](gsf::ModuleID target, gsf::ArgsPtr args) {
 			auto _callbackPtr = new CallbackInfo();
 			_callbackPtr->ptr_ = std::move(args);
 			_callbackPtr->target_ = target;
 			queue_.push(_callbackPtr);
 		});
-		*/
+	}
+
+	if (callback) {
+		callback(gsf::makeArgs(_uuid));
 	}
 }
 
@@ -229,7 +226,7 @@ void gsf::modules::MysqlProxyModule::eUpdate(gsf::ArgsPtr args, gsf::CallbackFun
 		_sql += _context;
 
 		_sql += " where id=" + std::to_string(_key);
-		conn_.query(0, _sql, nullptr);
+		conn_.query(0, 0, _sql, nullptr);
 	}
 }
 
@@ -240,13 +237,18 @@ void gsf::modules::MysqlProxyModule::eQuery(gsf::ArgsPtr args, gsf::CallbackFunc
 	std::string queryStr = args->pop_string();
 
 	using namespace std::placeholders;
+	auto _uuid = APP.getUUID();
 
-	conn_.query(_moduleid, queryStr, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
+	conn_.query(_moduleid, _uuid, queryStr, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
 		auto _callbackPtr = new CallbackInfo();
 		_callbackPtr->ptr_ = std::move(args);
 		_callbackPtr->target_ = target;
 		queue_.push(_callbackPtr);
 	});
+
+	if (callback) {
+		callback(gsf::makeArgs(_uuid));
+	}
 }
 
 void gsf::modules::MysqlProxyModule::onTimer(gsf::ArgsPtr args, gsf::CallbackFunc callback /*= nullptr*/)
