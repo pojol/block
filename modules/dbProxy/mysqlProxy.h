@@ -39,6 +39,21 @@ namespace gsf
 			void eInit(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
 
 			/*!
+				select, query 返回
+				succ, progress, args
+				[
+					succ, 1, args
+					succ, 2, args
+					succ, -1
+				]
+
+				insert 返回
+				int 0 = false, other = last_id
+
+				update 无返回
+			**/
+
+			/*!
 				获取一个实例
 			**/
 			void eSelect(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
@@ -74,8 +89,8 @@ namespace gsf
 
 			struct CallbackInfo
 			{
-				gsf::ModuleID target_;
-				gsf::ArgsPtr ptr_;
+				gsf::ModuleID target_ = gsf::ModuleNil;
+				gsf::ArgsPtr ptr_ = nullptr;
 			};
 			typedef std::queue<CallbackInfo*> CallbackQueue;
 
