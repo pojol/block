@@ -225,7 +225,7 @@ namespace eid
 			type: dispatch
 			res : nil
 		**/
-		query,	
+		execSql,	
 
 		/*!
 			comment: 创建一个实例
@@ -237,15 +237,15 @@ namespace eid
 
 		/*!
 			comment: 获取一个实例
-			args: int32_t moduleID, int32_t entityID
+			args: int32_t moduleID, string field, int32_t entityID ( entityID == 0 then load all
 			type: dispatch
 			res : entityInfo
 		**/
-		select,
+		load,
 		
 		/*!
 			comment: 更新一个实例
-			args: string tableName, int32_t entityID, table entityDirty
+			args: string field, int32_t entityID, table entityDirty
 			type: dispatch
 			res : nil
 		**/

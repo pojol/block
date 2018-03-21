@@ -27,8 +27,12 @@ void gsf::modules::MysqlProxyModule::init()
 		, std::bind(&MysqlProxyModule::eInit, this, std::placeholders::_1, std::placeholders::_2));
 
 	listen(this
-		, eid::dbProxy::query
-		, std::bind(&MysqlProxyModule::eQuery, this, std::placeholders::_1, std::placeholders::_2));
+		, eid::dbProxy::execSql
+		, std::bind(&MysqlProxyModule::eExecSql, this, std::placeholders::_1, std::placeholders::_2));
+
+	listen(this
+		, eid::dbProxy::load
+		, std::bind(&MysqlProxyModule::eLoad, this, std::placeholders::_1, std::placeholders::_2));
 
 	listen(this
 		, eid::dbProxy::insert
@@ -100,10 +104,37 @@ void gsf::modules::MysqlProxyModule::eInit(gsf::ArgsPtr args, gsf::CallbackFunc 
 	}
 }
 
-void gsf::modules::MysqlProxyModule::eSelect(gsf::ArgsPtr args, gsf::CallbackFunc callback /*= nullptr*/)
+void gsf::modules::MysqlProxyModule::eLoad(gsf::ArgsPtr args, gsf::CallbackFunc callback /*= nullptr*/)
 {
+	auto _target = args->pop_moduleid();
 	auto _table = args->pop_string();
 
+	auto _getkey = [&]()->std::string {
+		return args->pop_string();
+	};
+
+	auto _getval = [&](int32_t tag)->std::string {
+		switch (tag) {
+		case gsf::at_int8: return std::to_string(args->pop_i8());
+		case gsf::at_uint8: return std::to_string(args->pop_ui8());
+		case gsf::at_int16: return std::to_string(args->pop_i16());
+		case gsf::at_uint16: return std::to_string(args->pop_ui16());
+		case gsf::at_int32: return std::to_string(args->pop_i32());
+		case gsf::at_uint32: return std::to_string(args->pop_ui32());
+		case gsf::at_int64: return std::to_string(args->pop_i64());
+		case gsf::at_uint64: return std::to_string(args->pop_ui64());
+		case gsf::at_string: return args->pop_string();
+		}
+
+		return "0";
+	};
+
+	if (useCache_) {
+
+	}
+	else {
+
+	}
 }
 
 void gsf::modules::MysqlProxyModule::eInsert(gsf::ArgsPtr args, gsf::CallbackFunc callback /*= nullptr*/)
@@ -232,7 +263,7 @@ void gsf::modules::MysqlProxyModule::eUpdate(gsf::ArgsPtr args, gsf::CallbackFun
 }
 
 
-void gsf::modules::MysqlProxyModule::eQuery(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
+void gsf::modules::MysqlProxyModule::eExecSql(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	auto _moduleid = args->pop_moduleid();
 	std::string queryStr = args->pop_string();

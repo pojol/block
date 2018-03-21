@@ -56,7 +56,7 @@ namespace gsf
 			/*!
 				获取一个实例
 			**/
-			void eSelect(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eLoad(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
 			/*!
 				创建一个实例
 			**/
@@ -69,14 +69,16 @@ namespace gsf
 			/*!
 				执行一条sql语句
 			**/
-			void eQuery(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eExecSql(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
 
 
 			void onTimer(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
 
 		private:
 
+			//! 开启redis
 			bool useCache_ = false;
+			
 			gsf::TimerID rewriteTimeID_ = gsf::TimerNil;
 			const uint32_t executeRewriteDelay_ = 1000 * 60 * 10;
 			
