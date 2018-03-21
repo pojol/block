@@ -107,7 +107,8 @@ void gsf::modules::MysqlProxyModule::eInit(gsf::ArgsPtr args, gsf::CallbackFunc 
 void gsf::modules::MysqlProxyModule::eLoad(gsf::ArgsPtr args, gsf::CallbackFunc callback /*= nullptr*/)
 {
 	auto _target = args->pop_moduleid();
-	auto _table = args->pop_string();
+	auto _field = args->pop_string();
+	auto _key = args->pop_i32();
 
 	auto _getkey = [&]()->std::string {
 		return args->pop_string();
@@ -129,11 +130,31 @@ void gsf::modules::MysqlProxyModule::eLoad(gsf::ArgsPtr args, gsf::CallbackFunc 
 		return "0";
 	};
 
+	auto _uuid = APP.getUUID();
+
 	if (useCache_) {
 
 	}
 	else {
+		//"select * from entity where id = "
+		std::string _sql = "";
+		if (_key == 0) {
+			_sql = "select * from " + _field + ";";
+		}
+		else {
+			_sql = "select * from " + _field + " where id = " + std::to_string(_key) + ";";
+		}
 
+		conn_.query(_target, _uuid, _sql, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
+			auto _callbackPtr = new CallbackInfo();
+			_callbackPtr->ptr_ = std::move(args);
+			_callbackPtr->target_ = target;
+			queue_.push(_callbackPtr);
+		});
+	}
+
+	if (callback) {
+		callback(gsf::makeArgs(_uuid));
 	}
 }
 
