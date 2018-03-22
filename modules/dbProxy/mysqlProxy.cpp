@@ -17,7 +17,6 @@ gsf::modules::MysqlProxyModule::~MysqlProxyModule()
 
 void gsf::modules::MysqlProxyModule::before_init()
 {
-	logM_ = APP.getModule("LogModule");
 }
 
 void gsf::modules::MysqlProxyModule::init()
