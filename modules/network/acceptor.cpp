@@ -2,7 +2,6 @@
 
 #include "sessionMgr.h"
 #include "session.h"
-#include "msgBinder.h"
 
 #ifdef WIN32
 	#include <winsock2.h>
@@ -43,7 +42,6 @@ gsf::network::AcceptorModule::~AcceptorModule()
 void gsf::network::AcceptorModule::before_init()
 {
 	sessionMgr_ = new SessionMgr();
-	binder_ = new MsgBinder();
 
 	eventBasePtr_ = event_base_new();
 }
@@ -60,12 +58,12 @@ void gsf::network::AcceptorModule::init()
 void gsf::network::AcceptorModule::execute()
 {
 	if (sessionMgr_) {
-		sessionMgr_->close();
+		
 	}
 
 	if (eventBasePtr_) {
 		event_base_loop(eventBasePtr_, EVLOOP_ONCE | EVLOOP_NONBLOCK);
-	}	
+	}
 }
 
 void gsf::network::AcceptorModule::shut()
@@ -78,11 +76,6 @@ void gsf::network::AcceptorModule::after_shut()
 	if (sessionMgr_) {
 		delete sessionMgr_;
 		sessionMgr_ = nullptr;
-	}
-
-	if (binder_) {
-		delete binder_;
-		binder_ = nullptr;
 	}
 }
 
@@ -143,27 +136,27 @@ void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, 
 	do
 	{
 		if (network_ptr_->sessionMgr_->find(fd)) {
-			network_ptr_->sessionMgr_->setNeedClose(fd);
-			_ret = eid::error::err_repeated_fd;
+			network_ptr_->sessionMgr_->addClose(fd);
+			APP.ERR_LOG("acceptor", "repeat fd!");
 			break;
 		}
 
 		// check max connect
 		if (network_ptr_->sessionMgr_->curMaxConnect() >= NETWORK_CONNECT_MAX) {
-			_ret = eid::error::err_upper_limit_session;
+			APP.ERR_LOG("acceptor", "max connect!");
 			break;
 		}
 
 		bev = bufferevent_socket_new(network_ptr_->eventBasePtr_, fd, BEV_OPT_CLOSE_ON_FREE);
 		if (!bev) {
-			_ret = eid::error::err_socket_new;
+			APP.ERR_LOG("acceptor", "new socket fail!");
 			break;
 		}
 
 	} while (0);
 
 	if (0 == _ret) {
-		auto _session_ptr = network_ptr_->sessionMgr_->makeSession(fd, network_ptr_->module_id_, network_ptr_->binder_, bev);
+		auto _session_ptr = network_ptr_->sessionMgr_->makeSession(fd, network_ptr_->module_id_, bev);
 		bufferevent_setcb(bev, Session::readCB, NULL, Session::eventCB, _session_ptr.get());
 		bufferevent_enable(bev, EV_READ | EV_WRITE);
 
@@ -198,7 +191,6 @@ void gsf::network::AcceptorModule::eSendMsg(gsf::ModuleID target, gsf::ArgsPtr a
 void gsf::network::AcceptorModule::eKick(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	auto _fd = args->pop_fd();
-
-	sessionMgr_->setNeedClose(_fd);
+	sessionMgr_->addClose(_fd);
 }
 

@@ -89,7 +89,6 @@ namespace gsf
 		virtual void shut();
 		virtual void after_shut();
 
-
 	protected:
 		void setID(gsf::ModuleID id) { module_id_ = id; }
 		gsf::ModuleID module_id_ = gsf::ModuleNil;

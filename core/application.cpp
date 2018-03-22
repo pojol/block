@@ -197,14 +197,14 @@ void gsf::Application::reactorRegist(gsf::ModuleID moduleID, gsf::EventID event)
 	}
 }
 
-void gsf::Application::reactorDispatch(gsf::ModuleID target, gsf::EventID event, gsf::ArgsPtr args)
+void gsf::Application::reactorDispatch(gsf::ModuleID self, gsf::ModuleID target, gsf::EventID event, gsf::ArgsPtr args)
 {
 	//! 找到目标mailbox
 	auto _find = mailboxMap_.find((target * 10000) + event);
 	if (_find != mailboxMap_.end()) {
 
 		auto taskPtr = new TaskInfo();
-		taskPtr->target_ = target;
+		taskPtr->target_ = self;
 		taskPtr->event_ = event;
 		taskPtr->args_ = std::move(args);
 
@@ -241,6 +241,7 @@ void gsf::Application::run()
 					it->init();
 				}
 				else if (state == AppState::EXECUTE) {
+					it->mailboxPtr_->pop();
 					it->execute();
 #ifdef WATCH_PERF
 					t1 = (time_point_cast<microseconds>(system_clock::now()) - _ttime).count();
@@ -355,7 +356,7 @@ void gsf::Application::WARN_LOG(std::string module_name, std::string reason)
 	_str.append(" [reason] ");
 	_str.append(reason);
 	_str.append("\n");
-	reactorDispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogWarning, _str));
+	reactorDispatch(0, getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogWarning, _str));
 }
 
 
@@ -367,7 +368,7 @@ void gsf::Application::ERR_LOG(std::string module_name, std::string reason)
 	_str.append(" [reason] ");
 	_str.append(reason);
 	_str.append("\n");
-	reactorDispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogErr, _str));
+	reactorDispatch(0, getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogErr, _str));
 }
 
 void gsf::Application::INFO_LOG(std::string module_name, std::string reason)
@@ -378,7 +379,7 @@ void gsf::Application::INFO_LOG(std::string module_name, std::string reason)
 	_str.append(" [reason] ");
 	_str.append(reason);
 	_str.append("\n");
-	reactorDispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogInfo, _str));
+	reactorDispatch(0, getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogInfo, _str));
 }
 
 void gsf::Application::DEBUG_LOG(std::string module_name, std::string reason)
@@ -389,7 +390,7 @@ void gsf::Application::DEBUG_LOG(std::string module_name, std::string reason)
 	_str.append(" [reason] ");
 	_str.append(reason);
 	_str.append("\n");
-	reactorDispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogDebug, _str));
+	reactorDispatch(0, getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogDebug, _str));
 }
 
 /*

@@ -23,15 +23,14 @@ void gsf::modules::TimerModule::init()
 {
 	using namespace std::placeholders;
 
-	listen(this, eid::timer::delay_milliseconds	
+	mailboxPtr_->listen(eid::timer::delay_milliseconds
 		, std::bind(&TimerModule::eDelayMilliseconds, this, _1, _2));
-	
-	listen(this, eid::timer::delay_day
+
+	mailboxPtr_->listen(eid::timer::delay_day
 		, std::bind(&TimerModule::eDelayDay, this, _1, _2));
 	
-	listen(this, eid::timer::remove_timer
+	mailboxPtr_->listen(eid::timer::remove_timer
 		, std::bind(&TimerModule::event_remove_timer, this, _1, _2));
-
 }
 
 void gsf::modules::TimerModule::execute()
@@ -46,7 +45,7 @@ void gsf::modules::TimerModule::execute()
 
 		while ((_time_id >> sequence_bit_) < _now)
 		{
-			dispatch(itr->second->target_, eid::timer::timer_arrive, gsf::makeArgs(itr->second->timerid_));
+			mailboxPtr_->dispatch(itr->second->target_, eid::timer::timer_arrive, gsf::makeArgs(itr->second->timerid_));
 			map_.erase(itr);
 
 			if (!map_.empty()) {
@@ -78,34 +77,29 @@ uint64_t gsf::modules::TimerModule::make_timer_id(uint64_t delay)
 	return _tick;
 }
 
-void gsf::modules::TimerModule::eDelayMilliseconds(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
+void gsf::modules::TimerModule::eDelayMilliseconds(gsf::ModuleID target, gsf::ArgsPtr args)
 {
-	uint32_t _sender = args->pop_i32();
+	int _type = args->pop_i32();
 	uint32_t _milliseconds = args->pop_i32();
 
 	auto _tid = make_timer_id(_milliseconds);
 
 	auto _event = std::make_shared<TimerEvent>();
-	_event->target_ = _sender;
+	_event->target_ = target;
 	_event->timerid_ = _tid;
 	
 	assert(map_.find(_tid) == map_.end());
 	map_.insert(std::make_pair(_tid, _event));
 
-	if (callback) {
-		callback(gsf::makeArgs(_tid));
-	}
-	else {
-		APP.WARN_LOG("Timer", "evnet_delay_milliseconds callback is nil !");
-	}
+	mailboxPtr_->dispatch(target, eid::timer::add_timer, gsf::makeArgs(_type, _tid));
 }
 
 
-void gsf::modules::TimerModule::eDelayDay(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
+void gsf::modules::TimerModule::eDelayDay(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	using namespace std::chrono;
 
-	uint32_t _sender = args->pop_i32();
+	int _type = args->pop_i32();
 	uint32_t _hour = args->pop_i32();
 	uint32_t _minute = args->pop_i32();
 
@@ -130,21 +124,16 @@ void gsf::modules::TimerModule::eDelayDay(gsf::ArgsPtr args, gsf::CallbackFunc c
 	auto _tid = make_timer_id(_delay);
 
 	assert(map_.find(_tid) == map_.end());
-	_event->target_ = _sender;
+	_event->target_ = target;
 	_event->timerid_ = _tid;
 
 	map_.insert(std::make_pair(_tid, _event));
 
-	if (callback) {
-		callback(gsf::makeArgs(_tid));
-	}
-	else {
-		APP.WARN_LOG("Timer", "event_delay_day callback is nil !");
-	}
+	mailboxPtr_->dispatch(target, eid::timer::add_timer, gsf::makeArgs(_type, _tid));
 }
 
 
-void gsf::modules::TimerModule::event_remove_timer(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
+void gsf::modules::TimerModule::event_remove_timer(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	uint32_t _sender = args->pop_i32();
 	uint64_t _timer_id = args->pop_ui64();

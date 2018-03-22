@@ -13,7 +13,7 @@ void gsf::Module::init()
 
 void gsf::Module::execute()
 {
-	mailboxPtr_->pop();
+
 }
 
 void gsf::Module::shut()
@@ -62,7 +62,7 @@ void gsf::MailBox::listen(gsf::EventID event, ListenFunc func)
 
 void gsf::MailBox::dispatch(gsf::ModuleID target, gsf::EventID event, gsf::ArgsPtr args)
 {
-	APP.reactorDispatch(target, event, std::move(args));
+	APP.reactorDispatch(basePtr_->getModuleID(), target, event, std::move(args));
 }
 
 void gsf::MailBox::rpc(gsf::EventID event, ArgsPtr args, RpcCallback callback /*= nullptr*/)
@@ -72,9 +72,8 @@ void gsf::MailBox::rpc(gsf::EventID event, ArgsPtr args, RpcCallback callback /*
 
 void gsf::MailBox::pop()
 {
-	while (taskQueue_.empty())
+	while (!taskQueue_.empty())
 	{
-
 		TaskInfo * info = taskQueue_.front();
 
 		auto _itr = listenMap_.find(info->event_);

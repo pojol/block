@@ -1,19 +1,16 @@
 #include "session.h"
 #include "sessionMgr.h"
-#include "msgBinder.h"
 
-#include <core/args.h>
+#include <core/application.h>
 
 #include <iostream>
 
-gsf::network::Session::Session(int fd, int eid, MsgBinder *binder, std::function<void (int)> disconnect_callback, ::bufferevent *bev)
+gsf::network::Session::Session(int fd, int eid, SessionMgr *mgr, ::bufferevent *bev)
     : fd_(fd)
 	, targetM_(eid)
-	, binder_(binder)
 	, bufEvtPtr_(bev)
+	, basePtr_(mgr)
 {
-	disconnCallback_ = disconnect_callback;
-
 	inBufPtr_ = evbuffer_new();
 	if (0 != gsf::SESSION_READ_BUFFER_SIZE) {
 		evbuffer_expand(inBufPtr_, gsf::SESSION_READ_BUFFER_SIZE);
@@ -120,7 +117,8 @@ void gsf::network::Session::read(::bufferevent *bev)
 				args_ptr->push(_msg_id);
 				args_ptr->push_block(_block->buf_ + _block->get_head_size(), _block->get_body_size());
 				
-				dispatch(targetM_, eid::network::recv, std::move(args_ptr));
+				//dispatch(targetM_, eid::network::recv, std::move(args_ptr));
+				basePtr_->addMessage(std::move(args_ptr));
 			}
 			else {
 				if (!_block->check()) { //! 先这样检查下block中的内容是否合法，后面肯定不能这样明文传输
@@ -128,7 +126,8 @@ void gsf::network::Session::read(::bufferevent *bev)
 				}
 
 				std::string _str(_block->buf_ + _block->get_head_size(), _block->get_body_size());	//tmp
-				dispatch(targetM_, eid::network::recv, gsf::makeArgs(fd_, _msg_id, std::move(_str)));
+				//dispatch(targetM_, eid::network::recv, gsf::makeArgs(fd_, _msg_id, std::move(_str)));
+				basePtr_->addMessage(gsf::makeArgs(fd_, _msg_id, std::move(_str)));
 			}
 
 			_buf_len = evbuffer_get_length(inBufPtr_);
@@ -146,12 +145,12 @@ void gsf::network::Session::read(::bufferevent *bev)
 
 void gsf::network::Session::disConnect(int32_t err)
 {
-	disconnCallback_(fd_);
-
-	dispatch(targetM_, eid::network::dis_connect, gsf::makeArgs(fd_, err));
+	basePtr_->addClose(fd_);
+	//dispatch(targetM_, eid::network::dis_connect, gsf::makeArgs(fd_, err));
 }
 
 void gsf::network::Session::newConnect()
 {
-	dispatch(targetM_, eid::network::new_connect, gsf::makeArgs(fd_));
+	basePtr_->addConnect(fd_);
+	//dispatch(targetM_, eid::network::new_connect, gsf::makeArgs(fd_));
 }

@@ -2,7 +2,7 @@
 #define _GSF_MSG_BLOCK_HEADER_
 
 #include <memory>
-#include <core/event.h>
+#include <core/args.h>
 
 namespace gsf
 {

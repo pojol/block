@@ -142,7 +142,7 @@ namespace gsf
 
 	protected:
 		void reactorRegist(gsf::ModuleID moduleID, gsf::EventID event);
-		void reactorDispatch(gsf::ModuleID target, gsf::EventID event, gsf::ArgsPtr args);
+		void reactorDispatch(gsf::ModuleID self, gsf::ModuleID target, gsf::EventID event, gsf::ArgsPtr args);
 
 	private:
 		AppState state_;
@@ -184,7 +184,7 @@ namespace gsf
 		_str.append(std::to_string(time));
 		_str.append(fmt::format(_fmt, std::forward<P>(values)...));
 		
-		reactorDispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogInfo, _str));
+		reactorDispatch(0, getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogInfo, _str));
 	}
 
 	template <typename ...P>
@@ -197,7 +197,7 @@ namespace gsf
 		_str.append(reason);
 		_str.append("\n");
 		_str.append(fmt::format(_fmt, std::forward<P>(values)...));
-		reactorDispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogWarning, _str));
+		reactorDispatch(0, getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogWarning, _str));
 	}
 
 
@@ -211,7 +211,7 @@ namespace gsf
 		_str.append(reason);
 		_str.append("\n");
 		_str.append(fmt::format(_fmt, std::forward<P>(values)...));
-		reactorDispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogErr, _str));
+		reactorDispatch(0, getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogErr, _str));
 	}
 
 
@@ -225,7 +225,7 @@ namespace gsf
 		_str.append(reason);
 		_str.append("\n");
 		_str.append(fmt::format(_fmt, std::forward<P>(values)...));
-		reactorDispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogInfo, _str));
+		reactorDispatch(0, getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogInfo, _str));
 	}
 
 
@@ -240,7 +240,7 @@ namespace gsf
 		_str.append(reason);
 		_str.append("\n");
 		_str.append(fmt::format(_fmt, std::forward<P>(values)...));
-		reactorDispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogDebug, _str));
+		reactorDispatch(0, getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogDebug, _str));
 	}
 
 	template <typename T>

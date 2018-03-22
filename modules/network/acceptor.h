@@ -15,7 +15,6 @@ namespace gsf
 	namespace network
 	{
 		class SessionMgr;
-		class MsgBinder;
 
 		class AcceptorModule
 			: public gsf::Module
@@ -53,8 +52,6 @@ namespace gsf
 			uint32_t moduleID_;
 
 			SessionMgr *sessionMgr_ = nullptr;
-
-			MsgBinder *binder_ = nullptr;
 
 			event_base *eventBasePtr_ = nullptr;
 

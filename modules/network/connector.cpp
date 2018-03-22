@@ -2,7 +2,6 @@
 
 #include "sessionMgr.h"
 #include "session.h"
-#include "msgBinder.h"
 
 #include <event2/buffer.h>
 #include <event2/listener.h>
@@ -39,17 +38,13 @@ gsf::network::ConnectorModule::~ConnectorModule()
 
 void gsf::network::ConnectorModule::before_init()
 {
-	binderPtr_ = new MsgBinder();
-
 	eventBasePtr_ = event_base_new();
+	sessionMgr_ = new SessionMgr();
 
-	listen(this, eid::network::make_connector
-		, std::bind(&ConnectorModule::eMakeConncetor, this
-			, std::placeholders::_1, std::placeholders::_2));
+	using namespace std::placeholders;
 
-	listen(this, eid::network::send
-		, std::bind(&ConnectorModule::eSendMsg, this
-			, std::placeholders::_1, std::placeholders::_2));
+	mailboxPtr_->listen(eid::network::make_connector, std::bind(&ConnectorModule::eMakeConncetor, this, _1, _2));
+	mailboxPtr_->listen(eid::network::send, std::bind(&ConnectorModule::eSendMsg, this, _1, _2));
 }
 
 void gsf::network::ConnectorModule::init()
@@ -63,6 +58,9 @@ void gsf::network::ConnectorModule::execute()
 {
 	//! 先处理断连
 
+	//
+	sessionMgr_->exec(mailboxPtr_);
+
 	if (eventBasePtr_) {
 		event_base_loop(eventBasePtr_, EVLOOP_ONCE | EVLOOP_NONBLOCK);
 	}
@@ -70,23 +68,15 @@ void gsf::network::ConnectorModule::execute()
 
 void gsf::network::ConnectorModule::shut()
 {
-	wipeout(this);
-
 	bufferevent_free(bufferEventPtr_);
 	event_base_free(eventBasePtr_);
 }
 
 void gsf::network::ConnectorModule::after_shut()
 {
-	if (binderPtr_) {
-		delete binderPtr_;
-		binderPtr_ = nullptr;
-	}
-
-	boardcast(eid::module_shut_succ, gsf::makeArgs(getModuleID()));
 }
 
-void gsf::network::ConnectorModule::eMakeConncetor(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
+void gsf::network::ConnectorModule::eMakeConncetor(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	uint32_t _module_id = args->pop_i32();
 	std::string _ip = args->pop_string();
@@ -123,7 +113,7 @@ void gsf::network::ConnectorModule::eMakeConncetor(gsf::ArgsPtr args, gsf::Callb
 		_fd = bufferevent_getfd(bufferEventPtr_);
 	}
 
-	sessionPtr_ = std::make_shared<Session>(_fd, _module_id, binderPtr_, std::bind(&ConnectorModule::needCloseSession, this, std::placeholders::_1), bufferEventPtr_);
+	sessionPtr_ = std::make_shared<Session>(_fd, _module_id, sessionMgr_, bufferEventPtr_);
 	bufferevent_setcb(bufferEventPtr_, Session::readCB, NULL, Session::eventCB, sessionPtr_.get());
 	bufferevent_enable(bufferEventPtr_, EV_READ | EV_WRITE);
 
@@ -137,7 +127,7 @@ void gsf::network::ConnectorModule::needCloseSession(int fd)
 }
 
 
-void gsf::network::ConnectorModule::eSendMsg(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
+void gsf::network::ConnectorModule::eSendMsg(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	auto _msg = args->pop_msgid();
 	std::string _str = "";

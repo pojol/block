@@ -52,9 +52,8 @@ void gsf::modules::LogModule::before_init()
 
 	using namespace std::placeholders;
 
-	listen(this, eid::log::print, std::bind(&LogModule::ePrint, this, _1, _2));
-
-	listen(this, eid::log::nodebug, std::bind(&LogModule::eChangeFlag, this, _1, _2));
+	mailboxPtr_->listen(eid::log::print, std::bind(&LogModule::ePrint, this, _1, _2));
+	mailboxPtr_->listen(eid::log::nodebug, std::bind(&LogModule::eChangeFlag, this, _1, _2));
 
 	auto exeName = APP.getAppName();
 	initImpl(exeName);
@@ -94,7 +93,7 @@ void gsf::modules::LogModule::initImpl(const std::string &exe_name)
 }
 
 
-void gsf::modules::LogModule::ePrint(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
+void gsf::modules::LogModule::ePrint(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	//std::cout << args->to_string() << std::endl;
 	auto _lv = args->pop_ui16();
@@ -119,7 +118,7 @@ void gsf::modules::LogModule::ePrint(gsf::ArgsPtr args, gsf::CallbackFunc callba
 	}
 }
 
-void gsf::modules::LogModule::eChangeFlag(gsf::ArgsPtr args, gsf::CallbackFunc callback /* =nullptr */)
+void gsf::modules::LogModule::eChangeFlag(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	auto _flag = args->pop_i32();
 	if (0 == _flag) {

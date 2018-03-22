@@ -2,7 +2,6 @@
 #define _GSF_MYSQL_PROXY_HEADER_
 
 #include <core/module.h>
-#include <core/event.h>
 
 #include "mysqlConnect.h"
 #include "redisConnect.h"
@@ -14,7 +13,6 @@ namespace gsf
 	{
 		class MysqlProxyModule
 			: public gsf::Module
-			, public gsf::IEvent
 		{
 		public:
 			MysqlProxyModule();
@@ -36,7 +34,7 @@ namespace gsf
 
 		private:
 			
-			void eInit(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eInit(gsf::ModuleID target, gsf::ArgsPtr args);
 
 			/*!
 				select, query 返回
@@ -56,33 +54,39 @@ namespace gsf
 			/*!
 				获取一个实例
 			**/
-			void eLoad(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eLoad(gsf::ModuleID target, gsf::ArgsPtr args);
 			/*!
 				创建一个实例
 			**/
-			void eInsert(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eInsert(gsf::ModuleID target, gsf::ArgsPtr args);
 			/*!
 				更新一个实例
 			**/
-			void eUpdate(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eUpdate(gsf::ModuleID target, gsf::ArgsPtr args);
 
 			/*!
 				执行一条sql语句
 			**/
-			void eExecSql(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eExecSql(gsf::ModuleID target, gsf::ArgsPtr args);
 
 
-			void onTimer(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void onTimer(gsf::ModuleID target, gsf::ArgsPtr args);
 
 		private:
 
 			//! 开启redis
 			bool useCache_ = false;
 			
-			gsf::TimerID rewriteTimeID_ = gsf::TimerNil;
+			enum TimerType
+			{
+				tt_rewrite,
+				tt_command
+			};
+
+			std::pair<TimerType, gsf::TimerID> rewritePair_;
 			const uint32_t executeRewriteDelay_ = 1000 * 60 * 10;
 			
-			gsf::TimerID commandTimeID_ = gsf::TimerNil;
+			std::pair<TimerType, gsf::TimerID> commandPair_;
 			const uint32_t executeCommandDelay_ = 1000; //ms
 
 			gsf::ModuleID timerM_ = gsf::ModuleNil;
