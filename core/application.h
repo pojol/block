@@ -1,9 +1,9 @@
 #ifndef _GSF_APPLICATION_HEADER_
 #define _GSF_APPLICATION_HEADER_
 
-#include "event.h"
 #include "module.h"
 #include "single.h"
+#include "../depend/event_list.h"
 
 #include <list>
 #include <unordered_map>
@@ -35,9 +35,8 @@ namespace gsf
 	};
 
 	class Application : public gsf::utils::Singleton<Application>
-		, public IEvent
 	{
-
+		friend struct MailBox;
 	public:
 		Application();
 
@@ -141,6 +140,10 @@ namespace gsf
 		void pushFrame(uint64_t index, Frame frame);
 		void popFrame();
 
+	protected:
+		void reactorRegist(gsf::ModuleID moduleID, gsf::EventID event);
+		void reactorDispatch(gsf::ModuleID target, gsf::EventID event, gsf::ArgsPtr args);
+
 	private:
 		AppState state_;
 		int sequence_ = 0;
@@ -152,6 +155,8 @@ namespace gsf
 		std::unordered_map<std::string, int32_t> module_name_map_;
 
 		std::multimap<uint64_t, Frame> halfway_frame_;
+
+		std::unordered_map<gsf::EventID, MailBoxPtr> mailboxMap_;
 
 		bool shutdown_;
 
@@ -178,7 +183,8 @@ namespace gsf
 		_str.append(",time:");
 		_str.append(std::to_string(time));
 		_str.append(fmt::format(_fmt, std::forward<P>(values)...));
-		dispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogInfo, _str));
+		
+		reactorDispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogInfo, _str));
 	}
 
 	template <typename ...P>
@@ -191,7 +197,7 @@ namespace gsf
 		_str.append(reason);
 		_str.append("\n");
 		_str.append(fmt::format(_fmt, std::forward<P>(values)...));
-		dispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogWarning, _str));
+		reactorDispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogWarning, _str));
 	}
 
 
@@ -205,7 +211,7 @@ namespace gsf
 		_str.append(reason);
 		_str.append("\n");
 		_str.append(fmt::format(_fmt, std::forward<P>(values)...));
-		dispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogErr, _str));
+		reactorDispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogErr, _str));
 	}
 
 
@@ -219,7 +225,7 @@ namespace gsf
 		_str.append(reason);
 		_str.append("\n");
 		_str.append(fmt::format(_fmt, std::forward<P>(values)...));
-		dispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogInfo, _str));
+		reactorDispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogInfo, _str));
 	}
 
 
@@ -234,7 +240,7 @@ namespace gsf
 		_str.append(reason);
 		_str.append("\n");
 		_str.append(fmt::format(_fmt, std::forward<P>(values)...));
-		dispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogDebug, _str));
+		reactorDispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogDebug, _str));
 	}
 
 	template <typename T>

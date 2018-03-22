@@ -50,19 +50,11 @@ void gsf::network::AcceptorModule::before_init()
 
 void gsf::network::AcceptorModule::init()
 {
-	listen(this, eid::network::make_acceptor
-		, std::bind(&AcceptorModule::eMakeAcceptor, this
-		, std::placeholders::_1, std::placeholders::_2));
+	using namespace std::placeholders;
 
-	listen(this, eid::network::send
-		, std::bind(&AcceptorModule::eSendMsg, this
-		, std::placeholders::_1, std::placeholders::_2));
-
-	listen(this, eid::network::kick_connect
-		, std::bind(&AcceptorModule::eKick, this
-		, std::placeholders::_1, std::placeholders::_2));
-
-	//boardcast(eid::base::module_init_succ, gsf::makeArgs(get_module_id()));
+	mailboxPtr_->listen(eid::network::make_acceptor, std::bind(&AcceptorModule::eMakeAcceptor, this, _1, _2));
+	mailboxPtr_->listen(eid::network::send, std::bind(&AcceptorModule::eSendMsg, this, _1, _2));
+	mailboxPtr_->listen(eid::network::kick_connect, std::bind(&AcceptorModule::eKick, this, _1, _2));
 }
 
 void gsf::network::AcceptorModule::execute()
@@ -73,12 +65,11 @@ void gsf::network::AcceptorModule::execute()
 
 	if (eventBasePtr_) {
 		event_base_loop(eventBasePtr_, EVLOOP_ONCE | EVLOOP_NONBLOCK);
-	}
+	}	
 }
 
 void gsf::network::AcceptorModule::shut()
 {
-	wipeout(this);
 	evconnlistener_free(acceptListenerPtr_);
 }
 
@@ -95,7 +86,7 @@ void gsf::network::AcceptorModule::after_shut()
 	}
 }
 
-void gsf::network::AcceptorModule::eMakeAcceptor(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
+void gsf::network::AcceptorModule::eMakeAcceptor(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	if (nullptr == acceptListenerPtr_) {
 		uint32_t _module_id = args->pop_i32();
@@ -180,7 +171,7 @@ void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, 
 	}
 }
 
-void gsf::network::AcceptorModule::eSendMsg(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
+void gsf::network::AcceptorModule::eSendMsg(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	assert(nullptr != acceptListenerPtr_);
 
@@ -204,7 +195,7 @@ void gsf::network::AcceptorModule::eSendMsg(gsf::ArgsPtr args, gsf::CallbackFunc
 	}
 }
 
-void gsf::network::AcceptorModule::eKick(gsf::ArgsPtr args, gsf::CallbackFunc callback /*= nullptr*/)
+void gsf::network::AcceptorModule::eKick(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	auto _fd = args->pop_fd();
 

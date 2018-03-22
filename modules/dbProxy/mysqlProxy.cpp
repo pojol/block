@@ -17,6 +17,7 @@ gsf::modules::MysqlProxyModule::~MysqlProxyModule()
 
 void gsf::modules::MysqlProxyModule::before_init()
 {
+
 }
 
 void gsf::modules::MysqlProxyModule::init()

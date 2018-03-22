@@ -34,8 +34,8 @@ std::string gsf::Application::getAppName() const
 void gsf::Application::initCfg(const gsf::AppConfig &cfg)
 {
 	cfg_ = cfg;
-
-	new gsf::EventModule;
+	
+	//! 
 	new gsf::ArgsPool;
 	gsf::ArgsPool::get_ref().make(cfg.pool_args_count);
 }
@@ -181,6 +181,42 @@ void gsf::Application::popFrame()
 
 }
 
+void gsf::Application::reactorRegist(gsf::ModuleID moduleID, gsf::EventID event)
+{
+	auto _find = std::find_if(module_list_.begin(), module_list_.end(), [&](std::list<Module *>::value_type it) {
+		return (it->getModuleID() == moduleID);
+	});
+
+	if (_find != module_list_.end()) {
+
+		mailboxMap_.insert(std::make_pair((moduleID * 10000) + event, (*_find)->mailboxPtr_));
+
+	}
+	else {
+		WARN_LOG("app", "regist event, can't find module", " {}", moduleID);
+	}
+}
+
+void gsf::Application::reactorDispatch(gsf::ModuleID target, gsf::EventID event, gsf::ArgsPtr args)
+{
+	//! 找到目标mailbox
+	auto _find = mailboxMap_.find((target * 10000) + event);
+	if (_find != mailboxMap_.end()) {
+
+		auto taskPtr = new TaskInfo();
+		taskPtr->target_ = target;
+		taskPtr->event_ = event;
+		taskPtr->args_ = std::move(args);
+
+		//! 将task加入到mailbox的FIFO队列
+		_find->second->push(taskPtr);
+	}
+	else {
+		WARN_LOG("app", "dispatch, can't find event", " module={} event={}", target, event);
+		return;
+	}
+}
+
 void gsf::Application::run()
 {
 	//! run
@@ -230,11 +266,11 @@ void gsf::Application::run()
 			//	unregist_list_.pop_front();
 			//}
 
-			static_cast<Module*>(gsf::EventModule::get_ptr())->execute();
+			//static_cast<Module*>(gsf::EventModule::get_ptr())->execute();
 #ifdef WATCH_PERF
-			t1 = (time_point_cast<microseconds>(system_clock::now()) - _ttime).count();
-			static_cast<Module*>(gsf::EventModule::get_ptr())->add_tick_consume(t1);
-			_ttime = time_point_cast<microseconds>(system_clock::now());
+			//t1 = (time_point_cast<microseconds>(system_clock::now()) - _ttime).count();
+			//static_cast<Module*>(gsf::EventModule::get_ptr())->add_tick_consume(t1);
+			//_ttime = time_point_cast<microseconds>(system_clock::now());
 #endif // WATCH_PERF
 		};
 
@@ -319,7 +355,7 @@ void gsf::Application::WARN_LOG(std::string module_name, std::string reason)
 	_str.append(" [reason] ");
 	_str.append(reason);
 	_str.append("\n");
-	dispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogWarning, _str));
+	reactorDispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogWarning, _str));
 }
 
 
@@ -331,7 +367,7 @@ void gsf::Application::ERR_LOG(std::string module_name, std::string reason)
 	_str.append(" [reason] ");
 	_str.append(reason);
 	_str.append("\n");
-	dispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogErr, _str));
+	reactorDispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogErr, _str));
 }
 
 void gsf::Application::INFO_LOG(std::string module_name, std::string reason)
@@ -342,7 +378,7 @@ void gsf::Application::INFO_LOG(std::string module_name, std::string reason)
 	_str.append(" [reason] ");
 	_str.append(reason);
 	_str.append("\n");
-	dispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogInfo, _str));
+	reactorDispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogInfo, _str));
 }
 
 void gsf::Application::DEBUG_LOG(std::string module_name, std::string reason)
@@ -353,7 +389,7 @@ void gsf::Application::DEBUG_LOG(std::string module_name, std::string reason)
 	_str.append(" [reason] ");
 	_str.append(reason);
 	_str.append("\n");
-	dispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogDebug, _str));
+	reactorDispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogDebug, _str));
 }
 
 /*
