@@ -14,30 +14,28 @@
 <br/>
 
 ## 概览
-#### Event
+#### App
+> 每个✦[App](https://github.com/pojol/gsf/wiki/Core_Application)代理一个进程，管理所有 *Module* 的创建，销毁，还有状态变化。
+<br/>
+
+#### Module & Mailbox
 > 使用✦[Event](https://github.com/pojol/gsf/wiki/Core_Events)来处理 *gsf* 中 ✦[Module](https://github.com/pojol/gsf/wiki/Core_Module) 之间的交互，这种方式可以保证 *module* 之间的天然独立性。这种独立性，能显著的降低编码的复杂度和对数据分片的处理难度。
+> 每个Module都持有一个mailbox，负责订阅|发送事件，外部发送过来的消息都会存放在Module的Mailbox的FIFO队列中，每帧会自动取出。
 
 ✦ [listen](https://github.com/pojol/gsf/wiki/Core_Events) <br/>
 ✦ [dispatch](https://github.com/pojol/gsf/wiki/Core_Events) <br/>
 ✦ [rpc](https://github.com/pojol/gsf/wiki/Core_Events) <br/>
 <br/>
 
-getEv
-> 通过这个接口可以获得本进程内的 *event* 实例（函数指针），在需要高频调用的时候可以使用这个接口优化掉事件过程中的损耗（但这个接口会一定程度侵入Module），在性能遇到性能瓶颈并且没有其他优化方案可选之前不太推荐使用。 在使用 *event* 实例时一定要注意所在模块销毁后**解除依赖的引用**
-
-
 #### Args
 > 用于包装 *event* 的内容，✦[Args](https://github.com/pojol/gsf/wiki/Core_Args)由[ArgsPool](https://github.com/pojol/gsf/wiki/Core_ArgsPool)进行分配和回收。
 
-
-#### App
-> 每个✦[App](https://github.com/pojol/gsf/wiki/Core_Application)代理一个进程，管理所有 *Module* 的创建，销毁，还有状态变化。
 ***
 
 #### Modules
 * [network](https://github.com/pojol/gsf/wiki/Modules_Network_TCP)
 * [distributed](https://github.com/pojol/gsf/wiki/Modules_Distributed)
-* [luaProxy](https://github.com/pojol/gsf/wiki/Modules_LuaProxy)
+* [luaAdapter](https://github.com/pojol/gsf/wiki/Modules_LuaProxy)
 * [timer](https://github.com/pojol/gsf/wiki/Modules_Timer)
 * [dbProxy](https://github.com/pojol/gsf/wiki/Guide_Mysql)
 * [logger](https://github.com/pojol/gsf/wiki/Module_Logger)
