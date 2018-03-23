@@ -137,10 +137,10 @@ void gsf::modules::MysqlProxyModule::eLoad(gsf::ModuleID target, gsf::ArgsPtr ar
 			_sql = "select * from " + _field + " where id = " + std::to_string(_key) + ";";
 		}
 
-		conn_.query(target, _operator, _sql, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
+		conn_.query(target, _operator, _sql, [&](gsf::ModuleID _target, gsf::ArgsPtr args) {
 			auto _callbackPtr = new CallbackInfo();
 			_callbackPtr->ptr_ = std::move(args);
-			_callbackPtr->target_ = target;
+			_callbackPtr->target_ = _target;
 			queue_.push(_callbackPtr);
 		});
 	}
@@ -201,10 +201,10 @@ void gsf::modules::MysqlProxyModule::eInsert(gsf::ModuleID target, gsf::ArgsPtr 
 		conn_.query(0, _oper, _sql, nullptr);
 
 		// 这里要先设计下各个接口的返回样式
-		conn_.query(target, _oper, "select last_insert_id()", [&](gsf::ModuleID target, gsf::ArgsPtr args) {
+		conn_.query(target, _oper, "select last_insert_id()", [&](gsf::ModuleID _target, gsf::ArgsPtr args) {
 			auto _callbackPtr = new CallbackInfo();
 			_callbackPtr->ptr_ = std::move(args);
-			_callbackPtr->target_ = target;
+			_callbackPtr->target_ = _target;
 			queue_.push(_callbackPtr);
 		});
 	}
@@ -268,15 +268,15 @@ void gsf::modules::MysqlProxyModule::eUpdate(gsf::ModuleID target, gsf::ArgsPtr 
 
 void gsf::modules::MysqlProxyModule::eExecSql(gsf::ModuleID target, gsf::ArgsPtr args)
 {
-	auto _oper = args->pop_moduleid();
+	auto _oper = args->pop_i32();
 	std::string queryStr = args->pop_string();
 
 	using namespace std::placeholders;
 
-	conn_.query(target, _oper, queryStr, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
+	conn_.query(target, _oper, queryStr, [&](gsf::ModuleID _target, gsf::ArgsPtr args) {
 		auto _callbackPtr = new CallbackInfo();
 		_callbackPtr->ptr_ = std::move(args);
-		_callbackPtr->target_ = target;
+		_callbackPtr->target_ = _target;
 		queue_.push(_callbackPtr);
 	});
 }

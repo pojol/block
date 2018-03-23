@@ -184,7 +184,7 @@ void gsf::modules::MysqlConnect::query(gsf::ModuleID target, int oper, const std
 
 	auto errf = [&](const std::string &err) {
 		if (callback) {
-			callback(target, gsf::makeArgs(oper, false, int32_t(-1), err));
+			callback(target, gsf::makeArgs(oper, false, 0, 0, err));
 		}
 		else {
 			APP.ERR_LOG("dbProxy", "query", " {}", err);
@@ -199,12 +199,12 @@ void gsf::modules::MysqlConnect::query(gsf::ModuleID target, int oper, const std
 	result = mysql_store_result(basePtr_);
 	if (nullptr == result) {
 		if (callback) {
-			callback(target, gsf::makeArgs(oper, true, int32_t(-1), "success!"));
+			callback(target, gsf::makeArgs(oper, true, 0, 0, "success!"));
 		}
 		return;
 	}
 
-	uint64_t rowCount = mysql_affected_rows(basePtr_);
+	int32_t rowCount = static_cast<int32_t>(mysql_affected_rows(basePtr_));
 	if (0 == rowCount) {
 		mysql_free_result(result);
 	}
@@ -228,6 +228,7 @@ void gsf::modules::MysqlConnect::query(gsf::ModuleID target, int oper, const std
 		auto argsPtr = gsf::ArgsPool::get_ref().get();
 		argsPtr->push(oper);
 		argsPtr->push(true);
+		argsPtr->push(rowCount);
 		argsPtr->push(_progress);
 
 		for (size_t col = 0; col < fieldCount; col++)
@@ -259,9 +260,6 @@ void gsf::modules::MysqlConnect::query(gsf::ModuleID target, int oper, const std
 
 		row = mysql_fetch_row(result);
 	}
-
-	// eof
-	callback(target, gsf::makeArgs(oper, true, -1));
 
 	if (nullptr != result)
 	{
