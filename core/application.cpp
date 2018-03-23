@@ -100,11 +100,6 @@ int64_t gsf::Application::getUUID()
 	return uuid();
 }
 
-std::string gsf::Application::getScriptPath() const
-{
-	return cfg_.scriptPath_;
-}
-
 void gsf::Application::pushFrame(uint64_t index, Frame frame)
 {
 	halfway_frame_.insert(std::make_pair(index, frame));
@@ -238,6 +233,7 @@ void gsf::Application::run()
 					it->before_init();
 				}
 				else if (state == AppState::INIT) {
+					it->mailboxPtr_->pop();
 					it->init();
 				}
 				else if (state == AppState::EXECUTE) {
@@ -250,6 +246,7 @@ void gsf::Application::run()
 #endif // WATCH_PERF
 				}
 				else if (state == AppState::SHUT) {
+					it->mailboxPtr_->pop();
 					it->shut();
 				}
 				else if (state == AppState::AFTER_SHUT) {

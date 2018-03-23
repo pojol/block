@@ -20,10 +20,12 @@ namespace gsf
 			TimerEvent()
 				: target_(0)
 				, timerid_(0)
+				, tag_(0)
 			{}
 
 			uint32_t target_;
 			uint64_t timerid_;
+			int32_t tag_;
 		};
 
 		typedef std::shared_ptr<TimerEvent> TimerEventPtr;
@@ -51,7 +53,7 @@ namespace gsf
 			//void delay_week(std::tuple<gsf::utils::Any> args, gsf::EventHandlerPtr callback);
 			//void delay_month(std::tuple<gsf::utils::Any> args, gsf::EventHandlerPtr callback);
 
-			void event_remove_timer(gsf::ModuleID target, gsf::ArgsPtr args);
+			void eRemoveTimer(gsf::ModuleID target, gsf::ArgsPtr args);
 		private:
 	
 			uint64_t get_system_tick();

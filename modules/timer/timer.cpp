@@ -30,7 +30,7 @@ void gsf::modules::TimerModule::init()
 		, std::bind(&TimerModule::eDelayDay, this, _1, _2));
 	
 	mailboxPtr_->listen(eid::timer::remove_timer
-		, std::bind(&TimerModule::event_remove_timer, this, _1, _2));
+		, std::bind(&TimerModule::eRemoveTimer, this, _1, _2));
 }
 
 void gsf::modules::TimerModule::execute()
@@ -45,7 +45,7 @@ void gsf::modules::TimerModule::execute()
 
 		while ((_time_id >> sequence_bit_) < _now)
 		{
-			mailboxPtr_->dispatch(itr->second->target_, eid::timer::timer_arrive, gsf::makeArgs(itr->second->timerid_));
+			mailboxPtr_->dispatch(itr->second->target_, eid::timer::timer_arrive, gsf::makeArgs(itr->second->tag_));
 			map_.erase(itr);
 
 			if (!map_.empty()) {
@@ -79,7 +79,7 @@ uint64_t gsf::modules::TimerModule::make_timer_id(uint64_t delay)
 
 void gsf::modules::TimerModule::eDelayMilliseconds(gsf::ModuleID target, gsf::ArgsPtr args)
 {
-	int _type = args->pop_i32();
+	int _tag = args->pop_i32();
 	uint32_t _milliseconds = args->pop_i32();
 
 	auto _tid = make_timer_id(_milliseconds);
@@ -87,11 +87,10 @@ void gsf::modules::TimerModule::eDelayMilliseconds(gsf::ModuleID target, gsf::Ar
 	auto _event = std::make_shared<TimerEvent>();
 	_event->target_ = target;
 	_event->timerid_ = _tid;
+	_event->tag_ = _tag;
 	
 	assert(map_.find(_tid) == map_.end());
 	map_.insert(std::make_pair(_tid, _event));
-
-	mailboxPtr_->dispatch(target, eid::timer::add_timer, gsf::makeArgs(_type, _tid));
 }
 
 
@@ -99,7 +98,7 @@ void gsf::modules::TimerModule::eDelayDay(gsf::ModuleID target, gsf::ArgsPtr arg
 {
 	using namespace std::chrono;
 
-	int _type = args->pop_i32();
+	int _tag = args->pop_i32();
 	uint32_t _hour = args->pop_i32();
 	uint32_t _minute = args->pop_i32();
 
@@ -126,18 +125,27 @@ void gsf::modules::TimerModule::eDelayDay(gsf::ModuleID target, gsf::ArgsPtr arg
 	assert(map_.find(_tid) == map_.end());
 	_event->target_ = target;
 	_event->timerid_ = _tid;
+	_event->tag_ = _tag;
 
 	map_.insert(std::make_pair(_tid, _event));
-
-	mailboxPtr_->dispatch(target, eid::timer::add_timer, gsf::makeArgs(_type, _tid));
 }
 
 
-void gsf::modules::TimerModule::event_remove_timer(gsf::ModuleID target, gsf::ArgsPtr args)
+void gsf::modules::TimerModule::eRemoveTimer(gsf::ModuleID target, gsf::ArgsPtr args)
 {
-	uint32_t _sender = args->pop_i32();
-	uint64_t _timer_id = args->pop_ui64();
+	uint32_t _tag = args->pop_i32();
 
+	//! ..
+	for (TimerMap::iterator itr = map_.begin(); itr != map_.end(); ++itr)
+	{
+		if (itr->second->target_ == target && itr->second->tag_ == _tag) {
+			map_.erase(itr);
+			return;
+		}
+	}
+
+	APP.WARN_LOG("TimerModule", "removeTimer can't find tag", "target:{} tag:{}\n", target, _tag);
+/* 
 	auto itr = map_.find(_timer_id);
 	if (itr != map_.end()) {
 		map_.erase(itr);
@@ -145,4 +153,5 @@ void gsf::modules::TimerModule::event_remove_timer(gsf::ModuleID target, gsf::Ar
 	else {
 		APP.WARN_LOG("TimerModule", "event_remove_timer can't find remove timer", "{}\n", _timer_id);
 	}
+	*/
 }

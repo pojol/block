@@ -58,7 +58,7 @@ void gsf::network::AcceptorModule::init()
 void gsf::network::AcceptorModule::execute()
 {
 	if (sessionMgr_) {
-		
+		sessionMgr_->exec(mailboxPtr_);
 	}
 
 	if (eventBasePtr_) {
@@ -82,11 +82,10 @@ void gsf::network::AcceptorModule::after_shut()
 void gsf::network::AcceptorModule::eMakeAcceptor(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	if (nullptr == acceptListenerPtr_) {
-		uint32_t _module_id = args->pop_i32();
 		std::string _ip = args->pop_string();
 		uint32_t _port = args->pop_i32();
 
-		module_id_ = _module_id;	//! 绑定代理Module的id
+		module_id_ = target;	//! 绑定代理Module的id
 		accept_bind(_ip, _port);
 	}
 	else {

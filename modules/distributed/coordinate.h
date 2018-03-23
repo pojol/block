@@ -2,7 +2,6 @@
 #define _COORDINATE_HEADER_
 
 #include <core/module.h>
-#include <core/event.h>
 
 #include <string>
 #include <vector>
@@ -39,7 +38,6 @@ namespace gsf
 		*/
 		class CoodinatorModule
 			: public gsf::Module
-			, public gsf::IEvent
 		{
 		public:
 
@@ -50,10 +48,10 @@ namespace gsf
 
 
 		private:
-			void eCoordinatAdjustWeight(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
-			void eCoordinatSelect(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
-			void eCoordinatRegist(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
-			void eCoordinatUnregist(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eCoordinatAdjustWeight(gsf::ModuleID target, gsf::ArgsPtr args);
+			void eCoordinatSelect(gsf::ModuleID target, gsf::ArgsPtr args);
+			void eCoordinatRegist(gsf::ModuleID target, gsf::ArgsPtr args);
+			void eCoordinatUnregist(gsf::ModuleID target, gsf::ArgsPtr args);
 
 			void adjustModuleWeight(int32_t nod_id, const std::string &module_name, gsf::ModuleID module_id, int32_t characteristic, int32_t weight);
 

@@ -90,22 +90,11 @@ void gsf::modules::MysqlProxyModule::eInit(gsf::ModuleID target, gsf::ArgsPtr ar
 		redisPtr_ = std::make_shared<RedisProxy>();
 		redisPtr_->init();
 
-		rewritePair_.first = TimerType::tt_rewrite;
-		commandPair_.first = TimerType::tt_command;
-
+		
 		mailboxPtr_->listen(eid::timer::timer_arrive, std::bind(&MysqlProxyModule::onTimer, this, std::placeholders::_1, std::placeholders::_2));
-		mailboxPtr_->listen(eid::timer::add_timer, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
-			auto _type = args->pop_i32();
-			if (_type == TimerType::tt_command) {
-				commandPair_.second = args->pop_timerid();
-			}
-			else if (_type == TimerType::tt_rewrite) {
-				rewritePair_.second = args->pop_timerid();
-			}
-		});
 
-		mailboxPtr_->dispatch(timerM_, eid::timer::delay_milliseconds, gsf::makeArgs(commandPair_.first, executeCommandDelay_));
-		mailboxPtr_->dispatch(timerM_, eid::timer::delay_milliseconds, gsf::makeArgs(rewritePair_.first, executeRewriteDelay_));
+		mailboxPtr_->dispatch(timerM_, eid::timer::delay_milliseconds, gsf::makeArgs(TimerType::tt_command, executeCommandDelay_));
+		mailboxPtr_->dispatch(timerM_, eid::timer::delay_milliseconds, gsf::makeArgs(TimerType::tt_rewrite, executeRewriteDelay_));
 	}
 }
 
@@ -294,19 +283,17 @@ void gsf::modules::MysqlProxyModule::eExecSql(gsf::ModuleID target, gsf::ArgsPtr
 
 void gsf::modules::MysqlProxyModule::onTimer(gsf::ModuleID target, gsf::ArgsPtr args)
 {
-	gsf::TimerID _tid = args->pop_ui64();
+	int32_t _tag = args->pop_i32();
 
-	if (_tid == commandPair_.second) {
+	if (_tag == TimerType::tt_command) {
 
 		redisPtr_->execCommand();
-
-		mailboxPtr_->dispatch(timerM_, eid::timer::delay_milliseconds, gsf::makeArgs(commandPair_.first, executeCommandDelay_));
+		mailboxPtr_->dispatch(timerM_, eid::timer::delay_milliseconds, gsf::makeArgs(TimerType::tt_command, executeCommandDelay_));
 	}
-	else if (_tid == rewritePair_.second) {
+	else if (_tag == TimerType::tt_rewrite) {
 
 		redisPtr_->execRewrite();
-
-		mailboxPtr_->dispatch(timerM_, eid::timer::delay_milliseconds, gsf::makeArgs(rewritePair_.first, executeRewriteDelay_));
+		mailboxPtr_->dispatch(timerM_, eid::timer::delay_milliseconds, gsf::makeArgs(TimerType::tt_rewrite, executeRewriteDelay_));
 	}
 
 }

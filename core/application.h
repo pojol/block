@@ -31,7 +31,6 @@ namespace gsf
 		bool is_watch_pref = false;
 		std::string name = "default";
 		int32_t machine_ = 0;
-		std::string scriptPath_ = "";
 	};
 
 	class Application : public gsf::utils::Singleton<Application>
@@ -59,11 +58,6 @@ namespace gsf
 			获得在集群内产生的唯一ID
 		**/
 		int64_t getUUID();
-
-		/**!
-			获得脚本根目录
-		*/
-		std::string getScriptPath() const;
 
 		/*!
 			初始化进程

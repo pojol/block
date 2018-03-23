@@ -82,11 +82,7 @@ namespace gsf
 				tt_rewrite,
 				tt_command
 			};
-
-			std::pair<TimerType, gsf::TimerID> rewritePair_;
 			const uint32_t executeRewriteDelay_ = 1000 * 60 * 10;
-			
-			std::pair<TimerType, gsf::TimerID> commandPair_;
 			const uint32_t executeCommandDelay_ = 1000; //ms
 
 			gsf::ModuleID timerM_ = gsf::ModuleNil;

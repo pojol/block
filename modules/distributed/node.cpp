@@ -1,4 +1,4 @@
-#include "node.h"
+﻿#include "node.h"
 
 #include <modules/network/acceptor.h>
 #include <modules/network/connector.h>
@@ -39,15 +39,15 @@ void gsf::modules::NodeModule::before_init()
 	assert(timerM_ != gsf::ModuleNil);
 
 	using namespace std::placeholders;
-	listen(this, eid::node::node_create, std::bind(&NodeModule::eCreateNode, this, _1, _2));
-	listen(this, eid::node::node_regist, std::bind(&NodeModule::eRegistNode, this, _1, _2));
+	mailboxPtr_->listen(eid::node::node_create, std::bind(&NodeModule::eCreateNode, this, _1, _2));
+	mailboxPtr_->listen(eid::node::node_regist, std::bind(&NodeModule::eRegistNode, this, _1, _2));
 
-	listenRpc(std::bind(&NodeModule::eventRpc, this, _1, _2, _3, _4));
+	//listenRpc(std::bind(&NodeModule::eventRpc, this, _1, _2, _3, _4));
 }
 
 void gsf::modules::NodeModule::init()
 {
-	listen(this, eid::network::recv, [&](gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr) {
+	mailboxPtr_->listen(eid::network::recv, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
 	
 		auto _fd = args->pop_fd();
 		auto _msgid = args->pop_msgid();
@@ -66,7 +66,7 @@ void gsf::modules::NodeModule::init()
 
 			auto _res = gsf::ArgsPool::get_ref().get();
 			_res->push_block(_block.c_str(), args->get_size() - _off);
-			_info->callback(_res, _progress, _state);
+			//_info->callback(_res, _progress, _state);
 
 			auto _titr = timerSet_.find(_info->timer_);
 			assert(_titr != timerSet_.end());
@@ -76,10 +76,8 @@ void gsf::modules::NodeModule::init()
 				callbackMap_.erase(_itr);
 			}
 			else { //reset timer
-				dispatch(timerM_, eid::timer::delay_milliseconds, gsf::makeArgs(getModuleID(), rpcDelay_), [&](gsf::ArgsPtr args) {
-					_info->timer_ = args->pop_timerid();
-					timerSet_.insert(std::make_pair(_info->timer_, _info));
-				});
+				mailboxPtr_->dispatch(timerM_, eid::timer::delay_milliseconds, gsf::makeArgs(delayTag_, rpcDelay_));
+				timerSet_.insert(std::make_pair(delayTag_, _info));
 			}
 		}
 		else {
@@ -89,10 +87,10 @@ void gsf::modules::NodeModule::init()
 		return nullptr;
 	});
 
-	listen(this, eid::timer::timer_arrive, [&](gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr) {
-		auto _tid = args->pop_ui64();
+	mailboxPtr_->listen(eid::timer::timer_arrive, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
+		auto _tag = args->pop_i32();
 
-		auto _itr = timerSet_.find(_tid);
+		auto _itr = timerSet_.find(_tag);
 		if (_itr != timerSet_.end()) { // timeout
 
 			auto _info = _itr->second;
@@ -141,16 +139,18 @@ void gsf::modules::NodeModule::eventRpc(gsf::EventID event, gsf::ModuleID module
 			return;
 		}
 
-		dispatch(timerM_, eid::timer::delay_milliseconds, gsf::makeArgs(getModuleID(), rpcDelay_), [&](gsf::ArgsPtr args) {
-			auto _callbackPtr = std::make_shared<CallbackInfo>();
-			_callbackPtr->callback = callback;
-			_callbackPtr->timer_ = args->pop_timerid();
-			_callbackPtr->event_ = event;
-			_callbackPtr->id_ = _callbackid;
+		/* 这里的tag 处理要考虑下
+		mailboxPtr_->dispatch(timerM_, eid::timer::delay_milliseconds, gsf::makeArgs(delayTag_, rpcDelay_));
+		auto _callbackPtr = std::make_shared<CallbackInfo>();
+		_callbackPtr->callback = callback;
+		_callbackPtr->timer_ = delayTag_;
+		_callbackPtr->event_ = event;
+		_callbackPtr->id_ = _callbackid;
 
-			callbackMap_.insert(std::make_pair(_callbackid, _callbackPtr));
-			timerSet_.insert(std::make_pair(_callbackPtr->timer_, _callbackPtr));
-		});	
+		callbackMap_.insert(std::make_pair(_callbackid, _callbackPtr));
+		timerSet_.insert(std::make_pair(_callbackPtr->timer_, _callbackPtr));
+		*/
+		
 	}
 
 	if (args) {
@@ -159,10 +159,10 @@ void gsf::modules::NodeModule::eventRpc(gsf::EventID event, gsf::ModuleID module
 		argsPtr->push(_callbackid);
 		argsPtr->push_block(args->pop_block(0, args->get_size()).c_str(), args->get_size());
 
-		dispatch(_connector_m, eid::network::send, std::move(argsPtr));
+		mailboxPtr_->dispatch(_connector_m, eid::network::send, std::move(argsPtr));
 	}
 	else {
-		dispatch(_connector_m, eid::network::send, gsf::makeArgs(event, _callbackid));
+		mailboxPtr_->dispatch(_connector_m, eid::network::send, gsf::makeArgs(event, _callbackid));
 	}
 }
 
@@ -202,7 +202,7 @@ void gsf::modules::NodeModule::registNode(gsf::ModuleID base, int event, const s
 	}
 }
 
-void gsf::modules::NodeModule::eCreateNode(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
+void gsf::modules::NodeModule::eCreateNode(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	if (!service_) {
 		id_ = args->pop_i32();
@@ -232,7 +232,7 @@ void gsf::modules::NodeModule::eCreateNode(gsf::ArgsPtr args, gsf::CallbackFunc 
 		registNode(getModuleID(), eid::distributed::coordinat_select, _root_ip, _root_port);
 		//
 
-		listen(this, eid::network::new_connect, [&](gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr) {
+		mailboxPtr_->listen(eid::network::new_connect, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
 			connectorFD_ = args->pop_fd();
 
 			if (!service_) {
@@ -253,13 +253,13 @@ void gsf::modules::NodeModule::eCreateNode(gsf::ArgsPtr args, gsf::CallbackFunc 
 				}
 				eventRpc(eid::distributed::coordinat_regist, getModuleID(), _args, [&](const gsf::ArgsPtr &args, int32_t progress, bool result) {
 					if (result) {
-						dispatch(targetM_, eid::node::node_create_succ, nullptr);
+						mailboxPtr_->dispatch(targetM_, eid::node::node_create_succ, nullptr);
 					}
 				});
 			}
 		});
 
-		listen(this, eid::base::module_init_succ, [&](gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr) {
+		mailboxPtr_->listen(eid::base::module_init_succ, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
 
 			auto _t = gsf::ArgsPool::get_ref().get();
 			_t->push_block(args->pop_block(0, args->get_size()).c_str(), args->get_size());
@@ -268,8 +268,8 @@ void gsf::modules::NodeModule::eCreateNode(gsf::ArgsPtr args, gsf::CallbackFunc 
 			for (auto nod : eventMap_)
 			{
 				if (nod.second.connecotr_m_ == _module_id) {
-					dispatch(_module_id, eid::network::make_connector, gsf::makeArgs(getModuleID(), nod.second.ip_, nod.second.port_));
-					dispatch(nod.second.base_, eid::node::node_regist_succ, nullptr);
+					mailboxPtr_->dispatch(_module_id, eid::network::make_connector, gsf::makeArgs(getModuleID(), nod.second.ip_, nod.second.port_));
+					mailboxPtr_->dispatch(nod.second.base_, eid::node::node_regist_succ, nullptr);
 					break;
 				}
 			}
@@ -278,7 +278,7 @@ void gsf::modules::NodeModule::eCreateNode(gsf::ArgsPtr args, gsf::CallbackFunc 
 	}
 }
 
-void gsf::modules::NodeModule::eRegistNode(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
+void gsf::modules::NodeModule::eRegistNode(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	auto _base = args->pop_i32();
 	auto _event = args->pop_i32();

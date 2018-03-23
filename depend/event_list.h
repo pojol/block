@@ -172,11 +172,6 @@ namespace eid
 		remove_timer,
 
 		/*!
-			
-		**/
-		add_timer,
-
-		/*!
 			comment: 触发Timer
 			args: nil
 			type: listen

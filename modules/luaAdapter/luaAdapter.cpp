@@ -149,7 +149,7 @@ int gsf::modules::LuaAdapterModule::llisten(uint32_t event, const sol::function 
 {
 	try {
 
-		mailboxPtr_->listen(event, [&](gsf::ModuleID target, gsf::ArgsPtr args)->void {
+		mailboxPtr_->listen(event, [=](gsf::ModuleID target, gsf::ArgsPtr args)->void {
 			try {
 				std::string _req = "";
 				if (args) {

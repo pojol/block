@@ -78,11 +78,10 @@ void gsf::network::ConnectorModule::after_shut()
 
 void gsf::network::ConnectorModule::eMakeConncetor(gsf::ModuleID target, gsf::ArgsPtr args)
 {
-	uint32_t _module_id = args->pop_i32();
 	std::string _ip = args->pop_string();
 	uint32_t _port = args->pop_i32();
 
-	module_id_ = _module_id;
+	module_id_ = target;
 
 	int _fd = 0;
 
@@ -113,7 +112,8 @@ void gsf::network::ConnectorModule::eMakeConncetor(gsf::ModuleID target, gsf::Ar
 		_fd = bufferevent_getfd(bufferEventPtr_);
 	}
 
-	sessionPtr_ = std::make_shared<Session>(_fd, _module_id, sessionMgr_, bufferEventPtr_);
+	//sessionPtr_ = std::make_shared<Session>(_fd, target, sessionMgr_, bufferEventPtr_);
+	sessionPtr_ = sessionMgr_->makeSession(_fd, target, bufferEventPtr_);
 	bufferevent_setcb(bufferEventPtr_, Session::readCB, NULL, Session::eventCB, sessionPtr_.get());
 	bufferevent_enable(bufferEventPtr_, EV_READ | EV_WRITE);
 
