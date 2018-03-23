@@ -2,7 +2,6 @@
 
 #include "sessionMgr.h"
 #include "session.h"
-#include "msgBinder.h"
 
 #ifdef WIN32
 	#include <winsock2.h>
@@ -43,32 +42,23 @@ gsf::network::AcceptorModule::~AcceptorModule()
 void gsf::network::AcceptorModule::before_init()
 {
 	sessionMgr_ = new SessionMgr();
-	binder_ = new MsgBinder();
 
 	eventBasePtr_ = event_base_new();
 }
 
 void gsf::network::AcceptorModule::init()
 {
-	listen(this, eid::network::make_acceptor
-		, std::bind(&AcceptorModule::eMakeAcceptor, this
-		, std::placeholders::_1, std::placeholders::_2));
+	using namespace std::placeholders;
 
-	listen(this, eid::network::send
-		, std::bind(&AcceptorModule::eSendMsg, this
-		, std::placeholders::_1, std::placeholders::_2));
-
-	listen(this, eid::network::kick_connect
-		, std::bind(&AcceptorModule::eKick, this
-		, std::placeholders::_1, std::placeholders::_2));
-
-	//boardcast(eid::base::module_init_succ, gsf::makeArgs(get_module_id()));
+	mailboxPtr_->listen(eid::network::make_acceptor, std::bind(&AcceptorModule::eMakeAcceptor, this, _1, _2));
+	mailboxPtr_->listen(eid::network::send, std::bind(&AcceptorModule::eSendMsg, this, _1, _2));
+	mailboxPtr_->listen(eid::network::kick_connect, std::bind(&AcceptorModule::eKick, this, _1, _2));
 }
 
 void gsf::network::AcceptorModule::execute()
 {
 	if (sessionMgr_) {
-		sessionMgr_->close();
+		sessionMgr_->exec(mailboxPtr_);
 	}
 
 	if (eventBasePtr_) {
@@ -78,7 +68,6 @@ void gsf::network::AcceptorModule::execute()
 
 void gsf::network::AcceptorModule::shut()
 {
-	wipeout(this);
 	evconnlistener_free(acceptListenerPtr_);
 }
 
@@ -88,21 +77,15 @@ void gsf::network::AcceptorModule::after_shut()
 		delete sessionMgr_;
 		sessionMgr_ = nullptr;
 	}
-
-	if (binder_) {
-		delete binder_;
-		binder_ = nullptr;
-	}
 }
 
-void gsf::network::AcceptorModule::eMakeAcceptor(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
+void gsf::network::AcceptorModule::eMakeAcceptor(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	if (nullptr == acceptListenerPtr_) {
-		uint32_t _module_id = args->pop_i32();
 		std::string _ip = args->pop_string();
 		uint32_t _port = args->pop_i32();
 
-		module_id_ = _module_id;	//! 绑定代理Module的id
+		module_id_ = target;	//! 绑定代理Module的id
 		accept_bind(_ip, _port);
 	}
 	else {
@@ -152,27 +135,27 @@ void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, 
 	do
 	{
 		if (network_ptr_->sessionMgr_->find(fd)) {
-			network_ptr_->sessionMgr_->setNeedClose(fd);
-			_ret = eid::error::err_repeated_fd;
+			network_ptr_->sessionMgr_->addClose(fd);
+			APP.ERR_LOG("acceptor", "repeat fd!");
 			break;
 		}
 
 		// check max connect
 		if (network_ptr_->sessionMgr_->curMaxConnect() >= NETWORK_CONNECT_MAX) {
-			_ret = eid::error::err_upper_limit_session;
+			APP.ERR_LOG("acceptor", "max connect!");
 			break;
 		}
 
 		bev = bufferevent_socket_new(network_ptr_->eventBasePtr_, fd, BEV_OPT_CLOSE_ON_FREE);
 		if (!bev) {
-			_ret = eid::error::err_socket_new;
+			APP.ERR_LOG("acceptor", "new socket fail!");
 			break;
 		}
 
 	} while (0);
 
 	if (0 == _ret) {
-		auto _session_ptr = network_ptr_->sessionMgr_->makeSession(fd, network_ptr_->module_id_, network_ptr_->binder_, bev);
+		auto _session_ptr = network_ptr_->sessionMgr_->makeSession(fd, network_ptr_->module_id_, bev);
 		bufferevent_setcb(bev, Session::readCB, NULL, Session::eventCB, _session_ptr.get());
 		bufferevent_enable(bev, EV_READ | EV_WRITE);
 
@@ -180,7 +163,7 @@ void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, 
 	}
 }
 
-void gsf::network::AcceptorModule::eSendMsg(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
+void gsf::network::AcceptorModule::eSendMsg(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	assert(nullptr != acceptListenerPtr_);
 
@@ -204,10 +187,9 @@ void gsf::network::AcceptorModule::eSendMsg(gsf::ArgsPtr args, gsf::CallbackFunc
 	}
 }
 
-void gsf::network::AcceptorModule::eKick(gsf::ArgsPtr args, gsf::CallbackFunc callback /*= nullptr*/)
+void gsf::network::AcceptorModule::eKick(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	auto _fd = args->pop_fd();
-
-	sessionMgr_->setNeedClose(_fd);
+	sessionMgr_->addClose(_fd);
 }
 

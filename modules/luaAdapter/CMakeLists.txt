@@ -1,4 +1,4 @@
-PROJECT(luaProxy)
+PROJECT(luaAdapter)
 
 if(WIN32)
     #引用头文件目录
@@ -33,7 +33,7 @@ endif()
 
 
 FILE(GLOB_RECURSE SRC "*.cpp" "*.h" ".hpp")
-ADD_LIBRARY(luaProxy STATIC ${SRC})
+ADD_LIBRARY(luaAdapter STATIC ${SRC})
 
 if(MSVC)     
     # Use the static C library for all build types

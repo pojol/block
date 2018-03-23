@@ -17,27 +17,26 @@ gsf::modules::MysqlProxyModule::~MysqlProxyModule()
 
 void gsf::modules::MysqlProxyModule::before_init()
 {
+
 }
 
 void gsf::modules::MysqlProxyModule::init()
 {
-	listen(this
-		, eid::dbProxy::connect
+	using namespace std::placeholders;
+
+	mailboxPtr_->listen(eid::dbProxy::connect
 		, std::bind(&MysqlProxyModule::eInit, this, std::placeholders::_1, std::placeholders::_2));
 
-	listen(this
-		, eid::dbProxy::execSql
+	mailboxPtr_->listen(eid::dbProxy::execSql
 		, std::bind(&MysqlProxyModule::eExecSql, this, std::placeholders::_1, std::placeholders::_2));
 
-	listen(this
-		, eid::dbProxy::load
+	mailboxPtr_->listen(eid::dbProxy::load
 		, std::bind(&MysqlProxyModule::eLoad, this, std::placeholders::_1, std::placeholders::_2));
 
-	listen(this
-		, eid::dbProxy::insert
+	mailboxPtr_->listen(eid::dbProxy::insert
 		, std::bind(&MysqlProxyModule::eInsert, this, std::placeholders::_1, std::placeholders::_2));
 
-	listen(this, eid::dbProxy::update
+	mailboxPtr_->listen(eid::dbProxy::update
 		, std::bind(&MysqlProxyModule::eUpdate, this, std::placeholders::_1, std::placeholders::_2));
 }
 
@@ -47,7 +46,7 @@ void gsf::modules::MysqlProxyModule::execute()
 
 		auto _callbackPtr = queue_.front();
 
-		dispatch(_callbackPtr->target_, eid::dbProxy::callback, std::move(_callbackPtr->ptr_));
+		mailboxPtr_->dispatch(_callbackPtr->target_, eid::dbProxy::callback, std::move(_callbackPtr->ptr_));
 
 		delete _callbackPtr;
 		_callbackPtr = nullptr;
@@ -66,7 +65,7 @@ void gsf::modules::MysqlProxyModule::after_shut()
 
 }
 
-void gsf::modules::MysqlProxyModule::eInit(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
+void gsf::modules::MysqlProxyModule::eInit(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	auto _host = args->pop_string();	//host
 	auto _user = args->pop_string(); //user
@@ -91,21 +90,17 @@ void gsf::modules::MysqlProxyModule::eInit(gsf::ArgsPtr args, gsf::CallbackFunc 
 		redisPtr_ = std::make_shared<RedisProxy>();
 		redisPtr_->init();
 
-		listen(this, eid::timer::timer_arrive, std::bind(&MysqlProxyModule::onTimer, this, std::placeholders::_1, std::placeholders::_2));
+		
+		mailboxPtr_->listen(eid::timer::timer_arrive, std::bind(&MysqlProxyModule::onTimer, this, std::placeholders::_1, std::placeholders::_2));
 
-		dispatch(timerM_, eid::timer::delay_milliseconds, gsf::makeArgs(getModuleID(), executeCommandDelay_), [&](gsf::ArgsPtr args) {
-			commandTimeID_ = args->pop_moduleid();
-		});
-
-		dispatch(timerM_, eid::timer::delay_milliseconds, gsf::makeArgs(getModuleID(), executeRewriteDelay_), [&](gsf::ArgsPtr args) {
-			rewriteTimeID_ = args->pop_moduleid();
-		});
+		mailboxPtr_->dispatch(timerM_, eid::timer::delay_milliseconds, gsf::makeArgs(TimerType::tt_command, executeCommandDelay_));
+		mailboxPtr_->dispatch(timerM_, eid::timer::delay_milliseconds, gsf::makeArgs(TimerType::tt_rewrite, executeRewriteDelay_));
 	}
 }
 
-void gsf::modules::MysqlProxyModule::eLoad(gsf::ArgsPtr args, gsf::CallbackFunc callback /*= nullptr*/)
+void gsf::modules::MysqlProxyModule::eLoad(gsf::ModuleID target, gsf::ArgsPtr args)
 {
-	auto _target = args->pop_moduleid();
+	auto _operator = args->pop_i32();
 	auto _field = args->pop_string();
 	auto _key = args->pop_i32();
 
@@ -129,8 +124,6 @@ void gsf::modules::MysqlProxyModule::eLoad(gsf::ArgsPtr args, gsf::CallbackFunc 
 		return "0";
 	};
 
-	auto _uuid = APP.getUUID();
-
 	if (useCache_) {
 
 	}
@@ -144,22 +137,18 @@ void gsf::modules::MysqlProxyModule::eLoad(gsf::ArgsPtr args, gsf::CallbackFunc 
 			_sql = "select * from " + _field + " where id = " + std::to_string(_key) + ";";
 		}
 
-		conn_.query(_target, _uuid, _sql, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
+		conn_.query(target, _operator, _sql, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
 			auto _callbackPtr = new CallbackInfo();
 			_callbackPtr->ptr_ = std::move(args);
 			_callbackPtr->target_ = target;
 			queue_.push(_callbackPtr);
 		});
 	}
-
-	if (callback) {
-		callback(gsf::makeArgs(_uuid));
-	}
 }
 
-void gsf::modules::MysqlProxyModule::eInsert(gsf::ArgsPtr args, gsf::CallbackFunc callback /*= nullptr*/)
+void gsf::modules::MysqlProxyModule::eInsert(gsf::ModuleID target, gsf::ArgsPtr args)
 {
-	auto _target = args->pop_moduleid();
+	auto _oper = args->pop_i32();
 	auto _table = args->pop_string();
 
 	auto _getkey = [&]()->std::string {
@@ -181,8 +170,6 @@ void gsf::modules::MysqlProxyModule::eInsert(gsf::ArgsPtr args, gsf::CallbackFun
 
 		return "0";
 	};
-
-	auto _uuid = APP.getUUID();
 
 	if (useCache_) {
 
@@ -211,23 +198,19 @@ void gsf::modules::MysqlProxyModule::eInsert(gsf::ArgsPtr args, gsf::CallbackFun
 		}
 
 		std::string _sql = "insert into " + _table + " (" + _keys + ")" + " values (" + _values + ");";
-		conn_.query(0, _uuid, _sql, nullptr);
+		conn_.query(0, _oper, _sql, nullptr);
 
 		// 这里要先设计下各个接口的返回样式
-		conn_.query(_target, _uuid, "select last_insert_id()", [&](gsf::ModuleID target, gsf::ArgsPtr args) {
+		conn_.query(target, _oper, "select last_insert_id()", [&](gsf::ModuleID target, gsf::ArgsPtr args) {
 			auto _callbackPtr = new CallbackInfo();
 			_callbackPtr->ptr_ = std::move(args);
 			_callbackPtr->target_ = target;
 			queue_.push(_callbackPtr);
 		});
 	}
-
-	if (callback) {
-		callback(gsf::makeArgs(_uuid));
-	}
 }
 
-void gsf::modules::MysqlProxyModule::eUpdate(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
+void gsf::modules::MysqlProxyModule::eUpdate(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	auto _table = args->pop_string();
 	auto _key = args->pop_i32();
@@ -283,45 +266,34 @@ void gsf::modules::MysqlProxyModule::eUpdate(gsf::ArgsPtr args, gsf::CallbackFun
 }
 
 
-void gsf::modules::MysqlProxyModule::eExecSql(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
+void gsf::modules::MysqlProxyModule::eExecSql(gsf::ModuleID target, gsf::ArgsPtr args)
 {
-	auto _moduleid = args->pop_moduleid();
+	auto _oper = args->pop_moduleid();
 	std::string queryStr = args->pop_string();
 
 	using namespace std::placeholders;
-	auto _uuid = APP.getUUID();
 
-	conn_.query(_moduleid, _uuid, queryStr, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
+	conn_.query(target, _oper, queryStr, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
 		auto _callbackPtr = new CallbackInfo();
 		_callbackPtr->ptr_ = std::move(args);
 		_callbackPtr->target_ = target;
 		queue_.push(_callbackPtr);
 	});
-
-	if (callback) {
-		callback(gsf::makeArgs(_uuid));
-	}
 }
 
-void gsf::modules::MysqlProxyModule::onTimer(gsf::ArgsPtr args, gsf::CallbackFunc callback /*= nullptr*/)
+void gsf::modules::MysqlProxyModule::onTimer(gsf::ModuleID target, gsf::ArgsPtr args)
 {
-	gsf::TimerID _tid = args->pop_ui64();
+	int32_t _tag = args->pop_i32();
 
-	if (_tid == commandTimeID_) {
+	if (_tag == TimerType::tt_command) {
 
 		redisPtr_->execCommand();
-
-		dispatch(timerM_, eid::timer::delay_milliseconds, gsf::makeArgs(getModuleID(), executeCommandDelay_), [&](gsf::ArgsPtr args) {
-			commandTimeID_ = args->pop_moduleid();
-		});
+		mailboxPtr_->dispatch(timerM_, eid::timer::delay_milliseconds, gsf::makeArgs(TimerType::tt_command, executeCommandDelay_));
 	}
-	else if (_tid == rewriteTimeID_) {
+	else if (_tag == TimerType::tt_rewrite) {
 
 		redisPtr_->execRewrite();
-
-		dispatch(timerM_, eid::timer::delay_milliseconds, gsf::makeArgs(getModuleID(), executeRewriteDelay_), [&](gsf::ArgsPtr args) {
-			rewriteTimeID_ = args->pop_moduleid();
-		});
+		mailboxPtr_->dispatch(timerM_, eid::timer::delay_milliseconds, gsf::makeArgs(TimerType::tt_rewrite, executeRewriteDelay_));
 	}
 
 }

@@ -4,12 +4,12 @@
 #include <event2/bufferevent.h>
 #include <event2/buffer.h>
 
-#include <core/event.h>
 #include "msgBlock.h"
 
 #include <map>
 #include <memory>
 #include <string>
+#include <core/args.h>
 
 namespace gsf
 {
@@ -18,12 +18,12 @@ namespace gsf
 		class OBuffer;
 		class IBuffer;
 		class MsgBinder;
+		class SessionMgr;
 
 		class Session
-			: public gsf::IEvent
 		{
 		public:
-			Session(int fd, int eid, MsgBinder *binder, std::function<void (int)> disconnect_callback, ::bufferevent *bev);
+			Session(int fd, int eid, SessionMgr *mgr, ::bufferevent *bev);
 			~Session();
 
 			static void readCB(::bufferevent *bev, void *ctx);
@@ -44,14 +44,14 @@ namespace gsf
 			gsf::SessionID fd_ = gsf::SessionNil;
 			gsf::ModuleID targetM_ = gsf::ModuleNil;
 
-			MsgBinder *binder_ = nullptr;
-
 			std::function<void(int)> disconnCallback_;
 
 			::evbuffer *inBufPtr_ = nullptr;
 			::evbuffer *outBufPtr_ = nullptr;
 
 			::bufferevent *bufEvtPtr_ = nullptr;
+
+			SessionMgr * basePtr_ = nullptr;
 		};
 	}
 	

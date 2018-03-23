@@ -2,7 +2,6 @@
 #define _REDIS_CACHE_PROXY_HEADER_
 
 #include <core/module.h>
-#include <core/event.h>
 
 #include <set>
 
@@ -26,7 +25,6 @@ namespace gsf
 
 
 		class RedisProxy
-			: public gsf::IEvent
 		{
 		public:
 

@@ -9,7 +9,7 @@ INCLUDE_DIRECTORIES(
 LINK_DIRECTORIES(
 )
 
-FILE(GLOB_RECURSE SRC "*.cpp" "*.h")
+FILE(GLOB_RECURSE SRC "*.cpp" "*.h" "*.hpp")
 ADD_LIBRARY(core STATIC ${SRC})
 
 if(MSVC)     

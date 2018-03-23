@@ -10,7 +10,6 @@
 #include <tuple>
 
 #include <core/module.h>
-#include <core/event.h>
 
 namespace gsf
 {
@@ -21,17 +20,18 @@ namespace gsf
 			TimerEvent()
 				: target_(0)
 				, timerid_(0)
+				, tag_(0)
 			{}
 
 			uint32_t target_;
 			uint64_t timerid_;
+			int32_t tag_;
 		};
 
 		typedef std::shared_ptr<TimerEvent> TimerEventPtr;
 
 		class TimerModule
                 : public gsf::Module
-                , public gsf::IEvent
 		{
 		public:
 			
@@ -48,12 +48,12 @@ namespace gsf
 
 		private:
 			
-			void eDelayMilliseconds(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
-			void eDelayDay(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eDelayMilliseconds(gsf::ModuleID target, gsf::ArgsPtr args);
+			void eDelayDay(gsf::ModuleID target, gsf::ArgsPtr args);
 			//void delay_week(std::tuple<gsf::utils::Any> args, gsf::EventHandlerPtr callback);
 			//void delay_month(std::tuple<gsf::utils::Any> args, gsf::EventHandlerPtr callback);
 
-			void event_remove_timer(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eRemoveTimer(gsf::ModuleID target, gsf::ArgsPtr args);
 		private:
 	
 			uint64_t get_system_tick();

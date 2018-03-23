@@ -12,18 +12,18 @@ void gsf::modules::CoodinatorModule::before_init()
 {
 	using namespace std::placeholders;
 
-	listen(this, eid::distributed::coordinat_regist, std::bind(&CoodinatorModule::eCoordinatRegist, this, _1, _2));
-	listen(this, eid::distributed::coordinat_unregit, std::bind(&CoodinatorModule::eCoordinatUnregist, this, _1, _2));
+	mailboxPtr_->listen(eid::distributed::coordinat_regist, std::bind(&CoodinatorModule::eCoordinatRegist, this, _1, _2));
+	mailboxPtr_->listen(eid::distributed::coordinat_unregit, std::bind(&CoodinatorModule::eCoordinatUnregist, this, _1, _2));
 
-	listen(this, eid::distributed::coordinat_adjust_weight
+	mailboxPtr_->listen(eid::distributed::coordinat_adjust_weight
 		, std::bind(&CoodinatorModule::eCoordinatAdjustWeight, this, _1, _2));
 
-	listen(this, eid::distributed::coordinat_select
+	mailboxPtr_->listen(eid::distributed::coordinat_select
 		, std::bind(&CoodinatorModule::eCoordinatSelect, this, _1, _2));
 }
 
 //int32_t port, const std::string &module, gsf::ModuleID module_id, int32_t weight
-void gsf::modules::CoodinatorModule::eCoordinatAdjustWeight(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
+void gsf::modules::CoodinatorModule::eCoordinatAdjustWeight(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	auto _nod_id = args->pop_i32();
 	auto _module = args->pop_string();
@@ -33,7 +33,7 @@ void gsf::modules::CoodinatorModule::eCoordinatAdjustWeight(gsf::ArgsPtr args, g
 	adjustModuleWeight(_nod_id, _module, 0, _characteristic, _weight);
 }
 
-void gsf::modules::CoodinatorModule::eCoordinatSelect(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
+void gsf::modules::CoodinatorModule::eCoordinatSelect(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	auto _module_name = args->pop_string();
 	auto _module_characteristic = args->pop_i32();
@@ -72,13 +72,13 @@ void gsf::modules::CoodinatorModule::eCoordinatSelect(gsf::ArgsPtr args, gsf::Ca
 		}
 
 		assert(_ptr->nod_id != 0);
-		assert(callback);
-		callback(gsf::makeArgs(_ptr->nod_id, _ptr->type_, _ptr->weight_, _ptr->acceptor_ip_, _ptr->acceptor_port_));
+		// tmp
+		//callback(gsf::makeArgs(_ptr->nod_id, _ptr->type_, _ptr->weight_, _ptr->acceptor_ip_, _ptr->acceptor_port_));
 	}
 }
 
 //const std::string &type, const std::string &ip, int32_t port
-void gsf::modules::CoodinatorModule::eCoordinatRegist(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
+void gsf::modules::CoodinatorModule::eCoordinatRegist(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	auto _type = args->pop_string();
 	auto _nod_id = args->pop_i32();
@@ -111,7 +111,7 @@ void gsf::modules::CoodinatorModule::eCoordinatRegist(gsf::ArgsPtr args, gsf::Ca
 	}
 }
 
-void gsf::modules::CoodinatorModule::eCoordinatUnregist(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
+void gsf::modules::CoodinatorModule::eCoordinatUnregist(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	auto _port = args->pop_i32();
 }

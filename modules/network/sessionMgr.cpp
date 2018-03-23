@@ -1,7 +1,7 @@
 #include "sessionMgr.h"
 #include "session.h"
-#include "msgBinder.h"
 
+#include <core/application.h>
 
 gsf::network::SessionMgr::SessionMgr()
 {
@@ -12,9 +12,11 @@ gsf::network::SessionMgr::~SessionMgr()
 
 }
 
-gsf::network::SessionPtr gsf::network::SessionMgr::makeSession(int fd, int module_id, MsgBinder *binder, ::bufferevent *bev)
+gsf::network::SessionPtr gsf::network::SessionMgr::makeSession(int fd, int module_id, ::bufferevent *bev)
 {
-	auto _session_ptr = std::make_shared<Session>(fd, module_id, binder, std::bind(&SessionMgr::setNeedClose, this, std::placeholders::_1), bev);
+	target_ = module_id;
+
+	auto _session_ptr = std::make_shared<Session>(fd, module_id, this, bev);
 	sessionQueue_.insert(std::make_pair(fd, _session_ptr));
 	sessionQueueByModule_.insert(std::make_pair(module_id, _session_ptr));
 
@@ -42,12 +44,23 @@ gsf::network::SessionPtr gsf::network::SessionMgr::findByModule(uint32_t module_
 	return nullptr;
 }
 
-void gsf::network::SessionMgr::setNeedClose(int fd)
+void gsf::network::SessionMgr::addClose(int fd)
 {
 	disconnectVec_.push_back(fd);
 }
 
-void gsf::network::SessionMgr::close()
+void gsf::network::SessionMgr::addConnect(int fd)
+{
+	connectVec_.push_back(fd);
+}
+
+
+void gsf::network::SessionMgr::addMessage(gsf::ArgsPtr args)
+{
+	messageQueue_.push(std::move(args));
+}
+
+void gsf::network::SessionMgr::exec(MailBoxPtr mailbox)
 {
 	for (int fd : disconnectVec_)
 	{
@@ -61,10 +74,25 @@ void gsf::network::SessionMgr::close()
 			}
 
 			sessionQueue_.erase(_itr);
+			mailbox->dispatch(target_, eid::network::dis_connect, gsf::makeArgs(fd));
 		}
 	}
 
 	disconnectVec_.clear();
+
+	for (int fd : connectVec_)
+	{
+		mailbox->dispatch(target_, eid::network::new_connect, gsf::makeArgs(fd));
+	}
+
+	connectVec_.clear();
+
+	while (!messageQueue_.empty()) {
+
+		mailbox->dispatch(target_, eid::network::recv, std::move(messageQueue_.front()));
+
+		messageQueue_.pop();
+	}
 }
 
 int gsf::network::SessionMgr::curMaxConnect() const

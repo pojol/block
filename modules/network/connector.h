@@ -6,7 +6,6 @@
 #include <functional>
 
 #include <core/module.h>
-#include <core/event.h>
 
 #include <event2/util.h>
 #include <event2/listener.h>
@@ -17,12 +16,12 @@ namespace gsf
 	namespace network
 	{
 		class Session;
-		class MsgBinder;
+		class SessionMgr;
+
 		typedef std::shared_ptr<Session> SessionPtr;
 
 		class ConnectorModule
 			: public gsf::Module
-			, public gsf::IEvent
 		{
 		public:
 			ConnectorModule(const std::string &name);
@@ -38,8 +37,8 @@ namespace gsf
 			void after_shut() override;
 
 		private:
-			void eMakeConncetor(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
-			void eSendMsg(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eMakeConncetor(gsf::ModuleID target, gsf::ArgsPtr args);
+			void eSendMsg(gsf::ModuleID target, gsf::ArgsPtr args);
 
 			void needCloseSession(int fd);
 
@@ -50,7 +49,7 @@ namespace gsf
 			event_base *eventBasePtr_ = nullptr;
 
 			SessionPtr sessionPtr_ = nullptr;
-			MsgBinder *binderPtr_ = nullptr;
+			SessionMgr *sessionMgr_ = nullptr;
 
 			::bufferevent *bufferEventPtr_ = nullptr;
 		};

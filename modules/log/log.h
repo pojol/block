@@ -2,7 +2,6 @@
 #define _GSF_LOG_HEADER_
 
 #include <core/module.h>
-#include <core/event.h>
 
 #include <list>
 
@@ -12,7 +11,6 @@ namespace gsf
 	{
 		class LogModule
 			: public gsf::Module
-			, public gsf::IEvent
 		{
 		public:
 			LogModule();
@@ -30,8 +28,8 @@ namespace gsf
 
 			void initImpl(const std::string &exe_name);
 
-			void ePrint(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
-			void eChangeFlag(gsf::ArgsPtr args, gsf::CallbackFunc callback =nullptr);
+			void ePrint(gsf::ModuleID target, gsf::ArgsPtr args);
+			void eChangeFlag(gsf::ModuleID target, gsf::ArgsPtr args);
 
 		private:
 			bool ndebug_ = false;

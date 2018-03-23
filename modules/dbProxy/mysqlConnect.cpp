@@ -1,7 +1,7 @@
 #include "mysqlConnect.h"
 
 #include <iostream>
-#include <core/application.h>
+
 
 uint8_t ToValueType(enum_field_types mysqlType)
 {
@@ -120,6 +120,7 @@ bool gsf::modules::MysqlConnect::init(const std::string &host, int port, const s
 	return true;
 }
 
+/*
 void gsf::modules::MysqlConnect::execute(const std::string &order, const gsf::ArgsPtr &args)
 {
 	SqlStmtPtr stmt;
@@ -173,8 +174,8 @@ void gsf::modules::MysqlConnect::execute(const std::string &order, const gsf::Ar
 		std::cout << mysql_stmt_error(stmt->stmt) << std::endl;
 	}
 }
-
-void gsf::modules::MysqlConnect::query(gsf::ModuleID target, int64_t uuid, const std::string &sql, std::function<void (gsf::ModuleID, gsf::ArgsPtr)> callback)
+*/
+void gsf::modules::MysqlConnect::query(gsf::ModuleID target, int oper, const std::string &sql, std::function<void (gsf::ModuleID, gsf::ArgsPtr)> callback)
 {
 	MYSQL_RES *result = nullptr;
 	MYSQL_FIELD *fields = nullptr;
@@ -183,7 +184,7 @@ void gsf::modules::MysqlConnect::query(gsf::ModuleID target, int64_t uuid, const
 
 	auto errf = [&](const std::string &err) {
 		if (callback) {
-			callback(target, gsf::makeArgs(uuid, false, int32_t(-1), err));
+			callback(target, gsf::makeArgs(oper, false, int32_t(-1), err));
 		}
 		else {
 			APP.ERR_LOG("dbProxy", "query", " {}", err);
@@ -198,7 +199,7 @@ void gsf::modules::MysqlConnect::query(gsf::ModuleID target, int64_t uuid, const
 	result = mysql_store_result(basePtr_);
 	if (nullptr == result) {
 		if (callback) {
-			callback(target, gsf::makeArgs(uuid, true, int32_t(-1), "success!"));
+			callback(target, gsf::makeArgs(oper, true, int32_t(-1), "success!"));
 		}
 		return;
 	}
@@ -225,7 +226,7 @@ void gsf::modules::MysqlConnect::query(gsf::ModuleID target, int64_t uuid, const
 	while (nullptr != row)
 	{
 		auto argsPtr = gsf::ArgsPool::get_ref().get();
-		argsPtr->push(uuid);
+		argsPtr->push(oper);
 		argsPtr->push(true);
 		argsPtr->push(_progress);
 
@@ -260,7 +261,7 @@ void gsf::modules::MysqlConnect::query(gsf::ModuleID target, int64_t uuid, const
 	}
 
 	// eof
-	callback(target, gsf::makeArgs(uuid, true, -1));
+	callback(target, gsf::makeArgs(oper, true, -1));
 
 	if (nullptr != result)
 	{
@@ -268,9 +269,10 @@ void gsf::modules::MysqlConnect::query(gsf::ModuleID target, int64_t uuid, const
 	}
 }
 
+/*
 void gsf::modules::MysqlConnect::perpare(const std::string &sql, SqlStmtPtr &stmtPtr)
 {
-	/*
+
 	auto itr = prepared_stmt_map.find(sql);
 	if (itr != prepared_stmt_map.end()) {
 		stmtPtr = itr->second;
@@ -316,9 +318,9 @@ void gsf::modules::MysqlConnect::perpare(const std::string &sql, SqlStmtPtr &stm
 	} while (0);
 
 	stmtPtr.reset();
-	*/
-}
 
+}
+*/
 
 void gsf::modules::MysqlConnect::startThread()
 {
