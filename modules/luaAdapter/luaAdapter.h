@@ -61,7 +61,7 @@ namespace gsf
 
 			void lrpc(uint32_t event, int32_t moduleid, const std::string &buf);
 
-			void eDistory(gsf::ModuleID target, gsf::ArgsPtr args);
+			//void eDistory(gsf::ModuleID target, gsf::ArgsPtr args);
 			void eReload(gsf::ModuleID target, gsf::ArgsPtr args);
 
 			void create();

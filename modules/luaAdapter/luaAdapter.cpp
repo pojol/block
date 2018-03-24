@@ -78,7 +78,6 @@ void gsf::modules::LuaAdapterModule::before_init()
 {	
 	using namespace std::placeholders;
 
-	mailboxPtr_->listen(eid::lua_proxy::destroy, std::bind(&LuaAdapterModule::eDistory, this, _1, _2));
 	mailboxPtr_->listen(eid::lua_proxy::reload, std::bind(&LuaAdapterModule::eReload, this, _1, _2));
 }
 
@@ -326,11 +325,6 @@ void gsf::modules::LuaAdapterModule::create()
 
 		return;
 	}
-}
-
-void gsf::modules::LuaAdapterModule::eDistory(gsf::ModuleID target, gsf::ArgsPtr args)
-{
-
 }
 
 int gsf::modules::LuaAdapterModule::destroy(uint32_t module_id)
