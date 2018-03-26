@@ -43,19 +43,16 @@ void gsf::modules::NodeModule::before_init()
 	mailboxPtr_->listen(eid::node::node_regist, std::bind(&NodeModule::eRegistNode, this, _1, _2));
 
 	//listenRpc(std::bind(&NodeModule::eventRpc, this, _1, _2, _3, _4));
-}
 
-void gsf::modules::NodeModule::init()
-{
 	mailboxPtr_->listen(eid::network::recv, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
-	
+
 		auto _fd = args->pop_fd();
 		auto _msgid = args->pop_msgid();
 		auto _callbackid = args->pop_i64();
 
 		auto _itr = callbackMap_.find(_callbackid);
 		if (_itr != callbackMap_.end()) {
-			
+
 			auto _state = args->pop_bool();
 			auto _progress = args->pop_i32();
 
@@ -103,14 +100,19 @@ void gsf::modules::NodeModule::init()
 	});
 }
 
+void gsf::modules::NodeModule::init()
+{
+	mailboxPtr_->pull();
+}
+
 void gsf::modules::NodeModule::execute()
 {
-
+	mailboxPtr_->pull();
 }
 
 void gsf::modules::NodeModule::shut()
 {
-
+	mailboxPtr_->pull();
 }
 
 void gsf::modules::NodeModule::eventRpc(gsf::EventID event, gsf::ModuleID moduleID, const gsf::ArgsPtr &args, gsf::RpcCallback callback)

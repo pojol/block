@@ -53,7 +53,7 @@ namespace gsf
 		**/
 		void rpc(gsf::EventID event, ArgsPtr args, RpcCallback callback = nullptr);
 
-		void pop();
+		void pull();
 		void push(TaskInfo *info);
 
 	private:

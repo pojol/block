@@ -180,7 +180,7 @@ namespace eid
 		timer_arrive,
 	};
 
-	enum lua_proxy
+	enum lua
 	{
 		/*!
 			comment: 重新装载 Lua Script Module, 会走标准的退出和进入流程 init, shut 。即便持有状态也可以方便的热更
@@ -188,7 +188,7 @@ namespace eid
 			type: dispatch
 			res : bool succ
 		**/
-		reload,
+		reload = 2301,
 
 	};
 

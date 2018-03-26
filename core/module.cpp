@@ -70,7 +70,7 @@ void gsf::MailBox::rpc(gsf::EventID event, ArgsPtr args, RpcCallback callback /*
 
 }
 
-void gsf::MailBox::pop()
+void gsf::MailBox::pull()
 {
 	while (!taskQueue_.empty())
 	{

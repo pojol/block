@@ -49,6 +49,8 @@ void gsf::network::ConnectorModule::before_init()
 
 void gsf::network::ConnectorModule::init()
 {
+	mailboxPtr_->pull();
+
 	// todo ...
 	
 	//boardcast(eid::module_init_succ, gsf::makeArgs(get_module_id()));
@@ -56,6 +58,7 @@ void gsf::network::ConnectorModule::init()
 
 void gsf::network::ConnectorModule::execute()
 {
+	mailboxPtr_->pull();
 	//! 先处理断连
 
 	//
@@ -68,6 +71,8 @@ void gsf::network::ConnectorModule::execute()
 
 void gsf::network::ConnectorModule::shut()
 {
+	mailboxPtr_->pull();
+
 	bufferevent_free(bufferEventPtr_);
 	event_base_free(eventBasePtr_);
 }

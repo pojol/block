@@ -17,11 +17,6 @@ gsf::modules::MysqlProxyModule::~MysqlProxyModule()
 
 void gsf::modules::MysqlProxyModule::before_init()
 {
-
-}
-
-void gsf::modules::MysqlProxyModule::init()
-{
 	using namespace std::placeholders;
 
 	mailboxPtr_->listen(eid::dbProxy::connect
@@ -40,8 +35,15 @@ void gsf::modules::MysqlProxyModule::init()
 		, std::bind(&MysqlProxyModule::eUpdate, this, std::placeholders::_1, std::placeholders::_2));
 }
 
+void gsf::modules::MysqlProxyModule::init()
+{
+	mailboxPtr_->pull();
+}
+
 void gsf::modules::MysqlProxyModule::execute()
 {
+	mailboxPtr_->pull();
+
 	while (!queue_.empty()) {
 
 		auto _callbackPtr = queue_.front();
@@ -57,7 +59,7 @@ void gsf::modules::MysqlProxyModule::execute()
 
 void gsf::modules::MysqlProxyModule::shut()
 {
-
+	mailboxPtr_->pull();
 }
 
 void gsf::modules::MysqlProxyModule::after_shut()

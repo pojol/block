@@ -17,10 +17,6 @@ gsf::modules::TimerModule::TimerModule()
 
 void gsf::modules::TimerModule::before_init()
 {
-}
-
-void gsf::modules::TimerModule::init()
-{
 	using namespace std::placeholders;
 
 	mailboxPtr_->listen(eid::timer::delay_milliseconds
@@ -28,15 +24,22 @@ void gsf::modules::TimerModule::init()
 
 	mailboxPtr_->listen(eid::timer::delay_day
 		, std::bind(&TimerModule::eDelayDay, this, _1, _2));
-	
+
 	mailboxPtr_->listen(eid::timer::remove_timer
 		, std::bind(&TimerModule::eRemoveTimer, this, _1, _2));
+}
+
+void gsf::modules::TimerModule::init()
+{
+	mailboxPtr_->pull();
 }
 
 void gsf::modules::TimerModule::execute()
 {
 	using namespace std::chrono;
 	
+	mailboxPtr_->pull();
+
 	if (!map_.empty()) {
 
 		auto itr = map_.begin();
@@ -59,6 +62,11 @@ void gsf::modules::TimerModule::execute()
 	}
 }
 
+
+void gsf::modules::TimerModule::shut()
+{
+	mailboxPtr_->pull();
+}
 
 uint64_t gsf::modules::TimerModule::get_system_tick()
 {

@@ -45,7 +45,9 @@ namespace gsf
 			virtual ~CoodinatorModule() {}
 
 			void before_init() override;
-
+			void init() override;
+			void execute() override;
+			void shut() override;
 
 		private:
 			void eCoordinatAdjustWeight(gsf::ModuleID target, gsf::ArgsPtr args);

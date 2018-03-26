@@ -22,6 +22,22 @@ void gsf::modules::CoodinatorModule::before_init()
 		, std::bind(&CoodinatorModule::eCoordinatSelect, this, _1, _2));
 }
 
+void gsf::modules::CoodinatorModule::init()
+{
+	mailboxPtr_->pull();
+
+}
+
+void gsf::modules::CoodinatorModule::execute()
+{
+	mailboxPtr_->pull();
+}
+
+void gsf::modules::CoodinatorModule::shut()
+{
+	mailboxPtr_->pull();
+}
+
 //int32_t port, const std::string &module, gsf::ModuleID module_id, int32_t weight
 void gsf::modules::CoodinatorModule::eCoordinatAdjustWeight(gsf::ModuleID target, gsf::ArgsPtr args)
 {

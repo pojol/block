@@ -233,11 +233,9 @@ void gsf::Application::run()
 					it->before_init();
 				}
 				else if (state == AppState::INIT) {
-					it->mailboxPtr_->pop();
 					it->init();
 				}
 				else if (state == AppState::EXECUTE) {
-					it->mailboxPtr_->pop();
 					it->execute();
 #ifdef WATCH_PERF
 					t1 = (time_point_cast<microseconds>(system_clock::now()) - _ttime).count();
@@ -246,7 +244,6 @@ void gsf::Application::run()
 #endif // WATCH_PERF
 				}
 				else if (state == AppState::SHUT) {
-					it->mailboxPtr_->pop();
 					it->shut();
 				}
 				else if (state == AppState::AFTER_SHUT) {

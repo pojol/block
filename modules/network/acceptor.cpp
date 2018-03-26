@@ -44,10 +44,7 @@ void gsf::network::AcceptorModule::before_init()
 	sessionMgr_ = new SessionMgr();
 
 	eventBasePtr_ = event_base_new();
-}
 
-void gsf::network::AcceptorModule::init()
-{
 	using namespace std::placeholders;
 
 	mailboxPtr_->listen(eid::network::make_acceptor, std::bind(&AcceptorModule::eMakeAcceptor, this, _1, _2));
@@ -55,8 +52,15 @@ void gsf::network::AcceptorModule::init()
 	mailboxPtr_->listen(eid::network::kick_connect, std::bind(&AcceptorModule::eKick, this, _1, _2));
 }
 
+void gsf::network::AcceptorModule::init()
+{
+	mailboxPtr_->pull();
+}
+
 void gsf::network::AcceptorModule::execute()
 {
+	mailboxPtr_->pull();
+
 	if (sessionMgr_) {
 		sessionMgr_->exec(mailboxPtr_);
 	}
@@ -68,6 +72,7 @@ void gsf::network::AcceptorModule::execute()
 
 void gsf::network::AcceptorModule::shut()
 {
+	mailboxPtr_->pull();
 	evconnlistener_free(acceptListenerPtr_);
 }
 

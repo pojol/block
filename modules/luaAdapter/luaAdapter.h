@@ -37,6 +37,8 @@ namespace gsf
 			std::array<std::function<void(sol::table)>, 5> call_list_;
 		};
 
+		typedef std::shared_ptr<LuaProxy> LuaProxyPtr;
+
 		class LuaAdapterModule
 			: public gsf::Module
 		{
@@ -68,11 +70,16 @@ namespace gsf
 
 			int destroy(uint32_t module_id);
 
-			LuaProxy proxy_;
+			LuaProxyPtr proxyPtr_ = nullptr;
 
 		protected:
 			std::string dir_ = "";
 			std::string name_ = "";
+
+		private:
+
+			bool reloading = false;
+
 		};
 	}
 }

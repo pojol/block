@@ -46,6 +46,8 @@ namespace gsf
 
             void execute() override;
 
+			void shut() override;
+
 		private:
 			
 			void eDelayMilliseconds(gsf::ModuleID target, gsf::ArgsPtr args);

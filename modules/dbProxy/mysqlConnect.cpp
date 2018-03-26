@@ -191,6 +191,11 @@ void gsf::modules::MysqlConnect::query(gsf::ModuleID target, int oper, const std
 		}
 	};
 
+	if (nullptr == basePtr_) {
+		APP.ERR_LOG("MysqlConnect", "not connected!");
+		return ;
+	}
+
 	if (mysql_query(basePtr_, sql.c_str())) {
 		errf(mysql_error(basePtr_));
 		return;
