@@ -2,6 +2,8 @@
 #include "coordinate.h"
 #include <core/application.h>
 
+#include <algorithm>
+
 gsf::modules::CoodinatorModule::CoodinatorModule()
 	: Module("CoodinatorModule")
 {
