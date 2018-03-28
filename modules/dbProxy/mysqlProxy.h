@@ -37,21 +37,6 @@ namespace gsf
 			void eInit(gsf::ModuleID target, gsf::ArgsPtr args);
 
 			/*!
-				select, query 返回
-				succ, progress, args
-				[
-					succ, 1, args
-					succ, 2, args
-					succ, -1
-				]
-
-				insert 返回
-				int 0 = false, other = last_id
-
-				update 无返回
-			**/
-
-			/*!
 				获取一个实例
 			**/
 			void eLoad(gsf::ModuleID target, gsf::ArgsPtr args);
@@ -70,6 +55,9 @@ namespace gsf
 			void eExecSql(gsf::ModuleID target, gsf::ArgsPtr args);
 
 
+			/*！
+				开启灾备&cache功能后调用
+			**/
 			void onTimer(gsf::ModuleID target, gsf::ArgsPtr args);
 
 		private:

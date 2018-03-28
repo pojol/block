@@ -13,7 +13,12 @@
 #include <unistd.h>
 #endif // WIN32
 
-//int luaopen_protobuf_c(lua_State *L);
+#ifdef __cplusplus  
+extern "C" {  // only need to export C interface if  
+			  // used by C++ source code  
+	int luaopen_protobuf_c(lua_State *L);
+}
+#endif  
 
 std::string Traceback(lua_State * _state)
 {
@@ -226,7 +231,9 @@ void gsf::modules::LuaAdapterModule::create()
 	try
 	{
 		// set pbc to lua global
-		//luaopen_protobuf_c(_lua->state_.lua_state());
+		//luaopen_protobuf_c(proxyPtr_->state_.lua_state());
+
+		proxyPtr_->state_.require("protobuf.c", luaopen_protobuf_c);
 
 		auto _ret = proxyPtr_->state_.do_file(_path.c_str());
 		if (_ret) {
@@ -236,6 +243,7 @@ void gsf::modules::LuaAdapterModule::create()
 			APP.ERR_LOG("LuaProxy", _err);
 			return;
 		}
+
 	}
 	catch (sol::error e)
 	{
@@ -244,6 +252,7 @@ void gsf::modules::LuaAdapterModule::create()
 
 		APP.ERR_LOG("LuaProxy", _err);
 	}
+
 
 	proxyPtr_->state_.new_usertype<gsf::Args>("Args"
 		, sol::constructors<Args(), Args(const char *, int)>()
