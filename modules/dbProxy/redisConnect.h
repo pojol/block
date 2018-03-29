@@ -24,7 +24,7 @@ namespace gsf
 		//    #auto - aof - rewrite - min - size 64mb 关闭自动rewrite
 
 
-		class RedisProxy
+		class RedisConnect
 		{
 		public:
 
@@ -64,7 +64,7 @@ namespace gsf
 			std::set<std::string> field_set_;
 		};
 
-		typedef std::shared_ptr<RedisProxy> RedisPtr;
+		typedef std::shared_ptr<RedisConnect> RedisPtr;
 	}
 	
 }

@@ -49,25 +49,22 @@ namespace gsf
 			MysqlConnect & operator = (const MysqlConnect &) = delete;
 
 			bool init(const std::string &host, int port, const std::string &user, const std::string &pwd, const std::string &name);
-			/*
-			void execute(const std::string &order, const gsf::ArgsPtr &args);
-			*/
-			void query(gsf::ModuleID target, int oper, const std::string &sql, std::function<void (gsf::ModuleID, gsf::ArgsPtr)> callback);
+
+			void execute(const std::string &query, const char *buf, unsigned long len);
+
+			void execSql(gsf::ModuleID target, int oper, const std::string &sql, std::function<void (gsf::ModuleID, gsf::ArgsPtr)> callback);
 
 		private:
 
-			/*
-				void perpare(const std::string &sql, SqlStmtPtr &stmtPtr);
-			*/
-
-			void startThread();
-			void endThread();
+			void perpare(const std::string &sql, SqlStmtPtr &stmtPtr);
 
 		private:
 			MYSQL *basePtr_ = nullptr;
 
-			//std::unordered_map<std::string, SqlStmtPtr> prepared_stmt_map;
+			std::unordered_map<std::string, SqlStmtPtr> prepared_stmt_map;
 		};
+
+		typedef std::shared_ptr<MysqlConnect> MysqlPtr;
 	}
 }
 

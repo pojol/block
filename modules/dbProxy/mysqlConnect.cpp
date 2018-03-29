@@ -15,6 +15,7 @@ uint8_t ToValueType(enum_field_types mysqlType)
 	case FIELD_TYPE_STRING:
 	case FIELD_TYPE_VAR_STRING:
 	case FIELD_TYPE_BLOB:
+		return gsf::at_block;
 	case FIELD_TYPE_SET:
 	case FIELD_TYPE_NULL:
 		return gsf::at_string;
@@ -107,7 +108,7 @@ bool gsf::modules::MysqlConnect::init(const std::string &host, int port, const s
 		APP.ERR_LOG("MysqlConnect", "init fail!");
 		return false;
 	}
-	
+
 	basePtr_ = mysql_real_connect(init, host.c_str(), user.c_str(), pwd.c_str(), name.c_str(), port, nullptr, 0);
 	if (nullptr == basePtr_) {
 		APP.ERR_LOG("MysqlConnect", "connect fail!");
@@ -120,51 +121,40 @@ bool gsf::modules::MysqlConnect::init(const std::string &host, int port, const s
 	return true;
 }
 
-/*
-void gsf::modules::MysqlConnect::execute(const std::string &order, const gsf::ArgsPtr &args)
+
+void gsf::modules::MysqlConnect::execute(const std::string &query, const char *buf, unsigned long len)
 {
 	SqlStmtPtr stmt;
-	perpare(order, stmt);
+	perpare(query, stmt);
 
-	if (stmt->params != args->get_params_count())
-	{
-		std::cout << " enough params " << std::endl;
+	MYSQL_BIND params[2];
+	memset(params, 0, sizeof(params));
+
+	int id = 0;
+
+	params[0].buffer_type = MYSQL_TYPE_LONG;
+	params[0].buffer = &id;
+
+	char *blobBuf = nullptr;
+	try {
+		blobBuf = new char(len);
 	}
-
-	std::vector<MYSQL_BIND> mysqlBinds;
-	auto _tag = args->get_tag();
-	while (0 != _tag)
-	{
-		auto mt = ToMySqlType(_tag);
-		mysqlBinds.push_back(MYSQL_BIND());
-		auto& Param = mysqlBinds.back();
-		memset(&Param, 0, sizeof(MYSQL_BIND));
-		Param.buffer_type = mt.first;
-		Param.is_null = 0;
-		Param.is_unsigned = mt.second;
-		Param.length = 0;
-
-		if (_tag == gsf::at_int8 || _tag == gsf::at_uint8 || _tag == gsf::at_int16 || _tag == gsf::at_uint16 ||
-			_tag == gsf::at_int16 || _tag == gsf::at_int32 || _tag == gsf::at_uint32 || _tag == gsf::at_int64 ||
-			_tag == gsf::at_uint64 || _tag == gsf::at_float || _tag == gsf::at_double || _tag == gsf::at_bool)
-		{
-			Param.buffer = args->peek(_tag);
-			Param.buffer_length = (unsigned long)0;
-		}
-		else if (_tag == gsf::at_string) {
-			auto _pair = args->peek_str();
-			Param.buffer = _pair.first;
-			Param.buffer_length = _pair.second;
-		}
-		else {
-
-		}
-
-		_tag = args->get_tag();
+	catch (...) {
+		mysql_stmt_close(stmt->stmt);
+		APP.ERR_LOG("MysqlConnect", "out of memory");
+		return;
 	}
+	std::shared_ptr<char>(blobBuf, [](char *p)->void { delete[] p; });
+
+	params[1].buffer_type = MYSQL_TYPE_BLOB;
+	params[1].buffer_length = 10240;
+	params[1].length = &len;
+	params[1].is_null = 0;
+	params[1].buffer = blobBuf;
+	memcpy(blobBuf, buf, len);
 
 	// bind input arguments
-	if (mysql_stmt_bind_param(stmt->stmt, mysqlBinds.data()))
+	if (mysql_stmt_bind_param(stmt->stmt, params))
 	{
 		std::cout << mysql_stmt_error(stmt->stmt) << std::endl;
 	}
@@ -174,8 +164,8 @@ void gsf::modules::MysqlConnect::execute(const std::string &order, const gsf::Ar
 		std::cout << mysql_stmt_error(stmt->stmt) << std::endl;
 	}
 }
-*/
-void gsf::modules::MysqlConnect::query(gsf::ModuleID target, int oper, const std::string &sql, std::function<void (gsf::ModuleID, gsf::ArgsPtr)> callback)
+
+void gsf::modules::MysqlConnect::execSql(gsf::ModuleID target, int oper, const std::string &sql, std::function<void (gsf::ModuleID, gsf::ArgsPtr)> callback)
 {
 	MYSQL_RES *result = nullptr;
 	MYSQL_FIELD *fields = nullptr;
@@ -226,6 +216,7 @@ void gsf::modules::MysqlConnect::query(gsf::ModuleID target, int oper, const std
 
 	MYSQL_ROW row;
 	row = mysql_fetch_row(result);
+	unsigned long* lengths = mysql_fetch_lengths(result);
 	size_t col = 0;
 
 	while (nullptr != row)
@@ -257,6 +248,9 @@ void gsf::modules::MysqlConnect::query(gsf::ModuleID target, int oper, const std
 			case gsf::at_string:
 				argsPtr->push_string((row[col] != nullptr) ? row[col] : "");
 				break;
+			case gsf::at_block:
+				argsPtr->push_block(row[col], lengths[col]);
+				break;
 			}
 		}
 		callback(target, std::move(argsPtr));
@@ -272,7 +266,6 @@ void gsf::modules::MysqlConnect::query(gsf::ModuleID target, int oper, const std
 	}
 }
 
-/*
 void gsf::modules::MysqlConnect::perpare(const std::string &sql, SqlStmtPtr &stmtPtr)
 {
 
@@ -283,7 +276,7 @@ void gsf::modules::MysqlConnect::perpare(const std::string &sql, SqlStmtPtr &stm
 	}
 
 	do {
-		if (nullptr == base) {
+		if (nullptr == basePtr_) {
 			std::cout << "mysql unuseable!" << std::endl;
 			break;
 		}
@@ -291,7 +284,7 @@ void gsf::modules::MysqlConnect::perpare(const std::string &sql, SqlStmtPtr &stm
 		stmtPtr = std::make_shared<SqlStmt>();
 		stmtPtr->sql = sql;
 
-		stmtPtr->stmt = mysql_stmt_init(base);
+		stmtPtr->stmt = mysql_stmt_init(basePtr_);
 		if (nullptr == stmtPtr->stmt) {
 			std::cout << "stmt init fail" << std::endl;
 			break;
@@ -322,20 +315,4 @@ void gsf::modules::MysqlConnect::perpare(const std::string &sql, SqlStmtPtr &stm
 
 	stmtPtr.reset();
 
-}
-*/
-
-void gsf::modules::MysqlConnect::startThread()
-{
-	if (nullptr != basePtr_) {
-		mysql_thread_init();
-	}	
-}
-
-
-void gsf::modules::MysqlConnect::endThread()
-{
-	if (nullptr != basePtr_) {
-		mysql_thread_end();
-	}
 }

@@ -261,6 +261,7 @@ void gsf::modules::LuaAdapterModule::create()
 		, "push_i32", &Args::push_i32
 		, "push_string", &Args::push_string
 		, "push_bool", &Args::push_bool
+		, "push_block", &Args::push_block
 		, "pop_string", &Args::pop_string
 		, "pop_ui16", &Args::pop_ui16
 		, "pop_ui32", &Args::pop_ui32

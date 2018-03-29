@@ -7,7 +7,7 @@
 #include <fmt/format.h>
 #include <core/application.h>
 
-bool gsf::modules::RedisProxy::init()
+bool gsf::modules::RedisConnect::init()
 {
 	using namespace std::placeholders;
 
@@ -27,7 +27,7 @@ bool gsf::modules::RedisProxy::init()
 }
 
 
-void gsf::modules::RedisProxy::uninit()
+void gsf::modules::RedisConnect::uninit()
 {
 	redis_command_count_ = 0;
 	is_open_ = false;
@@ -39,7 +39,7 @@ void gsf::modules::RedisProxy::uninit()
 }
 
 
-void gsf::modules::RedisProxy::event_redis_avatar_offline(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
+void gsf::modules::RedisConnect::event_redis_avatar_offline(gsf::ArgsPtr args, gsf::CallbackFunc callback /* = nullptr */)
 {
 	if (!checkConnect()) {
 		APP.WARN_LOG("RedisProxy", "connect fail!");
@@ -61,7 +61,7 @@ void gsf::modules::RedisProxy::event_redis_avatar_offline(gsf::ArgsPtr args, gsf
 	freeReplyObject(_replay_ptr);
 }
 
-void gsf::modules::RedisProxy::command(const std::string &field, const std::string &key, const std::string &block)
+void gsf::modules::RedisConnect::command(const std::string &field, const std::string &key, const std::string &block)
 {
 	field_set_.insert(field);	//记录下域
 
@@ -73,7 +73,7 @@ void gsf::modules::RedisProxy::command(const std::string &field, const std::stri
 	redis_command_count_++;
 }
 
-bool gsf::modules::RedisProxy::checkConnect()
+bool gsf::modules::RedisConnect::checkConnect()
 {
 	if (!is_open_) {
 		APP.ERR_LOG("RedisCacheProxyModule", "service terminated! check_connect");
@@ -103,7 +103,7 @@ bool gsf::modules::RedisProxy::checkConnect()
 	}
 }
 
-void gsf::modules::RedisProxy::execCommand()
+void gsf::modules::RedisConnect::execCommand()
 {
 	if (!checkConnect()) {
 		return;
@@ -124,7 +124,7 @@ void gsf::modules::RedisProxy::execCommand()
 	redis_command_count_ = 0;
 }
 
-void gsf::modules::RedisProxy::execRewrite()
+void gsf::modules::RedisConnect::execRewrite()
 {
 	if (!checkConnect()) {
 		return;
@@ -142,7 +142,7 @@ void gsf::modules::RedisProxy::execRewrite()
 	freeReplyObject(_replay_ptr);
 }
 
-void gsf::modules::RedisProxy::resume_redis_handler()
+void gsf::modules::RedisConnect::resume_redis_handler()
 {
 	//把redis内的数据分发出去， 由具体的avatar模块监听初始化。 这边要考虑数据极其大的情况!
 
@@ -165,7 +165,7 @@ void gsf::modules::RedisProxy::resume_redis_handler()
 	}
 }
 
-void gsf::modules::RedisProxy::flush_redis_handler()
+void gsf::modules::RedisConnect::flush_redis_handler()
 {
 	redisReply *_replay_ptr;
 
