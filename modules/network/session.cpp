@@ -112,13 +112,14 @@ void gsf::network::Session::read(::bufferevent *bev)
 			MsgID _msg_id = _block->get_msg_id();
 
 			if (_msg_id > eid::distributed::rpc_begin && _msg_id < eid::distributed::rpc_end) {
+			/*
 				auto args_ptr = ArgsPool::get_ref().get();
 				args_ptr->push(fd_);
 				args_ptr->push(_msg_id);
 				args_ptr->push_block(_block->buf_ + _block->get_head_size(), _block->get_body_size());
-				
-				//dispatch(targetM_, eid::network::recv, std::move(args_ptr));
+
 				basePtr_->addMessage(std::move(args_ptr));
+			*/
 			}
 			else {
 				if (!_block->check()) { //! 先这样检查下block中的内容是否合法，后面肯定不能这样明文传输

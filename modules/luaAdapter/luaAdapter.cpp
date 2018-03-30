@@ -112,7 +112,7 @@ void gsf::modules::LuaAdapterModule::ldispatch(gsf::ModuleID target, gsf::EventI
 	auto _smartPtr = gsf::ArgsPool::get_ref().get();
 
 	try {
-		_smartPtr->push_block(buf.c_str(), buf.size());
+		_smartPtr->importBuf(buf);
 
 		mailboxPtr_->dispatch(target, event, std::move(_smartPtr));
 	}
@@ -134,9 +134,8 @@ int gsf::modules::LuaAdapterModule::llisten(uint32_t event, const sol::function 
 			try {
 				std::string _req = "";
 				if (args) {
-					auto _pos = args->get_size();
-					_req = args->pop_block(0, _pos);
-					func(_req, _pos);
+					_req = args->exportBuf();
+					func(_req, _req.length());
 				}
 				else {
 					func(nullptr, 0);
@@ -261,7 +260,6 @@ void gsf::modules::LuaAdapterModule::create()
 		, "push_i32", &Args::push_i32
 		, "push_string", &Args::push_string
 		, "push_bool", &Args::push_bool
-		, "push_block", &Args::push_block
 		, "pop_string", &Args::pop_string
 		, "pop_ui16", &Args::pop_ui16
 		, "pop_ui32", &Args::pop_ui32
@@ -269,10 +267,11 @@ void gsf::modules::LuaAdapterModule::create()
 		, "pop_i64", &Args::pop_i64
 		, "pop_ui64", &Args::pop_ui64
 		, "pop_bool", &Args::pop_bool
-		, "pop_block", &Args::pop_block
 		, "get_size", &Args::get_size
 		, "get_tag", &Args::get_tag
-		, "to_string", &Args::to_string);
+		, "get_offset", &Args::get_offset
+		, "importBuf", &Args::importBuf
+		, "exportBuf", &Args::exportBuf);
 
 	proxyPtr_->state_.new_usertype<LuaAdapterModule>("LuaProxyModule"
 		, "ldispatch", &LuaAdapterModule::ldispatch

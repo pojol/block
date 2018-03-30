@@ -122,7 +122,7 @@ bool gsf::modules::MysqlConnect::init(const std::string &host, int port, const s
 }
 
 
-void gsf::modules::MysqlConnect::execute(const std::string &query, const char *buf, unsigned long len)
+void gsf::modules::MysqlConnect::insert(const std::string &query, const char *buf, unsigned long len)
 {
 	SqlStmtPtr stmt;
 	perpare(query, stmt);
@@ -151,6 +151,44 @@ void gsf::modules::MysqlConnect::execute(const std::string &query, const char *b
 	params[1].length = &len;
 	params[1].is_null = 0;
 	params[1].buffer = blobBuf;
+	memcpy(blobBuf, buf, len);
+
+	// bind input arguments
+	if (mysql_stmt_bind_param(stmt->stmt, params))
+	{
+		std::cout << mysql_stmt_error(stmt->stmt) << std::endl;
+	}
+
+	if (mysql_stmt_execute(stmt->stmt))
+	{
+		std::cout << mysql_stmt_error(stmt->stmt) << std::endl;
+	}
+}
+
+void gsf::modules::MysqlConnect::update(const std::string &query, const char *buf, unsigned long len)
+{
+	SqlStmtPtr stmt;
+	perpare(query, stmt);
+
+	MYSQL_BIND params[1];
+	memset(params, 0, sizeof(params));
+
+	char *blobBuf = nullptr;
+	try {
+		blobBuf = new char(len);
+	}
+	catch (...) {
+		mysql_stmt_close(stmt->stmt);
+		APP.ERR_LOG("MysqlConnect", "out of memory");
+		return;
+	}
+	std::shared_ptr<char>(blobBuf, [](char *p)->void { delete[] p; });
+
+	params[0].buffer_type = MYSQL_TYPE_BLOB;
+	params[0].buffer_length = 10240;
+	params[0].length = &len;
+	params[0].is_null = 0;
+	params[0].buffer = blobBuf;
 	memcpy(blobBuf, buf, len);
 
 	// bind input arguments
@@ -249,7 +287,9 @@ void gsf::modules::MysqlConnect::execSql(gsf::ModuleID target, int oper, const s
 				argsPtr->push_string((row[col] != nullptr) ? row[col] : "");
 				break;
 			case gsf::at_block:
-				argsPtr->push_block(row[col], lengths[col]);
+				std::string _str = "";
+				_str.assign(row[col], lengths[col]);
+				argsPtr->push_string(_str);
 				break;
 			}
 		}

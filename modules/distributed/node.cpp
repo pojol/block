@@ -52,7 +52,7 @@ void gsf::modules::NodeModule::before_init()
 
 		auto _itr = callbackMap_.find(_callbackid);
 		if (_itr != callbackMap_.end()) {
-
+			/*
 			auto _state = args->pop_bool();
 			auto _progress = args->pop_i32();
 
@@ -76,6 +76,7 @@ void gsf::modules::NodeModule::before_init()
 				mailboxPtr_->dispatch(timerM_, eid::timer::delay_milliseconds, gsf::makeArgs(delayTag_, rpcDelay_));
 				timerSet_.insert(std::make_pair(delayTag_, _info));
 			}
+			*/
 		}
 		else {
 			APP.WARN_LOG("Node", "can't find rpc callback", "{}\n", _callbackid);
@@ -152,16 +153,17 @@ void gsf::modules::NodeModule::eventRpc(gsf::EventID event, gsf::ModuleID module
 		callbackMap_.insert(std::make_pair(_callbackid, _callbackPtr));
 		timerSet_.insert(std::make_pair(_callbackPtr->timer_, _callbackPtr));
 		*/
-		
 	}
 
 	if (args) {
+	/*
 		auto argsPtr = gsf::ArgsPool::get_ref().get();
 		argsPtr->push(event);
 		argsPtr->push(_callbackid);
-		argsPtr->push_block(args->pop_block(0, args->get_size()).c_str(), args->get_size());
+		argsPtr->push_block(args->get_block(0, args->get_size()).c_str(), args->get_size());
 
 		mailboxPtr_->dispatch(_connector_m, eid::network::send, std::move(argsPtr));
+		*/
 	}
 	else {
 		mailboxPtr_->dispatch(_connector_m, eid::network::send, gsf::makeArgs(event, _callbackid));
@@ -262,7 +264,7 @@ void gsf::modules::NodeModule::eCreateNode(gsf::ModuleID target, gsf::ArgsPtr ar
 		});
 
 		mailboxPtr_->listen(eid::base::module_init_succ, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
-
+			/*
 			auto _t = gsf::ArgsPool::get_ref().get();
 			_t->push_block(args->pop_block(0, args->get_size()).c_str(), args->get_size());
 			auto _module_id = _t->pop_moduleid();
@@ -275,6 +277,7 @@ void gsf::modules::NodeModule::eCreateNode(gsf::ModuleID target, gsf::ArgsPtr ar
 					break;
 				}
 			}
+			*/
 		});
 
 	}
