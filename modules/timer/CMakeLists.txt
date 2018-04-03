@@ -3,8 +3,8 @@ PROJECT(timer)
 if(WIN32)
     #引用头文件目录
     INCLUDE_DIRECTORIES(
-            ${GSF_SOURCE_DIR}/
-            ${GSF_SOURCE_DIR}/3rd/fmt
+            ${BLOCK_SOURCE_DIR}/
+            ${BLOCK_SOURCE_DIR}/3rd/fmt
     )
 
     #引用库目录
@@ -15,13 +15,13 @@ endif()
 if(UNIX)
     #引用头文件目录
     INCLUDE_DIRECTORIES(
-            ${GSF_SOURCE_DIR}/
-            ${GSF_SOURCE_DIR}/lib/fmt/include
+            ${BLOCK_SOURCE_DIR}/
+            ${BLOCK_SOURCE_DIR}/lib/fmt/include
     )
 
     #引用库目录
     LINK_DIRECTORIES(
-            ${GSF_SOURCE_DIR}/lib/
+            ${BLOCK_SOURCE_DIR}/lib/
     )
 endif()
 
@@ -41,9 +41,9 @@ if(MSVC)
       endif()
     endforeach()    
     
-    SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/win)
+    SET(LIBRARY_OUTPUT_PATH ${BLOCK_SOURCE_DIR}/lib/win)
 elseif(UNIX)
-	SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib)
+	SET(LIBRARY_OUTPUT_PATH ${BLOCK_SOURCE_DIR}/lib)
 elseif(APPLE)
 endif()
 
