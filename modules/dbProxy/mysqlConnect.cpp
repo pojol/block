@@ -240,6 +240,8 @@ void gsf::modules::MysqlConnect::execSql(gsf::ModuleID target, int oper, const s
 	int32_t rowCount = static_cast<int32_t>(mysql_affected_rows(basePtr_));
 	if (0 == rowCount) {
 		mysql_free_result(result);
+		errf("row = 0");
+		return;
 	}
 
 	uint32_t fieldCount = mysql_field_count(basePtr_);
