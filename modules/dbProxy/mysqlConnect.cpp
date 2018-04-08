@@ -122,7 +122,7 @@ bool gsf::modules::MysqlConnect::init(const std::string &host, int port, const s
 }
 
 
-void gsf::modules::MysqlConnect::insert(const std::string &query, const char *buf, unsigned long len)
+bool gsf::modules::MysqlConnect::insert(const std::string &query, const char *buf, unsigned long len)
 {
 	SqlStmtPtr stmt;
 	perpare(query, stmt);
@@ -142,7 +142,7 @@ void gsf::modules::MysqlConnect::insert(const std::string &query, const char *bu
 	catch (...) {
 		mysql_stmt_close(stmt->stmt);
 		APP.ERR_LOG("MysqlConnect", "out of memory");
-		return;
+		return false;
 	}
 	std::shared_ptr<char>(blobBuf, [](char *p)->void { delete[] p; });
 
@@ -157,12 +157,16 @@ void gsf::modules::MysqlConnect::insert(const std::string &query, const char *bu
 	if (mysql_stmt_bind_param(stmt->stmt, params))
 	{
 		std::cout << mysql_stmt_error(stmt->stmt) << std::endl;
+		return false;
 	}
 
 	if (mysql_stmt_execute(stmt->stmt))
 	{
 		std::cout << mysql_stmt_error(stmt->stmt) << std::endl;
+		return false;
 	}
+
+	return true;
 }
 
 void gsf::modules::MysqlConnect::update(const std::string &query, const char *buf, unsigned long len)

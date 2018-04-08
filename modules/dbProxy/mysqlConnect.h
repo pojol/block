@@ -50,7 +50,7 @@ namespace gsf
 
 			bool init(const std::string &host, int port, const std::string &user, const std::string &pwd, const std::string &name);
 
-			void insert(const std::string &query, const char *buf, unsigned long len);
+			bool insert(const std::string &query, const char *buf, unsigned long len);
 			void update(const std::string &query, const char *buf, unsigned long len);
 
 			void execSql(gsf::ModuleID target, int oper, const std::string &sql, std::function<void (gsf::ModuleID, gsf::ArgsPtr)> callback);
