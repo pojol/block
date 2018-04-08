@@ -67,21 +67,18 @@ void gsf::modules::LuaAdapterModule::execute()
 			return;
 		}
 
+		mailboxPtr_->pull();
+
 		sol::table _module = proxyPtr_->state_.get<sol::table>("module");
 
 		if (proxyPtr_->app_state_ == LuaAppState::INIT) {
-			mailboxPtr_->pull();
-
 			proxyPtr_->call_list_[LuaAppState::INIT](_module);
 			proxyPtr_->app_state_ = LuaAppState::EXECUTE;
 		}
 		else if (proxyPtr_->app_state_ == LuaAppState::EXECUTE) {
-			mailboxPtr_->pull();
 			proxyPtr_->call_list_[LuaAppState::EXECUTE](_module);
-
 		}
 		else if (proxyPtr_->app_state_ == LuaAppState::SHUT) {
-			mailboxPtr_->pull();
 			proxyPtr_->call_list_[LuaAppState::SHUT](_module);
 			proxyPtr_->app_state_ = LuaAppState::AFTER_SHUT;
 		}
