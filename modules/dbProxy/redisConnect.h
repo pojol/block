@@ -34,15 +34,50 @@ namespace gsf
 		//    #auto-aof-rewrite-percentage 100 关闭自动rewrite
 		//    #auto - aof - rewrite - min - size 64mb 关闭自动rewrite
 
-		// block
-		/*!
-			hash
-			[k,v] = (entityID, entityBlob)
-		
-			list
-			[k,v] = (entityID, updateBlob)
-		**/
+		struct BlockRedisReply
+		{
+			BlockRedisReply(redisReply *reply)
+				: reply_(reply) {
 
+			}
+
+			~BlockRedisReply() {
+				freeReplyObject(reply_);
+			}
+
+			bool check(const std::string &flag) {
+				assert(reply_ && reply_->type != REDIS_REPLY_ERROR);
+
+				if (reply_->type == REDIS_REPLY_ERROR) {
+					APP.ERR_LOG("RedisConnect", flag, " {}", reply_->str);
+					return false;
+				}
+
+				return true;
+			}
+
+			int type() {
+				return reply_->type;
+			}
+
+			int integer() {
+				return reply_->integer;
+			}
+
+			std::string str() {
+				return reply_->str;
+			}
+
+			redisReply * reply_;
+		};
+
+		typedef std::shared_ptr<BlockRedisReply> ReplyPtr;
+
+		/**!
+			hash 用于保存entity实例
+			list 用于存放entity的更新操作
+			在mergeTimeSpace_ 和 mergeCountSpace_ 两个值到达预设的时候会合并list中的更新操作，覆盖到hash
+		*/
 		template <typename T>
 		class RedisConnect
 		{
@@ -54,27 +89,23 @@ namespace gsf
 			/**!
 				将对象添加到缓存中，时间到达或者次数到达则写入到数据库
 			*/
-			bool push(const std::string &field, const std::string &key, const std::string &buf);
-
-			/*!
-				pipe line
-			**/
-			void exec();
+			bool push(const std::string &field, uint32_t key, const std::string &buf);
 
 			/**!
-			写入到数据库
+			 * 获得缓存中的实例, 会自动执行一次合并以保证获取到最新的实例.
 			*/
-			std::string pop(const std::string &key);
+			std::string get(const std::string &field, uint32_t key);
+			std::vector<std::pair<uint32_t, std::string>> getAll();
 
 			/**!
-				离线处理
+				从缓存中清除某个对象
 			*/
-			void offline();
+			bool remove(const std::string &key);
 
 			/**!
-			重刷aof文件，用于灾备
+				在进程的主循环中调用
 			*/
-			void refresh();
+			void run();
 
 			/**！
 				服务器正常退出时调用， 清空redis
@@ -88,19 +119,52 @@ namespace gsf
 			**/
 			bool checkConnect();
 
-			int getListLen(const std::string &key);
+			/**!
+				重刷aof文件，体积优化
+			*/
+			void refresh();
+
+			std::pair<uint32_t, std::string> pop(uint32_t key);
+
+			int getListLen(uint32_t key);
+
+			ReplyPtr command(redisContext *c, const char *format, ...);
+
+			void merge(uint32_t key);
 
 		private:
 
 			std::string ip_ = "127.0.0.1";
-			uint32_t port_ = 3306;
+			uint32_t port_ = 6379;
 
 			//! 判断连接是否正常
 			bool is_conn_ = false;
 
 			redisContext *redis_context_;
-			uint32_t redis_command_count_ = 0;
+			uint32_t pipeLineCount_ = 0;
+			std::set<uint32_t> keys_;
+			
+			std::string field_ = "";
+			uint32_t updateCount_ = 0;
+			uint64_t updateTime_ = APP.getSystemTick();
+			uint64_t refreshTime_ = APP.getSystemTick();
+
+			const uint32_t mergeTimeSpace_ = 1000 * 60 * 2;
+			const uint32_t mergeCountSpace_ = 100;
+			const uint32_t refreshSpace_ = 1000 * 60 * 10;
 		};
+
+		template <typename T>
+		ReplyPtr gsf::modules::RedisConnect<T>::command(redisContext *c, const char *format, ...)
+		{
+			va_list ap;
+			void *reply = NULL;
+			va_start(ap, format);
+			reply = redisvCommand(c, format, ap);
+			va_end(ap);
+
+			return std::make_shared<BlockRedisReply>(static_cast<redisReply*>(reply));
+		}
 
 		template <typename T>
 		bool gsf::modules::RedisConnect<T>::init()
@@ -132,48 +196,106 @@ namespace gsf
 		}
 
 		template <typename T>
-		bool gsf::modules::RedisConnect<T>::push(const std::string &field, const std::string &key, const std::string &buf)
+		bool gsf::modules::RedisConnect<T>::push(const std::string &field, uint32_t key, const std::string &buf)
 		{
-			if (!checkConnect()) {
-				return false;
-			}
+			bool _flag = false;
 
-			
-			//! 如果hash中不存在则创建，存在则添加到更新队列中
-
-			redisReply *_replay_ptr;
-			_replay_ptr = static_cast<redisReply*>(redisCommand(redis_context_, "HGET %s %s %s", field.c_str(), key.c_str()));
-
-			assert(_replay_ptr && _replay_ptr->type != REDIS_REPLY_ERROR);
-
-			if (_replay_ptr->type == REDIS_REPLY_ERROR) {
-				APP.ERR_LOG("RedisConnect", "rewrite_handler", " {}", _replay_ptr->str);
-			}
-
-			freeReplyObject(_replay_ptr);
-			/*
-				if (REDIS_OK != redisAppendCommand(redis_context_, "lpush %s%s", key.c_str(), buf.c_str())) {
-				APP.ERR_LOG("RedisConnect", "redisAppendCommand fail");
-				return false;
+			do{
+				if (field_ != "" && field_ != field){
+					APP.ERR_LOG("RedisConnect", "push", "field cannot be changed!");
+					break;
 				}
 
-				redis_command_count_++;
-			*/
-			return true;
+				if (!checkConnect()){
+					break;
+				}
+
+				std::string _keystr = std::to_string(key);
+
+				auto hgetReply = command(redis_context_, "HGET %s %s", field.c_str(), _keystr.c_str());
+				if (!hgetReply->check("hget")) {
+					break;
+				}
+
+				if (hgetReply->type() == REDIS_REPLY_NIL){
+
+					auto hsetReplay = command(redis_context_, "HSET %s %s %b", field.c_str(), _keystr.c_str(), buf.c_str(), buf.length());
+					if (!hsetReplay->check("hset")) {
+						break;
+					}
+				}
+				else {
+					if (REDIS_OK != redisAppendCommand(redis_context_, "RPUSH %s %b", _keystr.c_str(), buf.c_str(), buf.length()))
+					{
+						APP.ERR_LOG("RedisConnect", "push", "redis append command fail!");
+					}
+
+					pipeLineCount_++;
+				}
+
+				keys_.insert(key);
+				field_ = field;
+				_flag = true;
+			} while (0);
+
+			return _flag;
 		}
+	}
+
+	template <typename T>
+	std::string gsf::modules::RedisConnect<T>::get(const std::string &field, uint32_t key)
+	{
+		merge(key);
+
+		std::string _keystr = std::to_string(key);
+
+		auto replyPtr = command(redis_context_, "HGET %s %s", field.c_str(), _keystr.c_str());
+		if (!replyPtr->check("get")) {
+			return "";
+		}
+
+		return replyPtr->str();
+	}
+
+
+	template <typename T>
+	std::vector<std::pair<uint32_t, std::string>> gsf::modules::RedisConnect<T>::getAll()
+	{
+		assert(field_ != "");
+
+		std::vector<std::pair<uint32_t, std::string>> _vec;
+
+		for each (auto key in keys_)
+		{
+			merge(key);
+
+			std::string _keystr = std::to_string(key);
+
+			auto replyPtr = command(redis_context_, "HGET %s %s", field_.c_str(), _keystr.c_str());
+			if (!replyPtr->check("get all")) {
+				break;
+			}
+
+			_vec.push_back(std::make_pair(key, _keystr));
+		}
+
+		return _vec;
 	}
 	
 	template <typename T>
-	void gsf::modules::RedisConnect<T>::exec()
+	void gsf::modules::RedisConnect<T>::run()
 	{
+
+		if (pipeLineCount_ == 0) {
+			return;
+		}
+
 		if (!checkConnect()) {
 			return;
 		}
 
-		if (redis_command_count_ == 0) return;
-
 		redisReply *_replay_ptr;
-		for (uint32_t i = 0; i < redis_command_count_; ++i)
+		for (uint32_t i = 0; i < pipeLineCount_; ++i)
 		{
 			if (REDIS_OK != redisGetReply(redis_context_, (void**)&_replay_ptr)) {
 				APP.ERR_LOG("RedisConnect", "exec fail!");
@@ -182,46 +304,66 @@ namespace gsf
 			freeReplyObject(_replay_ptr);
 		}
 
-		redis_command_count_ = 0;
+		updateCount_ += pipeLineCount_;
+		using namespace std::chrono;
+		auto _curTime = APP.getSystemTick();
+		if ((_curTime - updateTime_) > mergeTimeSpace_ || updateCount_ > mergeCountSpace_){
+
+			//! 更新到hash
+			for each (auto key in keys_)
+			{
+				merge(key);
+			}
+
+			updateTime_ = _curTime;
+			updateCount_ = 0;
+		}
+
+		if ((_curTime - refreshTime_) > refreshSpace_) {
+			refresh();
+		}
+
+		pipeLineCount_ = 0;
 	}
 
 	template <typename T>
-	std::string gsf::modules::RedisConnect<T>::pop(const std::string &key)
+	std::pair<uint32_t, std::string> gsf::modules::RedisConnect<T>::pop(uint32_t key)
 	{
 		if (!checkConnect()) {
-			return "";
+			return std::make_pair(0, "");
 		}
 
+		std::string _keystr = std::to_string(key);
+
 		int _len = getListLen(key);
+		if (_len == 0) {
+			return std::make_pair(0, "");
+		}
 
 		T _t;
 
 		for (int i = 0; i < _len; ++i)
 		{
-			redisReply *_replay_ptr;
-			_replay_ptr = static_cast<redisReply*>(redisCommand(redis_context_, "lpop %s", key.c_str()));
-
-			assert(_replay_ptr && _replay_ptr->type != REDIS_REPLY_ERROR);
-
-			if (_replay_ptr->type == REDIS_REPLY_ERROR) {
-				APP.ERR_LOG("RedisConnect", "rewrite_handler", " {}", _replay_ptr->str);
+			auto replayPtr = command(redis_context_, "LPOP %s", _keystr.c_str());
+			if (!replayPtr->check("pop")) {
+				break;
 			}
 
 			if (i == 0) {
-				_t.ParseFromArray(_replay_ptr->str, std::strlen(_replay_ptr->str));
+				_t.ParseFromString(replayPtr->str());
 			}
 			else {
 				T _newer;
-				_newer.ParseFromArray(_replay_ptr->str, std::strlen(_replay_ptr->str));
+				_newer.ParseFromString(replayPtr->str());
 				_t.MergeFrom(_newer);
 			}
-
-			freeReplyObject(_replay_ptr);
 		}
 
 		std::string _buf;
+		int32_t _id = _t.id();
 		_t.SerializeToString(&_buf);
-		return _buf;
+		
+		return std::make_pair(_id, _buf);
 	}
 
 	template <typename T>
@@ -232,13 +374,12 @@ namespace gsf
 			return false;
 		}
 
-		redisReply *_replay_ptr;
-		_replay_ptr = static_cast<redisReply*>(redisCommand(redis_context_, "ping"));
+		auto replyPtr = command(redis_context_, "PING");
 
-		if (_replay_ptr && _replay_ptr->type != REDIS_REPLY_ERROR) {
+		if (replyPtr->check("ping")) {
 			return true;
 		}
-		else {	// 试着重连一下
+		else {
 			APP.WARN_LOG("RedisConnect", "connect fail! try reconnect!");
 
 			struct timeval _timeout = { 1, 500000 };
@@ -263,16 +404,8 @@ namespace gsf
 			return;
 		}
 
-		redisReply *_replay_ptr;
-		_replay_ptr = static_cast<redisReply*>(redisCommand(redis_context_, "bgrewriteaof"));
-
-		assert(_replay_ptr && _replay_ptr->type != REDIS_REPLY_ERROR);
-
-		if (_replay_ptr->type == REDIS_REPLY_ERROR) {
-			APP.ERR_LOG("RedisConnect", "rewrite_handler", " {}", _replay_ptr->str);
-		}
-
-		freeReplyObject(_replay_ptr);
+		auto replyPtr = command(redis_context_, "bgrewriteaof");
+		replyPtr->check("bgrewriteaof");
 	}
 
 	template <typename T>
@@ -282,39 +415,38 @@ namespace gsf
 			return;
 		}
 
-		redisReply *_replay_ptr;
-
-		_replay_ptr = static_cast<redisReply*>(redisCommand(redis_context_, "flushall"));
-
-		assert(_replay_ptr && _replay_ptr->type != REDIS_REPLY_ERROR);
-
-		if (_replay_ptr->type == REDIS_REPLY_ERROR) {
-			APP.ERR_LOG("RedisConnect", "flush_redis_handler", " {}", _replay_ptr->str);
-		}
-
-		freeReplyObject(_replay_ptr);
+		auto replyPtr = command(redis_context_, "flushall");
+		replyPtr->check("flushall");
 	}
 
 	template <typename T>
-	int gsf::modules::RedisConnect<T>::getListLen(const std::string &key)
+	void gsf::modules::RedisConnect<T>::merge(uint32_t key)
+	{
+		auto _p = pop(key);
+		if (_p.first != 0) {
+
+			auto hsetReplay = command(redis_context_, "HSET %s %s %b", field_.c_str(), std::to_string(_p.first).c_str(), _p.second.c_str(), _p.second.length());
+			hsetReplay->check("exec");
+		}
+	}
+
+	template <typename T>
+	int gsf::modules::RedisConnect<T>::getListLen(uint32_t key)
 	{
 		if (!checkConnect()) {
 			return 0;
 		}
 
-		redisReply *_replay_ptr;
-		_replay_ptr = static_cast<redisReply*>(redisCommand(redis_context_, "llen %s", key.c_str()));
+		std::string _keystr = std::to_string(key);
 
-		assert(_replay_ptr && _replay_ptr->type != REDIS_REPLY_ERROR);
-
-		if (_replay_ptr->type == REDIS_REPLY_ERROR) {
-			APP.ERR_LOG("RedisConnect", "rewrite_handler", " {}", _replay_ptr->str);
+		auto replyPtr = command(redis_context_, "LLEN %s", _keystr.c_str());
+		if (!replyPtr->check("LLEN")) {
+			return 0;
+		}
+		else {
+			return replyPtr->integer();
 		}
 
-		int _len = _replay_ptr->integer;
-		freeReplyObject(_replay_ptr);
-
-		return _len;
 	}
 }
 

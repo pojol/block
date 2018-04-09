@@ -60,9 +60,15 @@ namespace gsf
 		int64_t getUUID();
 
 		/*!
+			获得当前的毫秒数
+		**/
+		uint64_t getSystemTick();
+
+		/*!
 			初始化进程
 		**/
-		void initCfg(const gsf::AppConfig &cfg);
+			void
+			initCfg(const gsf::AppConfig &cfg);
 
 		/*!
 			创建一个Module
@@ -125,7 +131,6 @@ namespace gsf
 		//！ 临时先写在这里，未来如果支持分布式可能要放在其他地方生成，保证服务器集群唯一。
 		int32_t makeModuleID();
 
-		uint64_t getSystemTick();
 		int64_t uuid();
 
 		//void unregist_dynamic_module(uint32_t module_id);

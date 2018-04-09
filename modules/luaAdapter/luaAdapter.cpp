@@ -132,7 +132,7 @@ int gsf::modules::LuaAdapterModule::llisten(uint32_t event, const sol::function 
 				std::string _req = "";
 				if (args) {
 					_req = args->exportBuf();
-					func(_req, _req.length());
+					func(_req);
 				}
 				else {
 					func(nullptr, 0);
