@@ -190,7 +190,8 @@ namespace gsf
 		template <typename T>
 		void gsf::modules::RedisConnect<T>::uninit()
 		{
-			redis_command_count_ = 0;
+			updateCount_ = 0;
+			pipeLineCount_ = 0;
 			is_conn_ = false;
 
 			flush_redis_handler();
