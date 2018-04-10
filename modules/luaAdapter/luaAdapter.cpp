@@ -135,7 +135,7 @@ int gsf::modules::LuaAdapterModule::llisten(uint32_t event, const sol::function 
 					func(_req);
 				}
 				else {
-					func(nullptr, 0);
+					func(nullptr);
 				}
 			}
 			catch (sol::error e) {

@@ -65,7 +65,8 @@ namespace gsf
 			}
 
 			std::string str() {
-				return reply_->str;
+				std::string _t(reply_->str, reply_->len);
+				return _t;
 			}
 
 			redisReply * reply_;
@@ -77,6 +78,8 @@ namespace gsf
 			hash 用于保存entity实例
 			list 用于存放entity的更新操作
 			在mergeTimeSpace_ 和 mergeCountSpace_ 两个值到达预设的时候会合并list中的更新操作，覆盖到hash
+
+			这里序列化的方法 以及 合并数据的方法应该由外部提供。
 		*/
 		template <typename T>
 		class RedisConnect
@@ -254,6 +257,10 @@ namespace gsf
 			return "";
 		}
 
+		if (replyPtr->type() == REDIS_REPLY_NIL) {
+			return "";
+		}
+
 		return replyPtr->str();
 	}
 
@@ -261,8 +268,6 @@ namespace gsf
 	template <typename T>
 	std::vector<std::pair<uint32_t, std::string>> gsf::modules::RedisConnect<T>::getAll()
 	{
-		assert(field_ != "");
-
 		std::vector<std::pair<uint32_t, std::string>> _vec;
 
 		for each (auto key in keys_)
