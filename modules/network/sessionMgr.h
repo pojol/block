@@ -5,8 +5,10 @@
 #include <vector>
 #include <unordered_map>
 
-#include <core/single.h>
+#include <queue>
 
+#include <core/single.h>
+#include <core/module.h>
 #include <event2/bufferevent.h>
 
 namespace gsf
@@ -29,14 +31,17 @@ namespace gsf
 			~SessionMgr();
 			SessionMgr();
 
-			void setNeedClose(int fd);
+			void addClose(int fd);
+			void addConnect(int fd);
 
-			void close();
+			void addMessage(gsf::ArgsPtr args);
+
+			void exec(MailBoxPtr mailbox);
 
 			SessionPtr find(int fd);
 			SessionPtr findByModule(uint32_t module_id);
 
-			SessionPtr makeSession(int fd, int module_id, MsgBinder *binder, ::bufferevent *bev);
+			SessionPtr makeSession(int fd, int module_id, ::bufferevent *bev);
 
 			int curMaxConnect() const;
 
@@ -47,7 +52,11 @@ namespace gsf
 			SessionQueue sessionQueueByModule_;
 
 			std::vector<int> disconnectVec_;
+			std::vector<int> connectVec_;
 
+			std::queue<gsf::ArgsPtr> messageQueue_;
+
+			gsf::ModuleID target_ = gsf::ModuleNil;
 			uint32_t sessionIndex_;
 		};
 	}

@@ -54,13 +54,20 @@ void gsf::Args::push_impl(const T &val)
 	write_ += _size;
 }
 
+/*
 void gsf::Args::push_block(const char *block, int len)
 {
-	inc(len);
+	inc(len + 1 + 1);
+
+	push_impl(at_block);
+	TypeLen _len = static_cast<TypeLen>(len);
 
 	memcpy(write_, block, len);
 	write_ += len;
+
+	params_++;
 }
+*/
 
 void gsf::Args::push(const uint8_t &val)
 {
@@ -113,7 +120,7 @@ void gsf::Args::push_double(const double &val)
 
 void gsf::Args::push_string(const std::string &val)
 {
-	push(val.c_str());
+	push(val.c_str(), val.length());
 }
 
 void gsf::Args::push_bool(const bool &val)
@@ -193,7 +200,7 @@ void gsf::Args::push(const double &val)
 
 void gsf::Args::push(const std::string &val)
 {
-	push(val.c_str());
+	push(val.c_str(), val.length());
 }
 
 template <typename T>
@@ -239,10 +246,10 @@ void gsf::Args::push(std::map<Key, Value> &map)
 	params_++;
 }
 
-void gsf::Args::push(const char * val)
+void gsf::Args::push(const char * val, size_t len)
 {
 	push_impl(at_string);
-	TypeLen _len = static_cast<TypeLen>(std::strlen(val));
+	TypeLen _len = static_cast<TypeLen>(len);
 
 	push_impl(_len);
 
@@ -258,6 +265,7 @@ uint8_t gsf::Args::pop_tag()
 {
 	auto _ui8 = *reinterpret_cast<uint8_t*>(read_);
 	read_ += sizeof(uint8_t);
+	offset_ += sizeof(uint8_t);
 
 	return _ui8;
 }
@@ -268,6 +276,7 @@ uint8_t gsf::Args::pop_ui8()
 
 	auto _ui8 = *reinterpret_cast<uint8_t*>(read_);
 	read_ += sizeof(uint8_t);
+	offset_ += sizeof(uint8_t);
 
 	params_--;
 
@@ -280,6 +289,7 @@ int8_t gsf::Args::pop_i8()
 
 	auto _val = *reinterpret_cast<int8_t*>(read_);
 	read_ += sizeof(int8_t);
+	offset_ += sizeof(int8_t);
 
 	params_--;
 
@@ -292,6 +302,7 @@ uint16_t gsf::Args::pop_ui16()
 
 	auto _val = *reinterpret_cast<uint16_t*>(read_);
 	read_ += sizeof(uint16_t);
+	offset_ += sizeof(uint16_t);
 
 	params_--;
 
@@ -304,6 +315,7 @@ int16_t gsf::Args::pop_i16()
 
 	auto _val = *reinterpret_cast<int16_t*>(read_);
 	read_ += sizeof(int16_t);
+	offset_ += sizeof(int16_t);
 
 	params_--;
 
@@ -316,6 +328,7 @@ int32_t gsf::Args::pop_i32()
 
 	auto _i32 = *reinterpret_cast<int32_t*>(read_);
 	read_ += sizeof(int32_t);
+	offset_ += sizeof(int32_t);
 
 	params_--;
 
@@ -328,6 +341,7 @@ uint64_t gsf::Args::pop_ui64()
 
 	auto _val = *reinterpret_cast<uint64_t*>(read_);
 	read_ += sizeof(uint64_t);
+	offset_ += sizeof(uint64_t);
 
 	params_--;
 
@@ -340,6 +354,7 @@ int64_t gsf::Args::pop_i64()
 
 	auto _val = *reinterpret_cast<int64_t*>(read_);
 	read_ += sizeof(int64_t);
+	offset_ += sizeof(int64_t);
 
 	params_--;
 
@@ -352,6 +367,7 @@ bool gsf::Args::pop_bool()
 
 	auto _val = *reinterpret_cast<bool*>(read_);
 	read_ += sizeof(bool);
+	offset_ += sizeof(bool);
 
 	params_--;
 
@@ -364,6 +380,7 @@ float gsf::Args::pop_float()
 
 	auto _val = *reinterpret_cast<float*>(read_);
 	read_ += sizeof(float);
+	offset_ += sizeof(float);
 
 	params_--;
 
@@ -376,6 +393,7 @@ double gsf::Args::pop_double()
 
 	auto _val = *reinterpret_cast<double*>(read_);
 	read_ += sizeof(double);
+	offset_ += sizeof(double);
 
 	params_--;
 
@@ -388,6 +406,7 @@ uint32_t gsf::Args::pop_ui32()
 
 	auto _ui32 = *reinterpret_cast<uint32_t*>(read_);
 	read_ += sizeof(uint32_t);
+	offset_ += sizeof(uint32_t);
 
 	params_--;
 
@@ -459,6 +478,7 @@ gsf::Args::TypeLen gsf::Args::pop_typelen()
 {
 	TypeLen _len = *reinterpret_cast<TypeLen*>(read_);
 	read_ += sizeof(TypeLen);
+	offset_ += sizeof(TypeLen);
 	return _len;
 }
 
@@ -491,6 +511,7 @@ std::string gsf::Args::pop_string()
 	std::string _str;
 	_str.assign(read_, _len);
 	read_ += _len;
+	offset_ += _len;
 
 	return _str;
 }
@@ -552,12 +573,22 @@ std::map<Key, Value> gsf::Args::pop_map()
 	return _map;
 }
 
-std::string gsf::Args::pop_block(int beg, int size)
+/*
+std::string gsf::Args::pop_block()
 {
+	assert(pop_tag() == at_block);
+
+	TypeLen _len = pop_typelen();
+
 	std::string _str;
-	_str.append(bytes_->buff_ + beg, size);
+	_str.append(read_, _len);
+
+	read_ += _len;
+	offset_ += _len;
+
 	return _str;
 }
+*/
 
 //////////////////////////////////////////////////////////////////////////
 uint8_t gsf::Args::peek_tag()
@@ -642,7 +673,28 @@ uint32_t gsf::Args::get_params_count() const
 	return params_;
 }
 
-std::string gsf::Args::to_string() const
+uint32_t gsf::Args::get_offset() const
+{
+	return offset_;
+}
+
+std::string gsf::Args::exportBuf()
+{
+	std::string _str;
+	_str.append(bytes_->buff_, get_size());
+	return _str;
+}
+
+void gsf::Args::importBuf(const std::string &str)
+{
+	size_t _len = str.length();
+	inc(_len);
+
+	memcpy(write_, str.c_str(), _len);
+	write_ += _len;
+}
+
+std::string gsf::Args::print() const
 {
 	auto _args = Args(bytes_->buff_, get_size());
 	std::stringstream ss;

@@ -6,7 +6,6 @@
 #include <functional>
 
 #include <core/module.h>
-#include <core/event.h>
 
 #include <event2/util.h>
 #include <event2/listener.h>
@@ -16,11 +15,9 @@ namespace gsf
 	namespace network
 	{
 		class SessionMgr;
-		class MsgBinder;
 
 		class AcceptorModule
 			: public gsf::Module
-			, public gsf::IEvent
 		{
 		public:
 			AcceptorModule(const std::string &name);
@@ -37,11 +34,11 @@ namespace gsf
 
 		private:
 
-			void eMakeAcceptor(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eMakeAcceptor(gsf::ModuleID target, gsf::ArgsPtr args);
 
-			void eSendMsg(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eSendMsg(gsf::ModuleID target, gsf::ArgsPtr args);
 
-			void eKick(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eKick(gsf::ModuleID target, gsf::ArgsPtr args);
 
 			void accept_bind(const std::string &ip, int port);
 			static void accept_listen_cb(::evconnlistener *listener
@@ -55,8 +52,6 @@ namespace gsf
 			uint32_t moduleID_;
 
 			SessionMgr *sessionMgr_ = nullptr;
-
-			MsgBinder *binder_ = nullptr;
 
 			event_base *eventBasePtr_ = nullptr;
 

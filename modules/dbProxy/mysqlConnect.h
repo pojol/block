@@ -2,8 +2,8 @@
 #define _GSF_MYSQL_CONNECTOR_HEADER_
 
 #include <string>
-#include <core/event.h>
-
+#include <memory>
+#include <core/application.h>
 #include "mysql.h"
 
 namespace gsf 
@@ -50,22 +50,22 @@ namespace gsf
 
 			bool init(const std::string &host, int port, const std::string &user, const std::string &pwd, const std::string &name);
 
-			void execute(const std::string &order, const gsf::ArgsPtr &args);
+			bool insert(const std::string &query, const char *buf, unsigned long len);
+			void update(const std::string &query, const char *buf, unsigned long len);
 
-			void query(gsf::ModuleID target, int64_t uuid, const std::string &sql, std::function<void (gsf::ModuleID, gsf::ArgsPtr)> callback);
+			void execSql(gsf::ModuleID target, int oper, const std::string &sql, std::function<void (gsf::ModuleID, gsf::ArgsPtr)> callback);
 
 		private:
 
 			void perpare(const std::string &sql, SqlStmtPtr &stmtPtr);
 
-			void startThread();
-			void endThread();
-
 		private:
 			MYSQL *basePtr_ = nullptr;
 
-			//std::unordered_map<std::string, SqlStmtPtr> prepared_stmt_map;
+			std::unordered_map<std::string, SqlStmtPtr> prepared_stmt_map;
 		};
+
+		typedef std::shared_ptr<MysqlConnect> MysqlPtr;
 	}
 }
 

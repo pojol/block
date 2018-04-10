@@ -60,7 +60,6 @@ lib/apple/lib/pkgconfig/libevent_openssl.pc
 lib/apple/lib/pkgconfig/libevent_pthreads.pc
 lib/linux/libstream.a
 lib/
-*.zip
 3rd/glog-master
 3rd/hiredis-0.13.3
 3rd/pbc-proto_v3

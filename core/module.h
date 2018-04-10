@@ -7,6 +7,8 @@
 #include <functional>
 #include <vector>
 #include <queue>
+#include <map>
+#include <unordered_map>
 #include <string>
 
 #include "args.h"
@@ -16,47 +18,61 @@
 
 namespace gsf
 {
-	/*
 	typedef std::function<void(ArgsPtr)> CallbackFunc;
-	typedef std::function<void(gsf::ArgsPtr, gsf::CallbackFunc)> ListenFunc;
-	typedef std::vector<std::pair<gsf::EventID, ListenFunc>> ListenVec;
+	typedef std::function<void(gsf::ModuleID target, gsf::ArgsPtr)> ListenFunc;
+
 	typedef std::function<void(ArgsPtr, int32_t, bool)> RpcCallback;
+
+	class Module;
+	struct TaskInfo
+	{
+		gsf::ModuleID target_;
+		gsf::EventID event_;
+		gsf::ArgsPtr args_;
+	};
+
+	/*
+
 	*/
 	struct MailBox
 	{
+		MailBox(Module *ptr);
+
 		/*!
-			
+
 		**/
-		//void listen(gsf::EventID event,  ListenFunc func);
-		
+		void listen(gsf::EventID event, ListenFunc func);
+
 		/*!
-		
+
 		**/
-		//void dispatch(gsf::ModuleID target, gsf::EventID event, gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
-		
+		void dispatch(gsf::ModuleID target, gsf::EventID event, gsf::ArgsPtr args);
+
 		/*!
-			
+
 		**/
-		//void rpc(gsf::EventID event, ArgsPtr args, RpcCallback callback = nullptr);
+		void rpc(gsf::EventID event, ArgsPtr args, RpcCallback callback = nullptr);
+
+		void pull();
+		void push(TaskInfo *info);
 
 	private:
 
-		struct TaskInfo
-		{
-			gsf::ModuleID target_;
-			gsf::EventID event_;
-			gsf::ArgsPtr args_;
-		};
+		typedef std::queue<TaskInfo*> TaskQueue;
 
-		typedef std::queue<TaskInfo> TaskQueue;
+		std::unordered_map<gsf::EventID, ListenFunc> listenMap_;
+		TaskQueue taskQueue_;
 
-		//ListenVec listenVec_;
-		//TaskQueue taskQueue_;
+		Module *basePtr_ = nullptr;
 	};
+
+	typedef std::shared_ptr<MailBox> MailBoxPtr;
 
 	class Module
 	{
 		friend class Application;
+		friend class Reactor;
+
 	public:
 		Module(const std::string &name);
 		virtual ~Module();
@@ -99,7 +115,7 @@ namespace gsf
 #endif // WATCH_PERF
 
 		//! 
-		//MailBox mailbox_;
+		MailBoxPtr mailboxPtr_ = nullptr;
 	};
 }
 

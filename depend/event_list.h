@@ -180,31 +180,16 @@ namespace eid
 		timer_arrive,
 	};
 
-	enum lua_proxy
+	enum lua
 	{
-		/*!
-			comment: 创建 Lua Script Module ,proxy会自动完成c++/lua的相关绑定 
-			args: int32_t module_id, string script_dir, string script_name
-			type: dispatch
-			res : bool succ
-		**/
-		create = 2301,
-
 		/*!
 			comment: 重新装载 Lua Script Module, 会走标准的退出和进入流程 init, shut 。即便持有状态也可以方便的热更
 			args: int32_t module_id
 			type: dispatch
 			res : bool succ
 		**/
-		reload,
+		reload = 2301,
 
-		/*!
-			comment: 移除 Lua Script Module
-			args: int32_t module_id
-			type: dispatch
-			res : bool succ
-		**/
-		destroy,
 	};
 
 	enum dbProxy

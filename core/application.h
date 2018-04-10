@@ -1,9 +1,9 @@
 #ifndef _GSF_APPLICATION_HEADER_
 #define _GSF_APPLICATION_HEADER_
 
-#include "event.h"
 #include "module.h"
 #include "single.h"
+#include "../depend/event_list.h"
 
 #include <list>
 #include <unordered_map>
@@ -31,13 +31,11 @@ namespace gsf
 		bool is_watch_pref = false;
 		std::string name = "default";
 		int32_t machine_ = 0;
-		std::string scriptPath_ = "";
 	};
 
 	class Application : public gsf::utils::Singleton<Application>
-		, public IEvent
 	{
-
+		friend struct MailBox;
 	public:
 		Application();
 
@@ -61,15 +59,16 @@ namespace gsf
 		**/
 		int64_t getUUID();
 
-		/**!
-			获得脚本根目录
-		*/
-		std::string getScriptPath() const;
+		/*!
+			获得当前的毫秒数
+		**/
+		uint64_t getSystemTick();
 
 		/*!
 			初始化进程
 		**/
-		void initCfg(const gsf::AppConfig &cfg);
+			void
+			initCfg(const gsf::AppConfig &cfg);
 
 		/*!
 			创建一个Module
@@ -132,7 +131,6 @@ namespace gsf
 		//！ 临时先写在这里，未来如果支持分布式可能要放在其他地方生成，保证服务器集群唯一。
 		int32_t makeModuleID();
 
-		uint64_t getSystemTick();
 		int64_t uuid();
 
 		//void unregist_dynamic_module(uint32_t module_id);
@@ -140,6 +138,10 @@ namespace gsf
 		typedef std::tuple<uint32_t, std::function<void()>, std::function<void()>, std::function<void(Module*, bool)>, Module*> Frame;
 		void pushFrame(uint64_t index, Frame frame);
 		void popFrame();
+
+	protected:
+		void reactorRegist(gsf::ModuleID moduleID, gsf::EventID event);
+		void reactorDispatch(gsf::ModuleID self, gsf::ModuleID target, gsf::EventID event, gsf::ArgsPtr args);
 
 	private:
 		AppState state_;
@@ -152,6 +154,8 @@ namespace gsf
 		std::unordered_map<std::string, int32_t> module_name_map_;
 
 		std::multimap<uint64_t, Frame> halfway_frame_;
+
+		std::unordered_map<gsf::EventID, MailBoxPtr> mailboxMap_;
 
 		bool shutdown_;
 
@@ -178,7 +182,8 @@ namespace gsf
 		_str.append(",time:");
 		_str.append(std::to_string(time));
 		_str.append(fmt::format(_fmt, std::forward<P>(values)...));
-		dispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogInfo, _str));
+		
+		reactorDispatch(0, getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogInfo, _str));
 	}
 
 	template <typename ...P>
@@ -191,7 +196,7 @@ namespace gsf
 		_str.append(reason);
 		_str.append("\n");
 		_str.append(fmt::format(_fmt, std::forward<P>(values)...));
-		dispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogWarning, _str));
+		reactorDispatch(0, getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogWarning, _str));
 	}
 
 
@@ -205,7 +210,7 @@ namespace gsf
 		_str.append(reason);
 		_str.append("\n");
 		_str.append(fmt::format(_fmt, std::forward<P>(values)...));
-		dispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogErr, _str));
+		reactorDispatch(0, getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogErr, _str));
 	}
 
 
@@ -219,7 +224,7 @@ namespace gsf
 		_str.append(reason);
 		_str.append("\n");
 		_str.append(fmt::format(_fmt, std::forward<P>(values)...));
-		dispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogInfo, _str));
+		reactorDispatch(0, getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogInfo, _str));
 	}
 
 
@@ -234,7 +239,7 @@ namespace gsf
 		_str.append(reason);
 		_str.append("\n");
 		_str.append(fmt::format(_fmt, std::forward<P>(values)...));
-		dispatch(getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogDebug, _str));
+		reactorDispatch(0, getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogDebug, _str));
 	}
 
 	template <typename T>

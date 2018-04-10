@@ -3,22 +3,22 @@ PROJECT(network)
 #引用头文件目录
 if(WIN32)
     INCLUDE_DIRECTORIES(
-            ${GSF_SOURCE_DIR}/3rd/Libevent/include
-			${GSF_SOURCE_DIR}/3rd/fmt
-            ${GSF_SOURCE_DIR}/
+            ${BLOCK_SOURCE_DIR}/3rd/Libevent/include
+			${BLOCK_SOURCE_DIR}/3rd/fmt
+            ${BLOCK_SOURCE_DIR}/
     )
 endif()
 if(UNIX)
     INCLUDE_DIRECTORIES(
-            ${GSF_SOURCE_DIR}/lib/libevent/include
-			${GSF_SOURCE_DIR}/lib/fmt/include
-            ${GSF_SOURCE_DIR}/
+            ${BLOCK_SOURCE_DIR}/lib/libevent/include
+			${BLOCK_SOURCE_DIR}/lib/fmt/include
+            ${BLOCK_SOURCE_DIR}/
 			)
 endif()
 if(APPLE)
     INCLUDE_DIRECTORIES(
-            ${GSF_SOURCE_DIR}/lib/libevent/include
-            ${GSF_SOURCE_DIR}/
+            ${BLOCK_SOURCE_DIR}/lib/libevent/include
+            ${BLOCK_SOURCE_DIR}/
 			)
 endif()
 
@@ -26,16 +26,16 @@ endif()
 #引用库目录
 if(WIN32)
     LINK_DIRECTORIES(
-            ${GSF_SOURCE_DIR}/lib
+            ${BLOCK_SOURCE_DIR}/lib
     )
 elseif(UNIX)
     LINK_DIRECTORIES(
-            ${GSF_SOURCE_DIR}/lib/libevent/lib
-            ${GSF_SOURCE_DIR}/lib
+            ${BLOCK_SOURCE_DIR}/lib/libevent/lib
+            ${BLOCK_SOURCE_DIR}/lib
     )
 elseif(APPLE)
 	LINK_DIRECTORIES(
-		${GSF_SOURCE_DIR}/lib/apple/lib
+		${BLOCK_SOURCE_DIR}/lib/apple/lib
 	)
 endif()
 
@@ -57,10 +57,10 @@ if(MSVC)
       endif()
     endforeach()
 
-	SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/win)        
+	SET(LIBRARY_OUTPUT_PATH ${BLOCK_SOURCE_DIR}/lib/win)        
         #TARGET_LINK_LIBRARIES(network ws2_32.lib)      项目本身是静态库不需要链接静态库
 elseif(UNIX)
-        SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/)
+        SET(LIBRARY_OUTPUT_PATH ${BLOCK_SOURCE_DIR}/lib/)
 elseif(APPLE)
-	SET(LIBRARY_OUTPUT_PATH ${GSF_SOURCE_DIR}/lib/)
+	SET(LIBRARY_OUTPUT_PATH ${BLOCK_SOURCE_DIR}/lib/)
 endif()

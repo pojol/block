@@ -2,7 +2,6 @@
 #define _GSF_DISTRIBUTED_NODE_HEADER_
 
 #include <core/module.h>
-#include <core/event.h>
 
 #include <vector>
 #include <map>
@@ -40,7 +39,6 @@ namespace gsf
 
 		class NodeModule
 			: public gsf::Module
-			, public gsf::IEvent
 		{
 		public:
 
@@ -58,8 +56,8 @@ namespace gsf
 
 			void registNode(gsf::ModuleID base, int event, const std::string &ip, int port);
 
-			void eCreateNode(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
-			void eRegistNode(gsf::ArgsPtr args, gsf::CallbackFunc callback = nullptr);
+			void eCreateNode(gsf::ModuleID target, gsf::ArgsPtr args);
+			void eRegistNode(gsf::ModuleID target, gsf::ArgsPtr args);
 
 		private:
 
@@ -69,6 +67,8 @@ namespace gsf
 
 			std::string acceptorIP_ = "";
 			int32_t acceptorPort_ = 0;
+
+			int32_t delayTag_ = 1;
 
 			int32_t id_ = 0;
 			std::string type_ = "";

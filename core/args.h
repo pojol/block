@@ -149,7 +149,7 @@ namespace gsf
 		void push(const bool &val);
 		void push(const float &val);
 		void push(const double &val);
-		void push(const char *val);
+		void push(const char *val, size_t len);
 		void push(const std::string &val);
 
 		template <typename T>
@@ -164,7 +164,7 @@ namespace gsf
 		template <typename Key, typename Value>
 		void push(std::map<Key, Value> &map);
 
-		void push_block(const char *block, int len);
+		//void push_block(const char *block, int len);
 
 		// lua
 		void push_ui16(const uint16_t &val);
@@ -202,7 +202,7 @@ namespace gsf
 		template <typename Key, typename Value>
 		std::map<Key, Value> pop_map();
 
-		std::string pop_block(int beg, int end);
+		//std::string pop_block();
 
 		template <typename T>
 		void pop(T &val);
@@ -230,9 +230,13 @@ namespace gsf
 		int get_tag();
 		uint32_t get_size() const;
 		uint32_t get_params_count() const;
+		uint32_t get_offset() const;
+
+		std::string exportBuf();
+		void importBuf(const std::string &str);
 
 		//! debug
-		std::string to_string() const;
+		std::string print() const;
 		///////////////////////////////peek///////////////////////////////////////
 		uint8_t peek_tag();
 		void * peek(uint8_t type);
@@ -253,6 +257,7 @@ namespace gsf
 
 		const char *tail_ = nullptr;
 		size_t params_ = 0;
+		uint32_t offset_ = 0;
 	};
 
 	using deleter_type = std::function<void(Args*)>;
