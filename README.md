@@ -1,5 +1,5 @@
 # Block
-[![Build Status](https://travis-ci.org/pojol/gsf.svg?branch=master)](https://travis-ci.org/pojol/gsf)
+[![Build Status](https://travis-ci.org/pojol/block.svg?branch=master)](https://travis-ci.org/pojol/block)
 [![License](http://img.shields.io/badge/license-mit-blue.svg?style=flat-square)](https://raw.githubusercontent.com/labstack/echo/master/LICENSE)
 
 ## 简介
