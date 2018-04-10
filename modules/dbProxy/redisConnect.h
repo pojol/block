@@ -270,7 +270,7 @@ namespace gsf
 	{
 		std::vector<std::pair<uint32_t, std::string>> _vec;
 
-		for each (auto key in keys_)
+		for (auto key : keys_)
 		{
 			merge(key);
 
@@ -315,7 +315,7 @@ namespace gsf
 		if ((_curTime - updateTime_) > mergeTimeSpace_ || updateCount_ > mergeCountSpace_){
 
 			//! 更新到hash
-			for each (auto key in keys_)
+			for (auto key : keys_)
 			{
 				merge(key);
 			}
