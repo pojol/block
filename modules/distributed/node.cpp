@@ -1,23 +1,11 @@
 ﻿#include "node.h"
 
-#include <modules/tcp/acceptor.h>
-#include <modules/tcp/connector.h>
-
-#include <core/dynamic_module_factory.h>
 #include <core/application.h>
 
 #include <algorithm>
 #include <iostream>
 #include <fmt/format.h>
 
-namespace gsf
-{
-	namespace network
-	{
-		REGISTER_CLASS(AcceptorModule)
-		REGISTER_CLASS(ConnectorModule)
-	}
-}
 
 gsf::modules::NodeModule::NodeModule()
 	: Module("NodeModule")

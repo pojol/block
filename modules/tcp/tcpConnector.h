@@ -20,13 +20,13 @@ namespace gsf
 
 		typedef std::shared_ptr<Session> SessionPtr;
 
-		class ConnectorModule
+		class TcpConnectorModule
 			: public gsf::Module
 		{
 		public:
-			ConnectorModule(const std::string &name);
-			ConnectorModule();
-			virtual ~ConnectorModule();
+			TcpConnectorModule(const std::string &name);
+			TcpConnectorModule();
+			virtual ~TcpConnectorModule();
 
 			void before_init() override;
 			void init() override;

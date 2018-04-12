@@ -1,4 +1,4 @@
-﻿#include "acceptor.h"
+﻿#include "tcpAcceptor.h"
 
 #include "sessionMgr.h"
 #include "session.h"
@@ -22,24 +22,24 @@
 
 #include <core/application.h>
 
-gsf::network::AcceptorModule::AcceptorModule(const std::string &name)
+gsf::network::TcpAcceptorModule::TcpAcceptorModule(const std::string &name)
 	: Module(name)
 {
 
 }
 
-gsf::network::AcceptorModule::AcceptorModule()
+gsf::network::TcpAcceptorModule::TcpAcceptorModule()
 	: Module("AcceptorModule")
 {
 
 }
 
-gsf::network::AcceptorModule::~AcceptorModule()
+gsf::network::TcpAcceptorModule::~TcpAcceptorModule()
 {
 
 }
 
-void gsf::network::AcceptorModule::before_init()
+void gsf::network::TcpAcceptorModule::before_init()
 {
 	sessionMgr_ = new SessionMgr();
 
@@ -47,17 +47,17 @@ void gsf::network::AcceptorModule::before_init()
 
 	using namespace std::placeholders;
 
-	mailboxPtr_->listen(eid::network::make_acceptor, std::bind(&AcceptorModule::eMakeAcceptor, this, _1, _2));
-	mailboxPtr_->listen(eid::network::send, std::bind(&AcceptorModule::eSendMsg, this, _1, _2));
-	mailboxPtr_->listen(eid::network::kick_connect, std::bind(&AcceptorModule::eKick, this, _1, _2));
+	mailboxPtr_->listen(eid::network::make_acceptor, std::bind(&TcpAcceptorModule::eMakeAcceptor, this, _1, _2));
+	mailboxPtr_->listen(eid::network::send, std::bind(&TcpAcceptorModule::eSendMsg, this, _1, _2));
+	mailboxPtr_->listen(eid::network::kick_connect, std::bind(&TcpAcceptorModule::eKick, this, _1, _2));
 }
 
-void gsf::network::AcceptorModule::init()
+void gsf::network::TcpAcceptorModule::init()
 {
 	mailboxPtr_->pull();
 }
 
-void gsf::network::AcceptorModule::execute()
+void gsf::network::TcpAcceptorModule::execute()
 {
 	mailboxPtr_->pull();
 
@@ -70,13 +70,13 @@ void gsf::network::AcceptorModule::execute()
 	}
 }
 
-void gsf::network::AcceptorModule::shut()
+void gsf::network::TcpAcceptorModule::shut()
 {
 	mailboxPtr_->pull();
 	evconnlistener_free(acceptListenerPtr_);
 }
 
-void gsf::network::AcceptorModule::after_shut()
+void gsf::network::TcpAcceptorModule::after_shut()
 {
 	if (sessionMgr_) {
 		delete sessionMgr_;
@@ -84,7 +84,7 @@ void gsf::network::AcceptorModule::after_shut()
 	}
 }
 
-void gsf::network::AcceptorModule::eMakeAcceptor(gsf::ModuleID target, gsf::ArgsPtr args)
+void gsf::network::TcpAcceptorModule::eMakeAcceptor(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	if (nullptr == acceptListenerPtr_) {
 		std::string _ip = args->pop_string();
@@ -108,7 +108,7 @@ void gsf::network::AcceptorModule::bind_remote(const gsf::ArgsPtr &args, gsf::Ca
 	binder_->regist(_info_ptr);
 }
 */
-void gsf::network::AcceptorModule::accept_bind(const std::string &ip, int port)
+void gsf::network::TcpAcceptorModule::accept_bind(const std::string &ip, int port)
 {
 	struct sockaddr_in sin;
 	memset(&sin, 0, sizeof(sin));
@@ -131,9 +131,9 @@ void gsf::network::AcceptorModule::accept_bind(const std::string &ip, int port)
 	}
 }
 
-void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, evutil_socket_t fd, sockaddr *sa, int socklen, void *arg)
+void gsf::network::TcpAcceptorModule::accept_listen_cb(::evconnlistener *listener, evutil_socket_t fd, sockaddr *sa, int socklen, void *arg)
 {
-	gsf::network::AcceptorModule *network_ptr_ = (gsf::network::AcceptorModule*)arg;
+	gsf::network::TcpAcceptorModule *network_ptr_ = (gsf::network::TcpAcceptorModule*)arg;
 	::bufferevent *bev;
 	int32_t _ret = 0;
 
@@ -168,7 +168,7 @@ void gsf::network::AcceptorModule::accept_listen_cb(::evconnlistener *listener, 
 	}
 }
 
-void gsf::network::AcceptorModule::eSendMsg(gsf::ModuleID target, gsf::ArgsPtr args)
+void gsf::network::TcpAcceptorModule::eSendMsg(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	assert(nullptr != acceptListenerPtr_);
 
@@ -192,7 +192,7 @@ void gsf::network::AcceptorModule::eSendMsg(gsf::ModuleID target, gsf::ArgsPtr a
 	}
 }
 
-void gsf::network::AcceptorModule::eKick(gsf::ModuleID target, gsf::ArgsPtr args)
+void gsf::network::TcpAcceptorModule::eKick(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	auto _fd = args->pop_fd();
 	sessionMgr_->addClose(_fd);

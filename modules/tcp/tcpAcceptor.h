@@ -16,13 +16,13 @@ namespace gsf
 	{
 		class SessionMgr;
 
-		class AcceptorModule
+		class TcpAcceptorModule
 			: public gsf::Module
 		{
 		public:
-			AcceptorModule(const std::string &name);
-			AcceptorModule();
-			virtual ~AcceptorModule();
+			TcpAcceptorModule(const std::string &name);
+			TcpAcceptorModule();
+			virtual ~TcpAcceptorModule();
 
 			void before_init() override;
 			void init() override;

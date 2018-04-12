@@ -1,4 +1,4 @@
-﻿#include "connector.h"
+﻿#include "tcpConnector.h"
 
 #include "sessionMgr.h"
 #include "session.h"
@@ -20,34 +20,34 @@
 #include <errno.h>
 #endif // WIN32
 
-gsf::network::ConnectorModule::ConnectorModule(const std::string &name)
+gsf::network::TcpConnectorModule::TcpConnectorModule(const std::string &name)
 	: Module(name)
 {
 }
 
-gsf::network::ConnectorModule::ConnectorModule()
+gsf::network::TcpConnectorModule::TcpConnectorModule()
 	: Module("ConnectorModule")
 {
 
 }
 
-gsf::network::ConnectorModule::~ConnectorModule()
+gsf::network::TcpConnectorModule::~TcpConnectorModule()
 {
 
 }
 
-void gsf::network::ConnectorModule::before_init()
+void gsf::network::TcpConnectorModule::before_init()
 {
 	eventBasePtr_ = event_base_new();
 	sessionMgr_ = new SessionMgr();
 
 	using namespace std::placeholders;
 
-	mailboxPtr_->listen(eid::network::make_connector, std::bind(&ConnectorModule::eMakeConncetor, this, _1, _2));
-	mailboxPtr_->listen(eid::network::send, std::bind(&ConnectorModule::eSendMsg, this, _1, _2));
+	mailboxPtr_->listen(eid::network::make_connector, std::bind(&TcpConnectorModule::eMakeConncetor, this, _1, _2));
+	mailboxPtr_->listen(eid::network::send, std::bind(&TcpConnectorModule::eSendMsg, this, _1, _2));
 }
 
-void gsf::network::ConnectorModule::init()
+void gsf::network::TcpConnectorModule::init()
 {
 	mailboxPtr_->pull();
 
@@ -56,7 +56,7 @@ void gsf::network::ConnectorModule::init()
 	//boardcast(eid::module_init_succ, gsf::makeArgs(get_module_id()));
 }
 
-void gsf::network::ConnectorModule::execute()
+void gsf::network::TcpConnectorModule::execute()
 {
 	mailboxPtr_->pull();
 	//! 先处理断连
@@ -69,7 +69,7 @@ void gsf::network::ConnectorModule::execute()
 	}
 }
 
-void gsf::network::ConnectorModule::shut()
+void gsf::network::TcpConnectorModule::shut()
 {
 	mailboxPtr_->pull();
 
@@ -77,11 +77,11 @@ void gsf::network::ConnectorModule::shut()
 	event_base_free(eventBasePtr_);
 }
 
-void gsf::network::ConnectorModule::after_shut()
+void gsf::network::TcpConnectorModule::after_shut()
 {
 }
 
-void gsf::network::ConnectorModule::eMakeConncetor(gsf::ModuleID target, gsf::ArgsPtr args)
+void gsf::network::TcpConnectorModule::eMakeConncetor(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	std::string _ip = args->pop_string();
 	uint32_t _port = args->pop_i32();
@@ -126,13 +126,13 @@ void gsf::network::ConnectorModule::eMakeConncetor(gsf::ModuleID target, gsf::Ar
 }
 
 
-void gsf::network::ConnectorModule::needCloseSession(int fd)
+void gsf::network::TcpConnectorModule::needCloseSession(int fd)
 {
 	// 
 }
 
 
-void gsf::network::ConnectorModule::eSendMsg(gsf::ModuleID target, gsf::ArgsPtr args)
+void gsf::network::TcpConnectorModule::eSendMsg(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	auto _msg = args->pop_msgid();
 	std::string _str = "";
