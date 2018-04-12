@@ -15,7 +15,7 @@
 * 支持分布式构建，支持rpc
 * 支持脚本热更（带状态退出，重入
 * 支持基于redis的灾备机制和数据缓存
-
+***
 #### 内置模块
 * [network](https://github.com/pojol/gsf/wiki/Modules_Network_TCP)
 * [distributed](https://github.com/pojol/gsf/wiki/Modules_Distributed)
@@ -29,10 +29,10 @@
 #### 依赖编译环境
 * linux (gcc4.9+
 * windows (vs2015
-
+***
 #### 编译&安装
 * install.py
-
+***
 #### 依赖库
 * [fmtlib](https://github.com/fmtlib/fmt)
 * [lua](https://github.com/lua/lua)
