@@ -28,7 +28,7 @@
 
 #### 依赖编译环境
 * linux (gcc4.9+
-* windows (vs2015
+* windows (vs2015+
 ***
 #### 编译&安装
 * install.py
