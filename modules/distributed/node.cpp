@@ -1,7 +1,7 @@
 ﻿#include "node.h"
 
-#include <modules/network/acceptor.h>
-#include <modules/network/connector.h>
+#include <modules/tcp/acceptor.h>
+#include <modules/tcp/connector.h>
 
 #include <core/dynamic_module_factory.h>
 #include <core/application.h>
