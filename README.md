@@ -17,7 +17,7 @@
 * 支持基于redis的灾备机制和数据缓存
 ***
 #### 内置模块
-* [network](https://github.com/pojol/gsf/wiki/Modules_Network_TCP)
+* [tcp](https://github.com/pojol/gsf/wiki/Modules_Network_TCP)
 * [distributed](https://github.com/pojol/gsf/wiki/Modules_Distributed)
 * [luaAdapter](https://github.com/pojol/gsf/wiki/Modules_LuaProxy)
 * [timer](https://github.com/pojol/gsf/wiki/Modules_Timer)
