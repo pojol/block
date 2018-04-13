@@ -65,13 +65,15 @@ namespace eid
 
 	enum network
 	{
+		// tcp
+
 		/*!
 			comment: 创建一个接收器
 			args: int32_t module_id, string ip, int32_t port
 			type: dispatch
 			res : bool succ or fail, string reason
 		**/
-		make_acceptor = 2001,
+		tcp_make_acceptor = 2001,
 
 		/*!
 			comment: 创建一个连接器
@@ -79,7 +81,7 @@ namespace eid
 			type: dispatch
 			res : bool succ or fail, string reason
 		**/
-		make_connector,
+		tcp_make_connector,
 
 		/*!
 			comment: 踢掉某个现有的连接
@@ -87,7 +89,7 @@ namespace eid
 			type: dispatch
 			res : bool succ or fail, string reason
 		**/
-		kick_connect,
+		tcp_kick_connect,
 
 		/*!
 			comment: 发送一条网络消息
@@ -95,7 +97,7 @@ namespace eid
 			type: dispatch
 			res : nil
 		**/
-		send,
+		tcp_send,
 
 		/*!
 			comment: 接收到一条网络消息
@@ -103,7 +105,7 @@ namespace eid
 			type: listen
 			res : nil
 		**/
-		recv,
+		tcp_recv,
 		
 		/*!
 			comment: 接收到一个新的连接（适用于 acceptor
@@ -111,7 +113,7 @@ namespace eid
 			type: listen
 			res : nil
 		**/
-		new_connect,
+		tcp_new_connect,
 
 		/*!
 			comment: 连接被断开, 只有连接错误才会收到这条事件（服务器主动kick不会
@@ -119,7 +121,19 @@ namespace eid
 			type: listen
 			res : int32_t fd, string reason
 		**/
-		dis_connect,
+		tcp_dis_connect,
+
+		ws_make_acceptor = 2601,
+
+		ws_kick_connect,
+
+		// http
+
+		ws_send,
+		ws_recv,
+
+		ws_new_connect,
+		ws_dis_connect
 	};
 
 	enum log
