@@ -1,4 +1,4 @@
-#include "websocketAcceptor.hpp"
+﻿#include "websocketAcceptor.hpp"
 
 #include <core/application.h>
 
@@ -63,23 +63,26 @@ void gsf::network::WebSocketAcceptorModule::eMakeAcceptor(gsf::ModuleID target, 
 				WSSessionPtr _session = std::make_shared<WSSession>();
 				_session->connPtr_ = req.get_conn()->shared_from_this();
 				_session->tick_ = APP.getSystemTick();
-				_session->uuid_ = APP.getUUID();
-				sessionMap_.insert(std::make_pair(_session->uuid_, _session));
-
-
-
+				_session->fd_ = req.get_conn()->socket().native_handle();
+				sessionMap_.insert(std::make_pair(_session->fd_, _session));
 				break;
 			}
 			case data_proc_state::data_continue:			
 			{
+				
+
 				break;
 			}
 			case data_proc_state::data_close:
 			{
+				// 处理释放session的工作
+
 				break;
 			}
 			case data_proc_state::data_error:
 			{	
+				// 处理释放session的工作
+
 				break;
 			}
 		}

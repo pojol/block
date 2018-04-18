@@ -15,7 +15,7 @@ namespace gsf
 		{
 			int64_t tick_;
 			
-			int64_t uuid_;
+			int32_t fd_;
 			
 			//!
 			std::weak_ptr<cinatra::connection<cinatra::Socket>> connPtr_;
