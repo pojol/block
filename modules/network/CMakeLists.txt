@@ -1,4 +1,4 @@
-PROJECT(tcp)
+PROJECT(network)
 
 #引用头文件目录
 if(WIN32)
@@ -41,7 +41,7 @@ endif()
 
 
 FILE(GLOB_RECURSE SRC "*.cpp" "*.h")
-ADD_LIBRARY(tcp STATIC ${SRC})
+ADD_LIBRARY(network STATIC ${SRC})
 
 if(MSVC)
     # Use the static C library for all build types

@@ -32,7 +32,7 @@ void gsf::modules::NodeModule::before_init()
 
 	//listenRpc(std::bind(&NodeModule::eventRpc, this, _1, _2, _3, _4));
 
-	mailboxPtr_->listen(eid::network::tcp_recv, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
+	mailboxPtr_->listen(eid::network::recv, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
 
 		auto _fd = args->pop_fd();
 		auto _msgid = args->pop_msgid();
@@ -154,7 +154,7 @@ void gsf::modules::NodeModule::eventRpc(gsf::EventID event, gsf::ModuleID module
 		*/
 	}
 	else {
-		mailboxPtr_->dispatch(_connector_m, eid::network::tcp_send, gsf::makeArgs(event, _callbackid));
+		mailboxPtr_->dispatch(_connector_m, eid::network::send, gsf::makeArgs(event, _callbackid));
 	}
 }
 
@@ -224,7 +224,7 @@ void gsf::modules::NodeModule::eCreateNode(gsf::ModuleID target, gsf::ArgsPtr ar
 		registNode(getModuleID(), eid::distributed::coordinat_select, _root_ip, _root_port);
 		//
 
-		mailboxPtr_->listen(eid::network::tcp_new_connect, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
+		mailboxPtr_->listen(eid::network::new_connect, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
 			connectorFD_ = args->pop_fd();
 
 			if (!service_) {

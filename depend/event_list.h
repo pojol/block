@@ -76,6 +76,11 @@ namespace eid
 		tcp_make_acceptor = 2001,
 
 		/*!
+			
+		**/
+		websocket_make_acceptor,
+
+		/*!
 			comment: 创建一个连接器
 			args: module_id, ip, port
 			type: dispatch
@@ -84,12 +89,17 @@ namespace eid
 		tcp_make_connector,
 
 		/*!
+			
+		**/
+		websocket_make_connector,
+
+		/*!
 			comment: 踢掉某个现有的连接
 			args: int32_t fd
 			type: dispatch
 			res : bool succ or fail, string reason
 		**/
-		tcp_kick_connect,
+		kick_connect,
 
 		/*!
 			comment: 发送一条网络消息
@@ -97,7 +107,7 @@ namespace eid
 			type: dispatch
 			res : nil
 		**/
-		tcp_send,
+		send,
 
 		/*!
 			comment: 接收到一条网络消息
@@ -105,7 +115,7 @@ namespace eid
 			type: listen
 			res : nil
 		**/
-		tcp_recv,
+		recv,
 		
 		/*!
 			comment: 接收到一个新的连接（适用于 acceptor
@@ -113,7 +123,7 @@ namespace eid
 			type: listen
 			res : nil
 		**/
-		tcp_new_connect,
+		new_connect,
 
 		/*!
 			comment: 连接被断开, 只有连接错误才会收到这条事件（服务器主动kick不会
@@ -121,19 +131,7 @@ namespace eid
 			type: listen
 			res : int32_t fd, string reason
 		**/
-		tcp_dis_connect,
-
-		ws_make_acceptor = 2601,
-
-		ws_kick_connect,
-
-		// http
-
-		ws_send,
-		ws_recv,
-
-		ws_new_connect,
-		ws_dis_connect
+		dis_connect,
 	};
 
 	enum log

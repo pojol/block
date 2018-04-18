@@ -48,8 +48,8 @@ void gsf::network::TcpAcceptorModule::before_init()
 	using namespace std::placeholders;
 
 	mailboxPtr_->listen(eid::network::tcp_make_acceptor, std::bind(&TcpAcceptorModule::eMakeAcceptor, this, _1, _2));
-	mailboxPtr_->listen(eid::network::tcp_send, std::bind(&TcpAcceptorModule::eSendMsg, this, _1, _2));
-	mailboxPtr_->listen(eid::network::tcp_kick_connect, std::bind(&TcpAcceptorModule::eKick, this, _1, _2));
+	mailboxPtr_->listen(eid::network::send, std::bind(&TcpAcceptorModule::eSendMsg, this, _1, _2));
+	mailboxPtr_->listen(eid::network::kick_connect, std::bind(&TcpAcceptorModule::eKick, this, _1, _2));
 }
 
 void gsf::network::TcpAcceptorModule::init()

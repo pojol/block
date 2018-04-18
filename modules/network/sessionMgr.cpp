@@ -74,7 +74,7 @@ void gsf::network::SessionMgr::exec(MailBoxPtr mailbox)
 			}
 
 			sessionQueue_.erase(_itr);
-			mailbox->dispatch(target_, eid::network::tcp_dis_connect, gsf::makeArgs(fd));
+			mailbox->dispatch(target_, eid::network::dis_connect, gsf::makeArgs(fd));
 		}
 	}
 
@@ -82,14 +82,14 @@ void gsf::network::SessionMgr::exec(MailBoxPtr mailbox)
 
 	for (int fd : connectVec_)
 	{
-		mailbox->dispatch(target_, eid::network::tcp_new_connect, gsf::makeArgs(fd));
+		mailbox->dispatch(target_, eid::network::new_connect, gsf::makeArgs(fd));
 	}
 
 	connectVec_.clear();
 
 	while (!messageQueue_.empty()) {
 
-		mailbox->dispatch(target_, eid::network::tcp_recv, std::move(messageQueue_.front()));
+		mailbox->dispatch(target_, eid::network::recv, std::move(messageQueue_.front()));
 
 		messageQueue_.pop();
 	}
