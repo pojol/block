@@ -1,4 +1,4 @@
-PROJECT(timer)
+﻿PROJECT(timer)
 
 if(WIN32)
     #引用头文件目录
@@ -25,8 +25,7 @@ if(UNIX)
     )
 endif()
 
-FILE(GLOB_RECURSE SRC "*.cpp" "*.h")
-ADD_LIBRARY(timer STATIC ${SRC})
+FILE(GLOB_RECURSE SRC "*.cpp" "*.hpp")
 
 if(MSVC)     
     # Use the static C library for all build types
