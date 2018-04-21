@@ -26,6 +26,7 @@ if(UNIX)
 endif()
 
 FILE(GLOB_RECURSE SRC "*.cpp" "*.hpp")
+ADD_LIBRARY(timer STATIC ${SRC})
 
 if(MSVC)     
     # Use the static C library for all build types
