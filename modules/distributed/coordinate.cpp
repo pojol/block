@@ -14,30 +14,29 @@ void gsf::modules::CoodinatorModule::before_init()
 {
 	using namespace std::placeholders;
 
-	mailboxPtr_->listen(eid::distributed::coordinat_regist, std::bind(&CoodinatorModule::eCoordinatRegist, this, _1, _2));
-	mailboxPtr_->listen(eid::distributed::coordinat_unregit, std::bind(&CoodinatorModule::eCoordinatUnregist, this, _1, _2));
+	listen(eid::distributed::coordinat_regist, std::bind(&CoodinatorModule::eCoordinatRegist, this, _1, _2));
+	listen(eid::distributed::coordinat_unregit, std::bind(&CoodinatorModule::eCoordinatUnregist, this, _1, _2));
 
-	mailboxPtr_->listen(eid::distributed::coordinat_adjust_weight
+	listen(eid::distributed::coordinat_adjust_weight
 		, std::bind(&CoodinatorModule::eCoordinatAdjustWeight, this, _1, _2));
 
-	mailboxPtr_->listen(eid::distributed::coordinat_select
+	listen(eid::distributed::coordinat_select
 		, std::bind(&CoodinatorModule::eCoordinatSelect, this, _1, _2));
 }
 
 void gsf::modules::CoodinatorModule::init()
 {
-	mailboxPtr_->pull();
 
 }
 
 void gsf::modules::CoodinatorModule::execute()
 {
-	mailboxPtr_->pull();
+
 }
 
 void gsf::modules::CoodinatorModule::shut()
 {
-	mailboxPtr_->pull();
+
 }
 
 //int32_t port, const std::string &module, gsf::ModuleID module_id, int32_t weight

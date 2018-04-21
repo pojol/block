@@ -29,14 +29,14 @@ namespace gsf
 		{
 		public:
 			~SessionMgr();
-			SessionMgr();
+			SessionMgr(Module *base);
 
 			void addClose(int fd);
 			void addConnect(int fd);
 
 			void addMessage(gsf::ArgsPtr args);
 
-			void exec(MailBoxPtr mailbox);
+			void exec();
 
 			SessionPtr find(int fd);
 			SessionPtr findByModule(uint32_t module_id);
@@ -58,6 +58,9 @@ namespace gsf
 
 			gsf::ModuleID target_ = gsf::ModuleNil;
 			uint32_t sessionIndex_;
+
+			// tmp 
+			gsf::Module *basePtr_;
 		};
 	}
 }

@@ -80,6 +80,10 @@ namespace gsf
 		gsf::ModuleID getModuleID() { return module_id_; }
 		std::string & getModuleName() { return name_; }
 
+		void listen(gsf::EventID event, ListenFunc func);
+		void dispatch(gsf::ModuleID target, gsf::EventID event, gsf::ArgsPtr args);
+		void rpc(gsf::EventID event, ArgsPtr args, RpcCallback callback = nullptr);
+
 	protected:
 		virtual void before_init();
 		virtual void init();
@@ -90,9 +94,14 @@ namespace gsf
 		virtual void after_shut();
 
 	protected:
+		void setAvailable(bool flag) { available_ = flag; }
+		bool getAvailable() const { return available_; }
+
 		void setID(gsf::ModuleID id) { module_id_ = id; }
 		gsf::ModuleID module_id_ = gsf::ModuleNil;
 		std::string name_;
+
+		bool available_ = false;
 
 #ifdef WATCH_PERF
 		int64_t tick_consume_;
@@ -115,6 +124,7 @@ namespace gsf
 #endif // WATCH_PERF
 
 		//! 
+	private:
 		MailBoxPtr mailboxPtr_ = nullptr;
 	};
 }

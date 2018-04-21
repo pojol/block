@@ -50,7 +50,7 @@ void gsf::modules::LuaAdapterModule::before_init()
 {	
 	using namespace std::placeholders;
 
-	mailboxPtr_->listen(eid::lua::reload, std::bind(&LuaAdapterModule::eReload, this, _1, _2));
+	listen(eid::lua::reload, std::bind(&LuaAdapterModule::eReload, this, _1, _2));
 }
 
 void gsf::modules::LuaAdapterModule::init()
@@ -66,8 +66,6 @@ void gsf::modules::LuaAdapterModule::execute()
 			create();
 			return;
 		}
-
-		mailboxPtr_->pull();
 
 		sol::table _module = proxyPtr_->state_.get<sol::table>("module");
 
@@ -111,7 +109,7 @@ void gsf::modules::LuaAdapterModule::ldispatch(gsf::ModuleID target, gsf::EventI
 	try {
 		_smartPtr->importBuf(buf);
 
-		mailboxPtr_->dispatch(target, event, std::move(_smartPtr));
+		dispatch(target, event, std::move(_smartPtr));
 	}
 	catch (sol::error e) {
 		std::string _err = e.what() + '\n' + Traceback(proxyPtr_->state_);
@@ -127,7 +125,7 @@ int gsf::modules::LuaAdapterModule::llisten(uint32_t event, const sol::function 
 {
 	try {
 
-		mailboxPtr_->listen(event, [=](gsf::ModuleID target, gsf::ArgsPtr args)->void {
+		listen(event, [=](gsf::ModuleID target, gsf::ArgsPtr args)->void {
 			try {
 				std::string _req = "";
 				if (args) {

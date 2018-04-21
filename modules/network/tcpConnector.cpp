@@ -39,18 +39,16 @@ gsf::network::TcpConnectorModule::~TcpConnectorModule()
 void gsf::network::TcpConnectorModule::before_init()
 {
 	eventBasePtr_ = event_base_new();
-	sessionMgr_ = new SessionMgr();
+	sessionMgr_ = new SessionMgr(this);
 
 	using namespace std::placeholders;
 
-	mailboxPtr_->listen(eid::network::tcp_make_connector, std::bind(&TcpConnectorModule::eMakeConncetor, this, _1, _2));
-	mailboxPtr_->listen(eid::network::send, std::bind(&TcpConnectorModule::eSendMsg, this, _1, _2));
+	listen(eid::network::tcp_make_connector, std::bind(&TcpConnectorModule::eMakeConncetor, this, _1, _2));
+	listen(eid::network::send, std::bind(&TcpConnectorModule::eSendMsg, this, _1, _2));
 }
 
 void gsf::network::TcpConnectorModule::init()
 {
-	mailboxPtr_->pull();
-
 	// todo ...
 	
 	//boardcast(eid::module_init_succ, gsf::makeArgs(get_module_id()));
@@ -58,11 +56,10 @@ void gsf::network::TcpConnectorModule::init()
 
 void gsf::network::TcpConnectorModule::execute()
 {
-	mailboxPtr_->pull();
 	//! 先处理断连
 
 	//
-	sessionMgr_->exec(mailboxPtr_);
+	sessionMgr_->exec();
 
 	if (eventBasePtr_) {
 		event_base_loop(eventBasePtr_, EVLOOP_ONCE | EVLOOP_NONBLOCK);
@@ -71,8 +68,6 @@ void gsf::network::TcpConnectorModule::execute()
 
 void gsf::network::TcpConnectorModule::shut()
 {
-	mailboxPtr_->pull();
-
 	bufferevent_free(bufferEventPtr_);
 	event_base_free(eventBasePtr_);
 }

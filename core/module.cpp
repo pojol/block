@@ -26,6 +26,21 @@ void gsf::Module::after_shut()
 
 }
 
+void gsf::Module::listen(gsf::EventID event, ListenFunc func)
+{
+	mailboxPtr_->listen(event, func);
+}
+
+void gsf::Module::dispatch(gsf::ModuleID target, gsf::EventID event, gsf::ArgsPtr args)
+{
+	mailboxPtr_->dispatch(target, event, std::move(args));
+}
+
+void gsf::Module::rpc(gsf::EventID event, ArgsPtr args, RpcCallback callback)
+{
+	mailboxPtr_->rpc(event, std::move(args), callback);
+}
+
 gsf::Module::Module(const std::string &name)
 	: name_(name)
 #ifdef WATCH_PERF

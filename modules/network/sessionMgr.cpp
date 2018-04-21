@@ -3,7 +3,8 @@
 
 #include <core/application.h>
 
-gsf::network::SessionMgr::SessionMgr()
+gsf::network::SessionMgr::SessionMgr(gsf::Module *base)
+	: basePtr_(base)
 {
 }
 
@@ -60,7 +61,7 @@ void gsf::network::SessionMgr::addMessage(gsf::ArgsPtr args)
 	messageQueue_.push(std::move(args));
 }
 
-void gsf::network::SessionMgr::exec(MailBoxPtr mailbox)
+void gsf::network::SessionMgr::exec()
 {
 	for (int fd : disconnectVec_)
 	{
@@ -74,7 +75,7 @@ void gsf::network::SessionMgr::exec(MailBoxPtr mailbox)
 			}
 
 			sessionQueue_.erase(_itr);
-			mailbox->dispatch(target_, eid::network::dis_connect, gsf::makeArgs(fd));
+			basePtr_->dispatch(target_, eid::network::dis_connect, gsf::makeArgs(fd));
 		}
 	}
 
@@ -82,14 +83,14 @@ void gsf::network::SessionMgr::exec(MailBoxPtr mailbox)
 
 	for (int fd : connectVec_)
 	{
-		mailbox->dispatch(target_, eid::network::new_connect, gsf::makeArgs(fd));
+		basePtr_->dispatch(target_, eid::network::new_connect, gsf::makeArgs(fd));
 	}
 
 	connectVec_.clear();
 
 	while (!messageQueue_.empty()) {
 
-		mailbox->dispatch(target_, eid::network::recv, std::move(messageQueue_.front()));
+		basePtr_->dispatch(target_, eid::network::recv, std::move(messageQueue_.front()));
 
 		messageQueue_.pop();
 	}

@@ -41,28 +41,26 @@ gsf::network::TcpAcceptorModule::~TcpAcceptorModule()
 
 void gsf::network::TcpAcceptorModule::before_init()
 {
-	sessionMgr_ = new SessionMgr();
+	sessionMgr_ = new SessionMgr(this);
 
 	eventBasePtr_ = event_base_new();
 
 	using namespace std::placeholders;
 
-	mailboxPtr_->listen(eid::network::tcp_make_acceptor, std::bind(&TcpAcceptorModule::eMakeAcceptor, this, _1, _2));
-	mailboxPtr_->listen(eid::network::send, std::bind(&TcpAcceptorModule::eSendMsg, this, _1, _2));
-	mailboxPtr_->listen(eid::network::kick_connect, std::bind(&TcpAcceptorModule::eKick, this, _1, _2));
+	listen(eid::network::tcp_make_acceptor, std::bind(&TcpAcceptorModule::eMakeAcceptor, this, _1, _2));
+	listen(eid::network::send, std::bind(&TcpAcceptorModule::eSendMsg, this, _1, _2));
+	listen(eid::network::kick_connect, std::bind(&TcpAcceptorModule::eKick, this, _1, _2));
 }
 
 void gsf::network::TcpAcceptorModule::init()
 {
-	mailboxPtr_->pull();
+
 }
 
 void gsf::network::TcpAcceptorModule::execute()
 {
-	mailboxPtr_->pull();
-
 	if (sessionMgr_) {
-		sessionMgr_->exec(mailboxPtr_);
+		sessionMgr_->exec();
 	}
 
 	if (eventBasePtr_) {
@@ -72,7 +70,6 @@ void gsf::network::TcpAcceptorModule::execute()
 
 void gsf::network::TcpAcceptorModule::shut()
 {
-	mailboxPtr_->pull();
 	evconnlistener_free(acceptListenerPtr_);
 }
 

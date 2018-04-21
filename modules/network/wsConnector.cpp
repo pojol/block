@@ -24,23 +24,22 @@ gsf::network::WebSocketConnectorModule::~WebSocketConnectorModule()
 void gsf::network::WebSocketConnectorModule::before_init()
 {
 	using namespace std::placeholders;
-	mailboxPtr_->listen(eid::network::websocket_make_connector, std::bind(&WebSocketConnectorModule::eMakeConnector, this, _1, _2));
+	listen(eid::network::websocket_make_connector, std::bind(&WebSocketConnectorModule::eMakeConnector, this, _1, _2));
 }
 
 void gsf::network::WebSocketConnectorModule::init()
 {
-	mailboxPtr_->pull();
 }
 
 void gsf::network::WebSocketConnectorModule::execute()
 {
-	mailboxPtr_->pull();
+
 
 }
 
 void gsf::network::WebSocketConnectorModule::shut()
 {
-	mailboxPtr_->pull();
+
 }
 
 void gsf::network::WebSocketConnectorModule::after_shut()

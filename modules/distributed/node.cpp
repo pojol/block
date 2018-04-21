@@ -27,12 +27,12 @@ void gsf::modules::NodeModule::before_init()
 	assert(timerM_ != gsf::ModuleNil);
 
 	using namespace std::placeholders;
-	mailboxPtr_->listen(eid::node::node_create, std::bind(&NodeModule::eCreateNode, this, _1, _2));
-	mailboxPtr_->listen(eid::node::node_regist, std::bind(&NodeModule::eRegistNode, this, _1, _2));
+	listen(eid::node::node_create, std::bind(&NodeModule::eCreateNode, this, _1, _2));
+	listen(eid::node::node_regist, std::bind(&NodeModule::eRegistNode, this, _1, _2));
 
 	//listenRpc(std::bind(&NodeModule::eventRpc, this, _1, _2, _3, _4));
 
-	mailboxPtr_->listen(eid::network::recv, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
+	listen(eid::network::recv, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
 
 		auto _fd = args->pop_fd();
 		auto _msgid = args->pop_msgid();
@@ -73,7 +73,7 @@ void gsf::modules::NodeModule::before_init()
 		return nullptr;
 	});
 
-	mailboxPtr_->listen(eid::timer::timer_arrive, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
+	listen(eid::timer::timer_arrive, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
 		auto _tag = args->pop_i32();
 
 		auto _itr = timerSet_.find(_tag);
@@ -91,17 +91,14 @@ void gsf::modules::NodeModule::before_init()
 
 void gsf::modules::NodeModule::init()
 {
-	mailboxPtr_->pull();
 }
 
 void gsf::modules::NodeModule::execute()
 {
-	mailboxPtr_->pull();
 }
 
 void gsf::modules::NodeModule::shut()
 {
-	mailboxPtr_->pull();
 }
 
 void gsf::modules::NodeModule::eventRpc(gsf::EventID event, gsf::ModuleID moduleID, const gsf::ArgsPtr &args, gsf::RpcCallback callback)
@@ -154,7 +151,7 @@ void gsf::modules::NodeModule::eventRpc(gsf::EventID event, gsf::ModuleID module
 		*/
 	}
 	else {
-		mailboxPtr_->dispatch(_connector_m, eid::network::send, gsf::makeArgs(event, _callbackid));
+		dispatch(_connector_m, eid::network::send, gsf::makeArgs(event, _callbackid));
 	}
 }
 
@@ -224,7 +221,7 @@ void gsf::modules::NodeModule::eCreateNode(gsf::ModuleID target, gsf::ArgsPtr ar
 		registNode(getModuleID(), eid::distributed::coordinat_select, _root_ip, _root_port);
 		//
 
-		mailboxPtr_->listen(eid::network::new_connect, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
+		listen(eid::network::new_connect, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
 			connectorFD_ = args->pop_fd();
 
 			if (!service_) {
@@ -245,13 +242,13 @@ void gsf::modules::NodeModule::eCreateNode(gsf::ModuleID target, gsf::ArgsPtr ar
 				}
 				eventRpc(eid::distributed::coordinat_regist, getModuleID(), _args, [&](const gsf::ArgsPtr &args, int32_t progress, bool result) {
 					if (result) {
-						mailboxPtr_->dispatch(targetM_, eid::node::node_create_succ, nullptr);
+						dispatch(targetM_, eid::node::node_create_succ, nullptr);
 					}
 				});
 			}
 		});
 
-		mailboxPtr_->listen(eid::base::module_init_succ, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
+		listen(eid::base::module_init_succ, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
 			/*
 			auto _t = gsf::ArgsPool::get_ref().get();
 			_t->push_block(args->pop_block(0, args->get_size()).c_str(), args->get_size());

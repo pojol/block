@@ -52,8 +52,8 @@ void gsf::modules::LogModule::before_init()
 
 	using namespace std::placeholders;
 
-	mailboxPtr_->listen(eid::log::print, std::bind(&LogModule::ePrint, this, _1, _2));
-	mailboxPtr_->listen(eid::log::nodebug, std::bind(&LogModule::eChangeFlag, this, _1, _2));
+	listen(eid::log::print, std::bind(&LogModule::ePrint, this, _1, _2));
+	listen(eid::log::nodebug, std::bind(&LogModule::eChangeFlag, this, _1, _2));
 
 	auto exeName = APP.getAppName();
 	initImpl(exeName);
@@ -61,17 +61,14 @@ void gsf::modules::LogModule::before_init()
 
 void gsf::modules::LogModule::init()
 {
-	mailboxPtr_->pull();
 }
 
 void gsf::modules::LogModule::execute()
 {
-	mailboxPtr_->pull();
 }
 
 void gsf::modules::LogModule::shut()
 {
-	mailboxPtr_->pull();
 	google::ShutdownGoogleLogging();
 }
 
