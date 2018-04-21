@@ -231,11 +231,21 @@ void gsf::Application::run()
 			{
 				if (state == AppState::BEFORE_INIT) {
 					it->before_init();
+					it->setAvailable(true);
 				}
 				else if (state == AppState::INIT) {
+					if (it->getAvailable()) {
+						it->mailboxPtr_->pull();
+					}
+
 					it->init();
 				}
 				else if (state == AppState::EXECUTE) {
+
+					if (it->getAvailable()) {
+						it->mailboxPtr_->pull();
+					}
+
 					it->execute();
 #ifdef WATCH_PERF
 					t1 = (time_point_cast<microseconds>(system_clock::now()) - _ttime).count();
@@ -244,7 +254,14 @@ void gsf::Application::run()
 #endif // WATCH_PERF
 				}
 				else if (state == AppState::SHUT) {
+
+					if (it->getAvailable()) {
+						it->mailboxPtr_->pull();
+					}
+
 					it->shut();
+
+					it->setAvailable(false);
 				}
 				else if (state == AppState::AFTER_SHUT) {
 					it->after_shut();
