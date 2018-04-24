@@ -17,6 +17,44 @@ uint64_t gsf::modules::TimerModule::make_timer_id(uint64_t delay)
 	return _tick;
 }
 
+bool gsf::modules::TimerModule::make_timer_index(gsf::ModuleID target, int tag, uint64_t tid)
+{
+	auto _newtag = target * 1000 + tag;
+
+	auto _idxItr = indexMap_.find(_newtag);
+	if (_idxItr != indexMap_.end()) {
+		if (_idxItr->second != 0) {
+			APP.WARN_LOG("timer", "repet", " tag:{}\n", tag);
+			return false;
+		}
+
+		_idxItr->second = tid;
+	}
+	else {
+		indexMap_.insert(std::make_pair(_newtag, tid));
+	}
+
+	return true;
+}
+
+uint64_t gsf::modules::TimerModule::reset_timer_index(gsf::ModuleID target, int tag)
+{
+	uint64_t _tid = UINT64_MAX;
+
+	auto _newtag = target * 1000 + tag;
+
+	auto _idxItr = indexMap_.find(_newtag);
+	if (_idxItr != indexMap_.end()) {
+		_tid = _idxItr->second;
+		_idxItr->second = 0;	//reset
+	}
+	else {
+		APP.WARN_LOG("timer", "reset match index err!");
+	}
+
+	return _tid;
+}
+
 void gsf::modules::TimerModule::before_init()
 {
 	using namespace std::placeholders;
@@ -49,6 +87,8 @@ void gsf::modules::TimerModule::execute()
 		while ((_time_id >> sequence_bit_) < _now)
 		{
 			dispatch(itr->second->target_, eid::timer::timer_arrive, gsf::makeArgs(itr->second->tag_));
+			
+			reset_timer_index(itr->second->target_, itr->second->tag_);
 			map_.erase(itr);
 
 			if (!map_.empty()) {
@@ -80,7 +120,9 @@ void gsf::modules::TimerModule::eDelayMilliseconds(gsf::ModuleID target, gsf::Ar
 	_event->tag_ = _tag;
 
 	assert(map_.find(_tid) == map_.end());
-	map_.insert(std::make_pair(_tid, _event));
+	if (make_timer_index(target, _tag, _tid)) {
+		map_.insert(std::make_pair(_tid, _event));
+	}
 }
 
 
@@ -117,31 +159,24 @@ void gsf::modules::TimerModule::eDelayDay(gsf::ModuleID target, gsf::ArgsPtr arg
 	_event->timerid_ = _tid;
 	_event->tag_ = _tag;
 
-	map_.insert(std::make_pair(_tid, _event));
+	if (make_timer_index(target, _tag, _tid)) {
+		map_.insert(std::make_pair(_tid, _event));
+	}
 }
 
 
 void gsf::modules::TimerModule::eRemoveTimer(gsf::ModuleID target, gsf::ArgsPtr args)
 {
 	uint32_t _tag = args->pop_i32();
-
-	//! ..
-	for (TimerMap::iterator itr = map_.begin(); itr != map_.end(); ++itr)
-	{
-		if (itr->second->target_ == target && itr->second->tag_ == _tag) {
-			map_.erase(itr);
-			return;
+	auto _tid = reset_timer_index(target, _tag);
+	
+	if (_tid != UINT64_MAX) {
+		auto _titr = map_.find(_tid);
+		if (_titr != map_.end()) {
+			map_.erase(_titr);
+		}
+		else {
+			APP.WARN_LOG("timer", "invalid remove!", " target:{} tag:{}", target, _tag);
 		}
 	}
-
-	APP.WARN_LOG("TimerModule", "removeTimer can't find tag", "target:{} tag:{}\n", target, _tag);
-	/*
-	auto itr = map_.find(_timer_id);
-	if (itr != map_.end()) {
-	map_.erase(itr);
-	}
-	else {
-	APP.WARN_LOG("TimerModule", "event_remove_timer can't find remove timer", "{}\n", _timer_id);
-	}
-	*/
 }

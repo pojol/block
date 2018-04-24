@@ -88,10 +88,16 @@ namespace gsf
 			uint64_t sequence_bit_ = 15;
 			uint64_t sequence_mask_ = (uint64_t)pow(2, sequence_bit_) - 1;
 
+			bool make_timer_index(gsf::ModuleID target, int tag, uint64_t tid);
+			uint64_t reset_timer_index(gsf::ModuleID target, int tag);
+
 		private:
 
 			typedef std::map<uint64_t, TimerHandlerPtr> TimerMap;
 			TimerMap map_;
+
+			typedef std::unordered_map<uint32_t, uint64_t> TimerIndexMap;
+			TimerIndexMap indexMap_;
 		};
 
 		

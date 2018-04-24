@@ -60,7 +60,7 @@ namespace gsf
 				return reply_->type;
 			}
 
-			int integer() {
+			int64_t integer() {
 				return reply_->integer;
 			}
 
