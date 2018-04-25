@@ -153,45 +153,6 @@ namespace eid
 		nodebug,
 	};
 
-	enum timer
-	{
-		/*!
-			comment: 延迟若干毫秒触发
-			args: int32_t module_id, int32_t milliseconds
-			type: dispatch
-			res : int64_t timer_id
-		**/
-		delay_milliseconds = 2201,
-
-		/*!
-			comment: 隔天触发
-			args: int32_t module_id, int32_t hour, int32_t minute
-			type: dispatch
-			res : int64_t timer_id
-		**/
-		delay_day,
-
-		delay_week,
-
-		delay_month,
-
-		/*!
-			comment: 从定时器中移除某个timer
-			args: int64_t timer_id
-			type: dispatch
-			res : bool succ
-		**/
-		remove_timer,
-
-		/*!
-			comment: 触发Timer
-			args: nil
-			type: listen
-			res : int64_t timer_id
-		**/
-		timer_arrive,
-	};
-
 	enum lua
 	{
 		/*!
