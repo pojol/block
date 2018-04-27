@@ -4,7 +4,7 @@
 #include <memory>
 #include <core/args.h>
 
-namespace gsf
+namespace block
 {
 	// 对二进制块做下简单封装， 方便回收内存。
 

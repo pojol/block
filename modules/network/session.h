@@ -11,7 +11,7 @@
 #include <string>
 #include <core/args.h>
 
-namespace gsf
+namespace block
 {
 	namespace network
 	{
@@ -35,14 +35,14 @@ namespace gsf
 			void disConnect(int32_t err);
 			void newConnect();
 
-			gsf::SessionID getID() const { return fd_; }
-			gsf::ModuleID getModuleID() const { return targetM_; }
+			block::SessionID getID() const { return fd_; }
+			block::ModuleID getModuleID() const { return targetM_; }
 
 		protected:
 
 		private:
-			gsf::SessionID fd_ = gsf::SessionNil;
-			gsf::ModuleID targetM_ = gsf::ModuleNil;
+			block::SessionID fd_ = block::SessionNil;
+			block::ModuleID targetM_ = block::ModuleNil;
 
 			std::function<void(int)> disconnCallback_;
 

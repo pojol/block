@@ -1,9 +1,11 @@
-#ifndef _GSF_APPLICATION_HEADER_
-#define _GSF_APPLICATION_HEADER_
+#pragma once
 
-#include "module.h"
-#include "single.h"
 #include "../depend/event_list.h"
+#include "../utils/single.h"
+#include "../utils/timer.hpp"
+#include "../utils/logger.hpp"
+
+#include "args.h"
 
 #include <list>
 #include <unordered_map>
@@ -13,7 +15,7 @@
 
 #include <fmt/format.h>
 
-namespace gsf
+namespace block
 {
 	enum AppState
 	{
@@ -33,7 +35,16 @@ namespace gsf
 		int32_t machine_ = 0;
 	};
 
-	class Application : public gsf::utils::Singleton<Application>
+	class Module;
+	struct MailBox;
+	typedef std::shared_ptr<MailBox> MailBoxPtr;
+
+	class utils::Logger;
+	class utils::Timer;
+	typedef std::shared_ptr<utils::Logger> LoggerPtr;
+	typedef std::shared_ptr<utils::Timer> TimerPtr;
+
+	class Application : public block::utils::Singleton<Application>
 	{
 		friend struct MailBox;
 	public:
@@ -42,12 +53,12 @@ namespace gsf
 		/*!
 			获得进程的名称
 		**/
-		std::string getAppName() const;
+		std::string getName() const;
 
 		/*!
 			通过名字获取某个Module的实例ID， 仅支持静态创建的Module。
 		**/
-		gsf::ModuleID getModule(const std::string &modulName) const;
+		block::ModuleID getModule(const std::string &modulName) const;
 
 		/*!
 			获取进程的机器ID
@@ -68,7 +79,7 @@ namespace gsf
 			初始化进程
 		**/
 			void
-			initCfg(const gsf::AppConfig &cfg);
+			initCfg(const block::AppConfig &cfg);
 
 		/*!
 			创建一个Module
@@ -79,12 +90,12 @@ namespace gsf
 		/*!
 			动态创建一个Module
 		**/
-		gsf::ModuleID createDynamicModule(const std::string &moduleType);
+		block::ModuleID createDynamicModule(const std::string &moduleType);
 
 		/*!
 			删除一个Module 
 		**/
-		void deleteModule(gsf::ModuleID moduleID);
+		void deleteModule(block::ModuleID moduleID);
 
 		/*!
 			进程的主循环
@@ -96,28 +107,7 @@ namespace gsf
 		**/
 		void exit();
 
-		// 只有在 regist log module 之后下面的日志接口才会有效
-		// -- 调试日志 --
-		template <typename ...P>
-		void DEBUG_LOG(std::string module_name, std::string reason, std::string _fmt, P&& ...values);
-		void DEBUG_LOG(std::string module_name, std::string reason);
-
-		// -- 诊断日志 --
-		template <typename ...P>
-		void INFO_LOG(std::string module_name, std::string reason, std::string _fmt, P&& ...values);
-		void INFO_LOG(std::string module_name, std::string reason);
-
-		template <typename ...P>
-		void ERR_LOG(std::string module_name, std::string reason, std::string _fmt, P&& ...values);
-		void ERR_LOG(std::string module_name, std::string reason);
-
-		template <typename ...P>
-		void WARN_LOG(std::string module_name, std::string reason, std::string _fmt, P&& ...values);
-		void WARN_LOG(std::string module_name, std::string reason);
-
-		// -- 统计日志 -- 
-		template <typename ...P>
-		void RECORD_LOG(std::string behavior, uint32_t player, uint32_t time, std::string _fmt, P&& ...values);
+		LoggerPtr getLogger() { return logger_; }
 
 	protected:
 
@@ -126,7 +116,7 @@ namespace gsf
 		template <typename T>
 		void registModule(T *module, bool dynamic = false);
 
-		void unregistModule(gsf::ModuleID module_id);
+		void unregistModule(block::ModuleID module_id);
 
 		//！ 临时先写在这里，未来如果支持分布式可能要放在其他地方生成，保证服务器集群唯一。
 		int32_t makeModuleID();
@@ -140,8 +130,11 @@ namespace gsf
 		void popFrame();
 
 	protected:
-		void reactorRegist(gsf::ModuleID moduleID, gsf::EventID event);
-		void reactorDispatch(gsf::ModuleID self, gsf::ModuleID target, gsf::EventID event, gsf::ArgsPtr args);
+		void reactorRegist(block::ModuleID moduleID, block::EventID event);
+		void reactorDispatch(block::ModuleID self, block::ModuleID target, block::EventID event, block::ArgsPtr args);
+
+		LoggerPtr logger_ = nullptr;
+		TimerPtr timer_ = nullptr;
 
 	private:
 		AppState state_;
@@ -155,7 +148,7 @@ namespace gsf
 
 		std::multimap<uint64_t, Frame> halfway_frame_;
 
-		std::unordered_map<gsf::EventID, MailBoxPtr> mailboxMap_;
+		std::unordered_map<block::EventID, MailBoxPtr> mailboxMap_;
 
 		bool shutdown_;
 
@@ -163,93 +156,17 @@ namespace gsf
 
 		int32_t module_idx_;
 
-		gsf::AppConfig cfg_;
-
-#ifdef WATCH_PERF
-		uint32_t tick_len_;
-		int32_t last_tick_;
-#endif // WATCH_PERF
+		block::AppConfig cfg_;
 	};
 
-	template <typename ...P>
-	void gsf::Application::RECORD_LOG(std::string behavior, uint32_t player, uint32_t time, std::string _fmt, P&& ...values)
-	{
-		std::string _str = "";
-		_str.append("behavior:");
-		_str.append(behavior);
-		_str.append(",player:");
-		_str.append(std::to_string(player));
-		_str.append(",time:");
-		_str.append(std::to_string(time));
-		_str.append(fmt::format(_fmt, std::forward<P>(values)...));
-		
-		reactorDispatch(0, getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogInfo, _str));
-	}
-
-	template <typename ...P>
-	void gsf::Application::WARN_LOG(std::string module_name, std::string reason, std::string _fmt, P&& ...values)
-	{
-		std::string _str = "";
-		_str.append("[module] ");
-		_str.append(module_name);
-		_str.append(" [reason] ");
-		_str.append(reason);
-		_str.append("\n");
-		_str.append(fmt::format(_fmt, std::forward<P>(values)...));
-		reactorDispatch(0, getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogWarning, _str));
-	}
-
-
-	template <typename ...P>
-	void gsf::Application::ERR_LOG(std::string module_name, std::string reason, std::string _fmt, P&& ...values)
-	{
-		std::string _str = "";
-		_str.append("[module] ");
-		_str.append(module_name);
-		_str.append(" [reason] ");
-		_str.append(reason);
-		_str.append("\n");
-		_str.append(fmt::format(_fmt, std::forward<P>(values)...));
-		reactorDispatch(0, getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogErr, _str));
-	}
-
-
-	template <typename ...P>
-	void gsf::Application::INFO_LOG(std::string module_name, std::string reason, std::string _fmt, P&& ...values)
-	{
-		std::string _str = "";
-		_str.append("[module] ");
-		_str.append(module_name);
-		_str.append(" [reason] ");
-		_str.append(reason);
-		_str.append("\n");
-		_str.append(fmt::format(_fmt, std::forward<P>(values)...));
-		reactorDispatch(0, getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogInfo, _str));
-	}
-
-
-
-	template <typename ...P>
-	void gsf::Application::DEBUG_LOG(std::string module_name, std::string reason, std::string _fmt, P&& ...values)
-	{
-		std::string _str = "";
-		_str.append("[module] ");
-		_str.append(module_name);
-		_str.append(" [reason] ");
-		_str.append(reason);
-		_str.append("\n");
-		_str.append(fmt::format(_fmt, std::forward<P>(values)...));
-		reactorDispatch(0, getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogDebug, _str));
-	}
-
 	template <typename T>
-	void gsf::Application::createModule(T *module)
+	void block::Application::createModule(T *module)
 	{
 		registModule(module);
 	}
 
 	template <typename T>
-	void gsf::Application::registModule(T *module, bool dynamic /* = false */)
+	void block::Application::registModule(T *module, bool dynamic /* = false */)
 	{
 		module_list_.push_back(module);
 		
@@ -267,7 +184,27 @@ namespace gsf
 		}
 	}
 
-#define APP gsf::Application::get_ref() 
-}
+#define APP block::Application::get_ref() 
 
-#endif
+
+#define WARN_LOG(content) \
+	APP.getLogger()->WARN(content)	
+#define WARN_FMTLOG(content, ...) \
+	APP.getLogger()->WARN(content, ##__VA_ARGS__)
+
+#define INFO_LOG(content) \
+	APP.getLogger()->INFO(content)
+#define INFO_FMTLOG(content, ...)\
+	APP.getLogger()->INFO(content, ##__VA_ARGS__)
+
+#define DEBUG_LOG(content)\
+	APP.getLogger()->DEBUG(content)
+#define DEBUG_FMTLOG(content, ...)\
+	APP.getLogger()->DEBUG(content, ##__VA_ARGS__)
+
+#define ERROR_LOG(content)\
+	APP.getLogger()->ERR(content)
+#define ERROR_FMTLOG(content, ...)\
+	APP.getLogger()->ERR(content, ##__VA_ARGS__)
+
+}

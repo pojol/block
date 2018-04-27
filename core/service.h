@@ -1,7 +1,7 @@
 #ifndef _GSF_SERVEICE_HEADER_
 #define _GSF_SERVEICE_HEADER_
 
-namespace gsf
+namespace block
 {
 	enum ServiceState
 	{

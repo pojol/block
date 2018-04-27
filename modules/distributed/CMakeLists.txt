@@ -8,6 +8,7 @@ if(WIN32)
 		${BLOCK_SOURCE_DIR}/
 		${BLOCK_SOURCE_DIR}/3rd/Libevent/include
 		${BLOCK_SOURCE_DIR}/3rd/fmt
+		${BLOCK_SOURCE_DIR}/3rd/glog/src
     )
 
     #引用库目录

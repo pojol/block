@@ -5,11 +5,11 @@ if(WIN32)
     INCLUDE_DIRECTORIES(
             ${BLOCK_SOURCE_DIR}/
 			${BLOCK_SOURCE_DIR}/3rd/fmt
-            ${BLOCK_SOURCE_DIR}/3rd/glog/src
+			${BLOCK_SOURCE_DIR}/3rd/glog/src
 			${BLOCK_SOURCE_DIR}/3rd/mysql_connect/include
 			${BLOCK_SOURCE_DIR}/3rd/redis/deps/hiredis
     )
-
+	Add_Definitions("-DGLOG_NO_ABBREVIATED_SEVERITIES")
     #引用库目录
     LINK_DIRECTORIES(
     )

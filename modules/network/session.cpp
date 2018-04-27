@@ -5,24 +5,24 @@
 
 #include <iostream>
 
-gsf::network::Session::Session(int fd, int eid, SessionMgr *mgr, ::bufferevent *bev)
+block::network::Session::Session(int fd, int eid, SessionMgr *mgr, ::bufferevent *bev)
     : fd_(fd)
 	, targetM_(eid)
 	, bufEvtPtr_(bev)
 	, basePtr_(mgr)
 {
 	inBufPtr_ = evbuffer_new();
-	if (0 != gsf::SESSION_READ_BUFFER_SIZE) {
-		evbuffer_expand(inBufPtr_, gsf::SESSION_READ_BUFFER_SIZE);
+	if (0 != block::SESSION_READ_BUFFER_SIZE) {
+		evbuffer_expand(inBufPtr_, block::SESSION_READ_BUFFER_SIZE);
 	}
 
 	outBufPtr_ = evbuffer_new();
-	if (0 != gsf::SESSION_WRITE_BUFFER_SIZE) {
-		evbuffer_expand(outBufPtr_, gsf::SESSION_WRITE_BUFFER_SIZE);
+	if (0 != block::SESSION_WRITE_BUFFER_SIZE) {
+		evbuffer_expand(outBufPtr_, block::SESSION_WRITE_BUFFER_SIZE);
 	}
 }
 
-gsf::network::Session::~Session()
+block::network::Session::~Session()
 {
 	if (inBufPtr_) {
 		evbuffer_free(inBufPtr_);
@@ -37,7 +37,7 @@ gsf::network::Session::~Session()
 	}
 }
 
-void gsf::network::Session::readCB(::bufferevent *bev, void *ctx)
+void block::network::Session::readCB(::bufferevent *bev, void *ctx)
 {
 	Session *_session_ptr = static_cast<Session*>(ctx);
 
@@ -46,7 +46,7 @@ void gsf::network::Session::readCB(::bufferevent *bev, void *ctx)
 	//evbuffer_add_buffer()
 }
 
-void gsf::network::Session::eventCB(::bufferevent *bev, short what, void *ctx)
+void block::network::Session::eventCB(::bufferevent *bev, short what, void *ctx)
 {
 	int32_t _result = 0;
 
@@ -80,7 +80,7 @@ void gsf::network::Session::eventCB(::bufferevent *bev, short what, void *ctx)
 	}
 }
 
-int gsf::network::Session::write(uint32_t msg_id, BlockPtr blockptr)
+int block::network::Session::write(uint32_t msg_id, BlockPtr blockptr)
 {
 
 	int _ret = evbuffer_add(outBufPtr_, blockptr->buf_, blockptr->size_);
@@ -89,7 +89,7 @@ int gsf::network::Session::write(uint32_t msg_id, BlockPtr blockptr)
 	return 0;
 }
 
-void gsf::network::Session::read(::bufferevent *bev)
+void block::network::Session::read(::bufferevent *bev)
 {
 	bufferevent_read_buffer(bev, inBufPtr_);
 
@@ -127,8 +127,8 @@ void gsf::network::Session::read(::bufferevent *bev)
 				}
 
 				std::string _str(_block->buf_ + _block->get_head_size(), _block->get_body_size());	//tmp
-				//dispatch(targetM_, eid::network::recv, gsf::makeArgs(fd_, _msg_id, std::move(_str)));
-				basePtr_->addMessage(gsf::makeArgs(fd_, _msg_id, std::move(_str)));
+				//dispatch(targetM_, eid::network::recv, block::makeArgs(fd_, _msg_id, std::move(_str)));
+				basePtr_->addMessage(block::makeArgs(fd_, _msg_id, std::move(_str)));
 			}
 
 			_buf_len = evbuffer_get_length(inBufPtr_);
@@ -144,14 +144,14 @@ void gsf::network::Session::read(::bufferevent *bev)
 	}
 }
 
-void gsf::network::Session::disConnect(int32_t err)
+void block::network::Session::disConnect(int32_t err)
 {
 	basePtr_->addClose(fd_);
-	//dispatch(targetM_, eid::network::dis_connect, gsf::makeArgs(fd_, err));
+	//dispatch(targetM_, eid::network::dis_connect, block::makeArgs(fd_, err));
 }
 
-void gsf::network::Session::newConnect()
+void block::network::Session::newConnect()
 {
 	basePtr_->addConnect(fd_);
-	//dispatch(targetM_, eid::network::new_connect, gsf::makeArgs(fd_));
+	//dispatch(targetM_, eid::network::new_connect, block::makeArgs(fd_));
 }

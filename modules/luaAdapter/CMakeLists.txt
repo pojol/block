@@ -4,12 +4,12 @@ if(WIN32)
     #引用头文件目录
     INCLUDE_DIRECTORIES(
             ${BLOCK_SOURCE_DIR}/
-            ${BLOCK_SOURCE_DIR}/3rd/glog-0.3.4/src
             ${BLOCK_SOURCE_DIR}/3rd/lua-5.3.4/src
             ${BLOCK_SOURCE_DIR}/3rd/sol2
 			${BLOCK_SOURCE_DIR}/3rd/fmt
+			${BLOCK_SOURCE_DIR}/3rd/glog/src
     )
-
+	Add_Definitions("-DGLOG_NO_ABBREVIATED_SEVERITIES")
     #引用库目录
     LINK_DIRECTORIES(
     )

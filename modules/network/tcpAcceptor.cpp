@@ -22,24 +22,24 @@
 
 #include <core/application.h>
 
-gsf::network::TcpAcceptorModule::TcpAcceptorModule(const std::string &name)
+block::network::TcpAcceptorModule::TcpAcceptorModule(const std::string &name)
 	: Module(name)
 {
 
 }
 
-gsf::network::TcpAcceptorModule::TcpAcceptorModule()
+block::network::TcpAcceptorModule::TcpAcceptorModule()
 	: Module("AcceptorModule")
 {
 
 }
 
-gsf::network::TcpAcceptorModule::~TcpAcceptorModule()
+block::network::TcpAcceptorModule::~TcpAcceptorModule()
 {
 
 }
 
-void gsf::network::TcpAcceptorModule::before_init()
+void block::network::TcpAcceptorModule::before_init()
 {
 	sessionMgr_ = new SessionMgr(this);
 
@@ -52,12 +52,12 @@ void gsf::network::TcpAcceptorModule::before_init()
 	listen(eid::network::kick_connect, std::bind(&TcpAcceptorModule::eKick, this, _1, _2));
 }
 
-void gsf::network::TcpAcceptorModule::init()
+void block::network::TcpAcceptorModule::init()
 {
 
 }
 
-void gsf::network::TcpAcceptorModule::execute()
+void block::network::TcpAcceptorModule::execute()
 {
 	if (sessionMgr_) {
 		sessionMgr_->exec();
@@ -68,12 +68,12 @@ void gsf::network::TcpAcceptorModule::execute()
 	}
 }
 
-void gsf::network::TcpAcceptorModule::shut()
+void block::network::TcpAcceptorModule::shut()
 {
 	evconnlistener_free(acceptListenerPtr_);
 }
 
-void gsf::network::TcpAcceptorModule::after_shut()
+void block::network::TcpAcceptorModule::after_shut()
 {
 	if (sessionMgr_) {
 		delete sessionMgr_;
@@ -81,7 +81,7 @@ void gsf::network::TcpAcceptorModule::after_shut()
 	}
 }
 
-void gsf::network::TcpAcceptorModule::eMakeAcceptor(gsf::ModuleID target, gsf::ArgsPtr args)
+void block::network::TcpAcceptorModule::eMakeAcceptor(block::ModuleID target, block::ArgsPtr args)
 {
 	if (nullptr == acceptListenerPtr_) {
 		std::string _ip = args->pop_string();
@@ -91,12 +91,12 @@ void gsf::network::TcpAcceptorModule::eMakeAcceptor(gsf::ModuleID target, gsf::A
 		accept_bind(_ip, _port);
 	}
 	else {
-		APP.INFO_LOG("Acceptor Module", "repeat make acceptor");
+		INFO_LOG("repeat make acceptor");
 	}
 }
 
 /*
-void gsf::network::AcceptorModule::bind_remote(const gsf::ArgsPtr &args, gsf::CallbackFunc callback)
+void block::network::AcceptorModule::bind_remote(const block::ArgsPtr &args, block::CallbackFunc callback)
 {
 	uint32_t _module_id = args->pop_i32();
 	uint32_t _msg_id = args->pop_i32();
@@ -105,7 +105,7 @@ void gsf::network::AcceptorModule::bind_remote(const gsf::ArgsPtr &args, gsf::Ca
 	binder_->regist(_info_ptr);
 }
 */
-void gsf::network::TcpAcceptorModule::accept_bind(const std::string &ip, int port)
+void block::network::TcpAcceptorModule::accept_bind(const std::string &ip, int port)
 {
 	struct sockaddr_in sin;
 	memset(&sin, 0, sizeof(sin));
@@ -121,16 +121,16 @@ void gsf::network::TcpAcceptorModule::accept_bind(const std::string &ip, int por
 		, sizeof(sockaddr_in));
 
 	if (nullptr == acceptListenerPtr_) {
-		APP.ERR_LOG("Acceptor", "accept listen err!");
+		ERROR_LOG("accept listen err!");
 	}
 	else {
-		APP.INFO_LOG("Acceptor", "accept listen ready!");
+		INFO_LOG("accept listen ready!");
 	}
 }
 
-void gsf::network::TcpAcceptorModule::accept_listen_cb(::evconnlistener *listener, evutil_socket_t fd, sockaddr *sa, int socklen, void *arg)
+void block::network::TcpAcceptorModule::accept_listen_cb(::evconnlistener *listener, evutil_socket_t fd, sockaddr *sa, int socklen, void *arg)
 {
-	gsf::network::TcpAcceptorModule *network_ptr_ = (gsf::network::TcpAcceptorModule*)arg;
+	block::network::TcpAcceptorModule *network_ptr_ = (block::network::TcpAcceptorModule*)arg;
 	::bufferevent *bev;
 	int32_t _ret = 0;
 
@@ -138,19 +138,19 @@ void gsf::network::TcpAcceptorModule::accept_listen_cb(::evconnlistener *listene
 	{
 		if (network_ptr_->sessionMgr_->find(fd)) {
 			network_ptr_->sessionMgr_->addClose(fd);
-			APP.ERR_LOG("acceptor", "repeat fd!");
+			ERROR_LOG("acceptor : repeat fd!");
 			break;
 		}
 
 		// check max connect
 		if (network_ptr_->sessionMgr_->curMaxConnect() >= NETWORK_CONNECT_MAX) {
-			APP.ERR_LOG("acceptor", "max connect!");
+			ERROR_LOG("acceptor : max connect!");
 			break;
 		}
 
 		bev = bufferevent_socket_new(network_ptr_->eventBasePtr_, fd, BEV_OPT_CLOSE_ON_FREE);
 		if (!bev) {
-			APP.ERR_LOG("acceptor", "new socket fail!");
+			ERROR_LOG("acceptor : new socket fail!");
 			break;
 		}
 
@@ -165,7 +165,7 @@ void gsf::network::TcpAcceptorModule::accept_listen_cb(::evconnlistener *listene
 	}
 }
 
-void gsf::network::TcpAcceptorModule::eSendMsg(gsf::ModuleID target, gsf::ArgsPtr args)
+void block::network::TcpAcceptorModule::eSendMsg(block::ModuleID target, block::ArgsPtr args)
 {
 	assert(nullptr != acceptListenerPtr_);
 
@@ -175,7 +175,7 @@ void gsf::network::TcpAcceptorModule::eSendMsg(gsf::ModuleID target, gsf::ArgsPt
 
 	//! 内部消息走的时Args流， 外部的是原始的二进制数据。 所以这里要分开处理下!
 	if (_msg > eid::distributed::rpc_begin && _msg < eid::distributed::rpc_end) {
-		//auto _headlen = sizeof(gsf::SessionID) + 1 + sizeof(gsf::MsgID) + 1;
+		//auto _headlen = sizeof(block::SessionID) + 1 + sizeof(block::MsgID) + 1;
 		//_str = args->get_block(_headlen, args->get_size());
 	}
 	else {
@@ -184,12 +184,12 @@ void gsf::network::TcpAcceptorModule::eSendMsg(gsf::ModuleID target, gsf::ArgsPt
 
 	auto _session_ptr = sessionMgr_->find(_fd);
 	if (_session_ptr) {
-		auto _block = std::make_shared<gsf::Block>(_fd, _msg, _str);
+		auto _block = std::make_shared<block::Block>(_fd, _msg, _str);
 		_session_ptr->write(_msg, _block);
 	}
 }
 
-void gsf::network::TcpAcceptorModule::eKick(gsf::ModuleID target, gsf::ArgsPtr args)
+void block::network::TcpAcceptorModule::eKick(block::ModuleID target, block::ArgsPtr args)
 {
 	auto _fd = args->pop_fd();
 	sessionMgr_->addClose(_fd);

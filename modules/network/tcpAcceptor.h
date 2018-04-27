@@ -10,14 +10,14 @@
 #include <event2/util.h>
 #include <event2/listener.h>
 
-namespace gsf
+namespace block
 {
 	namespace network
 	{
 		class SessionMgr;
 
 		class TcpAcceptorModule
-			: public gsf::Module
+			: public block::Module
 		{
 		public:
 			TcpAcceptorModule(const std::string &name);
@@ -34,11 +34,11 @@ namespace gsf
 
 		private:
 
-			void eMakeAcceptor(gsf::ModuleID target, gsf::ArgsPtr args);
+			void eMakeAcceptor(block::ModuleID target, block::ArgsPtr args);
 
-			void eSendMsg(gsf::ModuleID target, gsf::ArgsPtr args);
+			void eSendMsg(block::ModuleID target, block::ArgsPtr args);
 
-			void eKick(gsf::ModuleID target, gsf::ArgsPtr args);
+			void eKick(block::ModuleID target, block::ArgsPtr args);
 
 			void accept_bind(const std::string &ip, int port);
 			static void accept_listen_cb(::evconnlistener *listener

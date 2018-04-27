@@ -11,7 +11,7 @@
 #include <event2/listener.h>
 #include <event2/bufferevent.h>
 
-namespace gsf
+namespace block
 {
 	namespace network
 	{
@@ -21,7 +21,7 @@ namespace gsf
 		typedef std::shared_ptr<Session> SessionPtr;
 
 		class TcpConnectorModule
-			: public gsf::Module
+			: public block::Module
 		{
 		public:
 			TcpConnectorModule(const std::string &name);
@@ -37,8 +37,8 @@ namespace gsf
 			void after_shut() override;
 
 		private:
-			void eMakeConncetor(gsf::ModuleID target, gsf::ArgsPtr args);
-			void eSendMsg(gsf::ModuleID target, gsf::ArgsPtr args);
+			void eMakeConncetor(block::ModuleID target, block::ArgsPtr args);
+			void eSendMsg(block::ModuleID target, block::ArgsPtr args);
 
 			void needCloseSession(int fd);
 

@@ -4,13 +4,13 @@
 #include <unordered_map>
 
 
-namespace gsf 
+namespace block 
 {
 
 	namespace network
 	{
 		class WebSocketAcceptorModule
-			: public gsf::Module
+			: public block::Module
 		{
 		public:
 			WebSocketAcceptorModule(const std::string &name);
@@ -27,7 +27,7 @@ namespace gsf
 
 		private:
 
-			void eMakeAcceptor(gsf::ModuleID target, gsf::ArgsPtr args);
+			void eMakeAcceptor(block::ModuleID target, block::ArgsPtr args);
 
 		};
 

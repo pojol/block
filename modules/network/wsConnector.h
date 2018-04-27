@@ -3,13 +3,13 @@
 #include <core/module.h>
 #include <unordered_map>
 
-namespace gsf 
+namespace block 
 {
 
 	namespace network
 	{
 		class WebSocketConnectorModule
-			: public gsf::Module
+			: public block::Module
 		{
 		public:
 			WebSocketConnectorModule(const std::string &name);
@@ -26,7 +26,7 @@ namespace gsf
 
 		private:
 
-			void eMakeConnector(gsf::ModuleID target, gsf::ArgsPtr args);
+			void eMakeConnector(block::ModuleID target, block::ArgsPtr args);
 		};
 
 	}

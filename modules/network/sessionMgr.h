@@ -7,11 +7,10 @@
 
 #include <queue>
 
-#include <core/single.h>
 #include <core/module.h>
 #include <event2/bufferevent.h>
 
-namespace gsf
+namespace block
 {
 	namespace network
 	{
@@ -34,7 +33,7 @@ namespace gsf
 			void addClose(int fd);
 			void addConnect(int fd);
 
-			void addMessage(gsf::ArgsPtr args);
+			void addMessage(block::ArgsPtr args);
 
 			void exec();
 
@@ -54,13 +53,13 @@ namespace gsf
 			std::vector<int> disconnectVec_;
 			std::vector<int> connectVec_;
 
-			std::queue<gsf::ArgsPtr> messageQueue_;
+			std::queue<block::ArgsPtr> messageQueue_;
 
-			gsf::ModuleID target_ = gsf::ModuleNil;
+			block::ModuleID target_ = block::ModuleNil;
 			uint32_t sessionIndex_;
 
 			// tmp 
-			gsf::Module *basePtr_;
+			block::Module *basePtr_;
 		};
 	}
 }

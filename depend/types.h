@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-namespace gsf
+namespace block
 {
 	typedef int32_t ModuleID;
 	static const int32_t ModuleNil = INT32_MAX;

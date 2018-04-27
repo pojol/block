@@ -1,9 +1,8 @@
-#ifndef _SINGLE_HEADER_
-#define _SINGLE_HEADER_
+#pragma once
 
 #include <assert.h>
 
-namespace gsf
+namespace block
 {
 	namespace utils
 	{
@@ -38,5 +37,3 @@ namespace gsf
 		T * Singleton<T>::intance_ptr_ = nullptr;
 	}
 }
-
-#endif

@@ -6,7 +6,7 @@
 #include <core/application.h>
 #include "mysql.h"
 
-namespace gsf 
+namespace block 
 {
 	namespace modules
 	{
@@ -53,7 +53,7 @@ namespace gsf
 			bool insert(const std::string &query, const char *buf, unsigned long len);
 			void update(const std::string &query, const char *buf, unsigned long len);
 
-			void execSql(gsf::ModuleID target, int oper, const std::string &sql, std::function<void (gsf::ModuleID, gsf::ArgsPtr)> callback);
+			void execSql(block::ModuleID target, int oper, const std::string &sql, std::function<void (block::ModuleID, block::ArgsPtr)> callback);
 
 		private:
 

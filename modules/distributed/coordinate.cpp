@@ -4,13 +4,13 @@
 
 #include <algorithm>
 
-gsf::modules::CoodinatorModule::CoodinatorModule()
+block::modules::CoodinatorModule::CoodinatorModule()
 	: Module("CoodinatorModule")
 {
 
 }
 
-void gsf::modules::CoodinatorModule::before_init()
+void block::modules::CoodinatorModule::before_init()
 {
 	using namespace std::placeholders;
 
@@ -24,23 +24,23 @@ void gsf::modules::CoodinatorModule::before_init()
 		, std::bind(&CoodinatorModule::eCoordinatSelect, this, _1, _2));
 }
 
-void gsf::modules::CoodinatorModule::init()
+void block::modules::CoodinatorModule::init()
 {
 
 }
 
-void gsf::modules::CoodinatorModule::execute()
+void block::modules::CoodinatorModule::execute()
 {
 
 }
 
-void gsf::modules::CoodinatorModule::shut()
+void block::modules::CoodinatorModule::shut()
 {
 
 }
 
-//int32_t port, const std::string &module, gsf::ModuleID module_id, int32_t weight
-void gsf::modules::CoodinatorModule::eCoordinatAdjustWeight(gsf::ModuleID target, gsf::ArgsPtr args)
+//int32_t port, const std::string &module, block::ModuleID module_id, int32_t weight
+void block::modules::CoodinatorModule::eCoordinatAdjustWeight(block::ModuleID target, block::ArgsPtr args)
 {
 	auto _nod_id = args->pop_i32();
 	auto _module = args->pop_string();
@@ -50,14 +50,14 @@ void gsf::modules::CoodinatorModule::eCoordinatAdjustWeight(gsf::ModuleID target
 	adjustModuleWeight(_nod_id, _module, 0, _characteristic, _weight);
 }
 
-void gsf::modules::CoodinatorModule::eCoordinatSelect(gsf::ModuleID target, gsf::ArgsPtr args)
+void block::modules::CoodinatorModule::eCoordinatSelect(block::ModuleID target, block::ArgsPtr args)
 {
 	auto _module_name = args->pop_string();
 	auto _module_characteristic = args->pop_i32();
 
 	auto _count = nodeNameMap_.count(_module_name);
 	if (_count == 0) {
-		APP.ERR_LOG("Coodinator", "Did not find the module ", " {}", _module_name);
+		ERROR_FMTLOG("coodinator Did not find the module name:{}", _module_name);
 		return ;
 	}
 	else {
@@ -90,19 +90,19 @@ void gsf::modules::CoodinatorModule::eCoordinatSelect(gsf::ModuleID target, gsf:
 
 		assert(_ptr->nod_id != 0);
 		// tmp
-		//callback(gsf::makeArgs(_ptr->nod_id, _ptr->type_, _ptr->weight_, _ptr->acceptor_ip_, _ptr->acceptor_port_));
+		//callback(block::makeArgs(_ptr->nod_id, _ptr->type_, _ptr->weight_, _ptr->acceptor_ip_, _ptr->acceptor_port_));
 	}
 }
 
 //const std::string &type, const std::string &ip, int32_t port
-void gsf::modules::CoodinatorModule::eCoordinatRegist(gsf::ModuleID target, gsf::ArgsPtr args)
+void block::modules::CoodinatorModule::eCoordinatRegist(block::ModuleID target, block::ArgsPtr args)
 {
 	auto _type = args->pop_string();
 	auto _nod_id = args->pop_i32();
 
 	auto itr = nodeIDMap_.find(_nod_id);
 	if (itr != nodeIDMap_.end()) {
-		APP.ERR_LOG("Coodinator", "regist app repeat!", " {}", _nod_id);
+		ERROR_FMTLOG("coodinator regist app repeat! nod:{}", _nod_id);
 		return;
 	}
 
@@ -128,16 +128,16 @@ void gsf::modules::CoodinatorModule::eCoordinatRegist(gsf::ModuleID target, gsf:
 	}
 }
 
-void gsf::modules::CoodinatorModule::eCoordinatUnregist(gsf::ModuleID target, gsf::ArgsPtr args)
+void block::modules::CoodinatorModule::eCoordinatUnregist(block::ModuleID target, block::ArgsPtr args)
 {
 	auto _port = args->pop_i32();
 }
 
-void gsf::modules::CoodinatorModule::adjustModuleWeight(int32_t nod_id, const std::string &module_name, gsf::ModuleID module_id, int32_t characteristic, int32_t weight)
+void block::modules::CoodinatorModule::adjustModuleWeight(int32_t nod_id, const std::string &module_name, block::ModuleID module_id, int32_t characteristic, int32_t weight)
 {
 	auto _itr = nodeIDMap_.find(nod_id);
 	if (_itr == nodeIDMap_.end()) {
-		APP.WARN_LOG("Coodinator", "adjust module weight fail, unregist!", " node = {}", nod_id);
+		WARN_FMTLOG("coodinator adjust module weight fail, unregist! node:{}", nod_id);
 		return;
 	}
 

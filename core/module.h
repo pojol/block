@@ -1,5 +1,4 @@
-#ifndef _GSF_MODULE_HEADER_
-#define _GSF_MODULE_HEADER_
+#pragma once
 
 #include <stdint.h>
 #include <istream>
@@ -12,23 +11,23 @@
 #include <string>
 
 #include "args.h"
-#include "types.h"
+#include "../depend/types.h"
 
 #define WATCH_PERF
 
-namespace gsf
+namespace block
 {
 	typedef std::function<void(ArgsPtr)> CallbackFunc;
-	typedef std::function<void(gsf::ModuleID target, gsf::ArgsPtr)> ListenFunc;
+	typedef std::function<void(block::ModuleID target, block::ArgsPtr)> ListenFunc;
 
 	typedef std::function<void(ArgsPtr, int32_t, bool)> RpcCallback;
 
 	class Module;
 	struct TaskInfo
 	{
-		gsf::ModuleID target_;
-		gsf::EventID event_;
-		gsf::ArgsPtr args_;
+		block::ModuleID target_;
+		block::EventID event_;
+		block::ArgsPtr args_;
 	};
 
 	/*
@@ -41,17 +40,17 @@ namespace gsf
 		/*!
 
 		**/
-		void listen(gsf::EventID event, ListenFunc func);
+		void listen(block::EventID event, ListenFunc func);
 
 		/*!
 
 		**/
-		void dispatch(gsf::ModuleID target, gsf::EventID event, gsf::ArgsPtr args);
+		void dispatch(block::ModuleID target, block::EventID event, block::ArgsPtr args);
 
 		/*!
 
 		**/
-		void rpc(gsf::EventID event, ArgsPtr args, RpcCallback callback = nullptr);
+		void rpc(block::EventID event, ArgsPtr args, RpcCallback callback = nullptr);
 
 		void pull();
 		void push(TaskInfo *info);
@@ -60,7 +59,7 @@ namespace gsf
 
 		typedef std::queue<TaskInfo*> TaskQueue;
 
-		std::unordered_map<gsf::EventID, ListenFunc> listenMap_;
+		std::unordered_map<block::EventID, ListenFunc> listenMap_;
 		TaskQueue taskQueue_;
 
 		Module *basePtr_ = nullptr;
@@ -77,12 +76,12 @@ namespace gsf
 		Module(const std::string &name);
 		virtual ~Module();
 
-		gsf::ModuleID getModuleID() { return module_id_; }
+		block::ModuleID getModuleID() { return module_id_; }
 		std::string & getModuleName() { return name_; }
 
-		void listen(gsf::EventID event, ListenFunc func);
-		void dispatch(gsf::ModuleID target, gsf::EventID event, gsf::ArgsPtr args);
-		void rpc(gsf::EventID event, ArgsPtr args, RpcCallback callback = nullptr);
+		void listen(block::EventID event, ListenFunc func);
+		void dispatch(block::ModuleID target, block::EventID event, block::ArgsPtr args);
+		void rpc(block::EventID event, ArgsPtr args, RpcCallback callback = nullptr);
 
 	protected:
 		virtual void before_init();
@@ -97,8 +96,8 @@ namespace gsf
 		void setAvailable(bool flag) { available_ = flag; }
 		bool getAvailable() const { return available_; }
 
-		void setID(gsf::ModuleID id) { module_id_ = id; }
-		gsf::ModuleID module_id_ = gsf::ModuleNil;
+		void setID(block::ModuleID id) { module_id_ = id; }
+		block::ModuleID module_id_ = block::ModuleNil;
 		std::string name_;
 
 		bool available_ = false;
@@ -128,6 +127,3 @@ namespace gsf
 		MailBoxPtr mailboxPtr_ = nullptr;
 	};
 }
-
-
-#endif

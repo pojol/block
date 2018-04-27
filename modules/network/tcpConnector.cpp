@@ -20,23 +20,23 @@
 #include <errno.h>
 #endif // WIN32
 
-gsf::network::TcpConnectorModule::TcpConnectorModule(const std::string &name)
+block::network::TcpConnectorModule::TcpConnectorModule(const std::string &name)
 	: Module(name)
 {
 }
 
-gsf::network::TcpConnectorModule::TcpConnectorModule()
+block::network::TcpConnectorModule::TcpConnectorModule()
 	: Module("ConnectorModule")
 {
 
 }
 
-gsf::network::TcpConnectorModule::~TcpConnectorModule()
+block::network::TcpConnectorModule::~TcpConnectorModule()
 {
 
 }
 
-void gsf::network::TcpConnectorModule::before_init()
+void block::network::TcpConnectorModule::before_init()
 {
 	eventBasePtr_ = event_base_new();
 	sessionMgr_ = new SessionMgr(this);
@@ -47,14 +47,14 @@ void gsf::network::TcpConnectorModule::before_init()
 	listen(eid::network::send, std::bind(&TcpConnectorModule::eSendMsg, this, _1, _2));
 }
 
-void gsf::network::TcpConnectorModule::init()
+void block::network::TcpConnectorModule::init()
 {
 	// todo ...
 	
-	//boardcast(eid::module_init_succ, gsf::makeArgs(get_module_id()));
+	//boardcast(eid::module_init_succ, block::makeArgs(get_module_id()));
 }
 
-void gsf::network::TcpConnectorModule::execute()
+void block::network::TcpConnectorModule::execute()
 {
 	//! 先处理断连
 
@@ -66,17 +66,17 @@ void gsf::network::TcpConnectorModule::execute()
 	}
 }
 
-void gsf::network::TcpConnectorModule::shut()
+void block::network::TcpConnectorModule::shut()
 {
 	bufferevent_free(bufferEventPtr_);
 	event_base_free(eventBasePtr_);
 }
 
-void gsf::network::TcpConnectorModule::after_shut()
+void block::network::TcpConnectorModule::after_shut()
 {
 }
 
-void gsf::network::TcpConnectorModule::eMakeConncetor(gsf::ModuleID target, gsf::ArgsPtr args)
+void block::network::TcpConnectorModule::eMakeConncetor(block::ModuleID target, block::ArgsPtr args)
 {
 	std::string _ip = args->pop_string();
 	uint32_t _port = args->pop_i32();
@@ -87,7 +87,7 @@ void gsf::network::TcpConnectorModule::eMakeConncetor(gsf::ModuleID target, gsf:
 
 	bufferEventPtr_ = bufferevent_socket_new(eventBasePtr_, -1, BEV_OPT_CLOSE_ON_FREE);
 	if (!bufferEventPtr_) {
-		APP.ERR_LOG("Connector", "bufferevent socket new fail!");
+		ERROR_LOG("connector : bufferevent socket new fail!");
 		return;
 	}
 
@@ -99,13 +99,13 @@ void gsf::network::TcpConnectorModule::eMakeConncetor(gsf::ModuleID target, gsf:
 
 	if (evutil_inet_pton(AF_INET, _ip.c_str(), &_sin.sin_addr) <= 0)
 	{
-		APP.ERR_LOG("Connector", "err_inet_pton fail!");
+		ERROR_LOG("connector : err_inet_pton fail!");
 		return;
 	}
 
 	int _ret = bufferevent_socket_connect(bufferEventPtr_, (sockaddr*)&_sin, sizeof(sockaddr_in));
 	if (_ret != 0) {
-		APP.ERR_LOG("Connector", "bufferevent socket connect fail!");
+		ERROR_LOG("connector : bufferevent socket connect fail!");
 		return;
 	}
 	else {
@@ -117,24 +117,24 @@ void gsf::network::TcpConnectorModule::eMakeConncetor(gsf::ModuleID target, gsf:
 	bufferevent_setcb(bufferEventPtr_, Session::readCB, NULL, Session::eventCB, sessionPtr_.get());
 	bufferevent_enable(bufferEventPtr_, EV_READ | EV_WRITE);
 
-	APP.INFO_LOG("Connector", "make connector success!");
+	INFO_LOG("connector : make connector success!");
 }
 
 
-void gsf::network::TcpConnectorModule::needCloseSession(int fd)
+void block::network::TcpConnectorModule::needCloseSession(int fd)
 {
 	// 
 }
 
 
-void gsf::network::TcpConnectorModule::eSendMsg(gsf::ModuleID target, gsf::ArgsPtr args)
+void block::network::TcpConnectorModule::eSendMsg(block::ModuleID target, block::ArgsPtr args)
 {
 	auto _msg = args->pop_msgid();
 	std::string _str = "";
 
 	//! 内部消息走的时Args流， 外部的是原始的二进制数据。 所以这里要分开处理下!
 	if (_msg > eid::distributed::rpc_begin && _msg < eid::distributed::rpc_end) {
-		auto _headlen = sizeof(gsf::MsgID) + 1;
+		auto _headlen = sizeof(block::MsgID) + 1;
 		//args->pop_block();
 		//_str = args->get_block(_headlen, args->get_size() - _headlen);
 	}
@@ -142,6 +142,6 @@ void gsf::network::TcpConnectorModule::eSendMsg(gsf::ModuleID target, gsf::ArgsP
 		_str = args->pop_string();
 	}
 
-	auto _block = std::make_shared<gsf::Block>(sessionPtr_->getID(), _msg, _str);
+	auto _block = std::make_shared<block::Block>(sessionPtr_->getID(), _msg, _str);
 	sessionPtr_->write(_msg, _block);
 }

@@ -3,17 +3,17 @@
 
 #include <core/application.h>
 
-gsf::network::SessionMgr::SessionMgr(gsf::Module *base)
+block::network::SessionMgr::SessionMgr(block::Module *base)
 	: basePtr_(base)
 {
 }
 
-gsf::network::SessionMgr::~SessionMgr()
+block::network::SessionMgr::~SessionMgr()
 {
 
 }
 
-gsf::network::SessionPtr gsf::network::SessionMgr::makeSession(int fd, int module_id, ::bufferevent *bev)
+block::network::SessionPtr block::network::SessionMgr::makeSession(int fd, int module_id, ::bufferevent *bev)
 {
 	target_ = module_id;
 
@@ -24,7 +24,7 @@ gsf::network::SessionPtr gsf::network::SessionMgr::makeSession(int fd, int modul
 	return _session_ptr;
 }
 
-gsf::network::SessionPtr gsf::network::SessionMgr::find(int fd)
+block::network::SessionPtr block::network::SessionMgr::find(int fd)
 {
 	auto _session_itr = sessionQueue_.find(fd);
 	if (_session_itr != sessionQueue_.end()){
@@ -34,7 +34,7 @@ gsf::network::SessionPtr gsf::network::SessionMgr::find(int fd)
 	return nullptr;
 }
 
-gsf::network::SessionPtr gsf::network::SessionMgr::findByModule(uint32_t module_id)
+block::network::SessionPtr block::network::SessionMgr::findByModule(uint32_t module_id)
 {
 	auto _session_ptr = sessionQueueByModule_.find(module_id);
 
@@ -45,23 +45,23 @@ gsf::network::SessionPtr gsf::network::SessionMgr::findByModule(uint32_t module_
 	return nullptr;
 }
 
-void gsf::network::SessionMgr::addClose(int fd)
+void block::network::SessionMgr::addClose(int fd)
 {
 	disconnectVec_.push_back(fd);
 }
 
-void gsf::network::SessionMgr::addConnect(int fd)
+void block::network::SessionMgr::addConnect(int fd)
 {
 	connectVec_.push_back(fd);
 }
 
 
-void gsf::network::SessionMgr::addMessage(gsf::ArgsPtr args)
+void block::network::SessionMgr::addMessage(block::ArgsPtr args)
 {
 	messageQueue_.push(std::move(args));
 }
 
-void gsf::network::SessionMgr::exec()
+void block::network::SessionMgr::exec()
 {
 	for (int fd : disconnectVec_)
 	{
@@ -75,7 +75,7 @@ void gsf::network::SessionMgr::exec()
 			}
 
 			sessionQueue_.erase(_itr);
-			basePtr_->dispatch(target_, eid::network::dis_connect, gsf::makeArgs(fd));
+			basePtr_->dispatch(target_, eid::network::dis_connect, block::makeArgs(fd));
 		}
 	}
 
@@ -83,7 +83,7 @@ void gsf::network::SessionMgr::exec()
 
 	for (int fd : connectVec_)
 	{
-		basePtr_->dispatch(target_, eid::network::new_connect, gsf::makeArgs(fd));
+		basePtr_->dispatch(target_, eid::network::new_connect, block::makeArgs(fd));
 	}
 
 	connectVec_.clear();
@@ -96,7 +96,7 @@ void gsf::network::SessionMgr::exec()
 	}
 }
 
-int gsf::network::SessionMgr::curMaxConnect() const
+int block::network::SessionMgr::curMaxConnect() const
 {
 	return 0;
 }

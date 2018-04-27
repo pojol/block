@@ -10,7 +10,7 @@
 #include <vector>
 #include <string>
 
-namespace gsf
+namespace block
 {
 	namespace modules
 	{
@@ -40,7 +40,7 @@ namespace gsf
 		typedef std::shared_ptr<LuaProxy> LuaProxyPtr;
 
 		class LuaAdapterModule
-			: public gsf::Module
+			: public block::Module
 		{
 
 		public:
@@ -57,14 +57,14 @@ namespace gsf
 			//sol::variadic_args args
 
 			//代理下event的dispatch 和 listen 接口，因为要在这里集中捕获下lua产生的异常。
-			void ldispatch(gsf::ModuleID target, gsf::EventID event, const std::string &buf);
+			void ldispatch(block::ModuleID target, block::EventID event, const std::string &buf);
 
 			int llisten(uint32_t event, const sol::function &func);
 
 			void lrpc(uint32_t event, int32_t moduleid, const std::string &buf);
 
-			//void eDistory(gsf::ModuleID target, gsf::ArgsPtr args);
-			void eReload(gsf::ModuleID target, gsf::ArgsPtr args);
+			//void eDistory(block::ModuleID target, block::ArgsPtr args);
+			void eReload(block::ModuleID target, block::ArgsPtr args);
 
 			void create();
 
