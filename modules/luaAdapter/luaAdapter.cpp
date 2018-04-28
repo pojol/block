@@ -368,7 +368,7 @@ uint64_t block::modules::LuaAdapterModule::ldelay(int32_t milliseconds, sol::fun
 {
 	try {
 
-		auto _tid = TIMERPTR->delay(block::utils::delay_milliseconds(milliseconds), [=]() {
+		auto _tid = DELAY(block::utils::delay_milliseconds(milliseconds), [=]() {
 			callback();
 		});
 
@@ -390,7 +390,7 @@ uint64_t block::modules::LuaAdapterModule::ldelayDay(int32_t hour, int32_t minut
 {
 	try {
 
-		auto _tid = TIMERPTR->delay(block::utils::delay_day(hour, minute), [=]() {
+		auto _tid = DELAY(block::utils::delay_day(hour, minute), [=]() {
 			callback();
 		});
 

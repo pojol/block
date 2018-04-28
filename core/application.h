@@ -187,7 +187,7 @@ namespace block
 
 #define APP block::Application::get_ref() 
 
-#define TIMERPTR APP.getTimer()
+#define DELAY APP.getTimer()->delay
 
 #define WARN_LOG(content) \
 	APP.getLogger()->WARN(content)	
