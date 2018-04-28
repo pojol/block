@@ -33,6 +33,7 @@ void block::Application::initCfg(const block::AppConfig &cfg)
 	cfg_ = cfg;
 	
 	logger_ = std::make_shared<block::utils::Logger>();
+	logger_->init(cfg_.name);
 	timer_ = std::make_shared<block::utils::Timer>();
 
 	//! 
@@ -286,6 +287,8 @@ void block::Application::run()
 			//_ttime = time_point_cast<microseconds>(system_clock::now());
 #endif // WATCH_PERF
 		};
+
+		timer_->exec();
 
 		_callback(state_);
 		if (state_ == AppState::BEFORE_INIT) {

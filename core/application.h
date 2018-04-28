@@ -78,8 +78,8 @@ namespace block
 		/*!
 			初始化进程
 		**/
-			void
-			initCfg(const block::AppConfig &cfg);
+			
+		void initCfg(const block::AppConfig &cfg);
 
 		/*!
 			创建一个Module
@@ -108,6 +108,7 @@ namespace block
 		void exit();
 
 		LoggerPtr getLogger() { return logger_; }
+		TimerPtr getTimer() { return timer_; }
 
 	protected:
 
@@ -186,6 +187,7 @@ namespace block
 
 #define APP block::Application::get_ref() 
 
+#define TIMERPTR APP.getTimer()
 
 #define WARN_LOG(content) \
 	APP.getLogger()->WARN(content)	

@@ -271,8 +271,13 @@ void block::modules::LuaAdapterModule::create()
 	proxyPtr_->state_.new_usertype<LuaAdapterModule>("LuaProxyModule"
 		, "ldispatch", &LuaAdapterModule::ldispatch
 		, "llisten", &LuaAdapterModule::llisten
-		, "lrpc", &LuaAdapterModule::lrpc);
-	proxyPtr_->state_.set("event", this);
+		, "lrpc", &LuaAdapterModule::lrpc
+		, "logDebug", &LuaAdapterModule::llogDebug
+		, "logInfo", &LuaAdapterModule::llogInfo
+		, "logWarn", &LuaAdapterModule::llogWarning
+		, "logError", &LuaAdapterModule::llogError
+		, "delay", &LuaAdapterModule::ldelay);
+	proxyPtr_->state_.set("self", this);
 	proxyPtr_->state_.set("module_id", getModuleID());
 
 	proxyPtr_->state_.new_usertype<block::Application>("Application"
@@ -337,4 +342,67 @@ void block::modules::LuaAdapterModule::eReload(block::ModuleID target, block::Ar
 	catch (...) {
 		ERROR_LOG("lua adapter unknown err");
 	}
+}
+
+void block::modules::LuaAdapterModule::llogDebug(const std::string &content)
+{
+	DEBUG_LOG(content);
+}
+
+void block::modules::LuaAdapterModule::llogInfo(const std::string &content)
+{
+	INFO_LOG(content);
+}
+
+void block::modules::LuaAdapterModule::llogWarning(const std::string &content)
+{
+	WARN_LOG(content);
+}
+
+void block::modules::LuaAdapterModule::llogError(const std::string &content)
+{
+	ERROR_LOG(content);
+}
+
+uint64_t block::modules::LuaAdapterModule::ldelay(int32_t milliseconds, sol::function callback)
+{
+	try {
+
+		auto _tid = TIMERPTR->delay(block::utils::delay_milliseconds(milliseconds), [=]() {
+			callback();
+		});
+
+		return _tid;
+	}
+	catch (sol::error e) {
+		std::string _err = e.what() + '\n' + Traceback(proxyPtr_->state_);
+		ERROR_LOG(_err);
+	}
+	catch (...)
+	{
+		ERROR_LOG("unknown err by lua delay !");
+	}
+	return 0;
+
+}
+
+uint64_t block::modules::LuaAdapterModule::ldelayDay(int32_t hour, int32_t minute, sol::function callback)
+{
+	try {
+
+		auto _tid = TIMERPTR->delay(block::utils::delay_day(hour, minute), [=]() {
+			callback();
+		});
+
+		return _tid;
+	}
+	catch (sol::error e) {
+		std::string _err = e.what() + '\n' + Traceback(proxyPtr_->state_);
+		ERROR_LOG(_err);
+	}
+	catch (...)
+	{
+		ERROR_LOG("unknown err by lua delay day !");
+	}
+	return 0;
 }

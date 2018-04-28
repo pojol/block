@@ -29,7 +29,7 @@ namespace block
 			template <typename T>
 			uint64_t delay(T delay, std::function<void()> callback)
 			{
-				return impl_.delay(delay, callback);
+				return impl_.delay(delay, callback, typename timer_traits<T>::type());
 			}
 
 			/*!

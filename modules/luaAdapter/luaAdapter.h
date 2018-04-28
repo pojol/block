@@ -56,6 +56,14 @@ namespace block
 		private:
 			//sol::variadic_args args
 
+			void llogDebug(const std::string &content);
+			void llogInfo(const std::string &content);
+			void llogWarning(const std::string &content);
+			void llogError(const std::string &content);
+
+			uint64_t ldelay(int32_t milliseconds, sol::function callback);
+			uint64_t ldelayDay(int32_t hour, int32_t minute, sol::function callback);
+
 			//代理下event的dispatch 和 listen 接口，因为要在这里集中捕获下lua产生的异常。
 			void ldispatch(block::ModuleID target, block::EventID event, const std::string &buf);
 
