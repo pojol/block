@@ -181,7 +181,7 @@ namespace block
 				is_conn_ = true;
 			}
 			else {
-				APP.ERR_LOG("RedisConnect", "event_redis_connect err");
+				ERROR_LOG("RedisConnect event_redis_connect err");
 			}
 
 			return is_conn_;
@@ -206,7 +206,7 @@ namespace block
 
 			do{
 				if (field_ != "" && field_ != field){
-					APP.ERR_LOG("RedisConnect", "push", "field cannot be changed!");
+					ERROR_LOG("RedisConnect push field cannot be changed!");
 					break;
 				}
 
@@ -231,7 +231,7 @@ namespace block
 				else {
 					if (REDIS_OK != redisAppendCommand(redis_context_, "RPUSH %s %b", _keystr.c_str(), buf.c_str(), buf.length()))
 					{
-						APP.ERR_LOG("RedisConnect", "push", "redis append command fail!");
+						ERROR_LOG("RedisConnect push redis append command fail!");
 					}
 
 					pipeLineCount_++;
@@ -304,7 +304,7 @@ namespace block
 		for (uint32_t i = 0; i < pipeLineCount_; ++i)
 		{
 			if (REDIS_OK != redisGetReply(redis_context_, (void**)&_replay_ptr)) {
-				APP.ERR_LOG("RedisConnect", "exec fail!");
+				ERROR_LOG("RedisConnect exec fail!");
 			}
 
 			freeReplyObject(_replay_ptr);
