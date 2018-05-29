@@ -171,29 +171,31 @@ bool block::modules::MysqlConnect::insert(const std::string &query, const char *
 
 void block::modules::MysqlConnect::update(const std::string &query, const char *buf, unsigned long len)
 {
+	assert(len > 0 && len < 10240);
+
 	SqlStmtPtr stmt;
 	perpare(query, stmt);
 
 	MYSQL_BIND params[1];
 	memset(params, 0, sizeof(params));
 
-	char *blobBuf = nullptr;
+	char *tbuf = nullptr;
 	try {
-		blobBuf = new char(len);
+		tbuf = new char[len];
 	}
 	catch (...) {
 		mysql_stmt_close(stmt->stmt);
 		ERROR_LOG("MysqlConnect out of memory");
 		return;
 	}
-	std::shared_ptr<char>(blobBuf, [](char *p)->void { delete[] p; });
+
+	memcpy(tbuf, buf, len);
 
 	params[0].buffer_type = MYSQL_TYPE_BLOB;
 	params[0].buffer_length = 10240;
 	params[0].length = &len;
 	params[0].is_null = 0;
-	params[0].buffer = blobBuf;
-	memcpy(blobBuf, buf, len);
+	params[0].buffer = tbuf;
 
 	// bind input arguments
 	if (mysql_stmt_bind_param(stmt->stmt, params))
@@ -205,6 +207,8 @@ void block::modules::MysqlConnect::update(const std::string &query, const char *
 	{
 		std::cout << mysql_stmt_error(stmt->stmt) << std::endl;
 	}
+
+	delete tbuf;
 }
 
 void block::modules::MysqlConnect::execSql(block::ModuleID target, int oper, const std::string &sql, std::function<void (block::ModuleID, block::ArgsPtr)> callback)
