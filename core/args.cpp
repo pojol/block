@@ -2,28 +2,28 @@
 #include <sstream>
 
 
-gsf::Args::Args()
+block::Args::Args()
 	: bytes_(new Bytes())
 {
 	write_ = read_ = bytes_->buff_;
 	tail_ = bytes_->buff_ + bytes_->total_;
 }
 
-gsf::Args::Args(const char *buf, size_t len)
+block::Args::Args(const char *buf, size_t len)
 	: bytes_(new Bytes(buf, len))
 {
 	write_ = read_ = bytes_->buff_;
 	tail_ = bytes_->buff_ + bytes_->total_;
 }
 
-gsf::Args::~Args()
+block::Args::~Args()
 {
 	params_ = 0;
 	write_ = read_ = nullptr;
 	tail_ = nullptr;
 }
 
-void gsf::Args::flush()
+void block::Args::flush()
 {
 	bytes_->flush();
 
@@ -33,7 +33,7 @@ void gsf::Args::flush()
 	params_ = 0;
 }
 
-void gsf::Args::inc(size_t len)
+void block::Args::inc(size_t len)
 {
 	if (bytes_->inc(len)) {
 		write_ = bytes_->buff_ + bytes_->size_ - len;
@@ -44,7 +44,7 @@ void gsf::Args::inc(size_t len)
 
 //////////////////////////////////////////////////////////////////////////
 template <typename T>
-void gsf::Args::push_impl(const T &val)
+void block::Args::push_impl(const T &val)
 {
 	size_t _size = sizeof(T);
 
@@ -55,7 +55,7 @@ void gsf::Args::push_impl(const T &val)
 }
 
 /*
-void gsf::Args::push_block(const char *block, int len)
+void block::Args::push_block(const char *block, int len)
 {
 	inc(len + 1 + 1);
 
@@ -69,142 +69,142 @@ void gsf::Args::push_block(const char *block, int len)
 }
 */
 
-void gsf::Args::push(const uint8_t &val)
+void block::Args::push(const uint8_t &val)
 {
 	push_impl(at_uint8);
 	push_impl(val);
 	params_++;
 }
 
-void gsf::Args::push_ui16(const uint16_t &val)
+void block::Args::push_ui16(const uint16_t &val)
 {
 	push_impl(at_uint16);
 	push_impl(val);
 	params_++;
 }
 
-void gsf::Args::push_ui32(const uint32_t &val)
+void block::Args::push_ui32(const uint32_t &val)
 {
 	push_impl(at_uint32);
 	push_impl(val);
 	params_++;
 }
 
-void gsf::Args::push_i32(const int32_t &val)
+void block::Args::push_i32(const int32_t &val)
 {
 	push_impl(at_int32);
 	push_impl(val);
 	params_++;
 }
 
-void gsf::Args::push_i64(const int64_t &val)
+void block::Args::push_i64(const int64_t &val)
 {
 	push_impl(at_int64);
 	push_impl(val);
 	params_++;
 }
 
-void gsf::Args::push_float(const float &val)
+void block::Args::push_float(const float &val)
 {
 	push_impl(at_float);
 	push_impl(val);
 	params_++;
 }
 
-void gsf::Args::push_double(const double &val)
+void block::Args::push_double(const double &val)
 {
 	push_impl(at_double);
 	push_impl(val);
 	params_++;
 }
 
-void gsf::Args::push_string(const std::string &val)
+void block::Args::push_string(const std::string &val)
 {
 	push(val.c_str(), val.length());
 }
 
-void gsf::Args::push_bool(const bool &val)
+void block::Args::push_bool(const bool &val)
 {
 	push(val);
 }
 
-void gsf::Args::push(const int8_t &val)
+void block::Args::push(const int8_t &val)
 {
 	push_impl(at_int8);
 	push_impl(val);
 	params_++;
 }
 
-void gsf::Args::push(const uint16_t &val)
+void block::Args::push(const uint16_t &val)
 {
 	push_impl(at_uint16);
 	push_impl(val);
 	params_++;
 }
 
-void gsf::Args::push(const int16_t &val)
+void block::Args::push(const int16_t &val)
 {
 	push_impl(at_int16);
 	push_impl(val);
 	params_++;
 }
 
-void gsf::Args::push(const uint32_t &val)
+void block::Args::push(const uint32_t &val)
 {
 	push_impl(at_uint32);
 	push_impl(val);
 	params_++;
 }
 
-void gsf::Args::push(const int32_t & val)
+void block::Args::push(const int32_t & val)
 {
 	push_impl(at_int32);
 	push_impl(val);
 	params_++;
 }
 
-void gsf::Args::push(const uint64_t &val)
+void block::Args::push(const uint64_t &val)
 {
 	push_impl(at_uint64);
 	push_impl(val);
 	params_++;
 }
 
-void gsf::Args::push(const int64_t &val)
+void block::Args::push(const int64_t &val)
 {
 	push_impl(at_int64);
 	push_impl(val);
 	params_++;
 }
 
-void gsf::Args::push(const bool &val)
+void block::Args::push(const bool &val)
 {
 	push_impl(at_bool);
 	push_impl(val);
 	params_++;
 }
 
-void gsf::Args::push(const float &val)
+void block::Args::push(const float &val)
 {
 	push_impl(at_float);
 	push_impl(val);
 	params_++;
 }
 
-void gsf::Args::push(const double &val)
+void block::Args::push(const double &val)
 {
 	push_impl(at_double);
 	push_impl(val);
 	params_++;
 }
 
-void gsf::Args::push(const std::string &val)
+void block::Args::push(const std::string &val)
 {
 	push(val.c_str(), val.length());
 }
 
 template <typename T>
-void gsf::Args::push(std::list<T> &list)
+void block::Args::push(std::list<T> &list)
 {
 	push_impl(at_list);
 	TypeLen _len = static_cast<TypeLen>(list.size());
@@ -218,7 +218,7 @@ void gsf::Args::push(std::list<T> &list)
 }
 
 template <typename T>
-void gsf::Args::push(std::vector<T> &vec)
+void block::Args::push(std::vector<T> &vec)
 {
 	push_impl(at_vec);
 	TypeLen _len = static_cast<TypeLen>(vec.size());
@@ -232,7 +232,7 @@ void gsf::Args::push(std::vector<T> &vec)
 }
 
 template <typename Key, typename Value>
-void gsf::Args::push(std::map<Key, Value> &map)
+void block::Args::push(std::map<Key, Value> &map)
 {
 	push_impl(at_map);
 	TypeLen _len = static_cast<TypeLen>(map.size());
@@ -246,7 +246,7 @@ void gsf::Args::push(std::map<Key, Value> &map)
 	params_++;
 }
 
-void gsf::Args::push(const char * val, size_t len)
+void block::Args::push(const char * val, size_t len)
 {
 	push_impl(at_string);
 	TypeLen _len = static_cast<TypeLen>(len);
@@ -261,7 +261,7 @@ void gsf::Args::push(const char * val, size_t len)
 }
 //////////////////////////////////////////////////////////////////////////
 
-uint8_t gsf::Args::pop_tag()
+uint8_t block::Args::pop_tag()
 {
 	auto _ui8 = *reinterpret_cast<uint8_t*>(read_);
 	read_ += sizeof(uint8_t);
@@ -270,7 +270,7 @@ uint8_t gsf::Args::pop_tag()
 	return _ui8;
 }
 
-uint8_t gsf::Args::pop_ui8()
+uint8_t block::Args::pop_ui8()
 {
 	assert(pop_tag() == at_uint8);
 
@@ -283,7 +283,7 @@ uint8_t gsf::Args::pop_ui8()
 	return _ui8;
 }
 
-int8_t gsf::Args::pop_i8()
+int8_t block::Args::pop_i8()
 {
 	assert(pop_tag() == at_int8);
 
@@ -296,7 +296,7 @@ int8_t gsf::Args::pop_i8()
 	return _val;
 }
 
-uint16_t gsf::Args::pop_ui16()
+uint16_t block::Args::pop_ui16()
 {
 	assert(pop_tag() == at_uint16);
 
@@ -309,7 +309,7 @@ uint16_t gsf::Args::pop_ui16()
 	return _val;
 }
 
-int16_t gsf::Args::pop_i16()
+int16_t block::Args::pop_i16()
 {
 	assert(pop_tag() == at_int16);
 
@@ -322,7 +322,7 @@ int16_t gsf::Args::pop_i16()
 	return _val;
 }
 
-int32_t gsf::Args::pop_i32()
+int32_t block::Args::pop_i32()
 {
 	assert(pop_tag() == at_int32);
 
@@ -335,7 +335,7 @@ int32_t gsf::Args::pop_i32()
 	return _i32;
 }
 
-uint64_t gsf::Args::pop_ui64()
+uint64_t block::Args::pop_ui64()
 {
 	assert(pop_tag() == at_uint64);
 
@@ -348,7 +348,7 @@ uint64_t gsf::Args::pop_ui64()
 	return _val;
 }
 
-int64_t gsf::Args::pop_i64()
+int64_t block::Args::pop_i64()
 {
 	assert(pop_tag() == at_int64);
 
@@ -361,7 +361,7 @@ int64_t gsf::Args::pop_i64()
 	return _val;
 }
 
-bool gsf::Args::pop_bool()
+bool block::Args::pop_bool()
 {
 	assert(pop_tag() == at_bool);
 
@@ -374,7 +374,7 @@ bool gsf::Args::pop_bool()
 	return _val;
 }
 
-float gsf::Args::pop_float()
+float block::Args::pop_float()
 {
 	assert(pop_tag() == at_float);
 
@@ -387,7 +387,7 @@ float gsf::Args::pop_float()
 	return _val;
 }
 
-double gsf::Args::pop_double()
+double block::Args::pop_double()
 {
 	assert(pop_tag() == at_double);
 
@@ -400,7 +400,7 @@ double gsf::Args::pop_double()
 	return _val;
 }
 
-uint32_t gsf::Args::pop_ui32()
+uint32_t block::Args::pop_ui32()
 {
 	assert(pop_tag() == at_uint32);
 
@@ -414,67 +414,67 @@ uint32_t gsf::Args::pop_ui32()
 }
 
 template <typename T>
-void gsf::Args::pop(T &val)
+void block::Args::pop(T &val)
 {
 	pop_impl(val);
 }
 
-void gsf::Args::pop_impl(uint8_t &val)
+void block::Args::pop_impl(uint8_t &val)
 {
 	val = pop_ui8();
 }
 
-void gsf::Args::pop_impl(int8_t &val)
+void block::Args::pop_impl(int8_t &val)
 {
 	val = pop_i8();
 }
 
-void gsf::Args::pop_impl(uint16_t &val)
+void block::Args::pop_impl(uint16_t &val)
 {
 	val = pop_ui16();
 }
 
-void gsf::Args::pop_impl(int16_t &val)
+void block::Args::pop_impl(int16_t &val)
 {
 	val = pop_i16();
 }
 
-void gsf::Args::pop_impl(uint32_t &val)
+void block::Args::pop_impl(uint32_t &val)
 {
 	val = pop_ui32();
 }
 
-void gsf::Args::pop_impl(int32_t &val)
+void block::Args::pop_impl(int32_t &val)
 {
 	val = pop_i32();
 }
 
-void gsf::Args::pop_impl(uint64_t &val)
+void block::Args::pop_impl(uint64_t &val)
 {
 	val = pop_ui64();
 }
 
-void gsf::Args::pop_impl(int64_t &val)
+void block::Args::pop_impl(int64_t &val)
 {
 	val = pop_i64();
 }
 
-void gsf::Args::pop_impl(bool &val)
+void block::Args::pop_impl(bool &val)
 {
 	val = pop_bool();
 }
 
-void gsf::Args::pop_impl(float &val)
+void block::Args::pop_impl(float &val)
 {
 	val = pop_float();
 }
 
-void gsf::Args::pop_impl(double &val)
+void block::Args::pop_impl(double &val)
 {
 	val = pop_double();
 }
 
-gsf::Args::TypeLen gsf::Args::pop_typelen()
+block::Args::TypeLen block::Args::pop_typelen()
 {
 	TypeLen _len = *reinterpret_cast<TypeLen*>(read_);
 	read_ += sizeof(TypeLen);
@@ -482,27 +482,27 @@ gsf::Args::TypeLen gsf::Args::pop_typelen()
 	return _len;
 }
 
-gsf::SessionID gsf::Args::pop_fd()
+block::SessionID block::Args::pop_fd()
 {
 	return pop_ui16();
 }
 
-gsf::MsgID gsf::Args::pop_msgid()
+block::MsgID block::Args::pop_msgid()
 {
 	return pop_i32();
 }
 
-gsf::ModuleID gsf::Args::pop_moduleid()
+block::ModuleID block::Args::pop_moduleid()
 {
 	return pop_i32();
 }
 
-gsf::TimerID gsf::Args::pop_timerid()
+block::TimerID block::Args::pop_timerid()
 {
 	return pop_ui64();
 }
 
-std::string gsf::Args::pop_string()
+std::string block::Args::pop_string()
 {
 	assert(pop_tag() == at_string);
 
@@ -517,7 +517,7 @@ std::string gsf::Args::pop_string()
 }
 
 template<typename T>
-std::list<T> gsf::Args::pop_list()
+std::list<T> block::Args::pop_list()
 {
 	assert(pop_tag() == at_list);
 
@@ -535,7 +535,7 @@ std::list<T> gsf::Args::pop_list()
 }
 
 template <typename T>
-std::vector<T> gsf::Args::pop_vec()
+std::vector<T> block::Args::pop_vec()
 {
 	assert(pop_tag() == at_vec);
 
@@ -553,7 +553,7 @@ std::vector<T> gsf::Args::pop_vec()
 }
 
 template <typename Key, typename Value>
-std::map<Key, Value> gsf::Args::pop_map()
+std::map<Key, Value> block::Args::pop_map()
 {
 	assert(pop_tag() == at_map);
 
@@ -574,7 +574,7 @@ std::map<Key, Value> gsf::Args::pop_map()
 }
 
 /*
-std::string gsf::Args::pop_block()
+std::string block::Args::pop_block()
 {
 	assert(pop_tag() == at_block);
 
@@ -591,14 +591,14 @@ std::string gsf::Args::pop_block()
 */
 
 //////////////////////////////////////////////////////////////////////////
-uint8_t gsf::Args::peek_tag()
+uint8_t block::Args::peek_tag()
 {
 	auto _tag = *reinterpret_cast<uint8_t*>(read_);
 	read_ += sizeof(uint8_t);
 	return _tag;
 }
 
-void * gsf::Args::peek(uint8_t type)
+void * block::Args::peek(uint8_t type)
 {
 	assert(type == peek_tag());
 
@@ -642,7 +642,7 @@ void * gsf::Args::peek(uint8_t type)
 	return sp;
 }
 
-std::pair<void*, int> gsf::Args::peek_str()
+std::pair<void*, int> block::Args::peek_str()
 {
 	void *sp = nullptr;
 
@@ -657,35 +657,35 @@ std::pair<void*, int> gsf::Args::peek_str()
 }
 
 //////////////////////////////////////////////////////////////////////////
-int gsf::Args::get_tag()
+int block::Args::get_tag()
 {
 	auto _ui8 = *reinterpret_cast<uint8_t*>(read_);
 	return _ui8;
 }
 
-uint32_t gsf::Args::get_size() const
+uint32_t block::Args::get_size() const
 {
 	return bytes_->size_;
 }
 
-uint32_t gsf::Args::get_params_count() const
+uint32_t block::Args::get_params_count() const
 {
 	return params_;
 }
 
-uint32_t gsf::Args::get_offset() const
+uint32_t block::Args::get_offset() const
 {
 	return offset_;
 }
 
-std::string gsf::Args::exportBuf()
+std::string block::Args::exportBuf()
 {
 	std::string _str;
 	_str.append(bytes_->buff_, get_size());
 	return _str;
 }
 
-void gsf::Args::importBuf(const std::string &str)
+void block::Args::importBuf(const std::string &str)
 {
 	size_t _len = str.length();
 	inc(_len);
@@ -694,7 +694,7 @@ void gsf::Args::importBuf(const std::string &str)
 	write_ += _len;
 }
 
-std::string gsf::Args::print() const
+std::string block::Args::print() const
 {
 	auto _args = Args(bytes_->buff_, get_size());
 	std::stringstream ss;

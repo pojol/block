@@ -14,7 +14,7 @@
 #include <fmt/format.h>
 #include <core/application.h>
 
-namespace gsf
+namespace block
 {
 	namespace modules 
 	{
@@ -49,7 +49,7 @@ namespace gsf
 				assert(reply_ && reply_->type != REDIS_REPLY_ERROR);
 
 				if (reply_->type == REDIS_REPLY_ERROR) {
-					APP.ERR_LOG("RedisConnect", flag, " {}", reply_->str);
+					ERROR_FMTLOG("RedisConnect" + flag + " str:{}", reply_->str);
 					return false;
 				}
 
@@ -60,7 +60,7 @@ namespace gsf
 				return reply_->type;
 			}
 
-			int integer() {
+			int64_t integer() {
 				return reply_->integer;
 			}
 
@@ -158,7 +158,7 @@ namespace gsf
 		};
 
 		template <typename T>
-		ReplyPtr gsf::modules::RedisConnect<T>::command(redisContext *c, const char *format, ...)
+		ReplyPtr block::modules::RedisConnect<T>::command(redisContext *c, const char *format, ...)
 		{
 			va_list ap;
 			void *reply = NULL;
@@ -170,7 +170,7 @@ namespace gsf
 		}
 
 		template <typename T>
-		bool gsf::modules::RedisConnect<T>::init()
+		bool block::modules::RedisConnect<T>::init()
 		{
 			using namespace std::placeholders;
 
@@ -181,14 +181,14 @@ namespace gsf
 				is_conn_ = true;
 			}
 			else {
-				APP.ERR_LOG("RedisConnect", "event_redis_connect err");
+				ERROR_LOG("RedisConnect event_redis_connect err");
 			}
 
 			return is_conn_;
 		}
 
 		template <typename T>
-		void gsf::modules::RedisConnect<T>::uninit()
+		void block::modules::RedisConnect<T>::uninit()
 		{
 			updateCount_ = 0;
 			pipeLineCount_ = 0;
@@ -200,13 +200,13 @@ namespace gsf
 		}
 
 		template <typename T>
-		bool gsf::modules::RedisConnect<T>::push(const std::string &field, uint32_t key, const std::string &buf)
+		bool block::modules::RedisConnect<T>::push(const std::string &field, uint32_t key, const std::string &buf)
 		{
 			bool _flag = false;
 
 			do{
 				if (field_ != "" && field_ != field){
-					APP.ERR_LOG("RedisConnect", "push", "field cannot be changed!");
+					ERROR_LOG("RedisConnect push field cannot be changed!");
 					break;
 				}
 
@@ -231,7 +231,7 @@ namespace gsf
 				else {
 					if (REDIS_OK != redisAppendCommand(redis_context_, "RPUSH %s %b", _keystr.c_str(), buf.c_str(), buf.length()))
 					{
-						APP.ERR_LOG("RedisConnect", "push", "redis append command fail!");
+						ERROR_LOG("RedisConnect push redis append command fail!");
 					}
 
 					pipeLineCount_++;
@@ -247,7 +247,7 @@ namespace gsf
 	}
 
 	template <typename T>
-	std::string gsf::modules::RedisConnect<T>::get(const std::string &field, uint32_t key)
+	std::string block::modules::RedisConnect<T>::get(const std::string &field, uint32_t key)
 	{
 		merge(key);
 
@@ -267,7 +267,7 @@ namespace gsf
 
 
 	template <typename T>
-	std::vector<std::pair<uint32_t, std::string>> gsf::modules::RedisConnect<T>::getAll()
+	std::vector<std::pair<uint32_t, std::string>> block::modules::RedisConnect<T>::getAll()
 	{
 		std::vector<std::pair<uint32_t, std::string>> _vec;
 
@@ -289,7 +289,7 @@ namespace gsf
 	}
 	
 	template <typename T>
-	void gsf::modules::RedisConnect<T>::run()
+	void block::modules::RedisConnect<T>::run()
 	{
 
 		if (pipeLineCount_ == 0) {
@@ -304,7 +304,7 @@ namespace gsf
 		for (uint32_t i = 0; i < pipeLineCount_; ++i)
 		{
 			if (REDIS_OK != redisGetReply(redis_context_, (void**)&_replay_ptr)) {
-				APP.ERR_LOG("RedisConnect", "exec fail!");
+				ERROR_LOG("RedisConnect exec fail!");
 			}
 
 			freeReplyObject(_replay_ptr);
@@ -333,7 +333,7 @@ namespace gsf
 	}
 
 	template <typename T>
-	std::pair<uint32_t, std::string> gsf::modules::RedisConnect<T>::pop(uint32_t key)
+	std::pair<uint32_t, std::string> block::modules::RedisConnect<T>::pop(uint32_t key)
 	{
 		if (!checkConnect()) {
 			return std::make_pair(0, "");
@@ -373,10 +373,10 @@ namespace gsf
 	}
 
 	template <typename T>
-	bool gsf::modules::RedisConnect<T>::checkConnect()
+	bool block::modules::RedisConnect<T>::checkConnect()
 	{
 		if (!is_conn_) {
-			APP.WARN_LOG("RedisConnect", "service terminated! check_connect");
+			WARN_LOG("RedisConnect service terminated! check_connect");
 			return false;
 		}
 
@@ -386,7 +386,7 @@ namespace gsf
 			return true;
 		}
 		else {
-			APP.WARN_LOG("RedisConnect", "connect fail! try reconnect!");
+			WARN_LOG("RedisConnect connect fail! try reconnect!");
 
 			struct timeval _timeout = { 1, 500000 };
 
@@ -397,14 +397,14 @@ namespace gsf
 				return true;
 			}
 			else {
-				APP.ERR_LOG("RedisConnect", "service terminated! can't connect!");
+				ERROR_LOG("RedisConnect service terminated! can't connect!");
 				return false;
 			}
 		}
 	}
 
 	template <typename T>
-	void gsf::modules::RedisConnect<T>::refresh()
+	void block::modules::RedisConnect<T>::refresh()
 	{
 		if (!checkConnect()) {
 			return;
@@ -415,7 +415,7 @@ namespace gsf
 	}
 
 	template <typename T>
-	void gsf::modules::RedisConnect<T>::flush_redis_handler()
+	void block::modules::RedisConnect<T>::flush_redis_handler()
 	{
 		if (!checkConnect()) {
 			return;
@@ -426,7 +426,7 @@ namespace gsf
 	}
 
 	template <typename T>
-	void gsf::modules::RedisConnect<T>::merge(uint32_t key)
+	void block::modules::RedisConnect<T>::merge(uint32_t key)
 	{
 		auto _p = pop(key);
 		if (_p.first != 0) {
@@ -437,7 +437,7 @@ namespace gsf
 	}
 
 	template <typename T>
-	int gsf::modules::RedisConnect<T>::getListLen(uint32_t key)
+	int block::modules::RedisConnect<T>::getListLen(uint32_t key)
 	{
 		if (!checkConnect()) {
 			return 0;

@@ -15,25 +15,25 @@ uint8_t ToValueType(enum_field_types mysqlType)
 	case FIELD_TYPE_STRING:
 	case FIELD_TYPE_VAR_STRING:
 	case FIELD_TYPE_BLOB:
-		return gsf::at_block;
+		return block::at_block;
 	case FIELD_TYPE_SET:
 	case FIELD_TYPE_NULL:
-		return gsf::at_string;
+		return block::at_string;
 	case FIELD_TYPE_TINY:
 	case FIELD_TYPE_SHORT:
 	case FIELD_TYPE_ENUM:
 	case FIELD_TYPE_LONG:
-		return gsf::at_int32;
+		return block::at_int32;
 	case FIELD_TYPE_INT24:
 	case FIELD_TYPE_LONGLONG:
-		return gsf::at_int64;
+		return block::at_int64;
 	case FIELD_TYPE_DECIMAL:
 	case FIELD_TYPE_FLOAT:
-		return gsf::at_float;
+		return block::at_float;
 	case FIELD_TYPE_DOUBLE:
-		return gsf::at_double;
+		return block::at_double;
 	default:
-		return gsf::at_eof;
+		return block::at_eof;
 	}
 }
 
@@ -43,47 +43,47 @@ std::pair<enum_field_types, char> ToMySqlType(uint8_t cppType)
 
 	switch (cppType)
 	{
-	case gsf::at_uint8:
+	case block::at_uint8:
 		ret.first = MYSQL_TYPE_TINY;
 		ret.second = 1;
 		break;
-	case gsf::at_int8:
+	case block::at_int8:
 		ret.first = MYSQL_TYPE_TINY;
 		ret.second = 0;
 		break;
-	case gsf::at_uint16:
+	case block::at_uint16:
 		ret.first = MYSQL_TYPE_SHORT;
 		ret.second = 1;
 		break;
-	case gsf::at_int16:
+	case block::at_int16:
 		ret.first = MYSQL_TYPE_SHORT;
 		ret.second = 0;
 		break;
-	case gsf::at_uint32:
+	case block::at_uint32:
 		ret.first = MYSQL_TYPE_LONG;
 		ret.second = 1;
 		break;
-	case gsf::at_int32:
+	case block::at_int32:
 		ret.first = MYSQL_TYPE_LONG;
 		ret.second = 0;
 		break;
-	case gsf::at_uint64:
+	case block::at_uint64:
 		ret.first = MYSQL_TYPE_LONGLONG;
 		ret.second = 1;
 		break;
-	case gsf::at_int64:
+	case block::at_int64:
 		ret.first = MYSQL_TYPE_LONGLONG;
 		ret.second = 0;
 		break;
-	case gsf::at_float:
+	case block::at_float:
 		ret.first = MYSQL_TYPE_FLOAT;
 		ret.second = 0;
 		break;
-	case gsf::at_double:
+	case block::at_double:
 		ret.first = MYSQL_TYPE_DOUBLE;
 		ret.second = 0;
 		break;
-	case gsf::at_string:
+	case block::at_string:
 		ret.first = MYSQL_TYPE_STRING;
 		ret.second = 0;
 		break;
@@ -91,38 +91,38 @@ std::pair<enum_field_types, char> ToMySqlType(uint8_t cppType)
 	return ret;
 }
 
-gsf::modules::MysqlConnect::MysqlConnect()
+block::modules::MysqlConnect::MysqlConnect()
 {
 
 }
 
-gsf::modules::MysqlConnect::~MysqlConnect()
+block::modules::MysqlConnect::~MysqlConnect()
 {
 
 }
 
-bool gsf::modules::MysqlConnect::init(const std::string &host, int port, const std::string &user, const std::string &pwd, const std::string &name)
+bool block::modules::MysqlConnect::init(const std::string &host, int port, const std::string &user, const std::string &pwd, const std::string &name)
 {
 	auto init = mysql_init(nullptr);
 	if (nullptr == init) {
-		APP.ERR_LOG("MysqlConnect", "init fail!");
+		ERROR_LOG("MysqlConnect init fail!");
 		return false;
 	}
 
 	basePtr_ = mysql_real_connect(init, host.c_str(), user.c_str(), pwd.c_str(), name.c_str(), port, nullptr, 0);
 	if (nullptr == basePtr_) {
-		APP.ERR_LOG("MysqlConnect", "connect fail!");
+		ERROR_LOG("MysqlConnect connect fail!");
 		//mysql_close(base);
 		return false;
 	}
 
-	APP.INFO_LOG("MysqlConnect", "init success!");
+	INFO_LOG("MysqlConnect init success!");
 
 	return true;
 }
 
 
-bool gsf::modules::MysqlConnect::insert(const std::string &query, const char *buf, unsigned long len)
+bool block::modules::MysqlConnect::insert(const std::string &query, const char *buf, unsigned long len)
 {
 	SqlStmtPtr stmt;
 	perpare(query, stmt);
@@ -141,7 +141,7 @@ bool gsf::modules::MysqlConnect::insert(const std::string &query, const char *bu
 	}
 	catch (...) {
 		mysql_stmt_close(stmt->stmt);
-		APP.ERR_LOG("MysqlConnect", "out of memory");
+		ERROR_LOG("MysqlConnect out of memory");
 		return false;
 	}
 	std::shared_ptr<char>(blobBuf, [](char *p)->void { delete[] p; });
@@ -169,31 +169,33 @@ bool gsf::modules::MysqlConnect::insert(const std::string &query, const char *bu
 	return true;
 }
 
-void gsf::modules::MysqlConnect::update(const std::string &query, const char *buf, unsigned long len)
+void block::modules::MysqlConnect::update(const std::string &query, const char *buf, unsigned long len)
 {
+	assert(len > 0 && len < 10240);
+
 	SqlStmtPtr stmt;
 	perpare(query, stmt);
 
 	MYSQL_BIND params[1];
 	memset(params, 0, sizeof(params));
 
-	char *blobBuf = nullptr;
+	char *tbuf = nullptr;
 	try {
-		blobBuf = new char(len);
+		tbuf = new char[len];
 	}
 	catch (...) {
 		mysql_stmt_close(stmt->stmt);
-		APP.ERR_LOG("MysqlConnect", "out of memory");
+		ERROR_LOG("MysqlConnect out of memory");
 		return;
 	}
-	std::shared_ptr<char>(blobBuf, [](char *p)->void { delete[] p; });
+
+	memcpy(tbuf, buf, len);
 
 	params[0].buffer_type = MYSQL_TYPE_BLOB;
 	params[0].buffer_length = 10240;
 	params[0].length = &len;
 	params[0].is_null = 0;
-	params[0].buffer = blobBuf;
-	memcpy(blobBuf, buf, len);
+	params[0].buffer = tbuf;
 
 	// bind input arguments
 	if (mysql_stmt_bind_param(stmt->stmt, params))
@@ -205,9 +207,11 @@ void gsf::modules::MysqlConnect::update(const std::string &query, const char *bu
 	{
 		std::cout << mysql_stmt_error(stmt->stmt) << std::endl;
 	}
+
+	delete tbuf;
 }
 
-void gsf::modules::MysqlConnect::execSql(gsf::ModuleID target, int oper, const std::string &sql, std::function<void (gsf::ModuleID, gsf::ArgsPtr)> callback)
+void block::modules::MysqlConnect::execSql(block::ModuleID target, int oper, const std::string &sql, std::function<void (block::ModuleID, block::ArgsPtr)> callback)
 {
 	MYSQL_RES *result = nullptr;
 	MYSQL_FIELD *fields = nullptr;
@@ -216,15 +220,15 @@ void gsf::modules::MysqlConnect::execSql(gsf::ModuleID target, int oper, const s
 
 	auto errf = [&](const std::string &err) {
 		if (callback) {
-			callback(target, gsf::makeArgs(oper, false, 0, 0, err));
+			callback(target, block::makeArgs(oper, false, 0, 0, err));
 		}
 		else {
-			APP.ERR_LOG("dbProxy", "query", " {}", err);
+			ERROR_FMTLOG("dbproxy query err:{}", err);
 		}
 	};
 
 	if (nullptr == basePtr_) {
-		APP.ERR_LOG("MysqlConnect", "not connected!");
+		ERROR_LOG("MysqlConnect not connected!");
 		return ;
 	}
 
@@ -236,7 +240,7 @@ void gsf::modules::MysqlConnect::execSql(gsf::ModuleID target, int oper, const s
 	result = mysql_store_result(basePtr_);
 	if (nullptr == result) {
 		if (callback) {
-			callback(target, gsf::makeArgs(oper, true, 0, 0, "success!"));
+			callback(target, block::makeArgs(oper, true, 0, 0, "success!"));
 		}
 		return;
 	}
@@ -265,7 +269,7 @@ void gsf::modules::MysqlConnect::execSql(gsf::ModuleID target, int oper, const s
 
 	while (nullptr != row)
 	{
-		auto argsPtr = gsf::ArgsPool::get_ref().get();
+		auto argsPtr = block::ArgsPool::get_ref().get();
 		argsPtr->push(oper);
 		argsPtr->push(true);
 		argsPtr->push(rowCount);
@@ -277,22 +281,22 @@ void gsf::modules::MysqlConnect::execSql(gsf::ModuleID target, int oper, const s
 
 			switch (col_tags[col].second)
 			{
-			case gsf::at_int32:
+			case block::at_int32:
 				argsPtr->push_i32(row[col] != nullptr ? std::stoul(row[col]) : 0);
 				break;
-			case gsf::at_int64:
+			case block::at_int64:
 				argsPtr->push_i64(row[col] != nullptr ? std::stoull(row[col]) : 0);
 				break;
-			case gsf::at_float:
+			case block::at_float:
 				argsPtr->push_float(row[col] != nullptr ? std::stof(row[col]) : 0);
 				break;
-			case gsf::at_double:
+			case block::at_double:
 				argsPtr->push_double(row[col] != nullptr ? std::stod(row[col]) : 0);
 				break;
-			case gsf::at_string:
+			case block::at_string:
 				argsPtr->push_string((row[col] != nullptr) ? row[col] : "");
 				break;
-			case gsf::at_block:
+			case block::at_block:
 				std::string _str = "";
 				_str.assign(row[col], lengths[col]);
 				argsPtr->push_string(_str);
@@ -312,7 +316,7 @@ void gsf::modules::MysqlConnect::execSql(gsf::ModuleID target, int oper, const s
 	}
 }
 
-void gsf::modules::MysqlConnect::perpare(const std::string &sql, SqlStmtPtr &stmtPtr)
+void block::modules::MysqlConnect::perpare(const std::string &sql, SqlStmtPtr &stmtPtr)
 {
 
 	auto itr = prepared_stmt_map.find(sql);
@@ -323,7 +327,7 @@ void gsf::modules::MysqlConnect::perpare(const std::string &sql, SqlStmtPtr &stm
 
 	do {
 		if (nullptr == basePtr_) {
-			std::cout << "mysql unuseable!" << std::endl;
+			ERROR_LOG("dbproxy mysql unuseable!");
 			break;
 		}
 
@@ -332,7 +336,7 @@ void gsf::modules::MysqlConnect::perpare(const std::string &sql, SqlStmtPtr &stm
 
 		stmtPtr->stmt = mysql_stmt_init(basePtr_);
 		if (nullptr == stmtPtr->stmt) {
-			std::cout << "stmt init fail" << std::endl;
+			ERROR_LOG("dbproxy stmt init fail!");
 			break;
 		}
 

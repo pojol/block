@@ -1,5 +1,4 @@
 build/*
-3rd/libevent-2.0.22-stable/*
 /.idea/*
 tool/robot/__pycache__/
 tool/robot/scene/__pycache__/login.cpython-35.pyc
@@ -60,15 +59,5 @@ lib/apple/lib/pkgconfig/libevent_openssl.pc
 lib/apple/lib/pkgconfig/libevent_pthreads.pc
 lib/linux/libstream.a
 lib/
-3rd/glog-master
-3rd/hiredis-0.13.3
-3rd/pbc-proto_v3
-3rd/protobuf-3.2.0
-3rd/protobuf
-3rd/redis-win-3.0.504
-3rd/sol2-2.16.0
-3rd/glog/
-3rd/pbc/
 Win32/Debug/ZERO_CHECK/ZERO_CHECK.log
 .vscode/settings.json
-3rd/

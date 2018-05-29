@@ -1,50 +1,39 @@
 ﻿#include "node.h"
 
-#include <modules/tcp/acceptor.h>
-#include <modules/tcp/connector.h>
-
-#include <core/dynamic_module_factory.h>
 #include <core/application.h>
 
 #include <algorithm>
 #include <iostream>
 #include <fmt/format.h>
+#include <utils/timer.hpp>
 
-namespace gsf
-{
-	namespace network
-	{
-		REGISTER_CLASS(AcceptorModule)
-		REGISTER_CLASS(ConnectorModule)
-	}
-}
 
-gsf::modules::NodeModule::NodeModule()
+block::modules::NodeModule::NodeModule()
 	: Module("NodeModule")
 {
 
 }
 
-gsf::modules::NodeModule::~NodeModule()
+block::modules::NodeModule::~NodeModule()
 {
 
 }
 
-void gsf::modules::NodeModule::before_init()
+void block::modules::NodeModule::before_init()
 {
 	logM_ = APP.getModule("LogModule");
 	timerM_ = APP.getModule("TimerModule");
 
-	assert(logM_ != gsf::ModuleNil);
-	assert(timerM_ != gsf::ModuleNil);
+	assert(logM_ != block::ModuleNil);
+	assert(timerM_ != block::ModuleNil);
 
 	using namespace std::placeholders;
-	mailboxPtr_->listen(eid::node::node_create, std::bind(&NodeModule::eCreateNode, this, _1, _2));
-	mailboxPtr_->listen(eid::node::node_regist, std::bind(&NodeModule::eRegistNode, this, _1, _2));
+	listen(eid::node::node_create, std::bind(&NodeModule::eCreateNode, this, _1, _2));
+	listen(eid::node::node_regist, std::bind(&NodeModule::eRegistNode, this, _1, _2));
 
 	//listenRpc(std::bind(&NodeModule::eventRpc, this, _1, _2, _3, _4));
 
-	mailboxPtr_->listen(eid::network::recv, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
+	listen(eid::network::recv, [&](block::ModuleID target, block::ArgsPtr args) {
 
 		auto _fd = args->pop_fd();
 		auto _msgid = args->pop_msgid();
@@ -56,12 +45,12 @@ void gsf::modules::NodeModule::before_init()
 			auto _state = args->pop_bool();
 			auto _progress = args->pop_i32();
 
-			auto _off = sizeof(gsf::SessionID) + 1 + sizeof(int32_t) + 1 + sizeof(int64_t) + 1 + sizeof(bool) + 1 + sizeof(int32_t) + 1;
+			auto _off = sizeof(block::SessionID) + 1 + sizeof(int32_t) + 1 + sizeof(int64_t) + 1 + sizeof(bool) + 1 + sizeof(int32_t) + 1;
 			auto _block = args->pop_block(_off, args->get_size());
 
 			auto _info = _itr->second;
 
-			auto _res = gsf::ArgsPool::get_ref().get();
+			auto _res = block::ArgsPool::get_ref().get();
 			_res->push_block(_block.c_str(), args->get_size() - _off);
 			//_info->callback(_res, _progress, _state);
 
@@ -73,19 +62,20 @@ void gsf::modules::NodeModule::before_init()
 				callbackMap_.erase(_itr);
 			}
 			else { //reset timer
-				mailboxPtr_->dispatch(timerM_, eid::timer::delay_milliseconds, gsf::makeArgs(delayTag_, rpcDelay_));
+				mailboxPtr_->dispatch(timerM_, eid::timer::delay_milliseconds, block::makeArgs(delayTag_, rpcDelay_));
 				timerSet_.insert(std::make_pair(delayTag_, _info));
 			}
-			*/
+			*/	
 		}
 		else {
-			APP.WARN_LOG("Node", "can't find rpc callback", "{}\n", _callbackid);
+			WARN_FMTLOG("node can't find rpc callback  callbackID:{}\n", _callbackid);
 		}
 
 		return nullptr;
 	});
 
-	mailboxPtr_->listen(eid::timer::timer_arrive, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
+	/*
+	listen(eid::timer::timer_arrive, [&](block::ModuleID target, block::ArgsPtr args) {
 		auto _tag = args->pop_i32();
 
 		auto _itr = timerSet_.find(_tag);
@@ -95,32 +85,30 @@ void gsf::modules::NodeModule::before_init()
 			timerSet_.erase(_itr);
 
 			auto _citr = callbackMap_.find(_info->id_);
-			_info->callback(gsf::makeArgs(fmt::format("{} rpc callback timeout", _info->id_)), -1, false);
+			_info->callback(block::makeArgs(fmt::format("{} rpc callback timeout", _info->id_)), -1, false);
 			callbackMap_.erase(_citr);
 		}
 	});
+	*/
 }
 
-void gsf::modules::NodeModule::init()
+void block::modules::NodeModule::init()
 {
-	mailboxPtr_->pull();
 }
 
-void gsf::modules::NodeModule::execute()
+void block::modules::NodeModule::execute()
 {
-	mailboxPtr_->pull();
 }
 
-void gsf::modules::NodeModule::shut()
+void block::modules::NodeModule::shut()
 {
-	mailboxPtr_->pull();
 }
 
-void gsf::modules::NodeModule::eventRpc(gsf::EventID event, gsf::ModuleID moduleID, const gsf::ArgsPtr &args, gsf::RpcCallback callback)
+void block::modules::NodeModule::eventRpc(block::EventID event, block::ModuleID moduleID, const block::ArgsPtr &args, block::RpcCallback callback)
 {
 	int64_t _callbackid = 0;
 
-	gsf::ModuleID _connector_m = gsf::ModuleNil;
+	block::ModuleID _connector_m = block::ModuleNil;
 	auto itr = eventMap_.find(event);
 	if (itr != eventMap_.end()) {
 		_connector_m = itr->second.connecotr_m_;
@@ -128,7 +116,7 @@ void gsf::modules::NodeModule::eventRpc(gsf::EventID event, gsf::ModuleID module
 	else {
 		if (callback) {
 			std::string _errstr = "can't find event! you need to register first.";
-			callback(gsf::makeArgs(_errstr), -1, false);
+			callback(block::makeArgs(_errstr), -1, false);
 		}
 		return;
 	}
@@ -138,12 +126,12 @@ void gsf::modules::NodeModule::eventRpc(gsf::EventID event, gsf::ModuleID module
 
 		auto _itr = callbackMap_.find(_callbackid);
 		if (_itr != callbackMap_.end()) {
-			callback(gsf::makeArgs("repeat rpc event!"), -1, false);
+			callback(block::makeArgs("repeat rpc event!"), -1, false);
 			return;
 		}
 
 		/* 这里的tag 处理要考虑下
-		mailboxPtr_->dispatch(timerM_, eid::timer::delay_milliseconds, gsf::makeArgs(delayTag_, rpcDelay_));
+		mailboxPtr_->dispatch(timerM_, eid::timer::delay_milliseconds, block::makeArgs(delayTag_, rpcDelay_));
 		auto _callbackPtr = std::make_shared<CallbackInfo>();
 		_callbackPtr->callback = callback;
 		_callbackPtr->timer_ = delayTag_;
@@ -157,7 +145,7 @@ void gsf::modules::NodeModule::eventRpc(gsf::EventID event, gsf::ModuleID module
 
 	if (args) {
 	/*
-		auto argsPtr = gsf::ArgsPool::get_ref().get();
+		auto argsPtr = block::ArgsPool::get_ref().get();
 		argsPtr->push(event);
 		argsPtr->push(_callbackid);
 		argsPtr->push_block(args->get_block(0, args->get_size()).c_str(), args->get_size());
@@ -166,11 +154,11 @@ void gsf::modules::NodeModule::eventRpc(gsf::EventID event, gsf::ModuleID module
 		*/
 	}
 	else {
-		mailboxPtr_->dispatch(_connector_m, eid::network::send, gsf::makeArgs(event, _callbackid));
+		dispatch(_connector_m, eid::network::send, block::makeArgs(event, _callbackid));
 	}
 }
 
-void gsf::modules::NodeModule::registNode(gsf::ModuleID base, int event, const std::string &ip, int port)
+void block::modules::NodeModule::registNode(block::ModuleID base, int event, const std::string &ip, int port)
 {
 	bool bRes = false;
 	auto _moduleid = 0;
@@ -187,7 +175,7 @@ void gsf::modules::NodeModule::registNode(gsf::ModuleID base, int event, const s
 	auto itr = eventMap_.find(event);
 	if (itr == eventMap_.end()) {
 
-		gsf::ModuleID _connector_m = gsf::ModuleNil;
+		block::ModuleID _connector_m = block::ModuleNil;
 
 		if (bRes) {
 			_connector_m = _moduleid;
@@ -206,7 +194,7 @@ void gsf::modules::NodeModule::registNode(gsf::ModuleID base, int event, const s
 	}
 }
 
-void gsf::modules::NodeModule::eCreateNode(gsf::ModuleID target, gsf::ArgsPtr args)
+void block::modules::NodeModule::eCreateNode(block::ModuleID target, block::ArgsPtr args)
 {
 	if (!service_) {
 		id_ = args->pop_i32();
@@ -236,14 +224,14 @@ void gsf::modules::NodeModule::eCreateNode(gsf::ModuleID target, gsf::ArgsPtr ar
 		registNode(getModuleID(), eid::distributed::coordinat_select, _root_ip, _root_port);
 		//
 
-		mailboxPtr_->listen(eid::network::new_connect, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
+		listen(eid::network::new_connect, [&](block::ModuleID target, block::ArgsPtr args) {
 			connectorFD_ = args->pop_fd();
 
 			if (!service_) {
-				APP.INFO_LOG("Node", "connect root succ!");
+				INFO_LOG("node connect root succ!");
 				service_ = true;
 
-				auto _args = gsf::ArgsPool::get_ref().get();
+				auto _args = block::ArgsPool::get_ref().get();
 				_args->push(type_);
 				_args->push(id_);
 				_args->push(acceptorIP_);
@@ -255,24 +243,24 @@ void gsf::modules::NodeModule::eCreateNode(gsf::ModuleID target, gsf::ArgsPtr ar
 					_args->push(it.moduleID);
 					_args->push(it.characteristic);
 				}
-				eventRpc(eid::distributed::coordinat_regist, getModuleID(), _args, [&](const gsf::ArgsPtr &args, int32_t progress, bool result) {
+				eventRpc(eid::distributed::coordinat_regist, getModuleID(), _args, [&](const block::ArgsPtr &args, int32_t progress, bool result) {
 					if (result) {
-						mailboxPtr_->dispatch(targetM_, eid::node::node_create_succ, nullptr);
+						dispatch(targetM_, eid::node::node_create_succ, nullptr);
 					}
 				});
 			}
 		});
 
-		mailboxPtr_->listen(eid::base::module_init_succ, [&](gsf::ModuleID target, gsf::ArgsPtr args) {
+		listen(eid::base::module_init_succ, [&](block::ModuleID target, block::ArgsPtr args) {
 			/*
-			auto _t = gsf::ArgsPool::get_ref().get();
+			auto _t = block::ArgsPool::get_ref().get();
 			_t->push_block(args->pop_block(0, args->get_size()).c_str(), args->get_size());
 			auto _module_id = _t->pop_moduleid();
 			
 			for (auto nod : eventMap_)
 			{
 				if (nod.second.connecotr_m_ == _module_id) {
-					mailboxPtr_->dispatch(_module_id, eid::network::make_connector, gsf::makeArgs(getModuleID(), nod.second.ip_, nod.second.port_));
+					mailboxPtr_->dispatch(_module_id, eid::network::make_connector, block::makeArgs(getModuleID(), nod.second.ip_, nod.second.port_));
 					mailboxPtr_->dispatch(nod.second.base_, eid::node::node_regist_succ, nullptr);
 					break;
 				}
@@ -283,7 +271,7 @@ void gsf::modules::NodeModule::eCreateNode(gsf::ModuleID target, gsf::ArgsPtr ar
 	}
 }
 
-void gsf::modules::NodeModule::eRegistNode(gsf::ModuleID target, gsf::ArgsPtr args)
+void block::modules::NodeModule::eRegistNode(block::ModuleID target, block::ArgsPtr args)
 {
 	auto _base = args->pop_i32();
 	auto _event = args->pop_i32();

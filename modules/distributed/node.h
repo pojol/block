@@ -8,13 +8,13 @@
 #include <tuple>
 #include <functional>
 
-namespace gsf
+namespace block
 {
 	namespace modules
 	{
 		struct CallbackInfo
 		{
-			gsf::RpcCallback callback;
+			block::RpcCallback callback;
 			uint64_t timer_ = 0;
 			uint32_t event_ = 0;
 			int64_t id_ = 0;
@@ -24,21 +24,21 @@ namespace gsf
 		struct ModuleInfo
 		{
 			std::string moduleName = "";
-			gsf::ModuleID moduleID = gsf::ModuleNil;
+			block::ModuleID moduleID = block::ModuleNil;
 			int32_t characteristic = 0;
 		};
 
 		struct NodeInfo
 		{
-			gsf::ModuleID connecotr_m_ = gsf::ModuleNil;
+			block::ModuleID connecotr_m_ = block::ModuleNil;
 			std::string ip_ = "";
 			int port_ = 0;
 			int event_ = 0;
-			gsf::ModuleID base_ = gsf::ModuleNil;
+			block::ModuleID base_ = block::ModuleNil;
 		};
 
 		class NodeModule
-			: public gsf::Module
+			: public block::Module
 		{
 		public:
 
@@ -52,18 +52,18 @@ namespace gsf
 
 		protected:
 
-			void eventRpc(gsf::EventID event, gsf::ModuleID moduleID, const gsf::ArgsPtr &args, gsf::RpcCallback callback);
+			void eventRpc(block::EventID event, block::ModuleID moduleID, const block::ArgsPtr &args, block::RpcCallback callback);
 
-			void registNode(gsf::ModuleID base, int event, const std::string &ip, int port);
+			void registNode(block::ModuleID base, int event, const std::string &ip, int port);
 
-			void eCreateNode(gsf::ModuleID target, gsf::ArgsPtr args);
-			void eRegistNode(gsf::ModuleID target, gsf::ArgsPtr args);
+			void eCreateNode(block::ModuleID target, block::ArgsPtr args);
+			void eRegistNode(block::ModuleID target, block::ArgsPtr args);
 
 		private:
 
-			gsf::ModuleID logM_ = gsf::ModuleNil;
-			gsf::ModuleID timerM_ = gsf::ModuleNil;
-			gsf::SessionID connectorFD_ = gsf::SessionNil;
+			block::ModuleID logM_ = block::ModuleNil;
+			block::ModuleID timerM_ = block::ModuleNil;
+			block::SessionID connectorFD_ = block::SessionNil;
 
 			std::string acceptorIP_ = "";
 			int32_t acceptorPort_ = 0;
@@ -75,7 +75,7 @@ namespace gsf
 
 			int32_t rpcDelay_ = 10000;
 			bool service_ = false;
-			gsf::ModuleID targetM_ = gsf::ModuleNil;
+			block::ModuleID targetM_ = block::ModuleNil;
 
 			std::vector<ModuleInfo> modules_;
 

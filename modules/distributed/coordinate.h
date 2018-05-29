@@ -8,13 +8,13 @@
 #include <map>
 #include <memory>
 
-namespace gsf
+namespace block
 {
 	namespace modules
 	{
 		struct CModuleInfo
 		{
-			gsf::ModuleID module_id_;
+			block::ModuleID module_id_;
 			std::string module_name_;
 			int32_t module_characteristic_;
 		};
@@ -37,7 +37,7 @@ namespace gsf
 		coodinator 协调多个相同业务app之间的负载
 		*/
 		class CoodinatorModule
-			: public gsf::Module
+			: public block::Module
 		{
 		public:
 
@@ -50,16 +50,16 @@ namespace gsf
 			void shut() override;
 
 		private:
-			void eCoordinatAdjustWeight(gsf::ModuleID target, gsf::ArgsPtr args);
-			void eCoordinatSelect(gsf::ModuleID target, gsf::ArgsPtr args);
-			void eCoordinatRegist(gsf::ModuleID target, gsf::ArgsPtr args);
-			void eCoordinatUnregist(gsf::ModuleID target, gsf::ArgsPtr args);
+			void eCoordinatAdjustWeight(block::ModuleID target, block::ArgsPtr args);
+			void eCoordinatSelect(block::ModuleID target, block::ArgsPtr args);
+			void eCoordinatRegist(block::ModuleID target, block::ArgsPtr args);
+			void eCoordinatUnregist(block::ModuleID target, block::ArgsPtr args);
 
-			void adjustModuleWeight(int32_t nod_id, const std::string &module_name, gsf::ModuleID module_id, int32_t characteristic, int32_t weight);
+			void adjustModuleWeight(int32_t nod_id, const std::string &module_name, block::ModuleID module_id, int32_t characteristic, int32_t weight);
 
 		private:
 
-			std::map<gsf::SessionID, NodePtr> nodeIDMap_;
+			std::map<block::SessionID, NodePtr> nodeIDMap_;
 			std::multimap<std::string, NodePtr> nodeNameMap_;
 		};
 	}

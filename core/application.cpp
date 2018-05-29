@@ -11,38 +11,39 @@
 #include <unistd.h>
 #endif // WIN32
 
+#include "module.h"
 #include "dynamic_module_factory.h"
 
-
-gsf::Application::Application()
+block::Application::Application()
 	: shutdown_(false)
 	, module_idx_(2)
 	, state_(AppState::BEFORE_INIT)
 	, cur_frame_(0)
 {
-#ifdef WATCH_PERF
-	tick_len_ = 200;
-	last_tick_ = -1;
-#endif
+
 }
 
-std::string gsf::Application::getAppName() const
+std::string block::Application::getName() const
 {
 	return cfg_.name;
 }
 
-void gsf::Application::initCfg(const gsf::AppConfig &cfg)
+void block::Application::initCfg(const block::AppConfig &cfg)
 {
 	cfg_ = cfg;
 	
+	logger_ = std::make_shared<block::utils::Logger>();
+	logger_->init(cfg_.name);
+	timer_ = std::make_shared<block::utils::Timer>();
+
 	//! 
-	new gsf::ArgsPool;
-	gsf::ArgsPool::get_ref().make(cfg.pool_args_count);
+	new block::ArgsPool;
+	block::ArgsPool::get_ref().make(cfg.pool_args_count);
 }
 
-gsf::ModuleID gsf::Application::createDynamicModule(const std::string &moduleType)
+block::ModuleID block::Application::createDynamicModule(const std::string &moduleType)
 {
-	gsf::Module *_module_ptr = static_cast<gsf::Module*>(DynamicModuleFactory::create(moduleType));
+	block::Module *_module_ptr = static_cast<block::Module*>(DynamicModuleFactory::create(moduleType));
 	_module_ptr->setID(makeModuleID());
 
 	pushFrame(cur_frame_ + 1, std::make_tuple(0, std::bind(&Module::before_init, _module_ptr), nullptr, nullptr, _module_ptr));
@@ -53,12 +54,12 @@ gsf::ModuleID gsf::Application::createDynamicModule(const std::string &moduleTyp
 	return _module_ptr->getModuleID();
 }
 
-void gsf::Application::deleteModule(gsf::ModuleID moduleID)
+void block::Application::deleteModule(block::ModuleID moduleID)
 {
 	unregistModule(moduleID);
 }
 
-void gsf::Application::unregistModule(gsf::ModuleID module_id)
+void block::Application::unregistModule(block::ModuleID module_id)
 {
 	auto itr = std::find_if(module_list_.begin(), module_list_.end(), [&](std::list<Module *>::value_type it) {
 		return (it->getModuleID() == module_id);
@@ -79,33 +80,33 @@ void gsf::Application::unregistModule(gsf::ModuleID module_id)
 	}
 }
 
-gsf::ModuleID gsf::Application::getModule(const std::string &modulName) const
+block::ModuleID block::Application::getModule(const std::string &modulName) const
 {
 	auto itr = module_name_map_.find(modulName);
 	if (itr != module_name_map_.end()) {
 		return itr->second;
 	}
 	else {
-		return gsf::ModuleNil;
+		return block::ModuleNil;
 	}
 }
 
-uint32_t gsf::Application::getMachine() const
+uint32_t block::Application::getMachine() const
 {
 	return cfg_.machine_;
 }
 
-int64_t gsf::Application::getUUID()
+int64_t block::Application::getUUID()
 {
 	return uuid();
 }
 
-void gsf::Application::pushFrame(uint64_t index, Frame frame)
+void block::Application::pushFrame(uint64_t index, Frame frame)
 {
 	halfway_frame_.insert(std::make_pair(index, frame));
 }
 
-void gsf::Application::popFrame()
+void block::Application::popFrame()
 {
 	if (!halfway_frame_.empty()) {
 		auto itr = halfway_frame_.find(cur_frame_);
@@ -176,7 +177,7 @@ void gsf::Application::popFrame()
 
 }
 
-void gsf::Application::reactorRegist(gsf::ModuleID moduleID, gsf::EventID event)
+void block::Application::reactorRegist(block::ModuleID moduleID, block::EventID event)
 {
 	auto _find = std::find_if(module_list_.begin(), module_list_.end(), [&](std::list<Module *>::value_type it) {
 		return (it->getModuleID() == moduleID);
@@ -188,11 +189,11 @@ void gsf::Application::reactorRegist(gsf::ModuleID moduleID, gsf::EventID event)
 
 	}
 	else {
-		WARN_LOG("app", "regist event, can't find module", " {}", moduleID);
+		//WARN_LOG("app", "regist event, can't find module", " {}", moduleID);
 	}
 }
 
-void gsf::Application::reactorDispatch(gsf::ModuleID self, gsf::ModuleID target, gsf::EventID event, gsf::ArgsPtr args)
+void block::Application::reactorDispatch(block::ModuleID self, block::ModuleID target, block::EventID event, block::ArgsPtr args)
 {
 	//! 找到目标mailbox
 	auto _find = mailboxMap_.find((target * 10000) + event);
@@ -207,12 +208,13 @@ void gsf::Application::reactorDispatch(gsf::ModuleID self, gsf::ModuleID target,
 		_find->second->push(taskPtr);
 	}
 	else {
-		WARN_LOG("app", "dispatch, can't find event", " module={} event={}", target, event);
+		
+		//WARN_LOG("app", "dispatch, can't find event", " module={} event={}", target, event);
 		return;
 	}
 }
 
-void gsf::Application::run()
+void block::Application::run()
 {
 	//! run
 	while (!shutdown_)
@@ -231,11 +233,21 @@ void gsf::Application::run()
 			{
 				if (state == AppState::BEFORE_INIT) {
 					it->before_init();
+					it->setAvailable(true);
 				}
 				else if (state == AppState::INIT) {
+					if (it->getAvailable()) {
+						it->mailboxPtr_->pull();
+					}
+
 					it->init();
 				}
 				else if (state == AppState::EXECUTE) {
+
+					if (it->getAvailable()) {
+						it->mailboxPtr_->pull();
+					}
+
 					it->execute();
 #ifdef WATCH_PERF
 					t1 = (time_point_cast<microseconds>(system_clock::now()) - _ttime).count();
@@ -244,7 +256,14 @@ void gsf::Application::run()
 #endif // WATCH_PERF
 				}
 				else if (state == AppState::SHUT) {
+
+					if (it->getAvailable()) {
+						it->mailboxPtr_->pull();
+					}
+
 					it->shut();
+
+					it->setAvailable(false);
 				}
 				else if (state == AppState::AFTER_SHUT) {
 					it->after_shut();
@@ -261,13 +280,15 @@ void gsf::Application::run()
 			//	unregist_list_.pop_front();
 			//}
 
-			//static_cast<Module*>(gsf::EventModule::get_ptr())->execute();
+			//static_cast<Module*>(block::EventModule::get_ptr())->execute();
 #ifdef WATCH_PERF
 			//t1 = (time_point_cast<microseconds>(system_clock::now()) - _ttime).count();
-			//static_cast<Module*>(gsf::EventModule::get_ptr())->add_tick_consume(t1);
+			//static_cast<Module*>(block::EventModule::get_ptr())->add_tick_consume(t1);
 			//_ttime = time_point_cast<microseconds>(system_clock::now());
 #endif // WATCH_PERF
 		};
+
+		timer_->exec();
 
 		_callback(state_);
 		if (state_ == AppState::BEFORE_INIT) {
@@ -288,7 +309,7 @@ void gsf::Application::run()
 
 		++cur_frame_;
 		tick();
-		gsf::ArgsPool::get_ref().reenter();
+		block::ArgsPool::get_ref().reenter();
 
 		auto _use = time_point_cast<microseconds>(system_clock::now()) - _before;
 		uint32_t _use_ms = static_cast<uint32_t>(_use.count() / 1000);
@@ -306,12 +327,12 @@ void gsf::Application::run()
 
 }
 
-void gsf::Application::exit()
+void block::Application::exit()
 {
 
 }
 
-int32_t gsf::Application::makeModuleID()
+int32_t block::Application::makeModuleID()
 {
 	if (module_idx_ == INT32_MAX) {
 		module_idx_ = 2;
@@ -320,12 +341,12 @@ int32_t gsf::Application::makeModuleID()
 	return module_idx_++;
 }
 
-uint64_t gsf::Application::getSystemTick()
+uint64_t block::Application::getSystemTick()
 {
 	return (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
-int64_t gsf::Application::uuid()
+int64_t block::Application::uuid()
 {
 	int64_t _uuid = 0;
 	uint64_t _tick = getSystemTick() - start_time_;
@@ -342,53 +363,8 @@ int64_t gsf::Application::uuid()
 }
 
 
-void gsf::Application::WARN_LOG(std::string module_name, std::string reason)
-{
-	std::string _str = "";
-	_str.append("[module] ");
-	_str.append(module_name);
-	_str.append(" [reason] ");
-	_str.append(reason);
-	_str.append("\n");
-	reactorDispatch(0, getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogWarning, _str));
-}
-
-
-void gsf::Application::ERR_LOG(std::string module_name, std::string reason)
-{
-	std::string _str = "";
-	_str.append("[module] ");
-	_str.append(module_name);
-	_str.append(" [reason] ");
-	_str.append(reason);
-	_str.append("\n");
-	reactorDispatch(0, getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogErr, _str));
-}
-
-void gsf::Application::INFO_LOG(std::string module_name, std::string reason)
-{
-	std::string _str = "";
-	_str.append("[module] ");
-	_str.append(module_name);
-	_str.append(" [reason] ");
-	_str.append(reason);
-	_str.append("\n");
-	reactorDispatch(0, getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogInfo, _str));
-}
-
-void gsf::Application::DEBUG_LOG(std::string module_name, std::string reason)
-{
-	std::string _str = "";
-	_str.append("[module] ");
-	_str.append(module_name);
-	_str.append(" [reason] ");
-	_str.append(reason);
-	_str.append("\n");
-	reactorDispatch(0, getModule("LogModule"), eid::log::print, gsf::makeArgs(gsf::LogDebug, _str));
-}
-
 /*
-void gsf::Application::unregist_dynamic_module(uint32_t module_id)
+void block::Application::unregist_dynamic_module(uint32_t module_id)
 {
 	auto itr = std::find_if(module_list_.begin(), module_list_.end(), [&](std::list<Module *>::value_type it){
 		return (it->get_module_id() == module_id);
@@ -406,7 +382,7 @@ void gsf::Application::unregist_dynamic_module(uint32_t module_id)
 }
 */
 
-void gsf::Application::tick()
+void block::Application::tick()
 {
 	/*
 	if (cfg_.is_watch_pref){
@@ -419,8 +395,8 @@ void gsf::Application::tick()
 				_pref += it->get_tick_info(tick_len_, cfg_.tick_count);
 			}
 
-			_pref += static_cast<Module*>(gsf::EventModule::get_ptr())->get_tick_info(tick_len_, cfg_.tick_count) + "\n";
-			std::cout << _pref << gsf::ArgsPool::get_ref().get_perf();
+			_pref += static_cast<Module*>(block::EventModule::get_ptr())->get_tick_info(tick_len_, cfg_.tick_count) + "\n";
+			std::cout << _pref << block::ArgsPool::get_ref().get_perf();
 		}
 
 		last_tick_ = _t;

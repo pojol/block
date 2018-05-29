@@ -1,32 +1,47 @@
 #include "module.h"
 #include "application.h"
 
-void gsf::Module::before_init()
+void block::Module::before_init()
 {
 
 }
 
-void gsf::Module::init()
+void block::Module::init()
 {
 
 }
 
-void gsf::Module::execute()
+void block::Module::execute()
 {
 
 }
 
-void gsf::Module::shut()
+void block::Module::shut()
 {
 
 }
 
-void gsf::Module::after_shut()
+void block::Module::after_shut()
 {
 
 }
 
-gsf::Module::Module(const std::string &name)
+void block::Module::listen(block::EventID event, ListenFunc func)
+{
+	mailboxPtr_->listen(event, func);
+}
+
+void block::Module::dispatch(block::ModuleID target, block::EventID event, block::ArgsPtr args)
+{
+	mailboxPtr_->dispatch(target, event, std::move(args));
+}
+
+void block::Module::rpc(block::EventID event, ArgsPtr args, RpcCallback callback)
+{
+	mailboxPtr_->rpc(event, std::move(args), callback);
+}
+
+block::Module::Module(const std::string &name)
 	: name_(name)
 #ifdef WATCH_PERF
 	, tick_consume_(0)
@@ -36,22 +51,22 @@ gsf::Module::Module(const std::string &name)
 	mailboxPtr_ = std::make_shared<MailBox>(this);
 }
 
-gsf::Module::~Module()
+block::Module::~Module()
 {
 
 }
 
-gsf::MailBox::MailBox(Module *ptr)
+block::MailBox::MailBox(Module *ptr)
 	: basePtr_(ptr)
 {
 
 }
 
-void gsf::MailBox::listen(gsf::EventID event, ListenFunc func)
+void block::MailBox::listen(block::EventID event, ListenFunc func)
 {
 	auto _itr = listenMap_.find(event);
 	if (_itr != listenMap_.end()) {
-		APP.WARN_LOG("mailbox", "repeat regist event!", " {}", event);
+		WARN_FMTLOG("mailbox : repeat regist event! event:{}", event);
 	}
 	else {
 		APP.reactorRegist(basePtr_->getModuleID(), event);
@@ -60,17 +75,17 @@ void gsf::MailBox::listen(gsf::EventID event, ListenFunc func)
 	}
 }
 
-void gsf::MailBox::dispatch(gsf::ModuleID target, gsf::EventID event, gsf::ArgsPtr args)
+void block::MailBox::dispatch(block::ModuleID target, block::EventID event, block::ArgsPtr args)
 {
 	APP.reactorDispatch(basePtr_->getModuleID(), target, event, std::move(args));
 }
 
-void gsf::MailBox::rpc(gsf::EventID event, ArgsPtr args, RpcCallback callback /*= nullptr*/)
+void block::MailBox::rpc(block::EventID event, ArgsPtr args, RpcCallback callback /*= nullptr*/)
 {
 
 }
 
-void gsf::MailBox::pull()
+void block::MailBox::pull()
 {
 	while (!taskQueue_.empty())
 	{
@@ -81,14 +96,14 @@ void gsf::MailBox::pull()
 			_itr->second(info->target_, std::move(info->args_));
 		}
 		else {
-			APP.WARN_LOG("mailbox", "", " {}", basePtr_->getModuleID());
+			WARN_FMTLOG("mailbox : pull can't find module : {}", basePtr_->getModuleID());
 		}
 
 		taskQueue_.pop();
 	}
 }
 
-void gsf::MailBox::push(TaskInfo *info)
+void block::MailBox::push(TaskInfo *info)
 {
 	taskQueue_.push(info);
 }

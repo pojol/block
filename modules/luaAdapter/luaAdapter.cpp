@@ -46,19 +46,19 @@ std::string Traceback(lua_State * _state)
 	return outputTraceback;
 }
 
-void gsf::modules::LuaAdapterModule::before_init()
+void block::modules::LuaAdapterModule::before_init()
 {	
 	using namespace std::placeholders;
 
-	mailboxPtr_->listen(eid::lua::reload, std::bind(&LuaAdapterModule::eReload, this, _1, _2));
+	listen(eid::lua::reload, std::bind(&LuaAdapterModule::eReload, this, _1, _2));
 }
 
-void gsf::modules::LuaAdapterModule::init()
+void block::modules::LuaAdapterModule::init()
 {
 	create();
 }
 
-void gsf::modules::LuaAdapterModule::execute()
+void block::modules::LuaAdapterModule::execute()
 {
 	//!
 	try {
@@ -66,8 +66,6 @@ void gsf::modules::LuaAdapterModule::execute()
 			create();
 			return;
 		}
-
-		mailboxPtr_->pull();
 
 		sol::table _module = proxyPtr_->state_.get<sol::table>("module");
 
@@ -88,7 +86,7 @@ void gsf::modules::LuaAdapterModule::execute()
 	}
 	catch (sol::error e) {
 		std::string _err = e.what() + '\n' + Traceback(proxyPtr_->state_);
-		APP.ERR_LOG("LuaProxy", _err);
+		ERROR_LOG(_err);
 
 		if (proxyPtr_->app_state_ == LuaAppState::INIT) {
 			//destroy(_lua->lua_id_);
@@ -99,35 +97,35 @@ void gsf::modules::LuaAdapterModule::execute()
 	}
 }
 
-void gsf::modules::LuaAdapterModule::shut()
+void block::modules::LuaAdapterModule::shut()
 {
 	
 }
 
-void gsf::modules::LuaAdapterModule::ldispatch(gsf::ModuleID target, gsf::EventID event, const std::string &buf)
+void block::modules::LuaAdapterModule::ldispatch(block::ModuleID target, block::EventID event, const std::string &buf)
 {
-	auto _smartPtr = gsf::ArgsPool::get_ref().get();
+	auto _smartPtr = block::ArgsPool::get_ref().get();
 
 	try {
 		_smartPtr->importBuf(buf);
 
-		mailboxPtr_->dispatch(target, event, std::move(_smartPtr));
+		dispatch(target, event, std::move(_smartPtr));
 	}
 	catch (sol::error e) {
 		std::string _err = e.what() + '\n' + Traceback(proxyPtr_->state_);
-		APP.ERR_LOG("LuaProxy", _err);
+		ERROR_LOG(_err);
 	}
 	catch (...)
 	{
-		APP.ERR_LOG("LuaProxy", "unknown err by ldispatch", " {} {}", target, event);
+		ERROR_FMTLOG("unknown err by ldispatch target:{} event:{}", target, event);
 	}
 }
 
-int gsf::modules::LuaAdapterModule::llisten(uint32_t event, const sol::function &func)
+int block::modules::LuaAdapterModule::llisten(uint32_t event, const sol::function &func)
 {
 	try {
 
-		mailboxPtr_->listen(event, [=](gsf::ModuleID target, gsf::ArgsPtr args)->void {
+		listen(event, [=](block::ModuleID target, block::ArgsPtr args)->void {
 			try {
 				std::string _req = "";
 				if (args) {
@@ -140,26 +138,26 @@ int gsf::modules::LuaAdapterModule::llisten(uint32_t event, const sol::function 
 			}
 			catch (sol::error e) {
 				std::string _err = e.what() + '\n' + Traceback(proxyPtr_->state_);
-				APP.ERR_LOG("LuaProxy", _err);
+				ERROR_LOG(_err);
 			}
 		});
 
 	}
 	catch (sol::error e) {
 		std::string _err = e.what() + '\n' + Traceback(proxyPtr_->state_);
-		APP.ERR_LOG("LuaProxy", _err);
+		ERROR_LOG(_err);
 	}
 	catch (...)
 	{
-		APP.ERR_LOG("LuaProxy", "unknown err by llisten", " {} {}", getModuleID(), event);
+		ERROR_FMTLOG("unknown err by llisten module:{} event:{}", getModuleID(), event);
 	}
 	return 0;
 }
 
-void gsf::modules::LuaAdapterModule::lrpc(uint32_t event, int32_t moduleid, const std::string &buf)
+void block::modules::LuaAdapterModule::lrpc(uint32_t event, int32_t moduleid, const std::string &buf)
 {
 	/*
-	auto _smartPtr = gsf::ArgsPool::get_ref().get();
+	auto _smartPtr = block::ArgsPool::get_ref().get();
 	auto lua = findLua(lua_id);
 
 	try {
@@ -201,7 +199,7 @@ void gsf::modules::LuaAdapterModule::lrpc(uint32_t event, int32_t moduleid, cons
 	*/
 }
 
-void gsf::modules::LuaAdapterModule::create()
+void block::modules::LuaAdapterModule::create()
 {
 	if (proxyPtr_) {	// reload
 		proxyPtr_.reset(new LuaProxy);
@@ -236,7 +234,7 @@ void gsf::modules::LuaAdapterModule::create()
 			std::string _err = Traceback(proxyPtr_->state_.lua_state()) + " build err "
 				+ _path + '\t' + lua_tostring(proxyPtr_->state_.lua_state(), _ret.stack_index()) + "\n";
 
-			APP.ERR_LOG("LuaProxy", _err);
+			ERROR_LOG(_err);
 			return;
 		}
 
@@ -246,11 +244,11 @@ void gsf::modules::LuaAdapterModule::create()
 		std::string _err = e.what() + '\n';
 		_err += Traceback(proxyPtr_->state_.lua_state());
 
-		APP.ERR_LOG("LuaProxy", _err);
+		ERROR_LOG(_err);
 	}
 
 
-	proxyPtr_->state_.new_usertype<gsf::Args>("Args"
+	proxyPtr_->state_.new_usertype<block::Args>("Args"
 		, sol::constructors<Args(), Args(const char *, int)>()
 		, "push_ui16", &Args::push_ui16
 		, "push_ui32", &Args::push_ui32
@@ -273,16 +271,21 @@ void gsf::modules::LuaAdapterModule::create()
 	proxyPtr_->state_.new_usertype<LuaAdapterModule>("LuaProxyModule"
 		, "ldispatch", &LuaAdapterModule::ldispatch
 		, "llisten", &LuaAdapterModule::llisten
-		, "lrpc", &LuaAdapterModule::lrpc);
-	proxyPtr_->state_.set("event", this);
+		, "lrpc", &LuaAdapterModule::lrpc
+		, "logDebug", &LuaAdapterModule::llogDebug
+		, "logInfo", &LuaAdapterModule::llogInfo
+		, "logWarn", &LuaAdapterModule::llogWarning
+		, "logError", &LuaAdapterModule::llogError
+		, "delay", &LuaAdapterModule::ldelay);
+	proxyPtr_->state_.set("self", this);
 	proxyPtr_->state_.set("module_id", getModuleID());
 
-	proxyPtr_->state_.new_usertype<gsf::Application>("Application"
+	proxyPtr_->state_.new_usertype<block::Application>("Application"
 		, "getModule", &Application::getModule
-		, "getAppName", &Application::getAppName
+		, "getName", &Application::getName
 		, "getMachine", &Application::getMachine
 		, "getUUID", &Application::getUUID);
-	proxyPtr_->state_.set("APP", gsf::Application::get_ptr());
+	proxyPtr_->state_.set("APP", block::Application::get_ptr());
 
 	proxyPtr_->call_list_[LuaAppState::BEFORE_INIT] = [&](sol::table t) {
 		t.get<std::function<void(std::string)>>("before_init")(dir_ + "/");
@@ -308,7 +311,7 @@ void gsf::modules::LuaAdapterModule::create()
 	catch (sol::error e) {
 		std::string _err = e.what() + '\n';
 		_err += Traceback(proxyPtr_->state_.lua_state());
-		APP.ERR_LOG("LuaProxy", _err);
+		ERROR_LOG(_err);
 
 		return;
 	}
@@ -316,13 +319,13 @@ void gsf::modules::LuaAdapterModule::create()
 	reloading = false;
 }
 
-int gsf::modules::LuaAdapterModule::destroy(uint32_t module_id)
+int block::modules::LuaAdapterModule::destroy(uint32_t module_id)
 {
 
 	return 0;
 }
 
-void gsf::modules::LuaAdapterModule::eReload(gsf::ModuleID target, gsf::ArgsPtr args)
+void block::modules::LuaAdapterModule::eReload(block::ModuleID target, block::ArgsPtr args)
 {
 	try {
 
@@ -334,9 +337,72 @@ void gsf::modules::LuaAdapterModule::eReload(gsf::ModuleID target, gsf::ArgsPtr 
 	catch (sol::error e) {
 		std::string _err = e.what() + '\n';
 		_err += Traceback(proxyPtr_->state_.lua_state());
-		APP.ERR_LOG("LuaProxy", _err);
+		ERROR_LOG(_err);
 	}
 	catch (...) {
-		APP.ERR_LOG("LuaProxy", "unknown");
+		ERROR_LOG("lua adapter unknown err");
 	}
+}
+
+void block::modules::LuaAdapterModule::llogDebug(const std::string &content)
+{
+	DEBUG_LOG(content);
+}
+
+void block::modules::LuaAdapterModule::llogInfo(const std::string &content)
+{
+	INFO_LOG(content);
+}
+
+void block::modules::LuaAdapterModule::llogWarning(const std::string &content)
+{
+	WARN_LOG(content);
+}
+
+void block::modules::LuaAdapterModule::llogError(const std::string &content)
+{
+	ERROR_LOG(content);
+}
+
+uint64_t block::modules::LuaAdapterModule::ldelay(int32_t milliseconds, sol::function callback)
+{
+	try {
+
+		auto _tid = DELAY(block::utils::delay_milliseconds(milliseconds), [=]() {
+			callback();
+		});
+
+		return _tid;
+	}
+	catch (sol::error e) {
+		std::string _err = e.what() + '\n' + Traceback(proxyPtr_->state_);
+		ERROR_LOG(_err);
+	}
+	catch (...)
+	{
+		ERROR_LOG("unknown err by lua delay !");
+	}
+	return 0;
+
+}
+
+uint64_t block::modules::LuaAdapterModule::ldelayDay(int32_t hour, int32_t minute, sol::function callback)
+{
+	try {
+
+		auto _tid = DELAY(block::utils::delay_day(hour, minute), [=]() {
+			callback();
+		});
+
+		return _tid;
+	}
+	catch (sol::error e) {
+		std::string _err = e.what() + '\n' + Traceback(proxyPtr_->state_);
+		ERROR_LOG(_err);
+	}
+	catch (...)
+	{
+		ERROR_LOG("unknown err by lua delay day !");
+	}
+	return 0;
 }

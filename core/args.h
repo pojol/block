@@ -12,10 +12,10 @@
 #include <sstream>
 #include <functional>
 
-#include "types.h"
-#include "single.h"
+#include "../depend/types.h"
+#include "../utils/single.h"
 
-namespace gsf
+namespace block
 {
 	class out_of_bound : public std::exception
 	{
@@ -221,10 +221,10 @@ namespace gsf
 		float pop_float();
 		double pop_double();
 
-		gsf::SessionID pop_fd();
-		gsf::MsgID pop_msgid();
-		gsf::ModuleID pop_moduleid();
-		gsf::TimerID pop_timerid();
+		block::SessionID pop_fd();
+		block::MsgID pop_msgid();
+		block::ModuleID pop_moduleid();
+		block::TimerID pop_timerid();
 
 		/////////////////////////////////get//////////////////////////////////////
 		int get_tag();
@@ -263,7 +263,7 @@ namespace gsf
 	using deleter_type = std::function<void(Args*)>;
 	using ArgsPtr = std::unique_ptr<Args, deleter_type>;
 
-	struct ArgsPool : public gsf::utils::Singleton<ArgsPool>
+	struct ArgsPool : public block::utils::Singleton<ArgsPool>
 	{
 		std::unique_ptr<Args, deleter_type> get()
 		{
