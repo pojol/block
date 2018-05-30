@@ -18,7 +18,7 @@ extern "C" {  // only need to export C interface if
 			  // used by C++ source code  
 	int luaopen_protobuf_c(lua_State *L);
 }
-#endif  
+#endif
 
 std::string Traceback(lua_State * _state)
 {
@@ -86,7 +86,7 @@ void block::modules::LuaAdapterModule::execute()
 	}
 	catch (sol::error e) {
 		std::string _err = e.what() + '\n' + Traceback(proxyPtr_->state_);
-		ERROR_LOG(_err);
+		ERROR_FMTLOG("[BLOCK] LuaAdapter execute sol::error : {}", _err);
 
 		if (proxyPtr_->app_state_ == LuaAppState::INIT) {
 			//destroy(_lua->lua_id_);
@@ -113,11 +113,11 @@ void block::modules::LuaAdapterModule::ldispatch(block::ModuleID target, block::
 	}
 	catch (sol::error e) {
 		std::string _err = e.what() + '\n' + Traceback(proxyPtr_->state_);
-		ERROR_LOG(_err);
+		ERROR_FMTLOG("[BLOCK] LuaAdapter dispatch sol::error : {}", _err);
 	}
 	catch (...)
 	{
-		ERROR_FMTLOG("unknown err by ldispatch target:{} event:{}", target, event);
+		ERROR_FMTLOG("[BLOCK] LuaAdapter unknown err by ldispatch target:{} event:{}", target, event);
 	}
 }
 
@@ -138,18 +138,18 @@ int block::modules::LuaAdapterModule::llisten(uint32_t event, const sol::functio
 			}
 			catch (sol::error e) {
 				std::string _err = e.what() + '\n' + Traceback(proxyPtr_->state_);
-				ERROR_LOG(_err);
+				ERROR_FMTLOG("[BLOCK] LuaAdapter listen callback sol::error : {}", _err);
 			}
 		});
 
 	}
 	catch (sol::error e) {
 		std::string _err = e.what() + '\n' + Traceback(proxyPtr_->state_);
-		ERROR_LOG(_err);
+		ERROR_FMTLOG("[BLOCK] LuaAdapter listen sol::error : {}", _err);
 	}
 	catch (...)
 	{
-		ERROR_FMTLOG("unknown err by llisten module:{} event:{}", getModuleID(), event);
+		ERROR_FMTLOG("[BLOCK] LuaAdapter unknown err by llisten module:{} event:{}", getModuleID(), event);
 	}
 	return 0;
 }
@@ -234,7 +234,7 @@ void block::modules::LuaAdapterModule::create()
 			std::string _err = Traceback(proxyPtr_->state_.lua_state()) + " build err "
 				+ _path + '\t' + lua_tostring(proxyPtr_->state_.lua_state(), _ret.stack_index()) + "\n";
 
-			ERROR_LOG(_err);
+			ERROR_FMTLOG("[BLOCK] LuaAdapter build fail : {}", _err);
 			return;
 		}
 
@@ -244,9 +244,8 @@ void block::modules::LuaAdapterModule::create()
 		std::string _err = e.what() + '\n';
 		_err += Traceback(proxyPtr_->state_.lua_state());
 
-		ERROR_LOG(_err);
+		ERROR_FMTLOG("[BLOCK] LuaAdapter build unknown fail : {}", _err);
 	}
-
 
 	proxyPtr_->state_.new_usertype<block::Args>("Args"
 		, sol::constructors<Args(), Args(const char *, int)>()
@@ -311,8 +310,8 @@ void block::modules::LuaAdapterModule::create()
 	catch (sol::error e) {
 		std::string _err = e.what() + '\n';
 		_err += Traceback(proxyPtr_->state_.lua_state());
-		ERROR_LOG(_err);
-
+		
+		ERROR_FMTLOG("[BLOCK] LuaAdapter before init fail {}", _err);
 		return;
 	}
 
@@ -337,10 +336,10 @@ void block::modules::LuaAdapterModule::eReload(block::ModuleID target, block::Ar
 	catch (sol::error e) {
 		std::string _err = e.what() + '\n';
 		_err += Traceback(proxyPtr_->state_.lua_state());
-		ERROR_LOG(_err);
+		ERROR_FMTLOG("[BLOCK] LuaAdapter reload fail : {}", _err);
 	}
 	catch (...) {
-		ERROR_LOG("lua adapter unknown err");
+		ERROR_LOG("[BLOCK] LuaAdapter reload unknown err!");
 	}
 }
 
@@ -366,43 +365,40 @@ void block::modules::LuaAdapterModule::llogError(const std::string &content)
 
 uint64_t block::modules::LuaAdapterModule::ldelay(int32_t milliseconds, sol::function callback)
 {
-	try {
-
-		auto _tid = DELAY(block::utils::delay_milliseconds(milliseconds), [=]() {
+	auto _tid = DELAY(block::utils::delay_milliseconds(milliseconds), [=]() {
+		try
+		{
 			callback();
-		});
+		}
+		catch (sol::error e) {
+			std::string _err = e.what() + '\n' + Traceback(proxyPtr_->state_);
+			ERROR_FMTLOG("[BLOCK] LuaAdapter delay func err : {}", _err);
+		}
+		catch (...)
+		{
+			ERROR_LOG("[BLOCK] LuaAdapter delay func unknown err");
+		}
+	});
 
-		return _tid;
-	}
-	catch (sol::error e) {
-		std::string _err = e.what() + '\n' + Traceback(proxyPtr_->state_);
-		ERROR_LOG(_err);
-	}
-	catch (...)
-	{
-		ERROR_LOG("unknown err by lua delay !");
-	}
-	return 0;
-
+	return _tid;
 }
 
 uint64_t block::modules::LuaAdapterModule::ldelayDay(int32_t hour, int32_t minute, sol::function callback)
 {
-	try {
+	auto _tid = DELAY(block::utils::delay_day(hour, minute), [=]() {
 
-		auto _tid = DELAY(block::utils::delay_day(hour, minute), [=]() {
+		try {
 			callback();
-		});
+		}
+		catch (sol::error e) {
+			std::string _err = e.what() + '\n' + Traceback(proxyPtr_->state_);
+			ERROR_FMTLOG("[BLOCK] LuaAdapter delayDay func err : {}", _err);
+		}
+		catch (...)
+		{
+			ERROR_LOG("[BLOCK] LuaAdapter delayDay func unknown err");
+		}
+	});
 
-		return _tid;
-	}
-	catch (sol::error e) {
-		std::string _err = e.what() + '\n' + Traceback(proxyPtr_->state_);
-		ERROR_LOG(_err);
-	}
-	catch (...)
-	{
-		ERROR_LOG("unknown err by lua delay day !");
-	}
-	return 0;
+	return _tid;
 }

@@ -321,7 +321,8 @@ void block::Application::run()
 #endif // WIN32
 		}
 		else {
-
+			auto of = _use_ms - cfg_.tick_count;
+			WARN_FMTLOG("single frame processing time overflow : {}ms", of);
 		}
 	}
 
