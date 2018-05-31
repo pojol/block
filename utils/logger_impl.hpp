@@ -65,6 +65,11 @@ namespace block
 				FLAGS_logbufsecs = 0;		   //立即写入到日志
 
 				google::SetLogDestination(google::GLOG_INFO, (_path + "/" + appName + ".info_").c_str());
+				//! 将日志输出到同一个文件
+				//google::SetLogDestination(google::GLOG_WARNING, "");
+				//google::SetLogDestination(google::GLOG_ERROR, "");
+				
+				//! 区分info, warning, error 日志文件
 				google::SetLogDestination(google::GLOG_WARNING, (_path + "/" + appName + ".warning_").c_str());
 				google::SetLogDestination(google::GLOG_ERROR, (_path + "/" + appName + ".error_").c_str());
 

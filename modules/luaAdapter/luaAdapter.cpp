@@ -129,6 +129,7 @@ int block::modules::LuaAdapterModule::llisten(uint32_t event, const sol::functio
 			try {
 				std::string _req = "";
 				if (args) {
+					//std::cout << args->print() << std::endl;
 					_req = args->exportBuf();
 					func(_req);
 				}
@@ -255,6 +256,7 @@ void block::modules::LuaAdapterModule::create()
 		, "push_string", &Args::push_string
 		, "push_bool", &Args::push_bool
 		, "pop_string", &Args::pop_string
+		, "pop_i16", &Args::pop_i16
 		, "pop_ui16", &Args::pop_ui16
 		, "pop_ui32", &Args::pop_ui32
 		, "pop_i32", &Args::pop_i32

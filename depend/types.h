@@ -19,8 +19,8 @@ namespace block
 	typedef int32_t NodeID;
 	static const int32_t NodeNil = INT32_MAX;
 
-	typedef int32_t MsgID;
-	static const int32_t MsgNil = INT32_MAX;
+	typedef int16_t MsgID;
+	static const int32_t MsgNil = INT16_MAX;
 	static const int32_t MsgMax = 65534;
 
 	static const uint16_t LogErr = 3;
@@ -31,7 +31,7 @@ namespace block
 	typedef int32_t ErrorID;
 	static const int32_t ErrNil = INT32_MAX;
 
-	typedef int32_t MsgHeadLen;
+	typedef int16_t MsgHeadLen;
 	static const int32_t MsgHeadLenNil = 0;
 
 	static const uint16_t ARGS_MAX_SIZE = 1024;				//
