@@ -285,7 +285,8 @@ void block::modules::LuaAdapterModule::create()
 		, "getModule", &Application::getModule
 		, "getName", &Application::getName
 		, "getMachine", &Application::getMachine
-		, "getUUID", &Application::getUUID);
+		, "getUUID", &Application::getUUID
+		, "createDynamicModule", &Application::createDynamicModule);
 	proxyPtr_->state_.set("APP", block::Application::get_ptr());
 
 	proxyPtr_->call_list_[LuaAppState::BEFORE_INIT] = [&](sol::table t) {

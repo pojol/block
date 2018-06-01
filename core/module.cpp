@@ -66,7 +66,7 @@ void block::MailBox::listen(block::EventID event, ListenFunc func)
 {
 	auto _itr = listenMap_.find(event);
 	if (_itr != listenMap_.end()) {
-		WARN_FMTLOG("mailbox : repeat regist event! event:{}", event);
+		WARN_FMTLOG("[BLOCK] mailbox repeat regist event:{}", event);
 	}
 	else {
 		APP.reactorRegist(basePtr_->getModuleID(), event);
