@@ -1,6 +1,5 @@
 
-#ifndef _DYNAMIC_FACTORY_HEADER_
-#define _DYNAMIC_FACTORY_HEADER_
+#pragma once
 
 #include <functional>
 #include <map>
@@ -48,6 +47,7 @@ struct DynamicRegister
 	}
 };
 
+
 #define REGISTER_CLASS(class_name)		\
 class class_name##DynamicRegister {		\
 	public:								\
@@ -59,6 +59,3 @@ class class_name##DynamicRegister {		\
 		static DynamicRegister reg_;	\
 };										\
 DynamicRegister class_name##DynamicRegister::reg_(#class_name, class_name##DynamicRegister::new_instance);
-
-
-#endif // !_DYNAMIC_FACTORY_HEADER_

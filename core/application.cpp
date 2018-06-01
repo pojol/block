@@ -46,10 +46,13 @@ block::ModuleID block::Application::createDynamicModule(const std::string &modul
 	block::Module *_module_ptr = static_cast<block::Module*>(DynamicModuleFactory::create(moduleType));
 	_module_ptr->setID(makeModuleID());
 
+	registModule(_module_ptr, true);
+
 	pushFrame(cur_frame_ + 1, std::make_tuple(0, std::bind(&Module::before_init, _module_ptr), nullptr, nullptr, _module_ptr));
 	pushFrame(cur_frame_ + 2, std::make_tuple(1, nullptr, std::bind(&Module::init, _module_ptr), nullptr, _module_ptr));
-	pushFrame(cur_frame_ + 3, std::make_tuple(2, nullptr, nullptr
-		, std::bind(&Application::registModule<Module>, this, std::placeholders::_1, std::placeholders::_2), _module_ptr));
+	//pushFrame(cur_frame_ + 3, std::make_tuple(2, nullptr, nullptr
+	//	, std::bind(&Application::registModule<Module>, this, std::placeholders::_1, std::placeholders::_2), _module_ptr));
+	pushFrame(cur_frame_ + 3, std::make_tuple(2, nullptr, nullptr, nullptr, _module_ptr));
 
 	return _module_ptr->getModuleID();
 }
@@ -123,12 +126,14 @@ void block::Application::popFrame()
 				auto func = std::get<2>(itr->second);
 				auto ptr = std::get<4>(itr->second);
 				//func();
+				//if (ptr->getAvailable()) {
+					ptr->mailboxPtr_->pull();
+				//}
 				ptr->init();
 			}
 			else if (idx == 2) {
-				auto func = std::get<3>(itr->second);
 				auto point = std::get<4>(itr->second);
-				func(point, true);
+				point->setAvailable(true);
 			}
 		}
 
@@ -189,7 +194,7 @@ void block::Application::reactorRegist(block::ModuleID moduleID, block::EventID 
 
 	}
 	else {
-		//WARN_LOG("app", "regist event, can't find module", " {}", moduleID);
+		WARN_FMTLOG("[BLOCK]application regist event:{} can't find module id:{}", event, moduleID);
 	}
 }
 
@@ -208,8 +213,7 @@ void block::Application::reactorDispatch(block::ModuleID self, block::ModuleID t
 		_find->second->push(taskPtr);
 	}
 	else {
-		
-		//WARN_LOG("app", "dispatch, can't find event", " module={} event={}", target, event);
+		WARN_FMTLOG("[BLOCK] application dispatch, can't find event module:{}, event:{}", target, event);
 		return;
 	}
 }
@@ -246,9 +250,8 @@ void block::Application::run()
 
 					if (it->getAvailable()) {
 						it->mailboxPtr_->pull();
+						it->execute();
 					}
-
-					it->execute();
 #ifdef WATCH_PERF
 					t1 = (time_point_cast<microseconds>(system_clock::now()) - _ttime).count();
 					it->add_tick_consume(t1);
@@ -273,13 +276,15 @@ void block::Application::run()
 				}
 			}
 
+			//! 动态创建的module，要先执行前面的状态帧。 才能同步到application状态中!
 			popFrame();
-			//while (!unregist_list_.empty()) {
-			//	auto itr = unregist_list_.front();
-			//	unregist_dynamic_module(itr);
-			//	unregist_list_.pop_front();
-			//}
-
+			/*
+			while (!unregist_list_.empty()) {
+				auto itr = unregist_list_.front();
+				unregist_dynamic_module(itr);
+				unregist_list_.pop_front();
+			}
+			*/
 			//static_cast<Module*>(block::EventModule::get_ptr())->execute();
 #ifdef WATCH_PERF
 			//t1 = (time_point_cast<microseconds>(system_clock::now()) - _ttime).count();
@@ -321,7 +326,8 @@ void block::Application::run()
 #endif // WIN32
 		}
 		else {
-
+			auto of = _use_ms - cfg_.tick_count;
+			WARN_FMTLOG("single frame processing time overflow : {}ms", of);
 		}
 	}
 
@@ -363,11 +369,10 @@ int64_t block::Application::uuid()
 }
 
 
-/*
 void block::Application::unregist_dynamic_module(uint32_t module_id)
 {
 	auto itr = std::find_if(module_list_.begin(), module_list_.end(), [&](std::list<Module *>::value_type it){
-		return (it->get_module_id() == module_id);
+		return (it->getModuleID() == module_id);
 	});	
 
 	if (itr != module_list_.end()){
@@ -380,7 +385,6 @@ void block::Application::unregist_dynamic_module(uint32_t module_id)
 		module_list_.erase(itr);
 	}
 }
-*/
 
 void block::Application::tick()
 {

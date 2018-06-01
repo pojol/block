@@ -87,7 +87,7 @@ void block::network::TcpConnectorModule::eMakeConncetor(block::ModuleID target, 
 
 	bufferEventPtr_ = bufferevent_socket_new(eventBasePtr_, -1, BEV_OPT_CLOSE_ON_FREE);
 	if (!bufferEventPtr_) {
-		ERROR_LOG("connector : bufferevent socket new fail!");
+		ERROR_LOG("[BLOCK] tcpConnector : bufferevent socket new fail!");
 		return;
 	}
 
@@ -99,13 +99,13 @@ void block::network::TcpConnectorModule::eMakeConncetor(block::ModuleID target, 
 
 	if (evutil_inet_pton(AF_INET, _ip.c_str(), &_sin.sin_addr) <= 0)
 	{
-		ERROR_LOG("connector : err_inet_pton fail!");
+		ERROR_LOG("[BLOCK] tcpConnector : err_inet_pton fail!");
 		return;
 	}
 
 	int _ret = bufferevent_socket_connect(bufferEventPtr_, (sockaddr*)&_sin, sizeof(sockaddr_in));
 	if (_ret != 0) {
-		ERROR_LOG("connector : bufferevent socket connect fail!");
+		ERROR_LOG("[BLOCK] tcpConnector : bufferevent socket connect fail!");
 		return;
 	}
 	else {
@@ -117,7 +117,7 @@ void block::network::TcpConnectorModule::eMakeConncetor(block::ModuleID target, 
 	bufferevent_setcb(bufferEventPtr_, Session::readCB, NULL, Session::eventCB, sessionPtr_.get());
 	bufferevent_enable(bufferEventPtr_, EV_READ | EV_WRITE);
 
-	INFO_LOG("connector : make connector success!");
+	INFO_LOG("[BLOCK] tcpConnector : make connector success!");
 }
 
 

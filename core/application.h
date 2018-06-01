@@ -124,7 +124,7 @@ namespace block
 
 		int64_t uuid();
 
-		//void unregist_dynamic_module(uint32_t module_id);
+		void unregist_dynamic_module(uint32_t module_id);
 
 		typedef std::tuple<uint32_t, std::function<void()>, std::function<void()>, std::function<void(Module*, bool)>, Module*> Frame;
 		void pushFrame(uint64_t index, Frame frame);

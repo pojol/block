@@ -105,19 +105,18 @@ bool block::modules::MysqlConnect::init(const std::string &host, int port, const
 {
 	auto init = mysql_init(nullptr);
 	if (nullptr == init) {
-		ERROR_LOG("MysqlConnect init fail!");
+		ERROR_LOG("[BLOCK] MysqlConnect init fail!");
 		return false;
 	}
 
 	basePtr_ = mysql_real_connect(init, host.c_str(), user.c_str(), pwd.c_str(), name.c_str(), port, nullptr, 0);
 	if (nullptr == basePtr_) {
-		ERROR_LOG("MysqlConnect connect fail!");
+		ERROR_LOG("[BLOCK] MysqlConnect connect fail!");
 		//mysql_close(base);
 		return false;
 	}
 
-	INFO_LOG("MysqlConnect init success!");
-
+	INFO_LOG("[BLOCK] MysqlConnect init success!");
 	return true;
 }
 
@@ -141,7 +140,7 @@ bool block::modules::MysqlConnect::insert(const std::string &query, const char *
 	}
 	catch (...) {
 		mysql_stmt_close(stmt->stmt);
-		ERROR_LOG("MysqlConnect out of memory");
+		ERROR_LOG("[BLOCK] MysqlConnect insert out of memory");
 		return false;
 	}
 	std::shared_ptr<char>(blobBuf, [](char *p)->void { delete[] p; });
@@ -171,29 +170,31 @@ bool block::modules::MysqlConnect::insert(const std::string &query, const char *
 
 void block::modules::MysqlConnect::update(const std::string &query, const char *buf, unsigned long len)
 {
+	assert(len > 0 && len < 10240);
+
 	SqlStmtPtr stmt;
 	perpare(query, stmt);
 
 	MYSQL_BIND params[1];
 	memset(params, 0, sizeof(params));
 
-	char *blobBuf = nullptr;
+	char *tbuf = nullptr;
 	try {
-		blobBuf = new char(len);
+		tbuf = new char[len];
 	}
 	catch (...) {
 		mysql_stmt_close(stmt->stmt);
-		ERROR_LOG("MysqlConnect out of memory");
+		ERROR_LOG("[BLOCK] MysqlConnect update out of memory");
 		return;
 	}
-	std::shared_ptr<char>(blobBuf, [](char *p)->void { delete[] p; });
+
+	memcpy(tbuf, buf, len);
 
 	params[0].buffer_type = MYSQL_TYPE_BLOB;
 	params[0].buffer_length = 10240;
 	params[0].length = &len;
 	params[0].is_null = 0;
-	params[0].buffer = blobBuf;
-	memcpy(blobBuf, buf, len);
+	params[0].buffer = tbuf;
 
 	// bind input arguments
 	if (mysql_stmt_bind_param(stmt->stmt, params))
@@ -205,6 +206,8 @@ void block::modules::MysqlConnect::update(const std::string &query, const char *
 	{
 		std::cout << mysql_stmt_error(stmt->stmt) << std::endl;
 	}
+
+	delete tbuf;
 }
 
 void block::modules::MysqlConnect::execSql(block::ModuleID target, int oper, const std::string &sql, std::function<void (block::ModuleID, block::ArgsPtr)> callback)
@@ -219,12 +222,12 @@ void block::modules::MysqlConnect::execSql(block::ModuleID target, int oper, con
 			callback(target, block::makeArgs(oper, false, 0, 0, err));
 		}
 		else {
-			ERROR_FMTLOG("dbproxy query err:{}", err);
+			ERROR_FMTLOG("[BLOCK] MysqlConnect execSql query fail err : {}", err);
 		}
 	};
 
 	if (nullptr == basePtr_) {
-		ERROR_LOG("MysqlConnect not connected!");
+		ERROR_LOG("[BLOCK] MysqlConnect execSql fail, connect disable");
 		return ;
 	}
 
@@ -323,7 +326,7 @@ void block::modules::MysqlConnect::perpare(const std::string &sql, SqlStmtPtr &s
 
 	do {
 		if (nullptr == basePtr_) {
-			ERROR_LOG("dbproxy mysql unuseable!");
+			ERROR_LOG("[BLOCK] MysqlConnect perpare fail, connect disable");
 			break;
 		}
 
@@ -332,7 +335,7 @@ void block::modules::MysqlConnect::perpare(const std::string &sql, SqlStmtPtr &s
 
 		stmtPtr->stmt = mysql_stmt_init(basePtr_);
 		if (nullptr == stmtPtr->stmt) {
-			ERROR_LOG("dbproxy stmt init fail!");
+			ERROR_LOG("[BLOCK] MysqlConnect stmt init fail!");
 			break;
 		}
 

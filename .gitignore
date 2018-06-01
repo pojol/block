@@ -61,3 +61,4 @@ lib/linux/libstream.a
 lib/
 Win32/Debug/ZERO_CHECK/ZERO_CHECK.log
 .vscode/settings.json
+3rd/
