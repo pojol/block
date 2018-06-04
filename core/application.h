@@ -170,7 +170,7 @@ namespace block
 	void block::Application::registModule(T *module, bool dynamic /* = false */)
 	{
 		module_list_.push_back(module);
-		
+
 		if (!dynamic) {
 			module->setID(makeModuleID());
 			//auto _type_id = typeid(T).hash_code();

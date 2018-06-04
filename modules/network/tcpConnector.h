@@ -44,7 +44,7 @@ namespace block
 
 		private:
 
-			uint32_t moduleID_;
+			uint32_t proxyModuleID_ = block::ModuleNil;
 
 			event_base *eventBasePtr_ = nullptr;
 

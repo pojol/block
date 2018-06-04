@@ -50,6 +50,7 @@ block::ModuleID block::Application::createDynamicModule(const std::string &modul
 
 	pushFrame(cur_frame_ + 1, std::make_tuple(0, std::bind(&Module::before_init, _module_ptr), nullptr, nullptr, _module_ptr));
 	pushFrame(cur_frame_ + 2, std::make_tuple(1, nullptr, std::bind(&Module::init, _module_ptr), nullptr, _module_ptr));
+	// 将regist提前，因为脚本层的module在动态创建的时候需要存在于module_list之中，否则会导致事件的注册失败。
 	//pushFrame(cur_frame_ + 3, std::make_tuple(2, nullptr, nullptr
 	//	, std::bind(&Application::registModule<Module>, this, std::placeholders::_1, std::placeholders::_2), _module_ptr));
 	pushFrame(cur_frame_ + 3, std::make_tuple(2, nullptr, nullptr, nullptr, _module_ptr));
@@ -76,10 +77,9 @@ void block::Application::unregistModule(block::ModuleID module_id)
 		exit_list_.insert(std::make_pair(cur_frame_ + 1, std::make_pair(1, module_ptr)));
 		exit_list_.insert(std::make_pair(cur_frame_ + 2, std::make_pair(2, module_ptr)));
 		exit_list_.insert(std::make_pair(cur_frame_ + 3, std::make_pair(3, module_ptr)));
-
 	}
 	else {
-		std::cout << "unregist_module not find module " << module_id << std::endl;
+		WARN_FMTLOG("[BLOCK] unregistModule can't find module {}", module_id);
 	}
 }
 
@@ -158,11 +158,12 @@ void block::Application::popFrame()
 					module_list_.erase(litr);
 
 					auto _mitr = module_name_map_.find(_module_name);
-					assert(_mitr != module_name_map_.end());
-					module_name_map_.erase(_mitr);
+					if (_mitr != module_name_map_.end()) {
+						module_name_map_.erase(_mitr);
+					}
 				}
 				else {
-					std::cout << "unregist_module pop frame not find module " << _module_id << std::endl;
+					WARN_FMTLOG("[BLOCK] popFrame can't find module {}", _module_id);
 				}
 			}
 			else if (idx == 1) {

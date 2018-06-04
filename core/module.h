@@ -8,6 +8,7 @@
 #include <queue>
 #include <map>
 #include <unordered_map>
+#include <iostream>
 #include <string>
 
 #include "args.h"
@@ -97,7 +98,7 @@ namespace block
 		bool getAvailable() const { return available_; }
 
 		void setID(block::ModuleID id) { module_id_ = id; }
-		block::ModuleID module_id_ = block::ModuleNil;
+		
 		std::string name_;
 
 		bool available_ = false;
@@ -124,6 +125,8 @@ namespace block
 
 		//! 
 	private:
+		block::ModuleID module_id_ = block::ModuleNil;
+
 		MailBoxPtr mailboxPtr_ = nullptr;
 	};
 }

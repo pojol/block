@@ -99,7 +99,8 @@ void block::modules::LuaAdapterModule::execute()
 
 void block::modules::LuaAdapterModule::shut()
 {
-	
+	sol::table _module = proxyPtr_->state_.get<sol::table>("module");
+	proxyPtr_->call_list_[LuaAppState::SHUT](_module);
 }
 
 void block::modules::LuaAdapterModule::ldispatch(block::ModuleID target, block::EventID event, const std::string &buf)
@@ -286,7 +287,8 @@ void block::modules::LuaAdapterModule::create()
 		, "getName", &Application::getName
 		, "getMachine", &Application::getMachine
 		, "getUUID", &Application::getUUID
-		, "createDynamicModule", &Application::createDynamicModule);
+		, "createDynamicModule", &Application::createDynamicModule
+		, "deleteModule", &Application::deleteModule);
 	proxyPtr_->state_.set("APP", block::Application::get_ptr());
 
 	proxyPtr_->call_list_[LuaAppState::BEFORE_INIT] = [&](sol::table t) {
@@ -319,12 +321,6 @@ void block::modules::LuaAdapterModule::create()
 	}
 
 	reloading = false;
-}
-
-int block::modules::LuaAdapterModule::destroy(uint32_t module_id)
-{
-
-	return 0;
 }
 
 void block::modules::LuaAdapterModule::eReload(block::ModuleID target, block::ArgsPtr args)

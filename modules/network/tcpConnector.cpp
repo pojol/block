@@ -81,7 +81,7 @@ void block::network::TcpConnectorModule::eMakeConncetor(block::ModuleID target, 
 	std::string _ip = args->pop_string();
 	uint32_t _port = args->pop_i32();
 
-	module_id_ = target;
+	proxyModuleID_ = target;
 
 	int _fd = 0;
 

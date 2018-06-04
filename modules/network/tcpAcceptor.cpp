@@ -56,7 +56,7 @@ void block::network::TcpAcceptorModule::init()
 {
 
 }
- 
+
 void block::network::TcpAcceptorModule::execute()
 {
 	if (sessionMgr_) {
@@ -87,7 +87,7 @@ void block::network::TcpAcceptorModule::eMakeAcceptor(block::ModuleID target, bl
 		std::string _ip = args->pop_string();
 		uint32_t _port = args->pop_i32();
 
-		module_id_ = target;	//! 绑定代理Module的id
+		proxyModuleID_ = target;	//! 绑定代理Module的id
 		accept_bind(_ip, _port);
 	}
 	else {
@@ -158,7 +158,7 @@ void block::network::TcpAcceptorModule::accept_listen_cb(::evconnlistener *liste
 	} while (0);
 
 	if (0 == _ret) {
-		auto _session_ptr = network_ptr_->sessionMgr_->makeSession(fd, network_ptr_->module_id_, bev);
+		auto _session_ptr = network_ptr_->sessionMgr_->makeSession(fd, network_ptr_->proxyModuleID_, bev);
 		bufferevent_setcb(bev, Session::readCB, NULL, Session::eventCB, _session_ptr.get());
 		bufferevent_enable(bev, EV_READ | EV_WRITE);
 
