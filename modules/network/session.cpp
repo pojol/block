@@ -100,8 +100,9 @@ void block::network::Session::read(::bufferevent *bev)
 	char * _head = (char*)malloc(_msgheadlen);
 	evbuffer_copyout(inBufPtr_, _head, _msgheadlen);
 
-	uint32_t _msg_size = *reinterpret_cast<uint32_t*>(_head);
+	uint32_t _msg_size = *reinterpret_cast<MsgHeadLen*>(_head);
 
+	//! 这里要补充一些数据块检查
 	if (_buf_len >= _msg_size) {
 
 		while (_buf_len >= _msg_size)
@@ -140,7 +141,6 @@ void block::network::Session::read(::bufferevent *bev)
 				break;
 			}
 		}
-
 	}
 }
 

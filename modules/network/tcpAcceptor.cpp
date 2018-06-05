@@ -87,11 +87,11 @@ void block::network::TcpAcceptorModule::eMakeAcceptor(block::ModuleID target, bl
 		std::string _ip = args->pop_string();
 		uint32_t _port = args->pop_i32();
 
-		module_id_ = target;	//! 绑定代理Module的id
+		proxyModuleID_ = target;	//! 绑定代理Module的id
 		accept_bind(_ip, _port);
 	}
 	else {
-		INFO_LOG("repeat make acceptor");
+		WARN_FMTLOG("[BLOCK] tcpAcceptor repeat make!");
 	}
 }
 
@@ -105,6 +105,7 @@ void block::network::AcceptorModule::bind_remote(const block::ArgsPtr &args, blo
 	binder_->regist(_info_ptr);
 }
 */
+
 void block::network::TcpAcceptorModule::accept_bind(const std::string &ip, int port)
 {
 	struct sockaddr_in sin;
@@ -121,10 +122,10 @@ void block::network::TcpAcceptorModule::accept_bind(const std::string &ip, int p
 		, sizeof(sockaddr_in));
 
 	if (nullptr == acceptListenerPtr_) {
-		ERROR_LOG("accept listen err!");
+		ERROR_LOG("[BLOCK] tcpAcceptor listen err!");
 	}
 	else {
-		INFO_LOG("accept listen ready!");
+		INFO_LOG("[BLOCK] tcpAcceptor listen ready!");
 	}
 }
 
@@ -138,26 +139,26 @@ void block::network::TcpAcceptorModule::accept_listen_cb(::evconnlistener *liste
 	{
 		if (network_ptr_->sessionMgr_->find(fd)) {
 			network_ptr_->sessionMgr_->addClose(fd);
-			ERROR_LOG("acceptor : repeat fd!");
+			ERROR_LOG("[BLOCK] tcpAcceptor repeat fd!");
 			break;
 		}
 
 		// check max connect
 		if (network_ptr_->sessionMgr_->curMaxConnect() >= NETWORK_CONNECT_MAX) {
-			ERROR_LOG("acceptor : max connect!");
+			ERROR_LOG("[BLOCK] tcpAcceptor max connect!");
 			break;
 		}
 
 		bev = bufferevent_socket_new(network_ptr_->eventBasePtr_, fd, BEV_OPT_CLOSE_ON_FREE);
 		if (!bev) {
-			ERROR_LOG("acceptor : new socket fail!");
+			ERROR_LOG("[BLOCK] tcpAcceptor new socket fail!");
 			break;
 		}
 
 	} while (0);
 
 	if (0 == _ret) {
-		auto _session_ptr = network_ptr_->sessionMgr_->makeSession(fd, network_ptr_->module_id_, bev);
+		auto _session_ptr = network_ptr_->sessionMgr_->makeSession(fd, network_ptr_->proxyModuleID_, bev);
 		bufferevent_setcb(bev, Session::readCB, NULL, Session::eventCB, _session_ptr.get());
 		bufferevent_enable(bev, EV_READ | EV_WRITE);
 

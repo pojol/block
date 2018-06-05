@@ -49,7 +49,7 @@ namespace block
 				assert(reply_ && reply_->type != REDIS_REPLY_ERROR);
 
 				if (reply_->type == REDIS_REPLY_ERROR) {
-					ERROR_FMTLOG("RedisConnect" + flag + " str:{}", reply_->str);
+					ERROR_FMTLOG("[BLOCK] RedisReply cmd : {} err : {}", flag , reply_->str);
 					return false;
 				}
 
@@ -181,7 +181,7 @@ namespace block
 				is_conn_ = true;
 			}
 			else {
-				ERROR_LOG("RedisConnect event_redis_connect err");
+				ERROR_LOG("[BLOCK] RedisConnect init fail");
 			}
 
 			return is_conn_;
@@ -206,7 +206,7 @@ namespace block
 
 			do{
 				if (field_ != "" && field_ != field){
-					ERROR_LOG("RedisConnect push field cannot be changed!");
+					ERROR_LOG("[BLOCK] RedisConnect push field cannot be changed!");
 					break;
 				}
 
@@ -231,7 +231,7 @@ namespace block
 				else {
 					if (REDIS_OK != redisAppendCommand(redis_context_, "RPUSH %s %b", _keystr.c_str(), buf.c_str(), buf.length()))
 					{
-						ERROR_LOG("RedisConnect push redis append command fail!");
+						ERROR_LOG("[BLOCK] RedisConnect push redis append command fail!");
 					}
 
 					pipeLineCount_++;
@@ -304,7 +304,7 @@ namespace block
 		for (uint32_t i = 0; i < pipeLineCount_; ++i)
 		{
 			if (REDIS_OK != redisGetReply(redis_context_, (void**)&_replay_ptr)) {
-				ERROR_LOG("RedisConnect exec fail!");
+				ERROR_LOG("[BLOCK] RedisConnect exec fail!");
 			}
 
 			freeReplyObject(_replay_ptr);
@@ -376,7 +376,7 @@ namespace block
 	bool block::modules::RedisConnect<T>::checkConnect()
 	{
 		if (!is_conn_) {
-			WARN_LOG("RedisConnect service terminated! check_connect");
+			WARN_LOG("[BLOCK] RedisConnect service terminated! check_connect");
 			return false;
 		}
 
@@ -386,7 +386,7 @@ namespace block
 			return true;
 		}
 		else {
-			WARN_LOG("RedisConnect connect fail! try reconnect!");
+			WARN_LOG("[BLOCK] RedisConnect connect fail! try reconnect!");
 
 			struct timeval _timeout = { 1, 500000 };
 
@@ -397,7 +397,7 @@ namespace block
 				return true;
 			}
 			else {
-				ERROR_LOG("RedisConnect service terminated! can't connect!");
+				ERROR_LOG("[BLOCK] RedisConnect service terminated! can't connect!");
 				return false;
 			}
 		}

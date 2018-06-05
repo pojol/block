@@ -76,8 +76,6 @@ namespace block
 
 			void create();
 
-			int destroy(uint32_t module_id);
-
 			LuaProxyPtr proxyPtr_ = nullptr;
 
 		protected:
