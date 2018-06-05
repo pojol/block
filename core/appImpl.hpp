@@ -23,11 +23,6 @@ namespace block
 	struct MailBox;
 	typedef std::shared_ptr<MailBox> MailBoxPtr;
 
-	class utils::Logger;
-	class utils::Timer;
-	typedef std::shared_ptr<utils::Logger> LoggerPtr;
-	typedef std::shared_ptr<utils::Timer> TimerPtr;
-
 	enum AppState
 	{
 		BEFORE_INIT = 0,
@@ -66,8 +61,8 @@ namespace block
 
 		int64_t uuid();
 
-		LoggerPtr getLogger() { return logger_; }
-		TimerPtr getTimer() { return timer_; }
+		utils::Logger getLogger() { return logger_; }
+		utils::Timer getTimer() { return timer_; }
 
 		void reactorRegist(block::ModuleID moduleID, block::EventID event);
 		void reactorDispatch(block::ModuleID self, block::ModuleID target, block::EventID event, block::ArgsPtr args);
@@ -88,8 +83,8 @@ namespace block
 		void popFrame();
 
 	private:
-		LoggerPtr logger_ = nullptr;
-		TimerPtr timer_ = nullptr;
+		utils::Logger logger_;
+		utils::Timer timer_;
 
 		AppState state_;
 		int sequence_ = 0;

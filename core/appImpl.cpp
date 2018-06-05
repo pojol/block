@@ -30,9 +30,9 @@ void block::AppImpl::initCfg(const block::AppConfig &cfg)
 {
 	cfg_ = cfg;
 
-	logger_ = std::make_shared<block::utils::Logger>();
-	logger_->init(cfg_.name);
-	timer_ = std::make_shared<block::utils::Timer>();
+	//logger_ = std::make_shared<block::utils::Logger>();
+	logger_.init(cfg_.name);
+	//timer_ = std::make_shared<block::utils::Timer>();
 
 	//! 
 	new block::ArgsPool;
@@ -42,7 +42,7 @@ void block::AppImpl::initCfg(const block::AppConfig &cfg)
 block::ModuleID block::AppImpl::createDynamicModule(const std::string &moduleType)
 {
 	if (module_name_map_.find(moduleType) != module_name_map_.end()) {
-		getLogger()->WARN("[BLOCK] create dynamic module fail, module name : {} has been static module used!", moduleType);
+		logger_.WARN("[BLOCK] create dynamic module fail, module name : {} has been static module used!", moduleType);
 		return 0;
 	}
 
@@ -77,7 +77,7 @@ void block::AppImpl::deleteModule(block::ModuleID moduleID)
 		exit_list_.insert(std::make_pair(cur_frame_ + 3, std::make_pair(3, module_ptr)));
 	}
 	else {
-		getLogger()->WARN("[BLOCK] unregistModule can't find module {}", moduleID);
+		logger_.WARN("[BLOCK] unregistModule can't find module {}", moduleID);
 	}
 }
 
@@ -172,7 +172,7 @@ void block::AppImpl::popFrame()
 					}
 				}
 				else {
-					getLogger()->WARN("[BLOCK] popFrame can't find module {}", _module_id);
+					logger_.WARN("[BLOCK] popFrame can't find module {}", _module_id);
 				}
 			}
 			else if (idx == 1) {
@@ -203,7 +203,7 @@ void block::AppImpl::reactorRegist(block::ModuleID moduleID, block::EventID even
 
 	}
 	else {
-		getLogger()->WARN("[BLOCK]application regist event:{} can't find module id:{}", event, moduleID);
+		logger_.WARN("[BLOCK]application regist event:{} can't find module id:{}", event, moduleID);
 	}
 }
 
@@ -222,7 +222,7 @@ void block::AppImpl::reactorDispatch(block::ModuleID self, block::ModuleID targe
 		_find->second->push(taskPtr);
 	}
 	else {
-		getLogger()->WARN("[BLOCK] application dispatch, can't find event module:{}, event:{}", target, event);
+		logger_.WARN("[BLOCK] application dispatch, can't find event module:{}, event:{}", target, event);
 		return;
 	}
 }
@@ -302,7 +302,7 @@ void block::AppImpl::run()
 #endif // WATCH_PERF
 		};
 
-		timer_->exec();
+		timer_.exec();
 
 		_callback(state_);
 		if (state_ == AppState::BEFORE_INIT) {
@@ -336,7 +336,7 @@ void block::AppImpl::run()
 		}
 		else {
 			auto of = _use_ms - cfg_.tick_count;
-			getLogger()->WARN("single frame processing time overflow : {}ms", of);
+			logger_.WARN("single frame processing time overflow : {}ms", of);
 		}
 	}
 }
