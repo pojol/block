@@ -70,8 +70,9 @@ namespace block
 
 	class Module
 	{
-		friend class Application;
+		friend class AppImpl;
 		friend class Reactor;
+		friend class Application;
 
 	public:
 		Module(const std::string &name);
