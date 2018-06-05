@@ -41,6 +41,11 @@ void block::AppImpl::initCfg(const block::AppConfig &cfg)
 
 block::ModuleID block::AppImpl::createDynamicModule(const std::string &moduleType)
 {
+	if (module_name_map_.find(moduleType) != module_name_map_.end()) {
+		getLogger()->WARN("[BLOCK] create dynamic module fail, module name : {} has been static module used!", moduleType);
+		return 0;
+	}
+
 	block::Module *_module_ptr = static_cast<block::Module*>(DynamicModuleFactory::create(moduleType));
 	_module_ptr->setID(makeModuleID());
 

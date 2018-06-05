@@ -78,8 +78,6 @@ namespace block
 		template <typename T>
 		void registModule(T *module, bool dynamic = false);
 
-		void unregistModule(block::ModuleID module_id);
-
 		//！ 临时先写在这里，未来如果支持分布式可能要放在其他地方生成，保证服务器集群唯一。
 		int32_t makeModuleID();
 
