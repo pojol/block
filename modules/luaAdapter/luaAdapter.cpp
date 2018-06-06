@@ -278,7 +278,9 @@ void block::modules::LuaAdapterModule::create()
 		, "logInfo", &LuaAdapterModule::llogInfo
 		, "logWarn", &LuaAdapterModule::llogWarning
 		, "logError", &LuaAdapterModule::llogError
-		, "delay", &LuaAdapterModule::ldelay);
+		, "delay", &LuaAdapterModule::ldelay
+		, "delayDay", &LuaAdapterModule::ldelayDay
+		, "rmvDelay", &LuaAdapterModule::lrmvDelay);
 	proxyPtr_->state_.set("self", this);
 	proxyPtr_->state_.set("module_id", getModuleID());
 
@@ -400,4 +402,9 @@ uint64_t block::modules::LuaAdapterModule::ldelayDay(int32_t hour, int32_t minut
 	});
 
 	return _tid;
+}
+
+void block::modules::LuaAdapterModule::lrmvDelay(uint64_t timerID)
+{
+	TIMER.remove(timerID);
 }
