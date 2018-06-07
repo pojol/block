@@ -14,15 +14,6 @@
 * 支持脚本热更（带状态退出，重入
 * 支持基于redis的灾备机制和数据缓存
 ***
-#### 内置模块
-* [tcp](https://github.com/pojol/gsf/wiki/Modules_Network_TCP)
-* [distributed](https://github.com/pojol/gsf/wiki/Modules_Distributed)
-* [luaAdapter](https://github.com/pojol/gsf/wiki/Modules_LuaProxy)
-* [timer](https://github.com/pojol/gsf/wiki/Modules_Timer)
-* [dbProxy](https://github.com/pojol/gsf/wiki/Guide_Mysql)
-* [logger](https://github.com/pojol/gsf/wiki/Module_Logger)
-
-***
 
 #### 依赖编译环境
 * linux (gcc4.9+
