@@ -55,12 +55,12 @@ uint64_t block::Application::getSystemTick()
 	return impl_.getSystemTick();
 }
 
-block::LoggerPtr block::Application::getLogger()
+block::utils::Logger block::Application::getLogger()
 {
 	return impl_.getLogger();
 }
 
-block::TimerPtr block::Application::getTimer()
+block::utils::Timer block::Application::getTimer()
 {
 	return impl_.getTimer();
 }

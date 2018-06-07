@@ -28,12 +28,12 @@ void block::modules::NodeModule::before_init()
 	assert(timerM_ != block::ModuleNil);
 
 	using namespace std::placeholders;
-	listen(eid::node::node_create, std::bind(&NodeModule::eCreateNode, this, _1, _2));
-	listen(eid::node::node_regist, std::bind(&NodeModule::eRegistNode, this, _1, _2));
+	listen(block::event::node_create, std::bind(&NodeModule::eCreateNode, this, _1, _2));
+	listen(block::event::node_regist, std::bind(&NodeModule::eRegistNode, this, _1, _2));
 
 	//listenRpc(std::bind(&NodeModule::eventRpc, this, _1, _2, _3, _4));
 
-	listen(eid::network::recv, [&](block::ModuleID target, block::ArgsPtr args) {
+	listen(block::event::tcp_recv, [&](block::ModuleID target, block::ArgsPtr args) {
 
 		auto _fd = args->pop_fd();
 		auto _msgid = args->pop_msgid();
@@ -154,7 +154,7 @@ void block::modules::NodeModule::eventRpc(block::EventID event, block::ModuleID 
 		*/
 	}
 	else {
-		dispatch(_connector_m, eid::network::send, block::makeArgs(event, _callbackid));
+		dispatch(_connector_m, block::event::tcp_send, block::makeArgs(event, _callbackid));
 	}
 }
 
@@ -218,13 +218,13 @@ void block::modules::NodeModule::eCreateNode(block::ModuleID target, block::Args
 		}
 
 		//! tmp
-		registNode(getModuleID(), eid::distributed::coordinat_regist, _root_ip, _root_port);
-		registNode(getModuleID(), eid::distributed::coordinat_unregit, _root_ip, _root_port);
-		registNode(getModuleID(), eid::distributed::coordinat_adjust_weight, _root_ip, _root_port);
-		registNode(getModuleID(), eid::distributed::coordinat_select, _root_ip, _root_port);
+		registNode(getModuleID(), block::event::coordinat_regist, _root_ip, _root_port);
+		registNode(getModuleID(), block::event::coordinat_unregit, _root_ip, _root_port);
+		registNode(getModuleID(), block::event::coordinat_adjust_weight, _root_ip, _root_port);
+		registNode(getModuleID(), block::event::coordinat_select, _root_ip, _root_port);
 		//
 
-		listen(eid::network::new_connect, [&](block::ModuleID target, block::ArgsPtr args) {
+		listen(block::event::tcp_new_connect, [&](block::ModuleID target, block::ArgsPtr args) {
 			connectorFD_ = args->pop_fd();
 
 			if (!service_) {
@@ -243,15 +243,15 @@ void block::modules::NodeModule::eCreateNode(block::ModuleID target, block::Args
 					_args->push(it.moduleID);
 					_args->push(it.characteristic);
 				}
-				eventRpc(eid::distributed::coordinat_regist, getModuleID(), _args, [&](const block::ArgsPtr &args, int32_t progress, bool result) {
+				eventRpc(block::event::coordinat_regist, getModuleID(), _args, [&](const block::ArgsPtr &args, int32_t progress, bool result) {
 					if (result) {
-						dispatch(targetM_, eid::node::node_create_succ, nullptr);
+						//dispatch(targetM_, block::event::node_create_succ, nullptr);
 					}
 				});
 			}
 		});
 
-		listen(eid::base::module_init_succ, [&](block::ModuleID target, block::ArgsPtr args) {
+		listen(block::event::module_init_succ, [&](block::ModuleID target, block::ArgsPtr args) {
 			/*
 			auto _t = block::ArgsPool::get_ref().get();
 			_t->push_block(args->pop_block(0, args->get_size()).c_str(), args->get_size());

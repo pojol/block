@@ -8,13 +8,13 @@ if(WIN32)
 			${BLOCK_SOURCE_DIR}/3rd/glog/src
             ${BLOCK_SOURCE_DIR}/
     )
-	Add_Definitions("-DGLOG_NO_ABBREVIATED_SEVERITIES")
 endif()
 if(UNIX)
     INCLUDE_DIRECTORIES(
-            ${BLOCK_SOURCE_DIR}/lib/libevent/include
-			${BLOCK_SOURCE_DIR}/lib/fmt/include
-            ${BLOCK_SOURCE_DIR}/
+       	${BLOCK_SOURCE_DIR}/lib/libevent/include
+	${BLOCK_SOURCE_DIR}/lib/fmt/include
+	${BLOCK_SOURCE_DIR}/lib/glog/include
+       	${BLOCK_SOURCE_DIR}/
 			)
 endif()
 if(APPLE)
@@ -24,6 +24,7 @@ if(APPLE)
 			)
 endif()
 
+Add_Definitions("-DGLOG_NO_ABBREVIATED_SEVERITIES")
 
 #引用库目录
 if(WIN32)

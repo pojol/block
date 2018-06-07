@@ -11,6 +11,7 @@
 #include <unistd.h>
 #endif // WIN32
 
+#include <fmt/format.h>
 #include <string>
 #include <sstream>
 #include <iostream>

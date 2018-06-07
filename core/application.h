@@ -66,8 +66,8 @@ namespace block
 		**/
 		void exit();
 
-		LoggerPtr getLogger();
-		TimerPtr getTimer();
+		utils::Logger getLogger();
+		utils::Timer getTimer();
 
 	protected:
 		void reactorRegist(block::ModuleID moduleID, block::EventID event);
@@ -85,26 +85,26 @@ namespace block
 
 #define APP block::Application::get_ref() 
 
-#define DELAY APP.getTimer()->delay
+#define TIMER APP.getTimer()
 
 #define WARN_LOG(content) \
-	APP.getLogger()->WARN(content)	
+	APP.getLogger().WARN(content)	
 #define WARN_FMTLOG(content, ...) \
-	APP.getLogger()->WARN(content, ##__VA_ARGS__)
+	APP.getLogger().WARN(content, ##__VA_ARGS__)
 
 #define INFO_LOG(content) \
-	APP.getLogger()->INFO(content)
+	APP.getLogger().INFO(content)
 #define INFO_FMTLOG(content, ...)\
-	APP.getLogger()->INFO(content, ##__VA_ARGS__)
+	APP.getLogger().INFO(content, ##__VA_ARGS__)
 
 #define DEBUG_LOG(content)\
-	APP.getLogger()->DEBUG(content)
+	APP.getLogger().DEBUG(content)
 #define DEBUG_FMTLOG(content, ...)\
-	APP.getLogger()->DEBUG(content, ##__VA_ARGS__)
+	APP.getLogger().DEBUG(content, ##__VA_ARGS__)
 
 #define ERROR_LOG(content)\
-	APP.getLogger()->ERR(content)
+	APP.getLogger().ERR(content)
 #define ERROR_FMTLOG(content, ...)\
-	APP.getLogger()->ERR(content, ##__VA_ARGS__)
+	APP.getLogger().ERR(content, ##__VA_ARGS__)
 
 }

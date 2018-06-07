@@ -52,17 +52,17 @@ void block::network::Session::eventCB(::bufferevent *bev, short what, void *ctx)
 
 	do {
 		if (what & BEV_EVENT_EOF) {
-			_result = eid::error::err_event_eof;
+			_result = block::error::err_event_eof;
 			break;
 		}
 
 		if (what & BEV_EVENT_ERROR) {
-			_result = eid::error::err_event_error;
+			_result = block::error::err_event_error;
 			break;
 		}
 
 		if (what & BEV_EVENT_TIMEOUT) {
-			_result = eid::error::err_event_timeout;
+			_result = block::error::err_event_timeout;
 			break;
 		}
 
@@ -112,7 +112,7 @@ void block::network::Session::read(::bufferevent *bev)
 
 			MsgID _msg_id = _block->get_msg_id();
 
-			if (_msg_id > eid::distributed::rpc_begin && _msg_id < eid::distributed::rpc_end) {
+			if (_msg_id > block::event::rpc_begin && _msg_id < block::event::rpc_end) {
 			/*
 				auto args_ptr = ArgsPool::get_ref().get();
 				args_ptr->push(fd_);

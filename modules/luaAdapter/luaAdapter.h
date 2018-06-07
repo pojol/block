@@ -63,6 +63,7 @@ namespace block
 
 			uint64_t ldelay(int32_t milliseconds, sol::function callback);
 			uint64_t ldelayDay(int32_t hour, int32_t minute, sol::function callback);
+			void lrmvDelay(uint64_t timerID);
 
 			//代理下event的dispatch 和 listen 接口，因为要在这里集中捕获下lua产生的异常。
 			void ldispatch(block::ModuleID target, block::EventID event, const std::string &buf);

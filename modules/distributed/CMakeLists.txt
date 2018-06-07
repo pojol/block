@@ -18,9 +18,10 @@ endif()
 if(UNIX)
     #引用头文件目录
     INCLUDE_DIRECTORIES(
-            ${BLOCK_SOURCE_DIR}/
-            ${BLOCK_SOURCE_DIR}/lib/libevent/include
-			${BLOCK_SOURCE_DIR}/lib/fmt/include
+       		${BLOCK_SOURCE_DIR}/
+        	${BLOCK_SOURCE_DIR}/lib/libevent/include
+		${BLOCK_SOURCE_DIR}/lib/fmt/include
+		${BLOCK_SOURCE_DIR}/lib/glog/include
     )
 
     #引用库目录

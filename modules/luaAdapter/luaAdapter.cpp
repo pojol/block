@@ -50,7 +50,7 @@ void block::modules::LuaAdapterModule::before_init()
 {	
 	using namespace std::placeholders;
 
-	listen(eid::lua::reload, std::bind(&LuaAdapterModule::eReload, this, _1, _2));
+	listen(block::event::script_reload, std::bind(&LuaAdapterModule::eReload, this, _1, _2));
 }
 
 void block::modules::LuaAdapterModule::init()
@@ -278,7 +278,9 @@ void block::modules::LuaAdapterModule::create()
 		, "logInfo", &LuaAdapterModule::llogInfo
 		, "logWarn", &LuaAdapterModule::llogWarning
 		, "logError", &LuaAdapterModule::llogError
-		, "delay", &LuaAdapterModule::ldelay);
+		, "delay", &LuaAdapterModule::ldelay
+		, "delayDay", &LuaAdapterModule::ldelayDay
+		, "rmvDelay", &LuaAdapterModule::lrmvDelay);
 	proxyPtr_->state_.set("self", this);
 	proxyPtr_->state_.set("module_id", getModuleID());
 
@@ -364,7 +366,7 @@ void block::modules::LuaAdapterModule::llogError(const std::string &content)
 
 uint64_t block::modules::LuaAdapterModule::ldelay(int32_t milliseconds, sol::function callback)
 {
-	auto _tid = DELAY(block::utils::delay_milliseconds(milliseconds), [=]() {
+	auto _tid = TIMER.delay(block::utils::delay_milliseconds(milliseconds), [=]() {
 		try
 		{
 			callback();
@@ -384,7 +386,7 @@ uint64_t block::modules::LuaAdapterModule::ldelay(int32_t milliseconds, sol::fun
 
 uint64_t block::modules::LuaAdapterModule::ldelayDay(int32_t hour, int32_t minute, sol::function callback)
 {
-	auto _tid = DELAY(block::utils::delay_day(hour, minute), [=]() {
+	auto _tid = TIMER.delay(block::utils::delay_day(hour, minute), [=]() {
 
 		try {
 			callback();
@@ -400,4 +402,9 @@ uint64_t block::modules::LuaAdapterModule::ldelayDay(int32_t hour, int32_t minut
 	});
 
 	return _tid;
+}
+
+void block::modules::LuaAdapterModule::lrmvDelay(uint64_t timerID)
+{
+	TIMER.remove(timerID);
 }

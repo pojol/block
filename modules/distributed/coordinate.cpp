@@ -14,13 +14,13 @@ void block::modules::CoodinatorModule::before_init()
 {
 	using namespace std::placeholders;
 
-	listen(eid::distributed::coordinat_regist, std::bind(&CoodinatorModule::eCoordinatRegist, this, _1, _2));
-	listen(eid::distributed::coordinat_unregit, std::bind(&CoodinatorModule::eCoordinatUnregist, this, _1, _2));
+	listen(block::event::coordinat_regist, std::bind(&CoodinatorModule::eCoordinatRegist, this, _1, _2));
+	listen(block::event::coordinat_unregit, std::bind(&CoodinatorModule::eCoordinatUnregist, this, _1, _2));
 
-	listen(eid::distributed::coordinat_adjust_weight
+	listen(block::event::coordinat_adjust_weight
 		, std::bind(&CoodinatorModule::eCoordinatAdjustWeight, this, _1, _2));
 
-	listen(eid::distributed::coordinat_select
+	listen(block::event::coordinat_select
 		, std::bind(&CoodinatorModule::eCoordinatSelect, this, _1, _2));
 }
 
