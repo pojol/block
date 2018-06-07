@@ -47,9 +47,9 @@ void block::network::TcpAcceptorModule::before_init()
 
 	using namespace std::placeholders;
 
-	listen(eid::network::tcp_make_acceptor, std::bind(&TcpAcceptorModule::eMakeAcceptor, this, _1, _2));
-	listen(eid::network::send, std::bind(&TcpAcceptorModule::eSendMsg, this, _1, _2));
-	listen(eid::network::kick_connect, std::bind(&TcpAcceptorModule::eKick, this, _1, _2));
+	listen(block::event::tcp_make_acceptor, std::bind(&TcpAcceptorModule::eMakeAcceptor, this, _1, _2));
+	listen(block::event::tcp_send, std::bind(&TcpAcceptorModule::eSendMsg, this, _1, _2));
+	listen(block::event::tcp_kick_connect, std::bind(&TcpAcceptorModule::eKick, this, _1, _2));
 }
 
 void block::network::TcpAcceptorModule::init()
@@ -175,7 +175,7 @@ void block::network::TcpAcceptorModule::eSendMsg(block::ModuleID target, block::
 	std::string _str = "";
 
 	//! 内部消息走的时Args流， 外部的是原始的二进制数据。 所以这里要分开处理下!
-	if (_msg > eid::distributed::rpc_begin && _msg < eid::distributed::rpc_end) {
+	if (_msg > block::event::rpc_begin && _msg < block::event::rpc_end) {
 		//auto _headlen = sizeof(block::SessionID) + 1 + sizeof(block::MsgID) + 1;
 		//_str = args->get_block(_headlen, args->get_size());
 	}

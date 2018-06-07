@@ -50,7 +50,7 @@ void block::modules::LuaAdapterModule::before_init()
 {	
 	using namespace std::placeholders;
 
-	listen(eid::lua::reload, std::bind(&LuaAdapterModule::eReload, this, _1, _2));
+	listen(block::event::script_reload, std::bind(&LuaAdapterModule::eReload, this, _1, _2));
 }
 
 void block::modules::LuaAdapterModule::init()

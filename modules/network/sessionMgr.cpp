@@ -75,7 +75,7 @@ void block::network::SessionMgr::exec()
 			}
 
 			sessionQueue_.erase(_itr);
-			basePtr_->dispatch(target_, eid::network::dis_connect, block::makeArgs(fd));
+			basePtr_->dispatch(target_, block::event::tcp_dis_connect, block::makeArgs(fd));
 		}
 	}
 
@@ -83,14 +83,14 @@ void block::network::SessionMgr::exec()
 
 	for (int fd : connectVec_)
 	{
-		basePtr_->dispatch(target_, eid::network::new_connect, block::makeArgs(fd));
+		basePtr_->dispatch(target_, block::event::tcp_new_connect, block::makeArgs(fd));
 	}
 
 	connectVec_.clear();
 
 	while (!messageQueue_.empty()) {
 
-		basePtr_->dispatch(target_, eid::network::recv, std::move(messageQueue_.front()));
+		basePtr_->dispatch(target_, block::event::tcp_recv, std::move(messageQueue_.front()));
 
 		messageQueue_.pop();
 	}

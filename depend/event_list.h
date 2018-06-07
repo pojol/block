@@ -7,196 +7,165 @@
 // 后面用工具自动生成
 //! 用于描述框架中用到的事件, 用户可以以此为模板在自己工程中建立一个event_list 用于工程中的事件描述
 
-namespace eid
+namespace block
 {
-	enum base
-	{
+	enum event {
 		/*!
-			comment: Module初始化成功
-			args: nil
-			type: boardcast
-			res : int32_t module_id
+		comment: Module初始化成功
+		args: nil
+		type: boardcast
+		res : int32_t module_id
 		**/
-		module_init_succ,
+		module_init_succ = 101,
 
 		/*!
-			comment: Module退出成功
-			args: nil
-			type: boardcast
-			res : int32_t module_id
+		comment: Module退出成功
+		args: nil
+		type: boardcast
+		res : int32_t module_id
 		**/
 		module_shut_succ,
-	};
 
-	//! 凡是gsf集群内使用rpc交互的消息都应该定义在distributed区块
-	enum distributed
-	{
+		//! 凡是gsf集群内使用rpc交互的消息都应该定义在distributed区块
 		rpc_begin = 1001,
 
 		/*!
-			comment: 将Node绑定到Coordinator
-			args: string node_type, int32_t node_id, string root_ip, int32_t root_port, [{string module_name, int32_t module_id, int32_t module_fature} ... ]
-			type: rpc
-			res : stream args, int32_t progress, bool succ
+		comment: 将Node绑定到Coordinator
+		args: string node_type, int32_t node_id, string root_ip, int32_t root_port, [{string module_name, int32_t module_id, int32_t module_fature} ... ]
+		type: rpc
+		res : stream args, int32_t progress, bool succ
 		**/
 		coordinat_regist,
-		
+
 		/***/
 		coordinat_unregit,
 
 		/*!
-			comment: 调整Node在Coordinator中的权重
-			args: int32_t node_id, string module_name, int32_t module_fature, int32_t +- weight 
-			type: rpc
-			res : stream args, int32_t progress, bool succ
+		comment: 调整Node在Coordinator中的权重
+		args: int32_t node_id, string module_name, int32_t module_fature, int32_t +- weight
+		type: rpc
+		res : stream args, int32_t progress, bool succ
 		**/
 		coordinat_adjust_weight,
 
 		/*!
-			comment: 通过ModuleName和ModuleFeature选取一个集群中适合自己的Node
-			args: string module_name, int32_t module_fature
-			type: rpc
-			res : stream args, int32_t progress, bool succ
+		comment: 通过ModuleName和ModuleFeature选取一个集群中适合自己的Node
+		args: string module_name, int32_t module_fature
+		type: rpc
+		res : stream args, int32_t progress, bool succ
 		**/
 		coordinat_select,
 
-		rpc_end,
-	};
-
-	enum network
-	{
-		// tcp
+		rpc_end = 1999,
 
 		/*!
-			comment: 创建一个接收器
-			args: int32_t module_id, string ip, int32_t port
-			type: dispatch
-			res : bool succ or fail, string reason
+		comment: 创建一个接收器
+		args: int32_t module_id, string ip, int32_t port
+		type: dispatch
+		res : bool succ or fail, string reason
 		**/
 		tcp_make_acceptor = 2001,
 
 		/*!
-			
-		**/
-		websocket_make_acceptor,
-
-		/*!
-			comment: 创建一个连接器
-			args: module_id, ip, port
-			type: dispatch
-			res : bool succ or fail, string reason
+		comment: 创建一个连接器
+		args: module_id, ip, port
+		type: dispatch
+		res : bool succ or fail, string reason
 		**/
 		tcp_make_connector,
 
 		/*!
+		comment: 踢掉某个现有的连接
+		args: int32_t fd
+		type: dispatch
+		res : bool succ or fail, string reason
+		**/
+		tcp_kick_connect,
 			
+		/*!
+		comment: 发送一条网络消息
+		args: int32_t fd, int32_t msgid, stream block
+		type: dispatch
+		res : nil
 		**/
-		websocket_make_connector,
+		tcp_send,
 
 		/*!
-			comment: 踢掉某个现有的连接
-			args: int32_t fd
-			type: dispatch
-			res : bool succ or fail, string reason
+		comment: 接收到一条网络消息
+		args: int32_t fd, int32_t msgid, stream block
+		type: listen
+		res : nil
 		**/
-		kick_connect,
+		tcp_recv,
 
 		/*!
-			comment: 发送一条网络消息
-			args: int32_t fd, int32_t msgid, stream block
-			type: dispatch
-			res : nil
+		comment: 接收到一个新的连接（适用于 acceptor
+		args: int32_t fd
+		type: listen
+		res : nil
 		**/
-		send,
+		tcp_new_connect,
 
 		/*!
-			comment: 接收到一条网络消息
-			args: int32_t fd, int32_t msgid, stream block
-			type: listen
-			res : nil
+		comment: 连接被断开, 只有连接错误才会收到这条事件（服务器主动kick不会
+		args: int32_t fd
+		type: listen
+		res : int32_t fd, string reason
 		**/
-		recv,
-		
-		/*!
-			comment: 接收到一个新的连接（适用于 acceptor
-			args: int32_t fd
-			type: listen
-			res : nil
-		**/
-		new_connect,
+		tcp_dis_connect,
 
 		/*!
-			comment: 连接被断开, 只有连接错误才会收到这条事件（服务器主动kick不会
-			args: int32_t fd
-			type: listen
-			res : int32_t fd, string reason
+		comment: 重新装载 Lua Script Module, 会走标准的退出和进入流程 init, shut 。即便持有状态也可以方便的热更
+		args: int32_t module_id
+		type: dispatch
+		res : bool succ
 		**/
-		dis_connect,
-	};
-
-	enum lua
-	{
-		/*!
-			comment: 重新装载 Lua Script Module, 会走标准的退出和进入流程 init, shut 。即便持有状态也可以方便的热更
-			args: int32_t module_id
-			type: dispatch
-			res : bool succ
-		**/
-		reload = 2301,
-
-	};
-
-	enum dbProxy
-	{
-		/*!
-			comment: 建立一个新的Mysql连接
-			args: string host, string user, string password, string dbName, int32_t port, bool useCache
-			type: dispatch
-			res : bool succ
-		**/
-		connect = 2401,
+		script_reload = 2301,
 
 		/*!
-			comment: 执行一条sql语句
-			args: int32_t moduleID, string sql
-			type: dispatch
-			res : nil
+		comment: 建立一个新的Mysql连接
+		args: string host, string user, string password, string dbName, int32_t port, bool useCache
+		type: dispatch
+		res : bool succ
 		**/
-		execSql,	
+		db_connect = 2401,
 
 		/*!
-			comment: 创建一个实例
-			args: string tableName, table entityInfo
-			type: dispatch
-			res : entityInfo
+		comment: 执行一条sql语句
+		args: int32_t moduleID, string sql
+		type: dispatch
+		res : nil
 		**/
-		insert,
+		db_execSql,
 
 		/*!
-			comment: 获取一个实例
-			args: int32_t moduleID, string field, int32_t entityID ( entityID == 0 then load all
-			type: dispatch
-			res : entityInfo
+		comment: 创建一个实例
+		args: string tableName, table entityInfo
+		type: dispatch
+		res : entityInfo
 		**/
-		load,
-		
+		db_insert,
+
 		/*!
-			comment: 更新一个实例
-			args: string field, int32_t entityID, table entityDirty
-			type: dispatch
-			res : nil
+		comment: 获取一个实例
+		args: int32_t moduleID, string field, int32_t entityID ( entityID == 0 then load all
+		type: dispatch
+		res : entityInfo
 		**/
-		update,
+		db_load,
 
-		callback,
-	};
+		/*!
+		comment: 更新一个实例
+		args: string field, int32_t entityID, table entityDirty
+		type: dispatch
+		res : nil
+		**/
+		db_update,
 
-	enum node
-	{
-		node_create = 2500,
-		node_create_succ,
-		node_regist,
-		node_regist_succ,
+		db_callback,
+
+		node_create = 2501,
+		node_regist
 	};
 
 	enum error
@@ -210,11 +179,5 @@ namespace eid
 		err_event_timeout,
 		err_inet_pton,
 		err_distributed_node_repeat,
-	};
-
-	enum sample
-	{
-		get_proc_path = 7000,
-		get_cfg,
 	};
 }
