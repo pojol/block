@@ -1,10 +1,22 @@
 PROJECT(core)
 
 #引用头文件目录
-INCLUDE_DIRECTORIES(
-	${BLOCK_SOURCE_DIR}/3rd/fmt
-	${BLOCK_SOURCE_DIR}/3rd/glog/src
-)
+if(WIN32)
+	INCLUDE_DIRECTORIES(
+		${BLOCK_SOURCE_DIR}/3rd/fmt
+		${BLOCK_SOURCE_DIR}/3rd/glog/src
+	)
+endif()
+
+if(UNIX)
+	set(CMAKE_CXX_FLAGS "-std=c++1y ${CMAKE_CXX_FLAGS}")
+
+	INCLUDE_DIRECTORIES(
+		${BLOCK_SOURCE_DIR}/lib/glog/include
+		${BLOCK_SOURCE_DIR}/lib/fmt/include
+	)
+endif()
+
 Add_Definitions("-DGLOG_NO_ABBREVIATED_SEVERITIES")
 
 #引用库目录

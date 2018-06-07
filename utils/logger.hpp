@@ -80,7 +80,7 @@ namespace block
 			template <typename ...P>
 			void RECORD(const std::string &behavior, uint32_t player, uint32_t time, const std::string &content, P&& ...values)
 			{
-				impl_.RECORD_LOG(behavior, player, time, content, values);
+				impl_.RECORD_LOG(behavior, player, time, content, values...);
 			}
 
 		private:
