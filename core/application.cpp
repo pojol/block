@@ -60,7 +60,7 @@ block::utils::Logger block::Application::getLogger()
 	return impl_.getLogger();
 }
 
-block::utils::Timer block::Application::getTimer()
+block::utils::Timer & block::Application::getTimer()
 {
 	return impl_.getTimer();
 }

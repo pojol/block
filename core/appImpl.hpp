@@ -62,7 +62,7 @@ namespace block
 		int64_t uuid();
 
 		utils::Logger getLogger() { return logger_; }
-		utils::Timer getTimer() { return timer_; }
+		utils::Timer & getTimer() { return timer_; }
 
 		void reactorRegist(block::ModuleID moduleID, block::EventID event);
 		void reactorDispatch(block::ModuleID self, block::ModuleID target, block::EventID event, block::ArgsPtr args);

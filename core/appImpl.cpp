@@ -14,8 +14,6 @@
 #include "module.h"
 #include "dynamic_module_factory.h"
 
-#include "../utils/crc32.hpp"
-
 block::AppImpl::AppImpl()
 	: shutdown_(false)
 	, module_idx_(2)
@@ -344,7 +342,7 @@ void block::AppImpl::run()
 		}
 		else {
 			auto of = _use_ms - cfg_.tick_count;
-			logger_.WARN("single frame processing time overflow : {}ms", of);
+			logger_.WARN("[BLOCK]application single frame processing time overflow : {}ms", of);
 		}
 	}
 }

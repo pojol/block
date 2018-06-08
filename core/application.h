@@ -67,7 +67,7 @@ namespace block
 		void exit();
 
 		utils::Logger getLogger();
-		utils::Timer getTimer();
+		utils::Timer & getTimer();
 
 	protected:
 		void reactorRegist(block::ModuleID moduleID, block::EventID event);
