@@ -14,6 +14,8 @@
 #include "module.h"
 #include "dynamic_module_factory.h"
 
+#include "../utils/crc32.hpp"
+
 block::AppImpl::AppImpl()
 	: shutdown_(false)
 	, module_idx_(2)
@@ -47,7 +49,7 @@ block::ModuleID block::AppImpl::createDynamicModule(const std::string &moduleTyp
 	}
 
 	block::Module *_module_ptr = static_cast<block::Module*>(DynamicModuleFactory::create(moduleType));
-	_module_ptr->setID(makeModuleID());
+	_module_ptr->setID(uuid());
 
 	registModule(_module_ptr, true);
 
@@ -81,7 +83,7 @@ void block::AppImpl::deleteModule(block::ModuleID moduleID)
 	}
 }
 
-block::ModuleID block::AppImpl::getModule(const std::string &moduleName) const
+block::ModuleID block::AppImpl::getModuleID(const std::string &moduleName) const
 {
 	auto itr = module_name_map_.find(moduleName);
 	if (itr != module_name_map_.end()) {
@@ -92,9 +94,9 @@ block::ModuleID block::AppImpl::getModule(const std::string &moduleName) const
 	}
 }
 
-uint32_t block::AppImpl::getMachine() const
+uint32_t block::AppImpl::getAppID() const
 {
-	return cfg_.machine_;
+	return cfg_.appid;
 }
 
 int64_t block::AppImpl::uuid()
@@ -103,7 +105,7 @@ int64_t block::AppImpl::uuid()
 	uint64_t _tick = getSystemTick() - start_time_;
 
 	_uuid |= _tick << 22;
-	_uuid |= cfg_.machine_ & 0x3FF << 12;
+	_uuid |= cfg_.appid & 0x3FF << 12;
 
 	_uuid |= sequence_++ & 0xFFF;
 	if (sequence_ == 0x1000) {
@@ -198,8 +200,14 @@ void block::AppImpl::reactorRegist(block::ModuleID moduleID, block::EventID even
 	});
 
 	if (_find != module_list_.end()) {
+	
+		auto _repItr = mailboxMap_.find(std::make_pair(moduleID, event));
+		if (_repItr != mailboxMap_.end()) {
+			logger_.WARN("[BLOCK]application regist event:{} repet, module:{}", event, (*_find)->getModuleName());
+			return;
+		}
 
-		mailboxMap_.insert(std::make_pair((moduleID * 10000) + event, (*_find)->mailboxPtr_));
+		mailboxMap_.insert(std::make_pair(std::make_pair(moduleID, event), (*_find)->mailboxPtr_));
 
 	}
 	else {
@@ -210,7 +218,7 @@ void block::AppImpl::reactorRegist(block::ModuleID moduleID, block::EventID even
 void block::AppImpl::reactorDispatch(block::ModuleID self, block::ModuleID target, block::EventID event, block::ArgsPtr args)
 {
 	//! 找到目标mailbox
-	auto _find = mailboxMap_.find((target * 10000) + event);
+	auto _find = mailboxMap_.find(std::make_pair(target, event));
 	if (_find != mailboxMap_.end()) {
 
 		auto taskPtr = new TaskInfo();
@@ -346,21 +354,12 @@ void block::AppImpl::exit()
 	
 }
 
-int32_t block::AppImpl::makeModuleID()
-{
-	if (module_idx_ == INT32_MAX) {
-		module_idx_ = 2;
-	}
-
-	return module_idx_++;
-}
-
 uint64_t block::AppImpl::getSystemTick()
 {
 	return (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
-void block::AppImpl::unregist_dynamic_module(uint32_t module_id)
+void block::AppImpl::unregist_dynamic_module(block::ModuleID module_id)
 {
 	auto itr = std::find_if(module_list_.begin(), module_list_.end(), [&](std::list<Module *>::value_type it) {
 		return (it->getModuleID() == module_id);

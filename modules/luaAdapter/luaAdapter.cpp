@@ -285,9 +285,9 @@ void block::modules::LuaAdapterModule::create()
 	proxyPtr_->state_.set("module_id", getModuleID());
 
 	proxyPtr_->state_.new_usertype<block::Application>("Application"
-		, "getModule", &Application::getModule
+		, "getModuleID", &Application::getModuleID
 		, "getName", &Application::getName
-		, "getMachine", &Application::getMachine
+		, "getAppID", &Application::getAppID
 		, "getUUID", &Application::getUUID
 		, "createDynamicModule", &Application::createDynamicModule
 		, "deleteModule", &Application::deleteModule);

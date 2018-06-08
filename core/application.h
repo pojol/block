@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "appImpl.hpp"
 
@@ -11,58 +11,58 @@ namespace block
 		Application();
 
 		/*!
-			获得进程的名称
+			鑾峰緱杩涚▼鐨勫悕绉?
 		**/
 		std::string getName() const;
 
 		/*!
-			通过名字获取某个Module的实例ID， 仅支持静态创建的Module。
+			閫氳繃鍚嶅瓧鑾峰彇鏌愪釜Module鐨勫疄渚婭D锛?浠呮敮鎸侀潤鎬佸垱寤虹殑Module銆?
 		**/
-		block::ModuleID getModule(const std::string &moduleName) const;
+		block::ModuleID getModuleID(const std::string &moduleName) const;
 
 		/*!
-			获取进程的机器ID
+			鑾峰彇杩涚▼鐨勬満鍣↖D
 		**/
-		uint32_t getMachine() const;
+		uint32_t getAppID() const;
 
 		/*!
-			获得在集群内产生的唯一ID
+			鑾峰緱鍦ㄩ泦缇ゅ唴浜х敓鐨勫敮涓€ID
 		**/
 		int64_t getUUID();
 
 		/*!
-			获得当前的毫秒数
+			鑾峰緱褰撳墠鐨勬绉掓暟
 		**/
 		uint64_t getSystemTick();
 
 		/*!
-			初始化进程
+			鍒濆鍖栬繘绋?
 		**/
 		void initCfg(const block::AppConfig &cfg);
 
 		/*!
-			创建一个Module,(这个函数只能作用于app.run 之前
+			鍒涘缓涓€涓狹odule,(杩欎釜鍑芥暟鍙兘浣滅敤浜巃pp.run 涔嬪墠
 		**/
 		template <typename T>
 		void createModule(T *module);
 
 		/*!
-			动态创建一个Module
+			鍔ㄦ€佸垱寤轰竴涓狹odule
 		**/
 		block::ModuleID createDynamicModule(const std::string &moduleType);
 
 		/*!
-			删除一个Module 
+			鍒犻櫎涓€涓狹odule 
 		**/
 		void deleteModule(block::ModuleID moduleID);
 
 		/*!
-			进程的主循环
+			杩涚▼鐨勪富寰幆
 		**/
 		void run();
 
 		/*!
-			进程的退出逻辑
+			杩涚▼鐨勯€€鍑洪€昏緫
 		**/
 		void exit();
 

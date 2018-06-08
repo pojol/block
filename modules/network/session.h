@@ -1,4 +1,4 @@
-#ifndef _GSF_SESSION_HEADER_
+﻿#ifndef _GSF_SESSION_HEADER_
 #define _GSF_SESSION_HEADER_
 
 #include <event2/bufferevent.h>
@@ -23,7 +23,7 @@ namespace block
 		class Session
 		{
 		public:
-			Session(int fd, int eid, SessionMgr *mgr, ::bufferevent *bev);
+			Session(int fd, block::ModuleID moduleID, SessionMgr *mgr, ::bufferevent *bev);
 			~Session();
 
 			static void readCB(::bufferevent *bev, void *ctx);

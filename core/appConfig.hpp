@@ -20,6 +20,6 @@ namespace block
 		std::string name = "default";
 
 		//! app的id，作用于分布式架构，必须保证唯一。
-		int32_t machine_ = 0;
+		int32_t appid = 0;
 	};
 }

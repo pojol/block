@@ -1,4 +1,4 @@
-#ifndef _GSF_DISTRIBUTED_NODE_HEADER_
+﻿#ifndef _GSF_DISTRIBUTED_NODE_HEADER_
 #define _GSF_DISTRIBUTED_NODE_HEADER_
 
 #include <core/module.h>
@@ -60,9 +60,6 @@ namespace block
 			void eRegistNode(block::ModuleID target, block::ArgsPtr args);
 
 		private:
-
-			block::ModuleID logM_ = block::ModuleNil;
-			block::ModuleID timerM_ = block::ModuleNil;
 			block::SessionID connectorFD_ = block::SessionNil;
 
 			std::string acceptorIP_ = "";

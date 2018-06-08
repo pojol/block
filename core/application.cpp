@@ -25,14 +25,14 @@ void block::Application::deleteModule(block::ModuleID moduleID)
 	impl_.deleteModule(moduleID);
 }
 
-block::ModuleID block::Application::getModule(const std::string &moduleName) const
+block::ModuleID block::Application::getModuleID(const std::string &moduleName) const
 {
-	return impl_.getModule(moduleName);
+	return impl_.getModuleID(moduleName);
 }
 
-uint32_t block::Application::getMachine() const
+uint32_t block::Application::getAppID() const
 {
-	return impl_.getMachine();
+	return impl_.getAppID();
 }
 
 int64_t block::Application::getUUID()

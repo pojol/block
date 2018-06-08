@@ -21,12 +21,6 @@ block::modules::NodeModule::~NodeModule()
 
 void block::modules::NodeModule::before_init()
 {
-	logM_ = APP.getModule("LogModule");
-	timerM_ = APP.getModule("TimerModule");
-
-	assert(logM_ != block::ModuleNil);
-	assert(timerM_ != block::ModuleNil);
-
 	using namespace std::placeholders;
 	listen(block::event::node_create, std::bind(&NodeModule::eCreateNode, this, _1, _2));
 	listen(block::event::node_regist, std::bind(&NodeModule::eRegistNode, this, _1, _2));
@@ -161,7 +155,7 @@ void block::modules::NodeModule::eventRpc(block::EventID event, block::ModuleID 
 void block::modules::NodeModule::registNode(block::ModuleID base, int event, const std::string &ip, int port)
 {
 	bool bRes = false;
-	auto _moduleid = 0;
+	block::ModuleID _moduleid = 0;
 
 	for (auto nod : eventMap_)
 	{

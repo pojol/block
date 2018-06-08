@@ -1,17 +1,17 @@
-//
+﻿//
 // Created by pojol on 2017/2/13.
 //
 
 #pragma once
 
-// 后面用工具自动生成
-//! 用于描述框架中用到的事件, 用户可以以此为模板在自己工程中建立一个event_list 用于工程中的事件描述
+// 鍚庨潰鐢ㄥ伐鍏疯嚜鍔ㄧ敓鎴?
+//! 鐢ㄤ簬鎻忚堪妗嗘灦涓敤鍒扮殑浜嬩欢, 鐢ㄦ埛鍙互浠ユ涓烘ā鏉垮湪鑷繁宸ョ▼涓缓绔嬩竴涓猠vent_list 鐢ㄤ簬宸ョ▼涓殑浜嬩欢鎻忚堪
 
 namespace block
 {
 	enum event {
 		/*!
-		comment: Module初始化成功
+		comment: Module鍒濆鍖栨垚鍔?
 		args: nil
 		type: boardcast
 		res : int32_t module_id
@@ -19,18 +19,18 @@ namespace block
 		module_init_succ = 101,
 
 		/*!
-		comment: Module退出成功
+		comment: Module閫€鍑烘垚鍔?
 		args: nil
 		type: boardcast
 		res : int32_t module_id
 		**/
 		module_shut_succ,
 
-		//! 凡是gsf集群内使用rpc交互的消息都应该定义在distributed区块
+		//! 鍑℃槸gsf闆嗙兢鍐呬娇鐢╮pc浜や簰鐨勬秷鎭兘搴旇瀹氫箟鍦╠istributed鍖哄潡
 		rpc_begin = 1001,
 
 		/*!
-		comment: 将Node绑定到Coordinator
+		comment: 灏哊ode缁戝畾鍒癈oordinator
 		args: string node_type, int32_t node_id, string root_ip, int32_t root_port, [{string module_name, int32_t module_id, int32_t module_fature} ... ]
 		type: rpc
 		res : stream args, int32_t progress, bool succ
@@ -41,7 +41,7 @@ namespace block
 		coordinat_unregit,
 
 		/*!
-		comment: 调整Node在Coordinator中的权重
+		comment: 璋冩暣Node鍦–oordinator涓殑鏉冮噸
 		args: int32_t node_id, string module_name, int32_t module_fature, int32_t +- weight
 		type: rpc
 		res : stream args, int32_t progress, bool succ
@@ -49,7 +49,7 @@ namespace block
 		coordinat_adjust_weight,
 
 		/*!
-		comment: 通过ModuleName和ModuleFeature选取一个集群中适合自己的Node
+		comment: 閫氳繃ModuleName鍜孧oduleFeature閫夊彇涓€涓泦缇や腑閫傚悎鑷繁鐨凬ode
 		args: string module_name, int32_t module_fature
 		type: rpc
 		res : stream args, int32_t progress, bool succ
@@ -59,7 +59,7 @@ namespace block
 		rpc_end = 1999,
 
 		/*!
-		comment: 创建一个接收器
+		comment: 鍒涘缓涓€涓帴鏀跺櫒
 		args: int32_t module_id, string ip, int32_t port
 		type: dispatch
 		res : bool succ or fail, string reason
@@ -67,7 +67,7 @@ namespace block
 		tcp_make_acceptor = 2001,
 
 		/*!
-		comment: 创建一个连接器
+		comment: 鍒涘缓涓€涓繛鎺ュ櫒
 		args: module_id, ip, port
 		type: dispatch
 		res : bool succ or fail, string reason
@@ -75,7 +75,7 @@ namespace block
 		tcp_make_connector,
 
 		/*!
-		comment: 踢掉某个现有的连接
+		comment: 韪㈡帀鏌愪釜鐜版湁鐨勮繛鎺?
 		args: int32_t fd
 		type: dispatch
 		res : bool succ or fail, string reason
@@ -83,7 +83,7 @@ namespace block
 		tcp_kick_connect,
 			
 		/*!
-		comment: 发送一条网络消息
+		comment: 鍙戦€佷竴鏉＄綉缁滄秷鎭?
 		args: int32_t fd, int32_t msgid, stream block
 		type: dispatch
 		res : nil
@@ -91,7 +91,7 @@ namespace block
 		tcp_send,
 
 		/*!
-		comment: 接收到一条网络消息
+		comment: 鎺ユ敹鍒颁竴鏉＄綉缁滄秷鎭?
 		args: int32_t fd, int32_t msgid, stream block
 		type: listen
 		res : nil
@@ -99,7 +99,7 @@ namespace block
 		tcp_recv,
 
 		/*!
-		comment: 接收到一个新的连接（适用于 acceptor
+		comment: 鎺ユ敹鍒颁竴涓柊鐨勮繛鎺ワ紙閫傜敤浜?acceptor
 		args: int32_t fd
 		type: listen
 		res : nil
@@ -107,7 +107,7 @@ namespace block
 		tcp_new_connect,
 
 		/*!
-		comment: 连接被断开, 只有连接错误才会收到这条事件（服务器主动kick不会
+		comment: 杩炴帴琚柇寮€, 鍙湁杩炴帴閿欒鎵嶄細鏀跺埌杩欐潯浜嬩欢锛堟湇鍔″櫒涓诲姩kick涓嶄細
 		args: int32_t fd
 		type: listen
 		res : int32_t fd, string reason
@@ -115,7 +115,7 @@ namespace block
 		tcp_dis_connect,
 
 		/*!
-		comment: 重新装载 Lua Script Module, 会走标准的退出和进入流程 init, shut 。即便持有状态也可以方便的热更
+		comment: 閲嶆柊瑁呰浇 Lua Script Module, 浼氳蛋鏍囧噯鐨勯€€鍑哄拰杩涘叆娴佺▼ init, shut 銆傚嵆渚挎寔鏈夌姸鎬佷篃鍙互鏂逛究鐨勭儹鏇?
 		args: int32_t module_id
 		type: dispatch
 		res : bool succ
@@ -123,7 +123,7 @@ namespace block
 		script_reload = 2301,
 
 		/*!
-		comment: 建立一个新的Mysql连接
+		comment: 寤虹珛涓€涓柊鐨凪ysql杩炴帴
 		args: string host, string user, string password, string dbName, int32_t port, bool useCache
 		type: dispatch
 		res : bool succ
@@ -131,7 +131,7 @@ namespace block
 		db_connect = 2401,
 
 		/*!
-		comment: 执行一条sql语句
+		comment: 鎵ц涓€鏉ql璇彞
 		args: int32_t moduleID, string sql
 		type: dispatch
 		res : nil
@@ -139,7 +139,7 @@ namespace block
 		db_execSql,
 
 		/*!
-		comment: 创建一个实例
+		comment: 鍒涘缓涓€涓疄渚?
 		args: string tableName, table entityInfo
 		type: dispatch
 		res : entityInfo
@@ -147,7 +147,7 @@ namespace block
 		db_insert,
 
 		/*!
-		comment: 获取一个实例
+		comment: 鑾峰彇涓€涓疄渚?
 		args: int32_t moduleID, string field, int32_t entityID ( entityID == 0 then load all
 		type: dispatch
 		res : entityInfo
@@ -155,7 +155,7 @@ namespace block
 		db_load,
 
 		/*!
-		comment: 更新一个实例
+		comment: 鏇存柊涓€涓疄渚?
 		args: string field, int32_t entityID, table entityDirty
 		type: dispatch
 		res : nil
