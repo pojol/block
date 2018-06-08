@@ -22,8 +22,9 @@ block::modules::NodeModule::~NodeModule()
 void block::modules::NodeModule::before_init()
 {
 	using namespace std::placeholders;
-	listen(block::event::node_create, std::bind(&NodeModule::eCreateNode, this, _1, _2));
-	listen(block::event::node_regist, std::bind(&NodeModule::eRegistNode, this, _1, _2));
+	listen(block::event::node_init, std::bind(&NodeModule::eNodeInit, this, _1, _2));
+	
+	//listen(block::event::node_regist, std::bind(&NodeModule::eRegistNode, this, _1, _2));
 
 	//listenRpc(std::bind(&NodeModule::eventRpc, this, _1, _2, _3, _4));
 
@@ -188,7 +189,7 @@ void block::modules::NodeModule::registNode(block::ModuleID base, int event, con
 	}
 }
 
-void block::modules::NodeModule::eCreateNode(block::ModuleID target, block::ArgsPtr args)
+void block::modules::NodeModule::eNodeInit(block::ModuleID target, block::ArgsPtr args)
 {
 	if (!service_) {
 		id_ = args->pop_i32();

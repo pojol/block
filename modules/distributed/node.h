@@ -56,8 +56,10 @@ namespace block
 
 			void registNode(block::ModuleID base, int event, const std::string &ip, int port);
 
-			void eCreateNode(block::ModuleID target, block::ArgsPtr args);
 			void eRegistNode(block::ModuleID target, block::ArgsPtr args);
+
+
+			void eNodeInit(block::ModuleID target, block::ArgsPtr args);
 
 		private:
 			block::SessionID connectorFD_ = block::SessionNil;
