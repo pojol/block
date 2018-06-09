@@ -42,7 +42,7 @@ namespace block
 
 		block::ModuleID getModuleID(const std::string &moduleName) const;
 
-		uint32_t getAppID() const;
+		const block::AppConfig & getAppCfg();
 
 		uint64_t getSystemTick();
 

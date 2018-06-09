@@ -92,9 +92,9 @@ block::ModuleID block::AppImpl::getModuleID(const std::string &moduleName) const
 	}
 }
 
-uint32_t block::AppImpl::getAppID() const
+const block::AppConfig & block::AppImpl::getAppCfg()
 {
-	return cfg_.appid;
+	return cfg_;
 }
 
 int64_t block::AppImpl::uuid()

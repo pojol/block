@@ -23,7 +23,7 @@ namespace block
 		/*!
 			鑾峰彇杩涚▼鐨勬満鍣↖D
 		**/
-		uint32_t getAppID() const;
+		const block::AppConfig & getAppCfg();
 
 		/*!
 			鑾峰緱鍦ㄩ泦缇ゅ唴浜х敓鐨勫敮涓€ID

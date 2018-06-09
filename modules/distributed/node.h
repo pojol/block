@@ -1,5 +1,4 @@
-﻿#ifndef _GSF_DISTRIBUTED_NODE_HEADER_
-#define _GSF_DISTRIBUTED_NODE_HEADER_
+﻿#pragma once
 
 #include <core/module.h>
 
@@ -23,19 +22,22 @@ namespace block
 
 		struct ModuleInfo
 		{
-			std::string moduleName = "";
-			block::ModuleID moduleID = block::ModuleNil;
-			int32_t characteristic = 0;
+			std::string moduleName_ = "";
+			block::ModuleID moduleID_ = block::ModuleNil;
 		};
-
+ 
 		struct NodeInfo
 		{
-			block::ModuleID connecotr_m_ = block::ModuleNil;
-			std::string ip_ = "";
-			int port_ = 0;
-			int event_ = 0;
-			block::ModuleID base_ = block::ModuleNil;
+			std::vector<ModuleInfo> modules;
+
+			int32_t nodeID_ = 0;
+			std::string nodeType_ = "";
+			std::string nodeIP_ = "";
+			int nodePort_ = 0;
+
+			int32_t weight_ = 0;
 		};
+		typedef std::shared_ptr<NodeInfo> NodePtr;
 
 		class NodeModule
 			: public block::Module
@@ -52,40 +54,23 @@ namespace block
 
 		protected:
 
-			void eventRpc(block::EventID event, block::ModuleID moduleID, const block::ArgsPtr &args, block::RpcCallback callback);
-
-			void registNode(block::ModuleID base, int event, const std::string &ip, int port);
-
-			void eRegistNode(block::ModuleID target, block::ArgsPtr args);
-
-
 			void eNodeInit(block::ModuleID target, block::ArgsPtr args);
 
 		private:
 			block::SessionID connectorFD_ = block::SessionNil;
-
-			std::string acceptorIP_ = "";
-			int32_t acceptorPort_ = 0;
-
-			int32_t delayTag_ = 1;
-
-			int32_t id_ = 0;
-			std::string type_ = "";
+			
+			int32_t nodeID_ = 0;
+			std::string nodeType_ = "";
+			std::string nodeIp_ = "";
+			int32_t nodePort_ = 0;
 
 			int32_t rpcDelay_ = 10000;
-			bool service_ = false;
-			block::ModuleID targetM_ = block::ModuleNil;
-
-			std::vector<ModuleInfo> modules_;
 
 			std::map<int64_t, CallbackPtr> callbackMap_;
 			std::map<uint64_t, CallbackPtr> timerSet_;
 
-			std::map<int, NodeInfo> eventMap_;
+			std::multimap<std::string, NodePtr> nodeMap_;
 		};
 
 	}
 }
-
-
-#endif

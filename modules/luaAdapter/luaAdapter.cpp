@@ -256,6 +256,7 @@ void block::modules::LuaAdapterModule::create()
 		, "push_i32", &Args::push_i32
 		, "push_string", &Args::push_string
 		, "push_bool", &Args::push_bool
+		, "push_i64", &Args::push_i64
 		, "pop_string", &Args::pop_string
 		, "pop_i16", &Args::pop_i16
 		, "pop_ui16", &Args::pop_ui16
@@ -287,7 +288,6 @@ void block::modules::LuaAdapterModule::create()
 	proxyPtr_->state_.new_usertype<block::Application>("Application"
 		, "getModuleID", &Application::getModuleID
 		, "getName", &Application::getName
-		, "getAppID", &Application::getAppID
 		, "getUUID", &Application::getUUID
 		, "createDynamicModule", &Application::createDynamicModule
 		, "deleteModule", &Application::deleteModule);

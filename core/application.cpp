@@ -30,9 +30,9 @@ block::ModuleID block::Application::getModuleID(const std::string &moduleName) c
 	return impl_.getModuleID(moduleName);
 }
 
-uint32_t block::Application::getAppID() const
+const block::AppConfig & block::Application::getAppCfg()
 {
-	return impl_.getAppID();
+	return impl_.getAppCfg();
 }
 
 int64_t block::Application::getUUID()

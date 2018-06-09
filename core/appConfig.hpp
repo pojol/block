@@ -21,5 +21,8 @@ namespace block
 
 		//! app的id，作用于分布式架构，必须保证唯一。
 		int32_t appid = 0;
+
+		//! rpc 调用的超时时间 ms
+		int32_t rpc_timeout = 10000;
 	};
 }
