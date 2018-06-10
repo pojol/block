@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 
 #include <stdint.h>
 
 namespace block
 {
-	typedef int32_t ModuleID;
-	static const int32_t ModuleNil = INT32_MAX;
+	typedef int64_t ModuleID;
+	static const int64_t ModuleNil = 0;
 
 	typedef int32_t EventID;
 	static const int32_t EventNil = INT32_MAX;

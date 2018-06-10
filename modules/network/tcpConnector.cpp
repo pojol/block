@@ -51,7 +51,7 @@ void block::network::TcpConnectorModule::init()
 {
 	// todo ...
 	
-	//boardcast(eid::module_init_succ, block::makeArgs(get_module_id()));
+	boardcast(block::event::module_init_succ, block::makeArgs(getModuleID(), getModuleName()));
 }
 
 void block::network::TcpConnectorModule::execute()
@@ -129,6 +129,7 @@ void block::network::TcpConnectorModule::needCloseSession(int fd)
 
 void block::network::TcpConnectorModule::eSendMsg(block::ModuleID target, block::ArgsPtr args)
 {
+	auto _fd = args->pop_fd();
 	auto _msg = args->pop_msgid();
 	std::string _str = "";
 

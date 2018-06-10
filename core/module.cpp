@@ -41,6 +41,11 @@ void block::Module::rpc(block::EventID event, ArgsPtr args, RpcCallback callback
 	mailboxPtr_->rpc(event, std::move(args), callback);
 }
 
+void block::Module::boardcast(block::EventID event, ArgsPtr args)
+{
+	mailboxPtr_->boardcast(event, std::move(args));
+}
+
 block::Module::Module(const std::string &name)
 	: name_(name)
 #ifdef WATCH_PERF
@@ -83,6 +88,11 @@ void block::MailBox::dispatch(block::ModuleID target, block::EventID event, bloc
 void block::MailBox::rpc(block::EventID event, ArgsPtr args, RpcCallback callback /*= nullptr*/)
 {
 
+}
+
+void block::MailBox::boardcast(block::EventID event, ArgsPtr args)
+{
+	APP.reactorBoardcast(basePtr_->getModuleID(), event, std::move(args));
 }
 
 void block::MailBox::pull()

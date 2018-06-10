@@ -1,4 +1,4 @@
-#include "sessionMgr.h"
+﻿#include "sessionMgr.h"
 #include "session.h"
 
 #include <core/application.h>
@@ -13,7 +13,7 @@ block::network::SessionMgr::~SessionMgr()
 
 }
 
-block::network::SessionPtr block::network::SessionMgr::makeSession(int fd, int module_id, ::bufferevent *bev)
+block::network::SessionPtr block::network::SessionMgr::makeSession(int fd, block::ModuleID module_id, ::bufferevent *bev)
 {
 	target_ = module_id;
 
@@ -34,7 +34,7 @@ block::network::SessionPtr block::network::SessionMgr::find(int fd)
 	return nullptr;
 }
 
-block::network::SessionPtr block::network::SessionMgr::findByModule(uint32_t module_id)
+block::network::SessionPtr block::network::SessionMgr::findByModule(block::ModuleID module_id)
 {
 	auto _session_ptr = sessionQueueByModule_.find(module_id);
 

@@ -1,13 +1,13 @@
-#include "session.h"
+﻿#include "session.h"
 #include "sessionMgr.h"
 
 #include <core/application.h>
 
 #include <iostream>
 
-block::network::Session::Session(int fd, int eid, SessionMgr *mgr, ::bufferevent *bev)
+block::network::Session::Session(int fd, block::ModuleID moduleID, SessionMgr *mgr, ::bufferevent *bev)
     : fd_(fd)
-	, targetM_(eid)
+	, targetM_(moduleID)
 	, bufEvtPtr_(bev)
 	, basePtr_(mgr)
 {
@@ -102,13 +102,13 @@ void block::network::Session::read(::bufferevent *bev)
 
 	uint32_t _msg_size = *reinterpret_cast<MsgHeadLen*>(_head);
 
-	//! 这里要补充一些数据块检查
+	//! 杩欓噷瑕佽ˉ鍏呬竴浜涙暟鎹潡妫€鏌?
 	if (_buf_len >= _msg_size) {
 
 		while (_buf_len >= _msg_size)
 		{
 			auto _block = std::make_shared<Block>(_msg_size);
-			evbuffer_remove(inBufPtr_, _block->buf_, _msg_size);	//! 将数据流拷贝到msg block中
+			evbuffer_remove(inBufPtr_, _block->buf_, _msg_size);	//! 灏嗘暟鎹祦鎷疯礉鍒癿sg block涓?
 
 			MsgID _msg_id = _block->get_msg_id();
 
@@ -123,7 +123,7 @@ void block::network::Session::read(::bufferevent *bev)
 			*/
 			}
 			else {
-				if (!_block->check()) { //! 先这样检查下block中的内容是否合法，后面肯定不能这样明文传输
+				if (!_block->check()) { //! 鍏堣繖鏍锋鏌ヤ笅block涓殑鍐呭鏄惁鍚堟硶锛屽悗闈㈣偗瀹氫笉鑳借繖鏍锋槑鏂囦紶杈?
 					break;
 				}
 

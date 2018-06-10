@@ -5,7 +5,6 @@
 ## 简介
 > *block* 是一个 **模块化的跨平台游戏服务器框架** ，通过不同的 [*Module*](https://github.com/pojol/block/wiki/Core_Module) 组装方式可以适应大多数的架构。通常您只需要使用 **lua** 就能完成大部分的游戏逻辑编写，但是您也可以使用 **c++** 来完成一些高密度计算的逻辑。
 
-***
 
 #### 特性
 * 完全逻辑独立的模块，通过Mailbox拉取,推送消息
@@ -21,9 +20,11 @@
 #### 编译&安装
 * install.py
 ***
+
 #### 文档
 * [document](https://github.com/pojol/block/wiki)
 ***
+
 #### 依赖库
 * [fmtlib](https://github.com/fmtlib/fmt)
 * [lua](https://github.com/lua/lua)

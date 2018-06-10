@@ -21,17 +21,14 @@ block::modules::NodeModule::~NodeModule()
 
 void block::modules::NodeModule::before_init()
 {
-	logM_ = APP.getModule("LogModule");
-	timerM_ = APP.getModule("TimerModule");
-
-	assert(logM_ != block::ModuleNil);
-	assert(timerM_ != block::ModuleNil);
-
 	using namespace std::placeholders;
-	listen(block::event::node_create, std::bind(&NodeModule::eCreateNode, this, _1, _2));
-	listen(block::event::node_regist, std::bind(&NodeModule::eRegistNode, this, _1, _2));
+	listen(block::event::node_init, std::bind(&NodeModule::eNodeInit, this, _1, _2));
+	
+	//listen(block::event::node_regist, std::bind(&NodeModule::eRegistNode, this, _1, _2));
 
 	//listenRpc(std::bind(&NodeModule::eventRpc, this, _1, _2, _3, _4));
+
+	rpcDelay_ = APP.getAppCfg().rpc_timeout;
 
 	listen(block::event::tcp_recv, [&](block::ModuleID target, block::ArgsPtr args) {
 
@@ -104,6 +101,7 @@ void block::modules::NodeModule::shut()
 {
 }
 
+/*
 void block::modules::NodeModule::eventRpc(block::EventID event, block::ModuleID moduleID, const block::ArgsPtr &args, block::RpcCallback callback)
 {
 	int64_t _callbackid = 0;
@@ -130,7 +128,7 @@ void block::modules::NodeModule::eventRpc(block::EventID event, block::ModuleID 
 			return;
 		}
 
-		/* 这里的tag 处理要考虑下
+
 		mailboxPtr_->dispatch(timerM_, eid::timer::delay_milliseconds, block::makeArgs(delayTag_, rpcDelay_));
 		auto _callbackPtr = std::make_shared<CallbackInfo>();
 		_callbackPtr->callback = callback;
@@ -140,28 +138,28 @@ void block::modules::NodeModule::eventRpc(block::EventID event, block::ModuleID 
 
 		callbackMap_.insert(std::make_pair(_callbackid, _callbackPtr));
 		timerSet_.insert(std::make_pair(_callbackPtr->timer_, _callbackPtr));
-		*/
 	}
 
 	if (args) {
-	/*
+
 		auto argsPtr = block::ArgsPool::get_ref().get();
 		argsPtr->push(event);
 		argsPtr->push(_callbackid);
 		argsPtr->push_block(args->get_block(0, args->get_size()).c_str(), args->get_size());
 
 		mailboxPtr_->dispatch(_connector_m, eid::network::send, std::move(argsPtr));
-		*/
 	}
 	else {
 		dispatch(_connector_m, block::event::tcp_send, block::makeArgs(event, _callbackid));
 	}
 }
+*/
 
+/*
 void block::modules::NodeModule::registNode(block::ModuleID base, int event, const std::string &ip, int port)
 {
 	bool bRes = false;
-	auto _moduleid = 0;
+	block::ModuleID _moduleid = 0;
 
 	for (auto nod : eventMap_)
 	{
@@ -193,8 +191,60 @@ void block::modules::NodeModule::registNode(block::ModuleID base, int event, con
 		eventMap_.insert(std::make_pair(event, _nod));
 	}
 }
+*/
 
-void block::modules::NodeModule::eCreateNode(block::ModuleID target, block::ArgsPtr args)
+void block::modules::NodeModule::eNodeInit(block::ModuleID target, block::ArgsPtr args)
+{
+	auto _nodeID = args->pop_i32();
+	auto _nodeTy = args->pop_string();
+	auto _nodeIP = args->pop_string();
+	auto _nodePort = args->pop_i32();
+	auto _rootIP = args->pop_string();
+	auto _rootPort = args->pop_i32();
+
+	auto _count = args->pop_i32();
+
+	for (int i = 0; i < _count; ++i)
+	{
+		auto _moduleName = args->pop_string();
+		auto _moduleID = args->pop_moduleid();
+		registModules_.push_back(std::make_pair(_moduleID, _moduleName));
+	}
+
+	// 检查本地是否有这个node
+	if (nodeMap_.find(_nodeID) != nodeMap_.end() && nodeID_ != _nodeID){
+		WARN_FMTLOG("[BLOCK] NodeModule repeat init nodeid:{}", _nodeID);
+		return;
+	}
+
+	nodeID_ = _nodeID;
+	nodeType_ = _nodeTy;
+	nodeIp_ = _nodeIP;
+	nodePort_ = _nodePort;
+	rootIP_ = _rootIP;
+	rootPort_ = _rootPort;
+
+	connector_m_ = APP.createDynamicModule("Node_ConnectorModule");
+	listen(block::event::module_init_succ, [this](block::ModuleID target, block::ArgsPtr args){
+		
+		auto _id = args->pop_moduleid();
+		auto _name = args->pop_string();
+
+		if (_id == connector_m_){
+			dispatch(connector_m_, block::event::tcp_make_connector, block::makeArgs(getModuleID(), rootIP_, rootPort_));
+		}
+
+	});
+
+	listen(block::event::tcp_new_connect, [&](block::ModuleID target, block::ArgsPtr args){
+		connector_fd_ = args->pop_fd();
+
+		INFO_FMTLOG("[BLOCK] NodeModule connected root server! fd:{}", connector_fd_);
+	});
+}
+
+/*
+void block::modules::NodeModule::eNodeInit(block::ModuleID target, block::ArgsPtr args)
 {
 	if (!service_) {
 		id_ = args->pop_i32();
@@ -252,7 +302,6 @@ void block::modules::NodeModule::eCreateNode(block::ModuleID target, block::Args
 		});
 
 		listen(block::event::module_init_succ, [&](block::ModuleID target, block::ArgsPtr args) {
-			/*
 			auto _t = block::ArgsPool::get_ref().get();
 			_t->push_block(args->pop_block(0, args->get_size()).c_str(), args->get_size());
 			auto _module_id = _t->pop_moduleid();
@@ -265,18 +314,8 @@ void block::modules::NodeModule::eCreateNode(block::ModuleID target, block::Args
 					break;
 				}
 			}
-			*/
 		});
 
 	}
 }
-
-void block::modules::NodeModule::eRegistNode(block::ModuleID target, block::ArgsPtr args)
-{
-	auto _base = args->pop_i32();
-	auto _event = args->pop_i32();
-	auto _ip = args->pop_string();
-	auto _port = args->pop_i32();
-
-	registNode(_base, _event, _ip, _port);
-}
+*/

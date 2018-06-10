@@ -1,4 +1,4 @@
-#include "args.h"
+﻿#include "args.h"
 #include <sstream>
 
 
@@ -494,7 +494,7 @@ block::MsgID block::Args::pop_msgid()
 
 block::ModuleID block::Args::pop_moduleid()
 {
-	return pop_i32();
+	return pop_i64();
 }
 
 block::TimerID block::Args::pop_timerid()

@@ -25,14 +25,14 @@ void block::Application::deleteModule(block::ModuleID moduleID)
 	impl_.deleteModule(moduleID);
 }
 
-block::ModuleID block::Application::getModule(const std::string &moduleName) const
+block::ModuleID block::Application::getModuleID(const std::string &moduleName) const
 {
-	return impl_.getModule(moduleName);
+	return impl_.getModuleID(moduleName);
 }
 
-uint32_t block::Application::getMachine() const
+const block::AppConfig & block::Application::getAppCfg()
 {
-	return impl_.getMachine();
+	return impl_.getAppCfg();
 }
 
 int64_t block::Application::getUUID()
@@ -60,7 +60,7 @@ block::utils::Logger block::Application::getLogger()
 	return impl_.getLogger();
 }
 
-block::utils::Timer block::Application::getTimer()
+block::utils::Timer & block::Application::getTimer()
 {
 	return impl_.getTimer();
 }
@@ -73,4 +73,9 @@ void block::Application::reactorRegist(block::ModuleID moduleID, block::EventID 
 void block::Application::reactorDispatch(block::ModuleID self, block::ModuleID target, block::EventID event, block::ArgsPtr args)
 {
 	impl_.reactorDispatch(self, target, event, std::move(args));
+}
+
+void block::Application::reactorBoardcast(block::ModuleID self, block::EventID event, block::ArgsPtr args)
+{
+	impl_.reactorBoardcast(self, event, std::move(args));
 }

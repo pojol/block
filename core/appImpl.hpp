@@ -40,9 +40,9 @@ namespace block
 
 		std::string getName() const;
 
-		block::ModuleID getModule(const std::string &moduleName) const;
+		block::ModuleID getModuleID(const std::string &moduleName) const;
 
-		uint32_t getMachine() const;
+		const block::AppConfig & getAppCfg();
 
 		uint64_t getSystemTick();
 
@@ -62,10 +62,11 @@ namespace block
 		int64_t uuid();
 
 		utils::Logger getLogger() { return logger_; }
-		utils::Timer getTimer() { return timer_; }
+		utils::Timer & getTimer() { return timer_; }
 
 		void reactorRegist(block::ModuleID moduleID, block::EventID event);
 		void reactorDispatch(block::ModuleID self, block::ModuleID target, block::EventID event, block::ArgsPtr args);
+		void reactorBoardcast(block::ModuleID self, block::EventID event, block::ArgsPtr args);
 
 	protected:
 		void tick();
@@ -73,10 +74,7 @@ namespace block
 		template <typename T>
 		void registModule(T *module, bool dynamic = false);
 
-		//！ 临时先写在这里，未来如果支持分布式可能要放在其他地方生成，保证服务器集群唯一。
-		int32_t makeModuleID();
-
-		void unregist_dynamic_module(uint32_t module_id);
+		void unregist_dynamic_module(block::ModuleID module_id);
 
 		typedef std::tuple<uint32_t, std::function<void()>, std::function<void()>, std::function<void(Module*, bool)>, Module*> Frame;
 		void pushFrame(uint64_t index, Frame frame);
@@ -93,11 +91,11 @@ namespace block
 		std::list<Module *> module_list_;
 		std::multimap<uint64_t, std::pair<uint16_t, Module*>> exit_list_;
 
-		std::unordered_map<std::string, int32_t> module_name_map_;
+		std::unordered_map<std::string, block::ModuleID> module_name_map_;
 
 		std::multimap<uint64_t, Frame> halfway_frame_;
 
-		std::unordered_map<block::EventID, MailBoxPtr> mailboxMap_;
+		std::map<std::pair<block::ModuleID, block::EventID>, MailBoxPtr> mailboxMap_;
 
 		bool shutdown_;
 
@@ -121,7 +119,7 @@ namespace block
 		module_list_.push_back(module);
 
 		if (!dynamic) {
-			module->setID(makeModuleID());
+			module->setID(uuid());
 			//auto _type_id = typeid(T).hash_code();
 			//auto _id_itr = module_id_map_.find(_type_id);
 			//if (_id_itr != module_id_map_.end()) {

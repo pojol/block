@@ -1,4 +1,4 @@
-#ifndef _SESSION_MANAGER_HEADER_
+﻿#ifndef _SESSION_MANAGER_HEADER_
 #define _SESSION_MANAGER_HEADER_
 
 #include <memory>
@@ -38,15 +38,15 @@ namespace block
 			void exec();
 
 			SessionPtr find(int fd);
-			SessionPtr findByModule(uint32_t module_id);
+			SessionPtr findByModule(block::ModuleID module_id);
 
-			SessionPtr makeSession(int fd, int module_id, ::bufferevent *bev);
+			SessionPtr makeSession(int fd, block::ModuleID module_id, ::bufferevent *bev);
 
 			int curMaxConnect() const;
 
 		private:
 
-			typedef std::unordered_map<int32_t, SessionPtr> SessionQueue;
+			typedef std::unordered_map<block::ModuleID, SessionPtr> SessionQueue;
 			SessionQueue sessionQueue_;
 			SessionQueue sessionQueueByModule_;
 
