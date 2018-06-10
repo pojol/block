@@ -35,6 +35,8 @@ namespace block
 			std::string nodeIP_ = "";
 			int nodePort_ = 0;
 
+			block::ModuleID connector_m_ = block::ModuleNil;
+
 			int32_t weight_ = 0;
 		};
 		typedef std::shared_ptr<NodeInfo> NodePtr;
@@ -57,19 +59,25 @@ namespace block
 			void eNodeInit(block::ModuleID target, block::ArgsPtr args);
 
 		private:
-			block::SessionID connectorFD_ = block::SessionNil;
+			block::SessionID connector_fd_ = block::SessionNil;
+			block::ModuleID connector_m_ = block::ModuleNil;
 			
 			int32_t nodeID_ = 0;
 			std::string nodeType_ = "";
 			std::string nodeIp_ = "";
 			int32_t nodePort_ = 0;
+			std::string rootIP_ = "";
+			int32_t rootPort_ = 0;
+			std::vector<std::pair<block::ModuleID, std::string>> registModules_;
+			
 
 			int32_t rpcDelay_ = 10000;
 
 			std::map<int64_t, CallbackPtr> callbackMap_;
 			std::map<uint64_t, CallbackPtr> timerSet_;
 
-			std::multimap<std::string, NodePtr> nodeMap_;
+			std::map<int32_t, NodePtr> nodeMap_;
+			std::multimap<std::string, NodePtr> moduleMap_;
 		};
 
 	}

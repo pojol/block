@@ -203,11 +203,44 @@ void block::modules::NodeModule::eNodeInit(block::ModuleID target, block::ArgsPt
 	auto _rootPort = args->pop_i32();
 
 	auto _count = args->pop_i32();
+
 	for (int i = 0; i < _count; ++i)
 	{
 		auto _moduleName = args->pop_string();
 		auto _moduleID = args->pop_moduleid();
+		registModules_.push_back(std::make_pair(_moduleID, _moduleName));
 	}
+
+	// 检查本地是否有这个node
+	if (nodeMap_.find(_nodeID) != nodeMap_.end() && nodeID_ != _nodeID){
+		WARN_FMTLOG("[BLOCK] NodeModule repeat init nodeid:{}", _nodeID);
+		return;
+	}
+
+	nodeID_ = _nodeID;
+	nodeType_ = _nodeTy;
+	nodeIp_ = _nodeIP;
+	nodePort_ = _nodePort;
+	rootIP_ = _rootIP;
+	rootPort_ = _rootPort;
+
+	connector_m_ = APP.createDynamicModule("Node_ConnectorModule");
+	listen(block::event::module_init_succ, [this](block::ModuleID target, block::ArgsPtr args){
+		
+		auto _id = args->pop_moduleid();
+		auto _name = args->pop_string();
+
+		if (_id == connector_m_){
+			dispatch(connector_m_, block::event::tcp_make_connector, block::makeArgs(getModuleID(), rootIP_, rootPort_));
+		}
+
+	});
+
+	listen(block::event::tcp_new_connect, [&](block::ModuleID target, block::ArgsPtr args){
+		connector_fd_ = args->pop_fd();
+
+		INFO_FMTLOG("[BLOCK] NodeModule connected root server! fd:{}", connector_fd_);
+	});
 }
 
 /*
