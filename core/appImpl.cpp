@@ -233,6 +233,22 @@ void block::AppImpl::reactorDispatch(block::ModuleID self, block::ModuleID targe
 	}
 }
 
+void block::AppImpl::reactorBoardcast(block::ModuleID self, block::EventID event, block::ArgsPtr args)
+{
+	for (auto itr = mailboxMap_.begin(); itr != mailboxMap_.end(); ++itr)
+	{
+		if (itr->first.second == event) {
+
+			auto taskPtr = new TaskInfo();
+			taskPtr->target_ = self;
+			taskPtr->event_ = event;
+			taskPtr->args_ = std::move(args);
+
+			itr->second->push(taskPtr);
+		}
+	}
+}
+
 void block::AppImpl::run()
 {
 	//! run

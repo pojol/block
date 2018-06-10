@@ -74,3 +74,8 @@ void block::Application::reactorDispatch(block::ModuleID self, block::ModuleID t
 {
 	impl_.reactorDispatch(self, target, event, std::move(args));
 }
+
+void block::Application::reactorBoardcast(block::ModuleID self, block::EventID event, block::ArgsPtr args)
+{
+	impl_.reactorBoardcast(self, event, std::move(args));
+}

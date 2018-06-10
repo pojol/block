@@ -66,6 +66,7 @@ namespace block
 
 		void reactorRegist(block::ModuleID moduleID, block::EventID event);
 		void reactorDispatch(block::ModuleID self, block::ModuleID target, block::EventID event, block::ArgsPtr args);
+		void reactorBoardcast(block::ModuleID self, block::EventID event, block::ArgsPtr args);
 
 	protected:
 		void tick();

@@ -30,17 +30,6 @@ namespace block
 		rpc_begin = 1001,
 
 		/*!
-		comment: 将Node绑定到Coordinator
-		args: string node_type, int32_t node_id, string root_ip, int32_t root_port, [{string module_name, int32_t module_id, int32_t module_fature} ... ]
-		type: rpc
-		res : stream args, int32_t progress, bool succ
-		**/
-		coordinat_regist,
-
-		/***/
-		coordinat_unregit,
-
-		/*!
 		comment: 调整Node在Coordinator中的权重
 		args: int32_t node_id, string module_name, int32_t module_fature, int32_t +- weight
 		type: rpc
@@ -48,13 +37,6 @@ namespace block
 		**/
 		coordinat_adjust_weight,
 
-		/*!
-		comment: 通过ModuleName和ModuleFeature选取一个集群中适合自己的Node
-		args: string module_name, int32_t module_fature
-		type: rpc
-		res : stream args, int32_t progress, bool succ
-		**/
-		coordinat_select,
 
 		rpc_end = 1999,
 

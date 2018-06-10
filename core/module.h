@@ -53,6 +53,11 @@ namespace block
 		**/
 		void rpc(block::EventID event, ArgsPtr args, RpcCallback callback = nullptr);
 
+		/**!
+			
+		*/
+		void boardcast(block::EventID event, ArgsPtr args);
+
 		void pull();
 		void push(TaskInfo *info);
 
@@ -84,6 +89,7 @@ namespace block
 		void listen(block::EventID event, ListenFunc func);
 		void dispatch(block::ModuleID target, block::EventID event, block::ArgsPtr args);
 		void rpc(block::EventID event, ArgsPtr args, RpcCallback callback = nullptr);
+		void boardcast(block::EventID event, ArgsPtr args);
 
 	protected:
 		virtual void before_init();

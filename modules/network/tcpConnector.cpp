@@ -51,7 +51,7 @@ void block::network::TcpConnectorModule::init()
 {
 	// todo ...
 	
-	//boardcast(eid::module_init_succ, block::makeArgs(get_module_id()));
+	boardcast(block::event::module_init_succ, block::makeArgs(getModuleID(), getModuleName()));
 }
 
 void block::network::TcpConnectorModule::execute()
