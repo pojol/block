@@ -43,7 +43,7 @@ namespace block
 	static const uint32_t MSGLEN_CLIENTSIZE = 1024 * 4;		//
 	static const uint32_t MSGLEN_RPCSIZE = 1024 * 10;		//
 
-	// args type
+															// args type
 	static const uint8_t at_uint8 = 1;
 	static const uint8_t at_int8 = 2;
 	static const uint8_t at_uint16 = 3;

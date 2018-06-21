@@ -23,17 +23,17 @@ namespace block
 	struct MailBox;
 	typedef std::shared_ptr<MailBox> MailBoxPtr;
 
-	enum AppState
-	{
-		BEFORE_INIT = 0,
-		INIT,
-		EXECUTE,
-		SHUT,
-		AFTER_SHUT,
-	};
-
 	class AppImpl
 	{
+		enum AppState
+		{
+			BEFORE_INIT = 0,
+			INIT,
+			EXECUTE,
+			SHUT,
+			AFTER_SHUT,
+		};
+
 		friend struct MailBox;
 	public:
 		AppImpl();

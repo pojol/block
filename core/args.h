@@ -1,5 +1,4 @@
-﻿#ifndef _GSF_ARGS_HEALDER_
-#define _GSF_ARGS_HEALDER_
+﻿#pragma once
 
 #include <string>
 #include <cstring>
@@ -362,5 +361,3 @@ namespace block
 		return args;
 	}
 }
-
-#endif
