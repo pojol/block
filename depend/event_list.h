@@ -28,20 +28,6 @@ namespace block
 			**/
 			module_shut_succ,
 
-			//! 凡是gsf集群内使用rpc交互的消息都应该定义在distributed区块
-			rpc_begin = 1001,
-
-			/*!
-			comment: 调整Node在Coordinator中的权重
-			args: int32_t node_id, string module_name, int32_t module_fature, int32_t +- weight
-			type: rpc
-			res : stream args, int32_t progress, bool succ
-			**/
-			coordinat_adjust_weight,
-
-
-			rpc_end = 1999,
-
 			/*!
 			comment: 创建一个接收器
 			args: int32_t module_id, string ip, int32_t port
@@ -149,8 +135,29 @@ namespace block
 			db_callback,
 
 			node_init = 2501,
+			node_addModule,
+			node_rmvModule,
 		};
 		
+	}
+
+	namespace rpc
+	{
+		enum rpc_event {
+			//! 凡是gsf集群内使用rpc交互的消息都应该定义在distributed区块
+			begin = 1001,
+
+			/*!
+			comment: 调整Node在Coordinator中的权重
+			args: int32_t node_id, string module_name, int32_t module_fature, int32_t +- weight
+			type: rpc
+			res : stream args, int32_t progress, bool succ
+			**/
+			coordinat_adjust_weight,
+
+
+			end = 1999,
+		};
 	}
 
 	namespace error

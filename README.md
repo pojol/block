@@ -19,9 +19,11 @@
 * linux (gcc4.9+
 * windows (vs2015+
 ***
+
 #### 编译&安装
 * install.py
 ***
+
 #### 依赖库
 * [fmtlib](https://github.com/fmtlib/fmt)
 * [lua](https://github.com/lua/lua)

@@ -36,9 +36,9 @@ void block::Module::dispatch(block::ModuleID target, block::EventID event, block
 	mailboxPtr_->dispatch(target, event, std::move(args));
 }
 
-void block::Module::rpc(block::EventID event, ArgsPtr args, RpcCallback callback)
+void block::Module::rpc(block::ModuleID target, const std::string &moduleName, block::EventID event, ArgsPtr args, RpcCallback callback)
 {
-	mailboxPtr_->rpc(event, std::move(args), callback);
+	mailboxPtr_->rpc(target, moduleName, event, std::move(args), callback);
 }
 
 void block::Module::boardcast(block::EventID event, ArgsPtr args)
@@ -85,8 +85,14 @@ void block::MailBox::dispatch(block::ModuleID target, block::EventID event, bloc
 	APP.reactorDispatch(basePtr_->getModuleID(), target, event, std::move(args));
 }
 
-void block::MailBox::rpc(block::EventID event, ArgsPtr args, RpcCallback callback /*= nullptr*/)
+void block::MailBox::rpc(block::ModuleID target, const std::string &moduleName, block::EventID event, ArgsPtr args, RpcCallback callback /*= nullptr*/)
 {
+	auto _moduleid = APP.getModuleID("NodeModule");
+	if (_moduleid == block::ModuleNil) {
+		WARN_LOG("[BLOCK] mailbox rpc event need register NodeModule!");
+		return;
+	}
+
 
 }
 

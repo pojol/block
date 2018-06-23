@@ -51,7 +51,7 @@ namespace block
 		/*!
 
 		**/
-		void rpc(block::EventID event, ArgsPtr args, RpcCallback callback = nullptr);
+		void rpc(block::ModuleID target, const std::string &moduleName, block::EventID event, ArgsPtr args, RpcCallback callback = nullptr);
 
 		/**!
 			
@@ -88,7 +88,7 @@ namespace block
 
 		void listen(block::EventID event, ListenFunc func);
 		void dispatch(block::ModuleID target, block::EventID event, block::ArgsPtr args);
-		void rpc(block::EventID event, ArgsPtr args, RpcCallback callback = nullptr);
+		void rpc(block::ModuleID target, const std::string &moduleName, block::EventID event, ArgsPtr args, RpcCallback callback = nullptr);
 		void boardcast(block::EventID event, ArgsPtr args);
 
 	protected:
