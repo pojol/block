@@ -21,6 +21,11 @@ namespace block
 		block::ModuleID getModuleID(const std::string &moduleName) const;
 
 		/*!
+		* 	判断app中是否存在该module
+ 		* */
+		bool hasModule(block::ModuleID moduleid);
+
+		/*!
 			鑾峰彇杩涚▼鐨勬満鍣↖D
 		**/
 		const block::AppConfig & getAppCfg();

@@ -92,6 +92,19 @@ block::ModuleID block::AppImpl::getModuleID(const std::string &moduleName) const
 	}
 }
 
+bool block::AppImpl::hasModule(block::ModuleID moduleid)
+{
+	auto _find = std::find_if(module_list_.begin(), module_list_.end(), [&](std::list<Module *>::value_type it) {
+       		return (it->getModuleID() == moduleid);
+        });
+
+	if (_find != module_list_.end()){
+		return true;
+	}
+
+	return false;
+}
+
 const block::AppConfig & block::AppImpl::getAppCfg()
 {
 	return cfg_;

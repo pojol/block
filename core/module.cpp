@@ -93,7 +93,20 @@ void block::MailBox::rpc(block::ModuleID target, const std::string &moduleName, 
 		return;
 	}
 
+	if (APP.hasModule(target)){
+		WARN_LOG("[BLOCK] mailbox rpc target is not remote module!");
+		return;
+	}
 
+/*
+	auto _f = APP.methods("NodeModule", "rpc");
+	if (_f != nullptr) {
+		_f(target, moduleName, event, std::move(args), callback); 
+	}
+	else {
+		WARN_LOG("[BLOCK] mailbox rpc func unable!");
+	}
+*/
 }
 
 void block::MailBox::boardcast(block::EventID event, ArgsPtr args)
