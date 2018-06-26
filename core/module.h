@@ -64,9 +64,9 @@ namespace block
 	private:
 
 		typedef std::queue<TaskInfo*> TaskQueue;
+		TaskQueue taskQueue_;
 
 		std::unordered_map<block::EventID, ListenFunc> listenMap_;
-		TaskQueue taskQueue_;
 
 		Module *basePtr_ = nullptr;
 	};
