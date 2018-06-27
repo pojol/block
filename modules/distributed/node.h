@@ -57,6 +57,7 @@ namespace block
 		protected:
 
 			void eNodeInit(block::ModuleID target, block::ArgsPtr args);
+			void eNodeRpc(block::ModuleID target, block::ArgsPtr args);
 
 		private:
 			block::SessionID connector_fd_ = block::SessionNil;

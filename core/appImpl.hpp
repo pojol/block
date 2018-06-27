@@ -22,6 +22,7 @@ namespace block
 	class Module;
 	struct MailBox;
 	typedef std::shared_ptr<MailBox> MailBoxPtr;
+	typedef std::function<void(ArgsPtr, int32_t, bool)> RpcCallback;
 
 	class AppImpl
 	{

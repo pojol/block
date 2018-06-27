@@ -23,6 +23,7 @@ void block::modules::NodeModule::before_init()
 {
 	using namespace std::placeholders;
 	listen(block::event::node_init, std::bind(&NodeModule::eNodeInit, this, _1, _2));
+	listen(block::event::node_rpc, std::bind(&NodeModule::eNodeRpc, this, _1, _2));
 	
 	//listen(block::event::node_regist, std::bind(&NodeModule::eRegistNode, this, _1, _2));
 
@@ -241,6 +242,13 @@ void block::modules::NodeModule::eNodeInit(block::ModuleID target, block::ArgsPt
 
 		INFO_FMTLOG("[BLOCK] NodeModule connected root server! fd:{}", connector_fd_);
 	});
+}
+
+void block::modules::NodeModule::eNodeRpc(block::ModuleID target, block::ArgsPtr args)
+{
+	
+
+
 }
 
 /*
