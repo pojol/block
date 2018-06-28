@@ -31,6 +31,16 @@ if(UNIX)
     )
 endif()
 
+if(APPLE)
+    INCLUDE_DIRECTORIES(
+            ${BLOCK_SOURCE_DIR}/3rd/fmt
+            /usr/local/Cellar/lua/5.3.4_2/include
+            ${BLOCK_SOURCE_DIR}/3rd/sol2
+            /usr/local/Cellar/gflags/2.2.1/include
+            /usr/local/Cellar/glog/0.3.5_3/include
+            ${BLOCK_SOURCE_DIR}/
+    )
+endif()
 
 FILE(GLOB_RECURSE SRC "*.cpp" "*.h" ".hpp")
 ADD_LIBRARY(luaAdapter STATIC ${SRC})

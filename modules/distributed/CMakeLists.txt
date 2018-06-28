@@ -1,14 +1,12 @@
 PROJECT(distributed)
 
-
-
 if(WIN32)
     #引用头文件目录
     INCLUDE_DIRECTORIES(
-		${BLOCK_SOURCE_DIR}/
-		${BLOCK_SOURCE_DIR}/3rd/Libevent/include
-		${BLOCK_SOURCE_DIR}/3rd/fmt
-		${BLOCK_SOURCE_DIR}/3rd/glog/src
+            ${BLOCK_SOURCE_DIR}/
+		    ${BLOCK_SOURCE_DIR}/3rd/Libevent/include
+		    ${BLOCK_SOURCE_DIR}/3rd/fmt
+		    ${BLOCK_SOURCE_DIR}/3rd/glog/src
     )
 
     #引用库目录
@@ -18,15 +16,25 @@ endif()
 if(UNIX)
     #引用头文件目录
     INCLUDE_DIRECTORIES(
-       		${BLOCK_SOURCE_DIR}/
+            ${BLOCK_SOURCE_DIR}/
         	${BLOCK_SOURCE_DIR}/lib/libevent/include
-		${BLOCK_SOURCE_DIR}/lib/fmt/include
-		${BLOCK_SOURCE_DIR}/lib/glog/include
+		    ${BLOCK_SOURCE_DIR}/lib/fmt/include
+		    ${BLOCK_SOURCE_DIR}/lib/glog/include
     )
 
     #引用库目录
     LINK_DIRECTORIES(
             ${BLOCK_SOURCE_DIR}/lib/
+    )
+endif()
+
+if(APPLE)
+    INCLUDE_DIRECTORIES(
+            ${BLOCK_SOURCE_DIR}/3rd/fmt
+            /usr/local/Cellar/libevent/2.1.8/include
+            /usr/local/Cellar/gflags/2.2.1/include
+            /usr/local/Cellar/glog/0.3.5_3/include
+            ${BLOCK_SOURCE_DIR}/
     )
 endif()
 

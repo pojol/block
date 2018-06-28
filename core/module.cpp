@@ -36,11 +36,6 @@ void block::Module::dispatch(block::ModuleID target, block::EventID event, block
 	mailboxPtr_->dispatch(target, event, std::move(args));
 }
 
-void block::Module::rpc(block::ModuleID target, const std::string &moduleName, block::EventID event, ArgsPtr args, RpcCallback callback)
-{
-	mailboxPtr_->rpc(target, moduleName, event, std::move(args), callback);
-}
-
 void block::Module::boardcast(block::EventID event, ArgsPtr args)
 {
 	mailboxPtr_->boardcast(event, std::move(args));
@@ -83,31 +78,6 @@ void block::MailBox::listen(block::EventID event, ListenFunc func)
 void block::MailBox::dispatch(block::ModuleID target, block::EventID event, block::ArgsPtr args)
 {
 	APP.reactorDispatch(basePtr_->getModuleID(), target, event, std::move(args));
-}
-
-void block::MailBox::rpc(block::ModuleID target, const std::string &moduleName, block::EventID event, ArgsPtr args, RpcCallback callback /*= nullptr*/)
-{
-	auto _moduleid = APP.getModuleID("NodeModule");
-	if (_moduleid == block::ModuleNil) {
-		WARN_LOG("[BLOCK] mailbox rpc event need register NodeModule!");
-		return;
-	}
-
-	if (APP.hasModule(target)){
-		WARN_LOG("[BLOCK] mailbox rpc target is not remote module!");
-		return;
-	}
-
-
-/*
-	auto _f = APP.methods("NodeModule", "rpc");
-	if (_f != nullptr) {
-		_f(target, moduleName, event, std::move(args), callback); 
-	}
-	else {
-		WARN_LOG("[BLOCK] mailbox rpc func unable!");
-	}
-*/
 }
 
 void block::MailBox::boardcast(block::EventID event, ArgsPtr args)

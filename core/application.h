@@ -11,12 +11,12 @@ namespace block
 		Application();
 
 		/*!
-			鑾峰緱杩涚▼鐨勫悕绉?
+			获取App的名称
 		**/
 		std::string getName() const;
 
 		/*!
-			閫氳繃鍚嶅瓧鑾峰彇鏌愪釜Module鐨勫疄渚婭D锛?浠呮敮鎸侀潤鎬佸垱寤虹殑Module銆?
+			通过名字获取某个Module的实例ID， 仅支持静态创建的Module。
 		**/
 		block::ModuleID getModuleID(const std::string &moduleName) const;
 
@@ -26,48 +26,48 @@ namespace block
 		bool hasModule(block::ModuleID moduleid);
 
 		/*!
-			鑾峰彇杩涚▼鐨勬満鍣↖D
+			获取App的配置结构
 		**/
 		const block::AppConfig & getAppCfg();
 
 		/*!
-			鑾峰緱鍦ㄩ泦缇ゅ唴浜х敓鐨勫敮涓€ID
+			获取一个uuid
 		**/
 		int64_t getUUID();
 
 		/*!
-			鑾峰緱褰撳墠鐨勬绉掓暟
+			获取app当前的毫秒数
 		**/
 		uint64_t getSystemTick();
 
 		/*!
-			鍒濆鍖栬繘绋?
+			初始化配置文件
 		**/
 		void initCfg(const block::AppConfig &cfg);
 
 		/*!
-			鍒涘缓涓€涓狹odule,(杩欎釜鍑芥暟鍙兘浣滅敤浜巃pp.run 涔嬪墠
+			创建一个静态的Module （只能在App.run之前调用
 		**/
 		template <typename T>
 		void createModule(T *module);
 
 		/*!
-			鍔ㄦ€佸垱寤轰竴涓狹odule
+			创建一个动态的Module
 		**/
 		block::ModuleID createDynamicModule(const std::string &moduleType);
 
 		/*!
-			鍒犻櫎涓€涓狹odule 
+			从App中删除一个Module
 		**/
 		void deleteModule(block::ModuleID moduleID);
 
 		/*!
-			杩涚▼鐨勪富寰幆
+			App的主循环
 		**/
 		void run();
 
 		/*!
-			杩涚▼鐨勯€€鍑洪€昏緫
+			App退出函数
 		**/
 		void exit();
 

@@ -23,7 +23,7 @@ void block::modules::NodeModule::before_init()
 {
 	using namespace std::placeholders;
 	listen(block::event::node_init, std::bind(&NodeModule::eNodeInit, this, _1, _2));
-	listen(block::event::node_rpc, std::bind(&NodeModule::eNodeRpc, this, _1, _2));
+	//listen(block::event::node_rpc, std::bind(&NodeModule::eNodeRpc, this, _1, _2));
 	
 	//listen(block::event::node_regist, std::bind(&NodeModule::eRegistNode, this, _1, _2));
 

@@ -9,17 +9,22 @@ if(WIN32)
             ${BLOCK_SOURCE_DIR}/
     )
 endif()
+
 if(UNIX)
     INCLUDE_DIRECTORIES(
        	${BLOCK_SOURCE_DIR}/lib/libevent/include
-	${BLOCK_SOURCE_DIR}/lib/fmt/include
-	${BLOCK_SOURCE_DIR}/lib/glog/include
+	    ${BLOCK_SOURCE_DIR}/lib/fmt/include
+	    ${BLOCK_SOURCE_DIR}/lib/glog/include
        	${BLOCK_SOURCE_DIR}/
-			)
+    )
 endif()
+
 if(APPLE)
     INCLUDE_DIRECTORIES(
-            ${BLOCK_SOURCE_DIR}/lib/libevent/include
+            /usr/local/Cellar/libevent/2.1.8/include
+            ${BLOCK_SOURCE_DIR}/3rd/fmt
+            /usr/local/Cellar/gflags/2.2.1/include
+            /usr/local/Cellar/glog/0.3.5_3/include
             ${BLOCK_SOURCE_DIR}/
 			)
 endif()

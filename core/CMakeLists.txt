@@ -17,6 +17,15 @@ if(UNIX)
 	)
 endif()
 
+if (APPLE)
+	message("APPLE")
+	INCLUDE_DIRECTORIES(
+			${BLOCK_SOURCE_DIR}/3rd/fmt
+			/usr/local/Cellar/gflags/2.2.1/include
+			/usr/local/Cellar/glog/0.3.5_3/include
+	)
+endif()
+
 Add_Definitions("-DGLOG_NO_ABBREVIATED_SEVERITIES")
 
 #引用库目录
