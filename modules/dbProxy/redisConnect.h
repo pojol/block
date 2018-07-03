@@ -177,7 +177,7 @@ namespace block
 			struct timeval _timeout = { 1, 500000 };
 
 			redis_context_ = redisConnectWithTimeout(ip_.c_str(), port_, _timeout);
-			if (redis_context_) {
+			if (redis_context_ && redis_context_->err == 0) {
 				is_conn_ = true;
 			}
 			else {
