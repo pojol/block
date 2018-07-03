@@ -112,25 +112,12 @@ void block::network::Session::read(::bufferevent *bev)
 
 			MsgID _msg_id = _block->get_msg_id();
 
-			if (_msg_id > block::rpc::begin && _msg_id < block::rpc::end) {
-			/*
-				auto args_ptr = ArgsPool::get_ref().get();
-				args_ptr->push(fd_);
-				args_ptr->push(_msg_id);
-				args_ptr->push_block(_block->buf_ + _block->get_head_size(), _block->get_body_size());
-
-				basePtr_->addMessage(std::move(args_ptr));
-			*/
+			if (!_block->check()) { //! 鍏堣繖鏍锋鏌ヤ笅block涓殑鍐呭鏄惁鍚堟硶锛屽悗闈㈣偗瀹氫笉鑳借繖鏍锋槑鏂囦紶杈?
+				break;
 			}
-			else {
-				if (!_block->check()) { //! 鍏堣繖鏍锋鏌ヤ笅block涓殑鍐呭鏄惁鍚堟硶锛屽悗闈㈣偗瀹氫笉鑳借繖鏍锋槑鏂囦紶杈?
-					break;
-				}
 
-				std::string _str(_block->buf_ + _block->get_head_size(), _block->get_body_size());	//tmp
-				//dispatch(targetM_, eid::network::recv, block::makeArgs(fd_, _msg_id, std::move(_str)));
-				basePtr_->addMessage(block::makeArgs(fd_, _msg_id, std::move(_str)));
-			}
+			std::string _str(_block->buf_ + _block->get_head_size(), _block->get_body_size());	//tmp
+			basePtr_->addMessage(block::makeArgs(fd_, _msg_id, std::move(_str)));
 
 			_buf_len = evbuffer_get_length(inBufPtr_);
 			if (_buf_len > _msgheadlen) {
@@ -147,11 +134,9 @@ void block::network::Session::read(::bufferevent *bev)
 void block::network::Session::disConnect(int32_t err)
 {
 	basePtr_->addClose(fd_);
-	//dispatch(targetM_, eid::network::dis_connect, block::makeArgs(fd_, err));
 }
 
 void block::network::Session::newConnect()
 {
 	basePtr_->addConnect(fd_);
-	//dispatch(targetM_, eid::network::new_connect, block::makeArgs(fd_));
 }

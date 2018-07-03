@@ -141,25 +141,6 @@ namespace block
 		
 	}
 
-	namespace rpc
-	{
-		enum rpc_event {
-			//! 凡是gsf集群内使用rpc交互的消息都应该定义在distributed区块
-			begin = 1001,
-
-			/*!
-			comment: 调整Node在Coordinator中的权重
-			args: int32_t node_id, string module_name, int32_t module_fature, int32_t +- weight
-			type: rpc
-			res : stream args, int32_t progress, bool succ
-			**/
-			coordinat_adjust_weight,
-
-
-			end = 1999,
-		};
-	}
-
 	namespace error
 	{
 		enum block_error
