@@ -1,6 +1,6 @@
 ﻿#pragma once 
 
-#include "../depend/event_list.h"
+#include "../event_list.h"
 #include "../utils/single.h"
 #include "../utils/timer.hpp"
 #include "../utils/logger.hpp"
@@ -22,18 +22,19 @@ namespace block
 	class Module;
 	struct MailBox;
 	typedef std::shared_ptr<MailBox> MailBoxPtr;
-
-	enum AppState
-	{
-		BEFORE_INIT = 0,
-		INIT,
-		EXECUTE,
-		SHUT,
-		AFTER_SHUT,
-	};
+	typedef std::function<void(ArgsPtr, int32_t, bool)> RpcCallback;
 
 	class AppImpl
 	{
+		enum AppState
+		{
+			BEFORE_INIT = 0,
+			INIT,
+			EXECUTE,
+			SHUT,
+			AFTER_SHUT,
+		};
+
 		friend struct MailBox;
 	public:
 		AppImpl();
@@ -41,6 +42,8 @@ namespace block
 		std::string getName() const;
 
 		block::ModuleID getModuleID(const std::string &moduleName) const;
+
+		bool hasModule(block::ModuleID moduleid);
 
 		const block::AppConfig & getAppCfg();
 

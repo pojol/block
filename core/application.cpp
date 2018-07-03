@@ -30,6 +30,11 @@ block::ModuleID block::Application::getModuleID(const std::string &moduleName) c
 	return impl_.getModuleID(moduleName);
 }
 
+bool block::Application::hasModule(block::ModuleID moduleid)
+{
+	return impl_.hasModule(moduleid);
+}
+
 const block::AppConfig & block::Application::getAppCfg()
 {
 	return impl_.getAppCfg();

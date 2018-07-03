@@ -12,7 +12,7 @@
 #include <string>
 
 #include "args.h"
-#include "../depend/types.h"
+#include "types.h"
 
 #define WATCH_PERF
 
@@ -48,10 +48,6 @@ namespace block
 		**/
 		void dispatch(block::ModuleID target, block::EventID event, block::ArgsPtr args);
 
-		/*!
-
-		**/
-		void rpc(block::EventID event, ArgsPtr args, RpcCallback callback = nullptr);
 
 		/**!
 			
@@ -64,9 +60,9 @@ namespace block
 	private:
 
 		typedef std::queue<TaskInfo*> TaskQueue;
+		TaskQueue taskQueue_;
 
 		std::unordered_map<block::EventID, ListenFunc> listenMap_;
-		TaskQueue taskQueue_;
 
 		Module *basePtr_ = nullptr;
 	};
@@ -88,7 +84,6 @@ namespace block
 
 		void listen(block::EventID event, ListenFunc func);
 		void dispatch(block::ModuleID target, block::EventID event, block::ArgsPtr args);
-		void rpc(block::EventID event, ArgsPtr args, RpcCallback callback = nullptr);
 		void boardcast(block::EventID event, ArgsPtr args);
 
 	protected:

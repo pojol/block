@@ -19,10 +19,10 @@ if(UNIX)
     #引用头文件目录
     INCLUDE_DIRECTORIES(
        		${BLOCK_SOURCE_DIR}/
-		${BLOCK_SOURCE_DIR}/lib/fmt/include
+		    ${BLOCK_SOURCE_DIR}/lib/fmt/include
        		${BLOCK_SOURCE_DIR}/lib/mysql_connector/include
-		${BLOCK_SOURCE_DIR}/lib/hiredis
-		${BLOCK_SOURCE_DIR}/lib/glog/include
+		    ${BLOCK_SOURCE_DIR}/lib/hiredis
+		    ${BLOCK_SOURCE_DIR}/lib/glog/include
     )
 
     #引用库目录
@@ -31,6 +31,17 @@ if(UNIX)
     )
 endif()
 
+
+if(APPLE)
+    INCLUDE_DIRECTORIES(
+            ${BLOCK_SOURCE_DIR}/3rd/fmt
+            /usr/local/Cellar/hiredis/0.13.3/include/hiredis
+            /usr/local/Cellar/mysql-connector-c/6.1.11/include
+            /usr/local/Cellar/gflags/2.2.1/include
+            /usr/local/Cellar/glog/0.3.5_3/include
+            ${BLOCK_SOURCE_DIR}/
+    )
+endif()
 
 FILE(GLOB_RECURSE SRC "*.cpp" "*.h" "*.hpp")
 ADD_LIBRARY(dbProxy STATIC ${SRC})

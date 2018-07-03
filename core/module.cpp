@@ -36,11 +36,6 @@ void block::Module::dispatch(block::ModuleID target, block::EventID event, block
 	mailboxPtr_->dispatch(target, event, std::move(args));
 }
 
-void block::Module::rpc(block::EventID event, ArgsPtr args, RpcCallback callback)
-{
-	mailboxPtr_->rpc(event, std::move(args), callback);
-}
-
 void block::Module::boardcast(block::EventID event, ArgsPtr args)
 {
 	mailboxPtr_->boardcast(event, std::move(args));
@@ -83,11 +78,6 @@ void block::MailBox::listen(block::EventID event, ListenFunc func)
 void block::MailBox::dispatch(block::ModuleID target, block::EventID event, block::ArgsPtr args)
 {
 	APP.reactorDispatch(basePtr_->getModuleID(), target, event, std::move(args));
-}
-
-void block::MailBox::rpc(block::EventID event, ArgsPtr args, RpcCallback callback /*= nullptr*/)
-{
-
 }
 
 void block::MailBox::boardcast(block::EventID event, ArgsPtr args)

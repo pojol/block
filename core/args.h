@@ -1,5 +1,4 @@
-﻿#ifndef _GSF_ARGS_HEALDER_
-#define _GSF_ARGS_HEALDER_
+﻿#pragma once
 
 #include <string>
 #include <cstring>
@@ -12,7 +11,7 @@
 #include <sstream>
 #include <functional>
 
-#include "../depend/types.h"
+#include "types.h"
 #include "../utils/single.h"
 
 namespace block
@@ -362,5 +361,3 @@ namespace block
 		return args;
 	}
 }
-
-#endif
