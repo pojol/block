@@ -80,13 +80,12 @@ void block::modules::LuaAdapterModule::execute()
 			proxyPtr_->call_list_[LuaAppState::SHUT](_module);
 			proxyPtr_->app_state_ = LuaAppState::AFTER_SHUT;
 		}
-		else if (proxyPtr_->app_state_ = LuaAppState::AFTER_SHUT) {
+		else if (proxyPtr_->app_state_ == LuaAppState::AFTER_SHUT) {
 			proxyPtr_->call_list_[LuaAppState::AFTER_SHUT](_module);
 		}
 	}
 	catch (sol::error e) {
-		std::string _err = e.what() + '\n' + Traceback(proxyPtr_->state_);
-		ERROR_FMTLOG("[BLOCK] LuaAdapter execute sol::error : {}", _err);
+		ERROR_FMTLOG("[BLOCK] LuaAdapter execute sol::error : {} traceback : {}", e.what(), Traceback(proxyPtr_->state_));
 
 		if (proxyPtr_->app_state_ == LuaAppState::INIT) {
 			//destroy(_lua->lua_id_);
@@ -113,8 +112,7 @@ void block::modules::LuaAdapterModule::ldispatch(block::ModuleID target, block::
 		dispatch(target, event, std::move(_smartPtr));
 	}
 	catch (sol::error e) {
-		std::string _err = e.what() + '\n' + Traceback(proxyPtr_->state_);
-		ERROR_FMTLOG("[BLOCK] LuaAdapter dispatch sol::error : {}", _err);
+		ERROR_FMTLOG("[BLOCK] LuaAdapter dispatch sol::error : {} traceback : {}", e.what(), Traceback(proxyPtr_->state_));
 	}
 	catch (...)
 	{
@@ -139,15 +137,13 @@ int block::modules::LuaAdapterModule::llisten(uint32_t event, const sol::functio
 				}
 			}
 			catch (sol::error e) {
-				std::string _err = e.what() + '\n' + Traceback(proxyPtr_->state_);
-				ERROR_FMTLOG("[BLOCK] LuaAdapter listen callback sol::error : {}", _err);
+				ERROR_FMTLOG("[BLOCK] LuaAdapter listen callback sol::error : {} traceback : {}", e.what(), Traceback(proxyPtr_->state_));
 			}
 		});
 
 	}
 	catch (sol::error e) {
-		std::string _err = e.what() + '\n' + Traceback(proxyPtr_->state_);
-		ERROR_FMTLOG("[BLOCK] LuaAdapter listen sol::error : {}", _err);
+		ERROR_FMTLOG("[BLOCK] LuaAdapter listen sol::error : {} traceback : {}", e.what(), Traceback(proxyPtr_->state_));
 	}
 	catch (...)
 	{
@@ -243,10 +239,7 @@ void block::modules::LuaAdapterModule::create()
 	}
 	catch (sol::error e)
 	{
-		std::string _err = e.what() + '\n';
-		_err += Traceback(proxyPtr_->state_.lua_state());
-
-		ERROR_FMTLOG("[BLOCK] LuaAdapter build unknown fail : {}", _err);
+		ERROR_FMTLOG("[BLOCK] LuaAdapter build unknown fail : {} traceback : {}", e.what(), Traceback(proxyPtr_->state_.lua_state()));
 	}
 
 	proxyPtr_->state_.new_usertype<block::Args>("Args"
@@ -314,11 +307,8 @@ void block::modules::LuaAdapterModule::create()
 		proxyPtr_->call_list_[LuaAppState::BEFORE_INIT](_module);
 		proxyPtr_->app_state_ = LuaAppState::INIT;
 	}
-	catch (sol::error e) {
-		std::string _err = e.what() + '\n';
-		_err += Traceback(proxyPtr_->state_.lua_state());
-		
-		ERROR_FMTLOG("[BLOCK] LuaAdapter before init fail {}", _err);
+	catch (sol::error e) {		
+		ERROR_FMTLOG("[BLOCK] LuaAdapter before init fail err : {} traceback : {}", e.what(), Traceback(proxyPtr_->state_.lua_state()));
 		return;
 	}
 
@@ -335,9 +325,7 @@ void block::modules::LuaAdapterModule::eReload(block::ModuleID target, block::Ar
 		reloading = true;
 	}
 	catch (sol::error e) {
-		std::string _err = e.what() + '\n';
-		_err += Traceback(proxyPtr_->state_.lua_state());
-		ERROR_FMTLOG("[BLOCK] LuaAdapter reload fail : {}", _err);
+		ERROR_FMTLOG("[BLOCK] LuaAdapter reload fail  err : {} traceback : {}", e.what(), Traceback(proxyPtr_->state_.lua_state()));
 	}
 	catch (...) {
 		ERROR_LOG("[BLOCK] LuaAdapter reload unknown err!");
@@ -372,8 +360,7 @@ uint64_t block::modules::LuaAdapterModule::ldelay(int32_t milliseconds, sol::fun
 			callback();
 		}
 		catch (sol::error e) {
-			std::string _err = e.what() + '\n' + Traceback(proxyPtr_->state_);
-			ERROR_FMTLOG("[BLOCK] LuaAdapter delay func err : {}", _err);
+			ERROR_FMTLOG("[BLOCK] LuaAdapter delay func err : {} traceback: {}", e.what(), Traceback(proxyPtr_->state_));
 		}
 		catch (...)
 		{
@@ -392,8 +379,7 @@ uint64_t block::modules::LuaAdapterModule::ldelayDay(int32_t hour, int32_t minut
 			callback();
 		}
 		catch (sol::error e) {
-			std::string _err = e.what() + '\n' + Traceback(proxyPtr_->state_);
-			ERROR_FMTLOG("[BLOCK] LuaAdapter delayDay func err : {}", _err);
+			ERROR_FMTLOG("[BLOCK] LuaAdapter delayDay func err : {} traceback : {}", e.what(), Traceback(proxyPtr_->state_));
 		}
 		catch (...)
 		{

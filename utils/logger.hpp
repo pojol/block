@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../depend/types.h"
+#include "../core/types.h"
 
 #define GOOGLE_GLOG_DLL_DECL
 #include <glog/logging.h>

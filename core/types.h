@@ -19,9 +19,9 @@ namespace block
 	typedef int32_t NodeID;
 	static const int32_t NodeNil = INT32_MAX;
 
-	typedef int16_t MsgID;
-	static const int32_t MsgNil = INT16_MAX;
-	static const int32_t MsgMax = 65534;
+	typedef uint16_t MsgID;
+	static const uint16_t MsgNil = UINT16_MAX;
+	static const uint16_t MsgMax = UINT16_MAX;
 
 	static const uint16_t LogErr = 3;
 	static const uint16_t LogWarning = 2;

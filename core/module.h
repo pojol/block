@@ -12,7 +12,7 @@
 #include <string>
 
 #include "args.h"
-#include "../depend/types.h"
+#include "types.h"
 
 #define WATCH_PERF
 

@@ -25,7 +25,7 @@ namespace block
 
 			int32_t nod_id = 0;
 			std::string type_ = "";
-			uint32_t weight_ = 0;
+			int32_t weight_ = 0;
 
 			std::string acceptor_ip_ = "";
 			int32_t acceptor_port_ = 0;
