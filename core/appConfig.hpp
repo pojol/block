@@ -27,5 +27,11 @@ namespace block
 
 		//! rpc 管道的最大消息长度（大于此长度时消息会被丢弃
 		int32_t rpc_maxlen = 1024;
+
+		//! rpc channel ip (redis ip 仅作用于rpc服务 | 如果和db cache使用同一个redis 需要注意避免重复
+		std::string rpcIp = "";
+
+		//! rpc channel port (redis port
+		int32_t rpcPort = 0;
 	};
 }

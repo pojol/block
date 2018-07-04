@@ -133,6 +133,18 @@ namespace block
 			db_update,
 
 			db_callback,
+
+			/**!
+			 * comment: 发布一条rpc消息
+			 * args: 
+			*/
+			rpc,
+
+			/**!
+			 * comment: 订阅一个rpc频道
+			 * args: 
+			*/
+			rpc_subscription,
 		};
 		
 	}

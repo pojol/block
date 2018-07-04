@@ -20,6 +20,7 @@ if(UNIX)
         	${BLOCK_SOURCE_DIR}/lib/libevent/include
 		    ${BLOCK_SOURCE_DIR}/lib/fmt/include
 		    ${BLOCK_SOURCE_DIR}/lib/glog/include
+            ${BLOCK_SOURCE_DIR}/lib/hiredis
     )
 
     #引用库目录
@@ -31,6 +32,7 @@ endif()
 if(APPLE)
     INCLUDE_DIRECTORIES(
             ${BLOCK_SOURCE_DIR}/3rd/fmt
+            /usr/local/Cellar/hiredis/0.13.3/include/hiredis
             /usr/local/Cellar/libevent/2.1.8/include
             /usr/local/Cellar/gflags/2.2.1/include
             /usr/local/Cellar/glog/0.3.5_3/include
@@ -38,7 +40,7 @@ if(APPLE)
     )
 endif()
 
-FILE(GLOB_RECURSE SRC "*.cpp" "*.h")
+FILE(GLOB_RECURSE SRC "*.cpp" "*.hpp")
 ADD_LIBRARY(distributed STATIC ${SRC})
 
 if(MSVC)     
