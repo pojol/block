@@ -133,10 +133,6 @@ namespace block
 			db_update,
 
 			db_callback,
-
-			node_init = 2501,
-			node_addModule,
-			node_rmvModule,
 		};
 		
 	}

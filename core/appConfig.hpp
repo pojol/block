@@ -24,5 +24,8 @@ namespace block
 
 		//! rpc 调用的超时时间 ms
 		int32_t rpc_timeout = 10000;
+
+		//! rpc 管道的最大消息长度（大于此长度时消息会被丢弃
+		int32_t rpc_maxlen = 1024;
 	};
 }

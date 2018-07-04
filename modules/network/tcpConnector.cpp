@@ -131,17 +131,7 @@ void block::network::TcpConnectorModule::eSendMsg(block::ModuleID target, block:
 {
 	auto _fd = args->pop_fd();
 	auto _msg = args->pop_msgid();
-	std::string _str = "";
-
-	//! 内部消息走的时Args流， 外部的是原始的二进制数据。 所以这里要分开处理下!
-	if (_msg > block::rpc::begin && _msg < block::rpc::end) {
-		auto _headlen = sizeof(block::MsgID) + 1;
-		//args->pop_block();
-		//_str = args->get_block(_headlen, args->get_size() - _headlen);
-	}
-	else {
-		_str = args->pop_string();
-	}
+	std::string _str = args->pop_string();
 
 	auto _block = std::make_shared<block::Block>(sessionPtr_->getID(), _msg, _str);
 	sessionPtr_->write(_msg, _block);
