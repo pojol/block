@@ -25,7 +25,8 @@ void block::modules::RPCModule::before_init()
 {
     using namespace std::placeholders;
 
-    listen(event::rpc_subscription, std::bind(&RPCModule::eSubscription, this, _1, _2));
+    listen(event::rpc_regist_consumer, std::bind(&RPCModule::eRegistConsumer, this, _1, _2));
+    listen(event::rpc_regist_consumer_group, std::bind(&RPCModule::eRegistConsumerGroup, this, _1, _2));
 
     listen(event::rpc, std::bind(&RPCModule::eRpc, this, _1, _2));
 
@@ -56,11 +57,86 @@ void block::modules::RPCModule::init()
 
 void block::modules::RPCModule::execute()
 {
+    if (!checkConnect()){
+        return;
+    }
+
+    redisReply *_replyPtr = nullptr;
+
     // pipeline
+    if (reidsPipelineCount_ > 0) {
 
-    // observer
+        for (int32_t i = 0; i < reidsPipelineCount_; ++i)
+        {
+            if (REDIS_OK != redisGetReply(redis_context_, (void**)&_replyPtr)) {
+                ERROR_FMTLOG("[BLOCK] rpc consume pipeline fail, err : {}", _replyPtr->str);
+            }
 
-    // subscriber
+            freeReplyObject(_replyPtr);
+            _replyPtr = nullptr;
+        }
+    }
+
+    for (auto itr = consumerList_.begin(); itr != consumerList_.end(); ++itr)
+    {
+        std::string _cmd = "";
+        _cmd += "XRANGE ";
+        _cmd += *itr;
+        _cmd += " - +";
+        _replyPtr = command(redis_context_, _cmd.c_str());
+        if (_replyPtr->type != REDIS_REPLY_ERROR){
+            consume(*itr, _replyPtr);
+        }
+        else {
+            ERROR_FMTLOG("[BLOCK] rpc xrange fail, err : {}", _replyPtr->str);
+        }
+
+        freeReplyObject(_replyPtr);
+        _replyPtr = nullptr;
+    }
+}
+
+void block::modules::RPCModule::consume(const std::string &moduleName, redisReply *replyPtr)
+{
+    for (int i = 0; i < replyPtr->elements; ++i)
+    {
+        auto cmd = replyPtr->element[i];
+
+        std::string _cmdid = "";
+        int32_t _event = 0;
+        std::string _buf = "";
+
+        for (int j = 0; j < cmd->elements; ++j)
+        {
+            auto context = cmd->element[j];
+            if (context->type != REDIS_REPLY_ARRAY){    // id
+                _cmdid = context->str;
+            }
+            else {
+                auto key = context->element[0];
+                _event = std::stoi(key->str);
+
+                auto val = context->element[1];
+                _buf = val->str;
+            }
+        }
+
+        // dispatch
+        auto _smartPtr = block::ArgsPool::get_ref().get();
+        _smartPtr->importBuf(_buf);
+        dispatch(APP.getModuleID(moduleName), _event, std::move(_smartPtr));
+
+        std::string _cmd = "";
+        _cmd.append("XDEL ");
+        _cmd.append(moduleName);
+        _cmd.append(" ");
+        _cmd.append(_cmdid);
+        auto _replyPtr = command(redis_context_, _cmd.c_str()); 
+        if (_replyPtr->type == REDIS_REPLY_ERROR) {
+            ERROR_FMTLOG("[BLOCK] rpc consume fail, err : {}", _replyPtr->str);
+        }
+        freeReplyObject(_replyPtr);
+    }
 }
 
 void block::modules::RPCModule::shut()
@@ -73,7 +149,6 @@ bool block::modules::RPCModule::checkConnect()
     int _status = 0;
 
     do {
-        
         if (_replyPtr->type != REDIS_REPLY_ERROR){
             break;
         }
@@ -98,7 +173,7 @@ bool block::modules::RPCModule::checkConnect()
             }
         }
 
-    }while(0);
+    } while(0);
 
     freeReplyObject(_replyPtr);
 
@@ -121,54 +196,62 @@ redisReply * block::modules::RPCModule::command(redisContext *c, const char *for
     return static_cast<redisReply*>(reply);
 }
 
-void block::modules::RPCModule::eSubscription(block::ModuleID target, block::ArgsPtr args)
+void block::modules::RPCModule::eRegistConsumer(block::ModuleID targetr, block::ArgsPtr args)
 {
-    // xrange
+    if (!checkConnect()){
+        WARN_LOG("[BLOCK] rpc regist consumer fail, connect failed!");
+        return;
+    }
 
-    // for xdel
+    auto _moduleName = args->pop_string();
 
-    // transport
+    std::string _cmd = "";
+    _cmd += "EXISTS ";
+    _cmd += _moduleName;
+
+    auto _replyPtr = command(redis_context_, _cmd.c_str());
+    if (_replyPtr->integer != 0){
+        WARN_LOG("[BLOCK] rpc regist consumer fail, repeat regist!");
+        freeReplyObject(_replyPtr);
+        return;
+    }
+    freeReplyObject(_replyPtr);
+
+    auto _itr = std::find_if(consumerList_.begin(), consumerList_.end(), [&](ConsumerList::value_type it){
+        return (it == _moduleName);
+    });
+    assert(_itr == consumerList_.end());
+
+    // 
+    consumerList_.push_back(_moduleName);
+}
+
+void block::modules::RPCModule::eRegistConsumerGroup(block::ModuleID targetr, block::ArgsPtr args)
+{
 }
 
 void block::modules::RPCModule::eRpc(block::ModuleID target, block::ArgsPtr args)
 {
     // copy buf
-    std::string _subscription = args->pop_string();
-    uint32_t _event = args->pop_ui32();
+    std::string _buf = args->exportBuf();
+
+    std::string _consumer = args->pop_string();
+    int32_t _event = args->pop_ui32();
 
     if (!checkConnect()){
         dispatch(target, _event, block::makeArgs(1, false, "disconnect!"));
         return;
     }
 
-    std::string _type = args->pop_string();
-    uint32_t _page = args->pop_ui32();
-    // push pipeline
-
     std::string _cmd = "";
     _cmd += "XADD ";
-    _cmd += _subscription;
-    _cmd += "* %d %s %d";
-    auto _replyPtr = command(redis_context_, _cmd.c_str(), _event, _type.c_str(), _page);   //use args buf
-    if (_replyPtr->type == REDIS_REPLY_ERROR){
-        WARN_FMTLOG("[BLOCK] rpc command fail, {}", "xadd");
-        dispatch(target, _event, block::makeArgs(1, false, "command fail!"));
-        freeReplyObject(_replyPtr);
+    _cmd += _consumer;
+    _cmd += " * %s %b";
 
-        return;
-    }
-    freeReplyObject(_replyPtr);
-
-    auto itr = std::find_if(observerVec_.begin(), observerVec_.end(), [&](ObserverVec::value_type it) {
-		return (it.first == std::to_string(target));
-	});
-
-    if (itr != observerVec_.end()){
-        itr->second.push_back("msg_id");
+    if (REDIS_OK != redisAppendCommand(redis_context_, _cmd.c_str(), std::to_string(_event).c_str(), _buf.c_str(), _buf.length())){
+        ERROR_FMTLOG("[BLOCK] rpc xadd fail, consumer : {}", _consumer);
     }
     else {
-        std::vector<std::string > _msgs;
-        _msgs.push_back("msg_id");
-        observerVec_.push_back(std::make_pair(std::to_string(target), _msgs));
+        reidsPipelineCount_++;
     }
-}   
+}

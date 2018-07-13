@@ -141,10 +141,16 @@ namespace block
 			rpc,
 
 			/**!
-			 * comment: 订阅一个rpc频道
-			 * args: 
+			 * comment: 注册一个rpc channel 消费者
+			 * args: string moduleName
 			*/
-			rpc_subscription,
+			rpc_regist_consumer,
+
+			/**!
+			 * comment: 注册一个rpc channel 消费组
+			 * 
+			*/
+			rpc_regist_consumer_group,
 		};
 		
 	}

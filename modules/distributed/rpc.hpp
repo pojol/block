@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <tuple>
+#include <set>
 #include <functional>
 
 #include <fmt/format.h>
@@ -37,7 +38,9 @@ namespace block
 
 		protected:
 
-            void eSubscription(block::ModuleID target, block::ArgsPtr args);
+            void eRegistConsumer(block::ModuleID target, block::ArgsPtr args);
+            void eRegistConsumerGroup(block::ModuleID target, block::ArgsPtr args);
+
             void eRpc(block::ModuleID target, block::ArgsPtr args);
 
         protected:
@@ -46,10 +49,12 @@ namespace block
 			**/
 			bool checkConnect();
 
+            void consume(const std::string &moduleName, redisReply *replyPtr);
+
             redisReply * command(redisContext *c, const char *format, ...);
 
-            typedef std::vector<std::pair<std::string, std::vector<std::string>>> ObserverVec;
-            ObserverVec observerVec_;
+            typedef std::vector<std::string> ConsumerList;
+            ConsumerList consumerList_;
 
         private:
             int32_t timeout_ = 1000;
@@ -58,6 +63,7 @@ namespace block
             int32_t maxlen_ = 1024;
 
             redisContext *redis_context_ = nullptr;
+            int32_t reidsPipelineCount_ = 0;
 		};
 
 	}
